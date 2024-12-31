@@ -20,7 +20,7 @@ sealed class UserDataPath(
         data object IsUsingFlipPage : UserDataPath("isUsingFlipPage", Reader)
         data object IsUsingClickFlipPage : UserDataPath("isUsingClickFlipPage", Reader)
         data object IsUsingVolumeKeyFlip : UserDataPath("isUsingVolumeKeyFlip", Reader)
-        data object IsUsingFlipAnime : UserDataPath("isUsingFlipAnime", Reader)
+        data object FlipAnime : UserDataPath("flipAnime", Reader)
         data object FastChapterChange : UserDataPath("fastChapterChange", Reader)
         data object EnableBatteryIndicator : UserDataPath("enableBatteryIndicator", Reader)
         data object EnableTimeIndicator : UserDataPath("enableTimeIndicator", Reader)
@@ -61,11 +61,3 @@ sealed class UserDataPath(
     }
 }
 
-open class LinkUserData(
-    private val userDataPath: UserDataPath
-): UserDataPath("") {
-    override val path: String
-        get() = userDataPath.path
-    override val groupChildrenPath = userDataPath.groupChildrenPath
-    override val groupChildren = userDataPath.groupChildren
-}
