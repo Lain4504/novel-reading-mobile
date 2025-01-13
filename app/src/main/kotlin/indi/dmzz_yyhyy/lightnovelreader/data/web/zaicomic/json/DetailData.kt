@@ -7,7 +7,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import java.time.Instant
 import java.time.LocalDateTime
-import java.util.*
+import java.util.TimeZone
 
 data class DetailData(
     @SerializedName("id")
@@ -41,6 +41,7 @@ data class DetailData(
         BookInformation(
             id = id,
             title = title,
+            subtitle = "",
             coverUrl = cover,
             author = try { authors.joinToString(" ") { it.name } } catch (e: NullPointerException) { "" },
             description = description,

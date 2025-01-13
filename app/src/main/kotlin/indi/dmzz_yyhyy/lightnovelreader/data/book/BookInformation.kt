@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 data class BookInformation(
     val id: Int,
     val title: String,
+    val subtitle: String,
     val coverUrl: String,
     val author: String,
     val description: String,
@@ -20,6 +21,7 @@ data class BookInformation(
         fun empty(): BookInformation = BookInformation(
                 -1,
                 "",
+            "",
                 "",
                 "",
                 "",

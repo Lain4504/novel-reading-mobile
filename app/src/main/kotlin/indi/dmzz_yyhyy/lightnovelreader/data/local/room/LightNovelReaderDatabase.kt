@@ -32,7 +32,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
         BookshelfEntity::class,
         BookshelfBookMetadataEntity::class,
                ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class LightNovelReaderDatabase : RoomDatabase() {
@@ -55,7 +55,7 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                         context.applicationContext,
                         LightNovelReaderDatabase::class.java,
                         "light_novel_reader_database")
-                        .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+                        .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                         .allowMainThreadQueries()
                         .build()
                     INSTANCE = instance
@@ -109,6 +109,25 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("alter table user_reading_data " +
                         "add read_completed_chapter_ids text default '' not null")
+            }
+        }
+
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("drop table book_information")
+                db.execSQL( "create table book_information (" +
+                        "id INTEGER NOT NULL," +
+                        "title TEXT NOT NULL, " +
+                        "subtitle TEXT NOT NULL, " +
+                        "cover_url TEXT NOT NULL, " +
+                        "author TEXT NOT NULL, " +
+                        "description TEXT NOT NULL, " +
+                        "tags TEXT NOT NULL, " +
+                        "publishing_house TEXT NOT NULL, " +
+                        "word_count INTEGER NOT NULL," +
+                        "last_update TEXT NOT NULL, " +
+                        "is_complete INTEGER NOT NULL, " +
+                        "PRIMARY KEY(id))" )
             }
         }
     }

@@ -19,10 +19,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
-import java.net.URLEncoder
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -34,6 +30,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
+import java.net.URLEncoder
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object Wenku8Api: WebBookDataSource {
     private var allBookChapterListCacheId: Int = -1
@@ -41,6 +41,7 @@ object Wenku8Api: WebBookDataSource {
     private val DATA_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     private val explorationExpandedPageDataSourceMap = mutableMapOf<String, ExplorationExpandedPageDataSource>()
     private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
 
     override val isOffLineFlow = flow {
         while(true) {
@@ -72,9 +73,12 @@ object Wenku8Api: WebBookDataSource {
     override fun getBookInformation(id: Int): BookInformation {
         if (isAppDataSourceOffLine()) return BookInformation.empty()
         return wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
+            val titleGroup = it.selectFirst("[name=Title]")?.text()
+                ?.let { it1 -> titleRegex.find(it1)?.groups }
             BookInformation(
                 id = id,
-                title = it.selectFirst("[name=Title]")?.text() ?: "",
+                title = titleGroup?.get(1)?.value ?: it.selectFirst("[name=Title]")?.text() ?: "",
+                subtitle = titleGroup?.get(2)?.value ?: "",
                 coverUrl = "https://img.wenku8.com/image/${id/1000}/$id/${id}s.jpg",
                 author = it.selectFirst("[name=Author]")?.attr("value") ?: "",
                 description = wenku8Api("action=book&do=intro&aid=$id&t=0")?.text() ?: "",
@@ -226,15 +230,19 @@ object Wenku8Api: WebBookDataSource {
                         ?.replace(".htm", "")
                         ?.toInt() ?: -1
                     )
-                else
+                else {
+                    val titleGroup = element.selectFirst("div > div:nth-child(1) > a")
+                        ?.attr("title")
+                        ?.let { it1 -> titleRegex.find(it1)?.groups }
                     BookInformation(
                         id = element.selectFirst("div > div:nth-child(1) > a")
                             ?.attr("href")
                             ?.replace("/book/", "")
                             ?.replace(".htm", "")
                             ?.toInt() ?: -1,
-                        title = element.selectFirst("div > div:nth-child(1) > a")
+                        title = titleGroup?.get(1)?.value ?: element.selectFirst("div > div:nth-child(1) > a")
                             ?.attr("title") ?: "",
+                        subtitle = titleGroup?.get(2)?.value ?: "",
                         coverUrl = element.selectFirst("div > div:nth-child(1) > a > img")
                             ?.attr("src") ?: "",
                         author = element.selectFirst("div > div:nth-child(2) > p:nth-child(2)")
@@ -261,6 +269,7 @@ object Wenku8Api: WebBookDataSource {
                         isComplete = element.selectFirst("div > div:nth-child(2) > p:nth-child(3)")
                             ?.text()?.split("/")?.getOrNull(2) == "已完结"
                     )
+                }
             }
 
     private fun registerExplorationExpandedPageDataSource(id: String, expandedPageDataSource: ExplorationExpandedPageDataSource) =
