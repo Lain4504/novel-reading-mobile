@@ -349,7 +349,7 @@ fun BasicContentComponent(
     fontSize: TextUnit,
     fontLineHeight: TextUnit,
 ) {
-    if (text.startsWith("http://") || text.startsWith("https://")) {
+    if (text.trim().startsWith("http://") || text.trim().startsWith("https://")) {
         Box(modifier
             .fillMaxWidth()
         ) {
@@ -390,13 +390,13 @@ fun slipText(
     style: TextStyle,
 ): List<String> {
     val resultList: MutableList<String> = mutableListOf()
-    text.split("[image]").filter { it.isNotEmpty() }.forEach {sigleText ->
-        if (sigleText.startsWith("http://") || sigleText.startsWith("https://"))
-            resultList.add(sigleText)
+    text.split("[image]").filter { it.isNotEmpty() }.forEach { single ->
+        if (single.trim().startsWith("http://") || single.trim().startsWith("https://"))
+            resultList.add(single)
         else {
             textMeasurer
                 .measure(
-                    text = sigleText,
+                    text = single,
                     style = style,
                     constraints = constraints
                 )

@@ -1,10 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data
 
 sealed class MenuOptions(vararg options: Option) {
-    private val _optionsList: MutableList<Option> = options.toMutableList()
-    val optionsList: List<Option> get() = _optionsList.toList()
+    private val _optionList: MutableList<Option> = options.toMutableList()
+    val optionList: List<Option> get() = _optionList.toList()
     fun option(key: String, name: String): String {
-        _optionsList.add(Option(key, name))
+        _optionList.add(Option(key, name))
         return key
     }
     class Option(
@@ -14,7 +14,7 @@ sealed class MenuOptions(vararg options: Option) {
         override fun equals(other: Any?): Boolean = this.key == other
         override fun hashCode(): Int = key.hashCode()
     }
-    fun get(key: String): Option = _optionsList.first { it.equals(key) }
+    fun get(key: String): Option = _optionList.first { it.equals(key) }
 
     data object UpdateChannelOptions: MenuOptions(
         Option("Release", "正式发布版"),
