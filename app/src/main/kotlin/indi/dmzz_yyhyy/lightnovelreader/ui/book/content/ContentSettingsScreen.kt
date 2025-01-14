@@ -409,7 +409,7 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
                 modifier = Modifier.animateItem(),
                 title = "翻页动画",
                 description = "设置翻页时的动画，当为无时允许你快速翻页。",
-                options = MenuOptions.FlipAnimeOptions,
+                options = MenuOptions.FlipAnimationOptions,
                 selectedOptionKey = settingState.flipAnime,
                 stringUserData = settingState.flipAnimeUserData
             )

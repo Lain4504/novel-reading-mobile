@@ -5,8 +5,8 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 sealed class MenuOptions(vararg options: Option) {
     private val _optionList: MutableList<Option> = options.toMutableList()
     val optionList: List<Option> get() = _optionList.toList()
-    fun option(key: String, name: String): String {
-        _optionList.add(Option(key, name))
+    fun option(key: String, nameId: Int): String {
+        _optionList.add(Option(key, nameId))
         return key
     }
     class Option(
@@ -44,8 +44,8 @@ sealed class MenuOptions(vararg options: Option) {
         Option("ko-kp", R.string.key_locale_ko_kp)
     )
 
-    data object FlipAnimeOptions: MenuOptions() {
-        val None = option("none", "无")
-        val ScrollWithoutShadow = option("scroll", "滚动")
+    data object FlipAnimationOptions: MenuOptions() {
+        val None = option("none", R.string.key_flip_animation_none)
+        val ScrollWithoutShadow = option("scroll", R.string.key_flip_animation_scroll)
     }
 }

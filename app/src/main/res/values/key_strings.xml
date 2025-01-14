@@ -26,4 +26,7 @@
     <string name="key_locale_ja_jp" translatable="false">日本語</string>
     <string name="key_locale_ko_kr" translatable="false">한국어 (대한민국)</string>
     <string name="key_locale_ko_kp" translatable="false">한국어 (조선민주주의인민공화국)</string>
+    <!-- FlipAnime -->
+    <string name="key_flip_animation_none">None</string>
+    <string name="key_flip_animation_scroll">Scroll</string>
 </resources>
