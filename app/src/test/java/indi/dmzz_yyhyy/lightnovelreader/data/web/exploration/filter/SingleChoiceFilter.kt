@@ -2,8 +2,8 @@ package indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter
 
 open class SingleChoiceFilter(
     private val title: String,
-    val dialogTitle: String,
-    val description: String,
+    val dialogTitleId: Int,
+    val descriptionId: Int,
     private val choices: List<String>,
     private val defaultChoice: String,
     private var onChange: (String) -> Unit

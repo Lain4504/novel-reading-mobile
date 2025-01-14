@@ -1,10 +1,12 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data
 
+import indi.dmzz_yyhyy.lightnovelreader.R
+
 sealed class MenuOptions(vararg options: Option) {
     val optionList: List<Option> = options.toList()
     class Option(
         val key: String,
-        val name: String
+        val nameId: Int
     ) {
         override fun equals(other: Any?): Boolean = this.key == other
         override fun hashCode(): Int = key.hashCode()
@@ -12,29 +14,29 @@ sealed class MenuOptions(vararg options: Option) {
     fun get(key: String): Option = optionList.first { it.equals(key) }
 
     data object UpdateChannelOptions: MenuOptions(
-        Option("Release", "正式发布版"),
-        Option("Development", "开发版"),
+        Option("Release", R.string.key_update_channel_release),
+        Option("Development", R.string.key_update_channel_development)
     )
 
     data object UpdatePlatformOptions: MenuOptions(
-        Option("GitHub", "GitHub"),
-        Option("AppCenter", "Microsoft App Center"),
-        /*Options("LNR_API", "yukonisen\'s LightNovelReader API"),*/
+        Option("GitHub", R.string.key_platform_github),
+        Option("AppCenter", R.string.key_platform_appcenter),
+        /*Options("LNR_API", R.string.key_platform_lnr_api)*/
     )
 
     data object DarkModeOptions: MenuOptions(
-        Option("FollowSystem", "跟随系统"),
-        Option("Enabled", "覆盖启用"),
-        Option("Disabled", "覆盖禁用")
+        Option("FollowSystem", R.string.key_dark_mode_follow_system),
+        Option("Enabled", R.string.key_dark_mode_enabled),
+        Option("Disabled", R.string.key_dark_mode_disabled)
     )
 
     data object AppLocaleOptions: MenuOptions(
-        Option("zh-CN", "简体中文 (中国大陆)"),
-        Option("zh-HK", "繁體中文 (香港)"),
-        Option("zh-TW", "繁體中文 (臺灣)"),
-        Option("ja-JP", "日本語"),
-        Option("ko-kr", "한국어 (대한민국)"),
-        Option("ko-kp", "한국어 (조선민주주의인민공화국)")
+        Option("zh-CN", R.string.key_locale_zh_cn),
+        Option("zh-HK", R.string.key_locale_zh_hk),
+        Option("zh-TW", R.string.key_locale_zh_tw),
+        Option("ja-JP", R.string.key_locale_ja_jp),
+        Option("ko-kr", R.string.key_locale_ko_kr),
+        Option("ko-kp", R.string.key_locale_ko_kp)
     )
 
 

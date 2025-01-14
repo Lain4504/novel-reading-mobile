@@ -1,12 +1,14 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data
 
+import indi.dmzz_yyhyy.lightnovelreader.R
+
 sealed class ObjectOptions(vararg options: Option) {
     val optionsList: List<Option> = options.toList()
 
     open class Option(
         val key: String,
-        val name: String,
-        val description: String,
+        val name: Int,
+        val description: Int,
         val url: String?
     ) {
         override fun equals(other: Any?): Boolean = this.key == (other as? String)
@@ -14,9 +16,9 @@ sealed class ObjectOptions(vararg options: Option) {
     }
 
     data object GitHubProxyUrlOptions: ObjectOptions(
-        Option("disabled", "未指定", "不使用加速地址", ""),
-        Option("gh-proxy.com", "gh-proxy.com", "第三方提供的公益加速服务", "https://gh-proxy.com/"),
-        Option("ghgo.xyz", "ghgo.xyz", "第三方提供的公益加速服务", "https://ghgo.xyz/"),
-        Option("custom", "自定义", "自行填写加速地址站点", null),
+        Option("disabled", R.string.key_proxy_disabled, R.string.key_proxy_disabled_desc, ""),
+        Option("gh-proxy.com", R.string.key_proxy_gh_proxy_com, R.string.key_proxy_3rd_party_service_desc, "https://gh-proxy.com/"),
+        Option("ghgo.xyz", R.string.key_proxy_ghgo_xyz, R.string.key_proxy_3rd_party_service_desc, "https://ghgo.xyz/"),
+        Option("custom", R.string.key_proxy_custom, R.string.key_proxy_custom_desc, null),
     )
 }

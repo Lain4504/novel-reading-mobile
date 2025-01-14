@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -314,7 +315,7 @@ fun SettingsMenuEntry(
                 )
             }
             AnimatedTextLine(
-                text = options.get(selectedOptionKey).name,
+                text = stringResource(options.get(selectedOptionKey).nameId),
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
                 color = MaterialTheme.colorScheme.primary
@@ -334,7 +335,7 @@ fun SettingsMenuEntry(
                                 onOptionChange(option.key)
                                 expanded = false
                             },
-                            text = { Text(option.name, fontSize = 14.sp) },
+                            text = { Text(stringResource(option.nameId), fontSize = 14.sp) },
                         )
                     }
                 }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -113,20 +114,20 @@ fun DataSettingsList(
     }
     SettingsClickableEntry(
         iconRes = R.drawable.output_24px,
-        title = "导出数据",
-        description = "将当前应用内的用户数据导出为.lnr文件",
+        title = stringResource(R.string.settings_snap_data),
+        description = stringResource(R.string.settings_snap_data_desc),
         onClick = { displayExportDialog = true }
     )
     SettingsClickableEntry(
         iconRes = R.drawable.input_24px,
-        title = "导入数据",
-        description = "从外部.lnr文件内导入数据至软件",
+        title = stringResource(R.string.settings_import_data),
+        description = stringResource(R.string.settings_import_data_desc),
         onClick = { selectDataFile(importDataLauncher) }
     )
     SettingsClickableEntry(
         iconRes = R.drawable.public_24px,
-        title = "切换数据源",
-        description = "切换软件的网络数据提供源，但这会导致你的用户数据被暂存，将在下次切换到此数据源后恢复。但是你的缓存数据会被永久删除。",
+        title = stringResource(R.string.settings_select_data_source),
+        description = stringResource(R.string.settings_select_data_source_desc),
         onClick = { displaySourceChangeDialog = true }
     )
 }

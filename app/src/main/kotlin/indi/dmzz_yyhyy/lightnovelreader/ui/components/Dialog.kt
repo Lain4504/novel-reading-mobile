@@ -184,7 +184,7 @@ fun UpdatesAvailableDialog(
     AlertDialog(
         title = {
             Text(
-                text = "更新可用",
+                text = stringResource(R.string.dialog_updates_available),
                 color = MaterialTheme.colorScheme.onSurface,
             )
         },
@@ -262,12 +262,12 @@ fun AddBookToBookshelfDialog(
     val scrollState = rememberScrollState()
     BaseDialog(
         icon = painterResource(R.drawable.filled_bookmark_24px),
-        title = "添加至书架",
-        description = "将这本小说添加到以下分组",
+        title = stringResource(R.string.add_to_bookshelf),
+        description = stringResource(R.string.dialog_add_to_bookshelf_text),
         onDismissRequest = onDismissRequest,
         onConfirmation = onConfirmation,
-        dismissText = "取消",
-        confirmationText = "添加至选定分组",
+        dismissText = stringResource(R.string.cancel),
+        confirmationText = stringResource(R.string.add_to_bookshelf),
     ) {
         Column(Modifier.width(IntrinsicSize.Max).sizeIn(maxHeight = 350.dp).verticalScroll(scrollState)) {
             allBookshelf.forEachIndexed { index, bookshelf ->
@@ -277,7 +277,7 @@ fun AddBookToBookshelfDialog(
                         .fillMaxWidth()
                         .padding(horizontal = 14.dp),
                     title = bookshelf.name,
-                    supportingText = "共 ${bookshelf.allBookIds.size} 本",
+                    supportingText = stringResource(R.string.bookshelf_book_count, bookshelf.allBookIds.size),
                     checked = selectedBookshelfIds.contains(bookshelf.id),
                     onCheckedChange = {
                         if (it) onSelectBookshelf(bookshelf.id) else onDeselectBookshelf(
@@ -383,39 +383,39 @@ fun ExportUserDataDialog(
         .padding(horizontal = 14.dp)
     BaseDialog(
         icon = painterResource(R.drawable.output_24px),
-        title = "导出数据",
-        description = "选择需要导出的数据。",
+        title = stringResource(R.string.settings_snap_data),
+        description = stringResource(R.string.dialog_snap_user_data_text),
         onDismissRequest = onDismissRequest,
     ) {
         Column(Modifier.width(IntrinsicSize.Max).sizeIn(maxHeight = 350.dp)) {
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "书架",
-                supportingText = "包括书架及书本信息",
+                title = stringResource(R.string.dialog_snap_bookshelf),
+                supportingText = stringResource(R.string.dialog_snap_bookshelf_text),
                 checked = mutableExportContext.bookshelf,
                 onCheckedChange = { mutableExportContext.bookshelf = it }
             )
             HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "阅读信息",
-                supportingText = "包括阅读历史、进度和时长等信息",
+                title = stringResource(R.string.dialog_snap_reading_data),
+                supportingText = stringResource(R.string.dialog_snap_reading_data_text),
                 checked = mutableExportContext.readingData,
                 onCheckedChange = { mutableExportContext.readingData = it }
             )
             HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "设置项",
-                supportingText = "包括应用设置和阅读器设置",
+                title = stringResource(R.string.dialog_snap_settings),
+                supportingText = stringResource(R.string.dialog_snap_settings_text),
                 checked = mutableExportContext.settings,
                 onCheckedChange = { mutableExportContext.settings = it }
             )
             HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "书签",
-                supportingText = "包括全部书本的书签信息",
+                title = stringResource(R.string.dialog_snap_bookmarks),
+                supportingText = stringResource(R.string.dialog_snap_bookmarks_text),
                 checked = mutableExportContext.bookmark,
                 onCheckedChange = { mutableExportContext.bookmark = it }
             )
@@ -431,7 +431,7 @@ fun ExportUserDataDialog(
                 onClick = onDismissRequest
             ) {
                 Text(
-                    text = "取消",
+                    text = stringResource(R.string.cancel),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -440,7 +440,7 @@ fun ExportUserDataDialog(
                 onClick = { onClickSaveAndSend(mutableExportContext) }
             ) {
                 Text(
-                    text = "导出并分享",
+                    text = stringResource(R.string.export_and_share),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -449,7 +449,7 @@ fun ExportUserDataDialog(
                 onClick = { onClickSaveToFile(mutableExportContext) }
             ) {
                 Text(
-                    text = "导出至文件",
+                    text = stringResource(R.string.export_to_file),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -486,12 +486,12 @@ fun SourceChangeDialog(
 ) {
     BaseDialog(
         icon = painterResource(R.drawable.public_24px),
-        title = "切换数据源",
-        description = "选择使用的数据源，切换软件的网络数据提供源，但这会导致你的用户数据被暂存，将在下次切换到此数据源后恢复。但是你的缓存数据会被永久删除，并且需要重启应用。",
+        title = stringResource(R.string.settings_select_data_source),
+        description = stringResource(R.string.dialog_select_data_source_text),
         onDismissRequest = onDismissRequest,
         onConfirmation = onConfirmation,
-        dismissText = "取消",
-        confirmationText = "切换并重启"
+        dismissText = stringResource(R.string.cancel),
+        confirmationText = stringResource(R.string.switch_and_restart)
     ) {
         webDataSourceItems.forEachIndexed { index, webDataSourceItem ->
             RadioButtonListItem(
@@ -500,7 +500,7 @@ fun SourceChangeDialog(
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp),
                 title = webDataSourceItem.name,
-                supportingText = "提供者: ${webDataSourceItem.provider}",
+                supportingText = stringResource(R.string.data_source_provider, webDataSourceItem.provider),
                 selected = selectedWebDataSourceId == webDataSourceItem.id,
                 onClick = { onClickItem(webDataSourceItem.id) }
             )
@@ -529,19 +529,19 @@ fun SettingsGitHubProxyDialog(
 
     AlertDialog (
         onDismissRequest = onDismissRequest,
-        title = { Text("设置 GitHub 代理") },
+        title = { Text(stringResource(R.string.settings_github_proxy)) },
         text = {
             Column {
                 ObjectOptions.GitHubProxyUrlOptions.optionsList.forEach { option ->
                     RadioButtonListItem(
-                        title = option.name,
+                        title = stringResource(option.name),
                         selected = selectedOption.key == option.key,
-                        supportingText = option.description,
+                        supportingText = stringResource(option.description),
                         onClick = { selectedOption = option },
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("请注意: 由于代理普遍不支持加速 GitHub API, 所以我们无法在检查环节使用代理。")
+                Text(stringResource(R.string.dialog_github_proxy_notice))
                 if (selectedOption.key == "custom") {
                     Spacer(modifier = Modifier.height(12.dp))
                     TextField(
@@ -549,7 +549,7 @@ fun SettingsGitHubProxyDialog(
                         value = input,
                         supportingText = {
                             Text(
-                                "注意: 协议和结尾的\"/\"不可省略",
+                                stringResource(R.string.dialog_github_proxy_supporting_text),
                                 fontFamily = FontFamily.Monospace
                             )
                         },
@@ -558,14 +558,14 @@ fun SettingsGitHubProxyDialog(
                             input = it
                         },
                         label = {
-                            Text("自定义站点")
+                            Text(stringResource(R.string.dialog_github_proxy_custom_url))
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
                     if (!isValid) {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = "正确格式示范: \n" +
+                            text = stringResource(R.string.dialog_github_proxy_custom_url_hint) +
                                     "https://example.com/\n" +
                                     "https://nth.3rd.example.com/",
                             fontFamily = FontFamily.Monospace,
@@ -674,20 +674,20 @@ fun SettingsAboutInfoDialog(
                 val contentColor = MaterialTheme.colorScheme.secondary
                 Column {
                     Text(
-                        "版本", color = titleColor
+                        stringResource(R.string.dialog_about_version), color = titleColor
                     )
                     Text(
                         "${BuildConfig.VERSION_NAME} [${BuildConfig.VERSION_CODE}]", color = contentColor
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        "构建时间", color = titleColor
+                        stringResource(R.string.dialog_about_build_time), color = titleColor
                     )
                     Text(
                         stringResource(R.string.info_build_date), color = contentColor
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text("编译主机", color = titleColor)
+                    Text(stringResource(R.string.dialog_about_build_host), color = titleColor)
                     Text(
                         stringResource(R.string.info_build_host), color = contentColor
                     )
@@ -709,10 +709,9 @@ fun ExportToEpubDialog(
 ) {
     AlertDialog (
         onDismissRequest = onDismissRequest,
-        title = { Text("导出为 EPUB") },
+        title = { Text(stringResource(R.string.dialog_export_to_epub)) },
         text = {
-            Text("EPUB (Electronic Publication) 是一种开放的电子书标准，格式为 .epub。\n\n"+
-                    "要将这本书导出为 EPUB 吗？")
+            Text(stringResource(R.string.dialog_export_to_epub_text))
         },
         confirmButton = {
             TextButton(

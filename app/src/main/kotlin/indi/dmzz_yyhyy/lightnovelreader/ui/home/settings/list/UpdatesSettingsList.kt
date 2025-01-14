@@ -51,7 +51,7 @@ fun UpdatesSettingsList(
     )
     SettingsMenuEntry(
         iconRes = R.drawable.outline_explore_24px,
-        title = "Distribution Platform",
+        title = stringResource(R.string.settings_distribution_platform),
         options = MenuOptions.UpdatePlatformOptions,
         selectedOptionKey = settingState.distributionPlatformKey,
         onOptionChange = settingState.distributionPlatformKeyUserData::asynchronousSet
@@ -59,8 +59,8 @@ fun UpdatesSettingsList(
     if (settingState.distributionPlatformKey == "GitHub") {
         SettingsClickableEntry(
             iconRes = R.drawable.vpn_lock_24px,
-            title = "GitHub Proxy",
-            description = "For CN users, please consider using a proxy if your connection to GitHub is slow",
+            title = stringResource(R.string.settings_github_proxy),
+            description = stringResource(R.string.settings_github_proxy_desc),
             option = settingState.proxyUrlKey.ifEmpty { stringResource(R.string.unspecified) },
             onClick = { showProxySettingsDialog = true }
         )

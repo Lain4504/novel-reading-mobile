@@ -288,7 +288,7 @@ fun BookshelfHomeScreen(
                     CollapseGroupTitle(
                         modifier = Modifier.animateItem(),
                         icon = painterResource(R.drawable.keep_24px),
-                        title = "已更新 (${uiState.selectedBookshelf.updatedBookIds.size})",
+                        title = stringResource(R.string.bookshelf_group_title_updated, uiState.selectedBookshelf.updatedBookIds.size),
                         expanded = updatedBooksExpanded,
                         onClickExpand = { updatedBooksExpanded = !updatedBooksExpanded }
                     )
@@ -316,7 +316,7 @@ fun BookshelfHomeScreen(
                     CollapseGroupTitle(
                         modifier = Modifier.animateItem(),
                         icon = painterResource(R.drawable.keep_24px),
-                        title = "已固定 (${uiState.selectedBookshelf.pinnedBookIds.size})",
+                        title = stringResource(R.string.bookshelf_group_title_pinned, uiState.selectedBookshelf.pinnedBookIds.size),
                         expanded = pinnedBooksExpanded,
                         onClickExpand = { pinnedBooksExpanded = !pinnedBooksExpanded }
                     )
@@ -343,7 +343,7 @@ fun BookshelfHomeScreen(
                     CollapseGroupTitle(
                         modifier = Modifier.animateItem(),
                         icon = painterResource(R.drawable.outline_bookmark_24px),
-                        title = "全部 (${uiState.selectedBookshelf.allBookIds.size})",
+                        title = stringResource(R.string.bookshelf_group_title_all, uiState.selectedBookshelf.allBookIds.size),
                         expanded = allBooksExpanded,
                         onClickExpand = { allBooksExpanded = !allBooksExpanded }
                     )
@@ -457,7 +457,7 @@ fun TopBar(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "新建书架",
+                            text = stringResource(R.string.bookshelf_create_title),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -466,7 +466,7 @@ fun TopBar(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "编辑此书架",
+                            text = stringResource(R.string.bookshelf_settings),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -475,7 +475,7 @@ fun TopBar(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "分享此书架",
+                            text = stringResource(R.string.share_bookshelf),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -484,7 +484,7 @@ fun TopBar(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "导入和导出...",
+                            text = stringResource(R.string.import_and_export),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -517,7 +517,7 @@ fun TopBar(
                 onDismissRequest = { exportImportMenuExpended = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text("导出为 .lnr", style = MaterialTheme.typography.bodyLarge) },
+                    text = { Text(stringResource(R.string.export_to_lnr_file)) },
                     onClick = {
                         onClickSaveThisBookshelf()
                         exportImportMenuExpended = false
@@ -525,7 +525,7 @@ fun TopBar(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("导出全部为 .lnr", style = MaterialTheme.typography.bodyLarge) },
+                    text = { Text(stringResource(R.string.export_all_to_lnr_file)) },
                     onClick = {
                         onClickSaveAllBookshelf()
                         exportImportMenuExpended = false
@@ -533,7 +533,7 @@ fun TopBar(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("从文件导入", style = MaterialTheme.typography.bodyLarge) },
+                    text = { Text(stringResource(R.string.import_from_file)) },
                     onClick = {
                         onClickImportBookshelf()
                         exportImportMenuExpended = false

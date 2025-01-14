@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 val ExplorationScreenInfo = NavItem (
     route = Screen.Home.Exploration.route,
     drawable = R.drawable.animated_exploration,
-    label = R.string.nav_exploration
+    label = R.string.nav_explore
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,7 +68,7 @@ fun Exploration(
                 TopAppBar(
                     title = {
                         Text(
-                            text = stringResource(R.string.nav_exploration),
+                            text = stringResource(R.string.nav_explore),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.W600,
                             color = MaterialTheme.colorScheme.onSurface

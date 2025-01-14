@@ -70,7 +70,7 @@ class UpdateCheckRepository @Inject constructor(
     private val githubProxyUrl = StringUserData(UserDataPath.Settings.App.ProxyUrl.path, userDataDao)
 
     companion object {
-        private val _updatePhase = MutableStateFlow("未检查")
+        private val _updatePhase = MutableStateFlow("Not checked")
         val updatePhase: StateFlow<String> get() = _updatePhase
         val proxyUrlRegex = Regex("(https?://)+[a-zA-Z0-9.-]+(\\.[a-zA-Z]{2,})(/)")
     }
