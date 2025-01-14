@@ -7,9 +7,9 @@ import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic.HOST
+import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.DataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.UpdatePageItem
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
-import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.DataContent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,6 +64,6 @@ object UpdateExplorationPageDataSource : ExplorationPageDataSource {
         }
         .data
         .map {
-            ExplorationDisplayBook(it.id, it.title, it.cover)
+            ExplorationDisplayBook(it.id, it.title, "", it.cover)
         }
 }

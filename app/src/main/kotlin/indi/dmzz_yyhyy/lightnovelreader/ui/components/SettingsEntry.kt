@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.content.Intent
@@ -28,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
@@ -157,7 +161,7 @@ fun SettingsSliderEntry(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     floatUserData: FloatUserData
 ) {
-    var tempValue by remember { mutableStateOf(value) }
+    var tempValue by remember { mutableFloatStateOf(value) }
     LaunchedEffect(value) {
         tempValue = value
     }
@@ -247,9 +251,31 @@ private fun SettingsSliderEntry(
     }
 }
 
+@Composable
+fun SettingsMenuEntry(
+    modifier: Modifier = Modifier,
+    iconRes: Int = -1,
+    title: String,
+    description: String? = null,
+    options: MenuOptions,
+    selectedOptionKey: String,
+    stringUserData: StringUserData
+) {
+    SettingsMenuEntry(
+        modifier = modifier,
+        iconRes = iconRes,
+        title = title,
+        description = description,
+        options = options,
+        selectedOptionKey = selectedOptionKey,
+        onOptionChange = { stringUserData.asynchronousSet(it) }
+    )
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsMenuEntry(
+    modifier: Modifier = Modifier,
     iconRes: Int = -1,
     title: String,
     description: String? = null,
@@ -261,7 +287,7 @@ fun SettingsMenuEntry(
     var offset by remember { mutableStateOf(Offset.Zero) }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -348,8 +374,21 @@ fun SettingsMenuEntry(
 fun SettingsClickableEntry(
     iconRes: Int = -1,
     title: String,
+    description: String
+) {
+    SettingsClickableEntry(
+        iconRes = iconRes,
+        title = title,
+        description = description,
+        onClick = { }
+    )
+}
+
+@Composable
+fun SettingsClickableEntry(
+    iconRes: Int = -1,
+    title: String,
     description: String,
-    option: String? = null,
     openUrl: String
 ) {
     val context = LocalContext.current
@@ -357,7 +396,6 @@ fun SettingsClickableEntry(
         iconRes = iconRes,
         title = title,
         description = description,
-        option = option,
         onClick = {
             openUrl.let { url ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -371,8 +409,8 @@ fun SettingsClickableEntry(
 fun SettingsClickableEntry(
     iconRes: Int = -1,
     title: String,
-    description: String? = null,
     option: String? = null,
+    description: String,
     onClick: () -> Unit
 ) {
     Row(
@@ -418,14 +456,12 @@ fun SettingsClickableEntry(
                 lineHeight = 16.sp
             )
             Spacer(modifier = Modifier.height(2.dp))
-            description?.let {
-                Text(
-                    text = it ,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp
-                )
-            }
+            Text(
+                text = description,
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
+                lineHeight = 18.sp
+            )
             option?.let {
                 AnimatedTextLine(
                     text = it,

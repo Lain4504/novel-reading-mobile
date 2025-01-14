@@ -51,6 +51,7 @@ object Wenku8HomeExplorationPage: ExplorationPageDataSource {
                 ExplorationDisplayBook(
                     id = idlList[it],
                     title = titleList[it],
+                    author = "",
                     coverUrl = coverUrlList[it],
                 )
             } ?: emptyList(),

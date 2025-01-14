@@ -8,9 +8,9 @@ import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic.HOST
+import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.DataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.TagTypeItem
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
-import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.DataContent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +65,7 @@ object TypesExplorationPageDataSource : ExplorationPageDataSource {
         }
         .data
         .comicList
-        .map { ExplorationDisplayBook(it.id, it.title, it.cover) }
+        .map { ExplorationDisplayBook(it.id, it.title, "", it.cover) }
 
     private data class ComicList<T> (@SerializedName("comicList") val comicList: List<T>)
 

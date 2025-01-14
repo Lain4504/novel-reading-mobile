@@ -82,6 +82,9 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
         val titleList = soup?.select("#content > table.grid > tbody > tr > td > div > div:nth-child(2) > b > a")
             ?.slice(0..5)
             ?.map { it.text().split("(").getOrNull(0) ?: "" } ?: emptyList()
+        val authorList = soup?.select("#content > table.grid > tbody > tr > td > div > div:nth-child(2) > p:nth-child(2)")
+            ?.slice(0..5)
+            ?.map { it.text().split("/").getOrNull(0)?.split(":")?.get(1) ?: ""} ?: emptyList()
         val coverUrlList = soup?.select("#content > table.grid > tbody > tr > td > div > div:nth-child(1) > a > img")
             ?.slice(0..5)
             ?.map { it.attr("src") } ?: emptyList()
@@ -91,6 +94,7 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
                 ExplorationDisplayBook(
                     id = idlList[it],
                     title = titleList[it],
+                    author = authorList[it],
                     coverUrl = coverUrlList[it],
                 )
             } ?: emptyList(),

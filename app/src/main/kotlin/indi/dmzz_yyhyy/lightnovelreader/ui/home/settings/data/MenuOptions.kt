@@ -3,7 +3,12 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data
 import indi.dmzz_yyhyy.lightnovelreader.R
 
 sealed class MenuOptions(vararg options: Option) {
-    val optionList: List<Option> = options.toList()
+    private val _optionList: MutableList<Option> = options.toMutableList()
+    val optionList: List<Option> get() = _optionList.toList()
+    fun option(key: String, name: String): String {
+        _optionList.add(Option(key, name))
+        return key
+    }
     class Option(
         val key: String,
         val nameId: Int
@@ -11,7 +16,7 @@ sealed class MenuOptions(vararg options: Option) {
         override fun equals(other: Any?): Boolean = this.key == other
         override fun hashCode(): Int = key.hashCode()
     }
-    fun get(key: String): Option = optionList.first { it.equals(key) }
+    fun get(key: String): Option = _optionList.first { it.equals(key) }
 
     data object UpdateChannelOptions: MenuOptions(
         Option("Release", R.string.key_update_channel_release),
@@ -39,5 +44,8 @@ sealed class MenuOptions(vararg options: Option) {
         Option("ko-kp", R.string.key_locale_ko_kp)
     )
 
-
+    data object FlipAnimeOptions: MenuOptions() {
+        val None = option("none", "无")
+        val ScrollWithoutShadow = option("scroll", "滚动")
+    }
 }

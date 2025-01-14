@@ -41,9 +41,16 @@ object RecommendExplorationPageDataSource : ExplorationPageDataSource {
                     val books = recommendData.data.mapNotNull {
                         if (it.type != 1) return@mapNotNull null
                         val coverSize = getImageSize(it.cover) ?: return@mapNotNull null
-                        if (coverSize.width > coverSize.height )
-                            return@mapNotNull ExplorationDisplayBook(it.id, it.title, getBookInformation(it.id)?.coverUrl ?: return@mapNotNull null)
-                        ExplorationDisplayBook(it.id, it.title, it.cover)
+                        if (coverSize.width > coverSize.height ) {
+                            val bookInformation = getBookInformation(it.id) ?: return@mapNotNull null
+                            return@mapNotNull ExplorationDisplayBook(
+                                it.id,
+                                it.title,
+                                "",
+                                bookInformation.coverUrl
+                            )
+                        }
+                        ExplorationDisplayBook(it.id, it.title, "", it.cover)
                     }
                     if (books.isEmpty()) return@forEach
                     explorationBooksRows.update {
