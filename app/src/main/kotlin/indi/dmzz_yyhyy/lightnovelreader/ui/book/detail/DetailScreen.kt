@@ -644,9 +644,7 @@ private fun VolumeItem(
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     volume.chapters.forEach {
-                        if (hideReadChapters && readCompletedChapterIds.contains(it.id)) {
-
-                        } else {
+                        if (!(hideReadChapters && readCompletedChapterIds.contains(it.id))) {
                             Box(
                                 modifier = Modifier
                                     .clickable { onClickChapter(it.id) }

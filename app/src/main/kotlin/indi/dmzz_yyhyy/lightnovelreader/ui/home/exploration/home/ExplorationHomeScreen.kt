@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -255,26 +257,28 @@ fun ExplorationPage(
                                     modifier = Modifier
                                         .width(100.dp)
                                         .padding(horizontal = 2.dp)
-                                        .padding(top = 4.dp, bottom = 2.dp),
+                                        .padding(top = 8.dp, bottom = 2.dp),
                                     verticalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
+                                    val titleLineHeight = 16.sp
                                     Text(
+                                        modifier = Modifier.height(
+                                            with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                                        ).wrapContentHeight(Alignment.Top),
                                         text = explorationDisplayBook.title,
                                         fontSize = 13.sp,
-                                        lineHeight = 16.sp,
+                                        lineHeight = titleLineHeight,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    /* 可选作者（未实现）
                                     Text(
-                                        text = explorationDisplayBook.author.toString(),
+                                        text = explorationDisplayBook.author,
                                         fontSize = 13.sp,
                                         lineHeight = 18.sp,
                                         color = MaterialTheme.colorScheme.secondary,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    */
                                 }
                             }
                         }

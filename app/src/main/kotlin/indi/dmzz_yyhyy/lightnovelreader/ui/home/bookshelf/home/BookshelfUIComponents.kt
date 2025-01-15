@@ -251,17 +251,6 @@ fun BookStatusIcon(bookInformation: BookInformation) {
                 tint = MaterialTheme.colorScheme.outline
             )
         }
-
-        // 可实现: 已动画化标识
-
-        /*if (bookInformation.isAnimated) {
-            Icon(
-                modifier = modifier,
-                painter = painterResource(R.drawable.live_tv_24px),
-                contentDescription = "Animated",
-                tint = MaterialTheme.colorScheme.outline
-            )
-        }*/
     }
 }
 
