@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -134,7 +135,7 @@ fun SettingsBottomSheet(
                         )
                         Text(
                             modifier = Modifier.padding(start = 8.dp),
-                            text = "设置预览",
+                            text = stringResource(R.string.settings_preview),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -220,7 +221,7 @@ fun SettingsBottomSheet(
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.titleLarge,
-                    text = "阅读器设置"
+                    text = stringResource(R.string.reader_settings)
                 )
             }
 
@@ -314,7 +315,7 @@ fun ContentSettings(
 fun LazyListScope.AppearancePage(settingState: SettingState) {
     item {
         SettingsSliderEntry(
-            title = "阅读器字体大小",
+            title = stringResource(R.string.settings_reader_font_size),
             unit = "sp",
             valueRange = 8f..64f,
             value = settingState.fontSize,
@@ -323,7 +324,7 @@ fun LazyListScope.AppearancePage(settingState: SettingState) {
     }
     item {
         SettingsSliderEntry(
-            title = "阅读器行距大小",
+            title = stringResource(R.string.settings_reader_line_spacing),
             unit = "sp",
             valueRange = 0f..32f,
             value = settingState.fontLineHeight,
@@ -332,40 +333,40 @@ fun LazyListScope.AppearancePage(settingState: SettingState) {
     }
     item {
         SettingsSwitchEntry(
-            title = "屏幕常亮",
-            description = "在阅读页时，总是保持屏幕开启。这将导致耗电量增加",
+            title = stringResource(R.string.settings_reader_keep_screen_on),
+            description = stringResource(R.string.settings_reader_keep_screen_on_desc),
             checked = settingState.keepScreenOn,
             booleanUserData = settingState.keepScreenOnUserData,
         )
     }
     item {
         SettingsSwitchEntry(
-            title = "电量指示器",
-            description = "在页面左下角显示当前电量。",
+            title = stringResource(R.string.settings_reader_battery_indicator),
+            description = stringResource(R.string.settings_reader_battery_indicator_desc),
             checked = settingState.enableBatteryIndicator,
             booleanUserData = settingState.enableBatteryIndicatorUserData,
         )
     }
     item {
         SettingsSwitchEntry(
-            title = "时间指示器",
-            description = "在页面左下角显示当前时间。",
+            title = stringResource(R.string.settings_reader_time_indicator),
+            description = stringResource(R.string.settings_reader_time_indicator_desc),
             checked = settingState.enableTimeIndicator,
             booleanUserData = settingState.enableTimeIndicatorUserData,
         )
     }
     item {
         SettingsSwitchEntry(
-            title = "名称指示器",
-            description = "在页面右下角显示当前阅读章节名称。",
+            title = stringResource(R.string.settings_reader_chapter_indicator),
+            description = stringResource(R.string.settings_reader_chapter_indicator_desc),
             checked = settingState.enableChapterTitleIndicator,
             booleanUserData = settingState.enableChapterTitleIndicatorUserData,
         )
     }
     item {
         SettingsSwitchEntry(
-            title = "进度指示器",
-            description = "在页面右下角显示当前阅读进度。",
+            title = stringResource(R.string.settings_reader_progress_indicator),
+            description = stringResource(R.string.settings_reader_progress_indicator_desc),
             checked = settingState.enableReadingChapterProgressIndicator,
             booleanUserData = settingState.enableReadingChapterProgressIndicatorUserData,
         )
@@ -375,8 +376,8 @@ fun LazyListScope.AppearancePage(settingState: SettingState) {
 fun LazyListScope.ActionPage(settingState: SettingState) {
     item {
         SettingsSwitchEntry(
-            title = "翻页模式",
-            description = "切换滚动模式为翻页模式",
+            title = stringResource(R.string.settings_reader_page_mode),
+            description = stringResource(R.string.settings_reader_page_mode_desc),
             checked = settingState.isUsingFlipPage,
             booleanUserData = settingState.isUsingFlipPageUserData,
         )
@@ -385,8 +386,8 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
         item {
             SettingsSwitchEntry(
                 modifier = Modifier.animateItem(),
-                title = "音量键控制",
-                description = "使用音量+键切换至上一页，使用音量-键切换至下一页。",
+                title = stringResource(R.string.settings_reader_volume_key_control),
+                description = stringResource(R.string.settings_reader_volume_key_control_desc),
                 checked = settingState.isUsingVolumeKeyFlip,
                 booleanUserData = settingState.isUsingVolumeKeyFlipUserData,
             )
@@ -396,8 +397,8 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
         item {
             SettingsSwitchEntry(
                 modifier = Modifier.animateItem(),
-                title = "点击翻页",
-                description = "使用点击控制翻页，并将呼出菜单变为上下滑动。",
+                title = stringResource(R.string.settings_reader_t2tp),
+                description = stringResource(R.string.settings_reader_t2tp_desc),
                 checked = settingState.isUsingClickFlipPage,
                 booleanUserData = settingState.isUsingClickFlipPageUserData,
             )
@@ -407,8 +408,8 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
         item {
             SettingsMenuEntry(
                 modifier = Modifier.animateItem(),
-                title = "翻页动画",
-                description = "设置翻页时的动画，当为无时允许你快速翻页。",
+                title = stringResource(R.string.settings_reader_page_turn_anim),
+                description = stringResource(R.string.settings_reader_page_turn_anim_desc),
                 options = MenuOptions.FlipAnimationOptions,
                 selectedOptionKey = settingState.flipAnime,
                 stringUserData = settingState.flipAnimeUserData
@@ -419,8 +420,8 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
         item {
             SettingsSwitchEntry(
                 modifier = Modifier.animateItem(),
-                title = "快速切换章节",
-                description = "开启后，当你在每章尾页或首页翻页时，会自动切换到上一章或下一章。",
+                title = stringResource(R.string.settings_reader_quick_chapter_switch),
+                description = stringResource(R.string.settings_reader_quick_chapter_switch_desc),
                 checked = settingState.fastChapterChange,
                 booleanUserData = settingState.fastChapterChangeUserData,
             )
@@ -431,8 +432,8 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
 fun LazyListScope.PaddingPage(settingState: SettingState) {
     item {
         SettingsSwitchEntry(
-            title = "自动获取边距",
-            description = "自动识别手机屏幕的边距，并进行显示适配，如关闭需要手动进行设置。",
+            title = stringResource(R.string.settings_reader_auto_margin),
+            description = stringResource(R.string.settings_reader_auto_margin_desc),
             checked = settingState.autoPadding,
             booleanUserData = settingState.autoPaddingUserData,
         )
@@ -440,7 +441,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
-                title = "上边距",
+                title = stringResource(R.string.settings_reader_top_margin),
                 unit = "dp",
                 valueRange = 0f..128f,
                 value = settingState.topPadding,
@@ -451,7 +452,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
-                title = "下边距",
+                title = stringResource(R.string.settings_reader_bottom_margin),
                 unit = "dp",
                 valueRange = 0f..128f,
                 value = settingState.bottomPadding,
@@ -462,7 +463,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
-                title = "左边距",
+                title = stringResource(R.string.settings_reader_left_margin),
                 unit = "dp",
                 valueRange = 0f..128f,
                 value = settingState.leftPadding,
@@ -473,7 +474,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
-                title = "右边距",
+                title = stringResource(R.string.settings_reader_right_margin),
                 unit = "dp",
                 valueRange = 0f..128f,
                 value = settingState.rightPadding,

@@ -17,4 +17,5 @@
     <!-- FlipAnime -->
     <string name="key_flip_animation_none">无</string>
     <string name="key_flip_animation_scroll">滚动</string>
+
 </resources>

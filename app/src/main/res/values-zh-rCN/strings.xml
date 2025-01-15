@@ -51,6 +51,37 @@
     <string name="settings_github_proxy">GitHub 代理</string>
     <string name="settings_github_proxy_desc">对于中国大陆用户，使用 GitHub 代理地址以获得更流畅的访问 </string>
 
+    <string name="reader_settings">阅读设置</string>
+    <string name="settings_reader_font_size">字体大小</string>
+    <string name="settings_reader_line_spacing">行间距</string>
+    <string name="settings_reader_keep_screen_on">保持屏幕常亮</string>
+    <string name="settings_reader_keep_screen_on_desc">在阅读时保持屏幕亮起。可能会增加电量消耗</string>
+    <string name="settings_reader_battery_indicator">电池指示器</string>
+    <string name="settings_reader_battery_indicator_desc">在左下角显示当前电池电量</string>
+    <string name="settings_reader_time_indicator">时间指示器</string>
+    <string name="settings_reader_time_indicator_desc">在左下角显示当前时间</string>
+    <string name="settings_reader_chapter_indicator">章节指示器</string>
+    <string name="settings_reader_chapter_indicator_desc">在右下角显示当前章节标题</string>
+    <string name="settings_reader_progress_indicator">进度指示器</string>
+    <string name="settings_reader_progress_indicator_desc">在右下角显示阅读进度</string>
+    <string name="settings_reader_page_mode">翻页模式</string>
+    <string name="settings_reader_page_mode_desc">切换滚动模式和翻页模式</string>
+    <string name="settings_reader_volume_key_control">音量键翻页</string>
+    <string name="settings_reader_volume_key_control_desc">使用音量+键翻到上一页，音量-键翻到下一页</string>
+    <string name="settings_reader_t2tp">点击翻页</string>
+    <string name="settings_reader_t2tp_desc">启用点击翻页。垂直滑动以触发菜单</string>
+    <string name="settings_reader_page_turn_anim">翻页动画</string>
+    <string name="settings_reader_page_turn_anim_desc">设置翻页动画，选择“无”时启用快速翻页</string>
+    <string name="settings_reader_quick_chapter_switch">快速章节切换</string>
+    <string name="settings_reader_quick_chapter_switch_desc">允许在章节的开头或结尾翻页时自动切换章节</string>
+    <string name="settings_reader_auto_margin">自动边距调整</string>
+    <string name="settings_reader_auto_margin_desc">自动检测并调整屏幕边距，关闭以手动设置各边距值</string>
+    <string name="settings_reader_top_margin">顶部边距</string>
+    <string name="settings_reader_bottom_margin">底部边距</string>
+    <string name="settings_reader_left_margin">左边距</string>
+    <string name="settings_reader_right_margin">右边距</string>
+
+
     <string name="display_settings">显示</string>
     <string name="settings_dark_theme">深色主题</string>
     <string name="settings_dark_theme_desc">选择是否启用深色主题</string>
