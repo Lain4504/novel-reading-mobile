@@ -1,18 +1,13 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,43 +17,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxDefaults
-import androidx.compose.material3.SwipeToDismissBoxState
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.SwipeToDismissBoxValue.EndToStart
-import androidx.compose.material3.SwipeToDismissBoxValue.Settled
-import androidx.compose.material3.SwipeToDismissBoxValue.StartToEnd
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
-import indi.dmzz_yyhyy.lightnovelreader.utils.SwipeAction
-import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 
 @Composable
 fun BookCardContent(
@@ -254,142 +231,3 @@ fun BookStatusIcon(bookInformation: BookInformation) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-@Composable
-fun BookCardItem(
-    modifier: Modifier = Modifier,
-    bookInformation: BookInformation,
-    selected: Boolean = false,
-    collected: Boolean = false,
-    onClick: () -> Unit,
-    onLongPress: () -> Unit,
-    latestChapterTitle: String? = null,
-    swipeToRightAction: SwipeAction = SwipeAction.None,
-    swipeToLeftAction: SwipeAction = SwipeAction.None,
-    progress: (SwipeAction) -> Unit?,
-){
-    val haptic = LocalHapticFeedback.current
-    val dismissState = rememberNoFlingSwipeToDismissBoxState(
-        positionalThreshold = { it * 0.6f },
-        confirmValueChange = {
-            when (it) {
-                StartToEnd -> {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    progress.invoke(swipeToRightAction)
-                }
-                EndToStart -> {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    progress.invoke(swipeToLeftAction)
-                }
-                Settled -> { }
-            }
-            false
-        },
-    )
-
-    LaunchedEffect(dismissState.dismissDirection) {
-        if (dismissState.dismissDirection != Settled) {
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        }
-    }
-
-    val backgroundColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surface,
-        animationSpec = tween(durationMillis = 300)
-    )
-
-    Card {
-        SwipeToDismissBox(
-            state = dismissState,
-            modifier = modifier,
-            enableDismissFromEndToStart = swipeToLeftAction != SwipeAction.None,
-            enableDismissFromStartToEnd = swipeToRightAction != SwipeAction.None,
-            backgroundContent = {
-                DismissBackground(
-                    dismissState = dismissState,
-                    swipeToLeftAction = swipeToLeftAction,
-                    swipeToRightAction = swipeToRightAction
-                )
-            },
-            content = {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(backgroundColor)
-                        .combinedClickable(
-                            onClick = onClick,
-                            onLongClick = withHaptic { onLongPress() },
-                        )
-                ) {
-                    BookCardContent(
-                        selected = selected,
-                        collected = collected,
-                        latestChapterTitle = latestChapterTitle,
-                        bookInformation = bookInformation
-                    )
-                }
-            }
-        )
-    }
-}
-
-@Composable
-@ExperimentalMaterial3Api
-fun rememberNoFlingSwipeToDismissBoxState(
-    initialValue: SwipeToDismissBoxValue = Settled,
-    confirmValueChange: (SwipeToDismissBoxValue) -> Boolean = { true },
-    positionalThreshold: (totalDistance: Float) -> Float =
-        SwipeToDismissBoxDefaults.positionalThreshold,
-): SwipeToDismissBoxState {
-    val density = Density(Float.POSITIVE_INFINITY)
-    return rememberSaveable(
-        saver = SwipeToDismissBoxState.Saver(
-            confirmValueChange = confirmValueChange,
-            density = density,
-            positionalThreshold = positionalThreshold
-        )
-    ) {
-        SwipeToDismissBoxState(initialValue, density, confirmValueChange, positionalThreshold)
-    }
-}
-
-@Composable
-private fun DismissBackground(
-    dismissState: SwipeToDismissBoxState,
-    swipeToRightAction: SwipeAction,
-    swipeToLeftAction: SwipeAction
-) {
-    val color = when (dismissState.dismissDirection) {
-        StartToEnd -> swipeToRightAction.color
-        EndToStart -> swipeToLeftAction.color
-        Settled -> Color.Transparent
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color)
-            .clip(RoundedCornerShape(12.dp))
-            .padding(28.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        if (dismissState.dismissDirection == StartToEnd) {
-            Icon(
-                painter = painterResource(id = swipeToRightAction.iconRes),
-                contentDescription = swipeToRightAction.description,
-                tint = MaterialTheme.colorScheme.surface
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        if (dismissState.dismissDirection == EndToStart) {
-            Icon(
-                painter = painterResource(id = swipeToLeftAction.iconRes),
-                contentDescription = swipeToLeftAction.description,
-                tint = MaterialTheme.colorScheme.surface
-            )
-        }
-    }
-}

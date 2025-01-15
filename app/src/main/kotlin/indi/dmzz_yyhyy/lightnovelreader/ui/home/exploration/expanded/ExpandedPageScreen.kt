@@ -42,7 +42,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Component
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookCardItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 import kotlinx.coroutines.launch
 
@@ -115,8 +115,7 @@ fun ExpandedPageScreen(
                     bookInformation = bookInformation,
                     onClick = { onClickBook(bookInformation.id) },
                     onLongPress = withHaptic {},
-                    collected = uiState.allBookshelfBookIds.contains(bookInformation.id),
-                    progress = {},
+                    collected = uiState.allBookshelfBookIds.contains(bookInformation.id)
                 )
                 LaunchedEffect(uiState.bookList.size) {
                     if (uiState.bookList.size - index == 3) {

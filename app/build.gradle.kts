@@ -151,6 +151,8 @@ dependencies {
     androidTestImplementation("androidx.work:work-testing:$workVersion")
     implementation("androidx.work:work-multiprocess:$workVersion")
     implementation(project(":epub"))
+    // Swipe
+    implementation("me.saket.swipe:swipe:1.3.0")
 }
 
 kapt {

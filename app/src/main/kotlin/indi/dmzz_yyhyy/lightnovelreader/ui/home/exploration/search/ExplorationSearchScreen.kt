@@ -56,7 +56,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookCardItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -293,8 +293,7 @@ fun ExplorationSearchScreen(
                     bookInformation = it,
                     onClick = { onClickBook(it.id) },
                     onLongPress = withHaptic {},
-                    collected = uiState.allBookshelfBookIds.contains(it.id),
-                    progress = {},
+                    collected = uiState.allBookshelfBookIds.contains(it.id)
                 )
             }
             item {
