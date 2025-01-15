@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +69,7 @@ fun EditBookshelfScreen(
     }
     dialog {
         if (dialogVisible)
-            DeleteDialog(
+            DeleteBookshelfDialog(
                 onDismissRequest = { dialogVisible = false },
                 onConfirmation = {
                     dialogVisible = false
@@ -86,9 +87,9 @@ fun EditBookshelfScreen(
                 .padding(20.dp),
             value = bookshelf.name,
             onValueChange = onNameChange,
-            label = { Text("名称") },
-            placeholder = { Text("输入书本名称") },
-            supportingText = { Text("为书架命名，建议长度在6个汉字以内") },
+            label = { Text(stringResource(R.string.name)) },
+            placeholder = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
+            supportingText = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
             maxLines = 1,
             interactionSource = interactionSource,
             trailingIcon = {
@@ -105,7 +106,7 @@ fun EditBookshelfScreen(
         )
         Text(
             modifier = Modifier.padding(16.dp, 10.dp),
-            text = "书架设置",
+            text = stringResource(R.string.bookshelf_settings),
             style = MaterialTheme.typography.displayLarge,
             fontWeight = FontWeight.W700,
             fontSize = 17.sp,
@@ -115,15 +116,15 @@ fun EditBookshelfScreen(
         )
         SwitchSettingItem(
             iconRes = R.drawable.cloud_download_24px,
-            title = "自动缓存",
-            description = "自动缓存新加入的书本完整内容",
+            title = stringResource(R.string.settings_auto_cache),
+            description = stringResource(R.string.settings_auto_cache_desc),
             value = bookshelf.autoCache,
             onValueChange = onAutoCacheChange
         )
         SwitchSettingItem(
             iconRes = R.drawable.outline_schedule_24px,
-            title = "更新通知提醒",
-            description = "在后台时，检查并通知书本更新",
+            title = stringResource(R.string.settings_book_update_reminder),
+            description = stringResource(R.string.settings_book_update_reminder_desc),
             value = bookshelf.systemUpdateReminder,
             onValueChange = onSystemUpdateReminderChange
         )
@@ -139,8 +140,17 @@ fun EditBookshelfScreen(
                         contentDescription = "Localized description",
                     )
                 },
-                headlineContent = { Text(text = "删除此书架", fontSize = 16.sp, modifier = Modifier.padding(bottom = 2.dp)) },
-                supportingContent = { Text(text = "将此书架永久移除", fontSize = 14.sp, lineHeight = 15.sp) },
+                headlineContent = { Text(
+                        text = stringResource(R.string.settings_delete_bookshelf),
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    ) },
+                supportingContent = {
+                    Text(
+                        text = stringResource(R.string.settings_delete_bookshelf_desc),
+                        fontSize = 14.sp,
+                        lineHeight = 15.sp
+                    ) },
             )
     }
 }
@@ -216,13 +226,13 @@ fun SwitchSettingItem(
 }
 
 @Composable
-private fun DeleteDialog(
+private fun DeleteBookshelfDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit) {
     AlertDialog(
         title = {
             Text(
-                text = "删除书架",
+                text = stringResource(R.string.dialog_delete_bookshelf),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.W400
                 ),
@@ -231,7 +241,7 @@ private fun DeleteDialog(
         },
         text = {
             Text(
-                text = "确定要删除这个书架吗？它将会永久失去！（真的很久！）",
+                text = stringResource(R.string.dialog_delete_bookshelf_text),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.W400
                 ),
@@ -244,7 +254,7 @@ private fun DeleteDialog(
                 onClick = onConfirmation
             ) {
                 Text(
-                    text = "确定",
+                    text = stringResource(android.R.string.ok),
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.W500
                     ),
@@ -257,7 +267,7 @@ private fun DeleteDialog(
                 onClick = onDismissRequest
             ) {
                 Text(
-                    text = "取消",
+                    text = stringResource(R.string.cancel),
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.W500
                     ),

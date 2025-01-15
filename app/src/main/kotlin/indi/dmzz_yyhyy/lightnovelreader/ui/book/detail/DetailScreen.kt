@@ -42,7 +42,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -277,7 +276,7 @@ private fun TopBar(
             LazyRow {
                 item {
                     Text(
-                        text = "详情",
+                        text = stringResource(R.string.detail_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.W400,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -353,7 +352,9 @@ private fun BookCardBlock(bookInformation: BookInformation) {
                 ) {
                     BookStatusIcon(bookInformation)
                     Text(
-                        text = if (bookInformation.isComplete) "已完结" else stringResource(
+                        text = if (bookInformation.isComplete)
+                            stringResource(R.string.book_completed)
+                            else stringResource(
                             R.string.book_info_update_date,
                             bookInformation.lastUpdated.year,
                             bookInformation.lastUpdated.monthValue,
@@ -378,7 +379,7 @@ private fun BookCardBlock(bookInformation: BookInformation) {
                         tint = MaterialTheme.colorScheme.outline
                     )
                     Text(
-                        text = "${bookInformation.wordCount / 1000}K 字",
+                        text = stringResource(R.string.book_info_word_count_kilo, bookInformation.wordCount / 1000),
                         maxLines = 1,
                         fontSize = 14.sp,
                         lineHeight = 17.sp,
@@ -466,7 +467,7 @@ private fun QuickOperationsBlock(
         ) {
             QuickOperationButton(
                 icon = painterResource(R.drawable.bookmark_add_24px),
-                title = "添加至书架",
+                title = stringResource(R.string.add_to_bookshelf),
                 onClick = onClickAddToBookShelf
             )
         }
@@ -477,7 +478,7 @@ private fun QuickOperationsBlock(
         ) {
             QuickOperationButton(
                 icon = painterResource(R.drawable.cloud_download_24px),
-                title = "缓存至本地",
+                title = stringResource(R.string.action_cache),
                 onClick = onClickCache
             )
         }
@@ -523,7 +524,7 @@ private fun IntroBlock(description: String) {
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = if (expanded) "收起" else "展开",
+                    text = if (expanded) stringResource(R.string.collapse) else stringResource(R.string.expand),
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -566,7 +567,8 @@ private fun VolumeItem(
                     color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = if (isFullyRead) "已读完" else "已读 $readCount/$totalCount",
+                    text = if (isFullyRead) stringResource(R.string.info_reading_finished)
+                    else stringResource(R.string.info_reading_progress, readCount, totalCount),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.secondary
                 )

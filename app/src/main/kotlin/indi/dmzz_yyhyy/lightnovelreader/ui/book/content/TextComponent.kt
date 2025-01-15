@@ -124,7 +124,7 @@ fun ContentText(
             readingProgress = readingProgress,
             isUsingClickFlip = isUsingClickFlip,
             isUsingVolumeKeyFlip = isUsingVolumeKeyFlip,
-            flipAnime = flipAnime,
+            flipAnimation = flipAnime,
             fastChapterChange = fastChapterChange,
             onChapterReadingProgressChange = onChapterReadingProgressChange,
             changeIsImmersive = changeIsImmersive,
@@ -193,7 +193,7 @@ fun SimpleFlipPageTextComponent(
     readingProgress: Float,
     isUsingClickFlip: Boolean,
     isUsingVolumeKeyFlip: Boolean,
-    flipAnime: String,
+    flipAnimation: String,
     fastChapterChange: Boolean,
     onChapterReadingProgressChange: (Float) -> Unit,
     changeIsImmersive: () -> Unit,
@@ -214,7 +214,7 @@ fun SimpleFlipPageTextComponent(
     fun lastPage() {
         if (pagerState.currentPage != 0)
             scope.launch {
-                if (flipAnime != MenuOptions.FlipAnimeOptions.None)
+                if (flipAnimation != MenuOptions.FlipAnimationOptions.None)
                     pagerState.animateScrollToPage(pagerState.currentPage - 1)
                 else
                     pagerState.scrollToPage(pagerState.currentPage - 1)
@@ -225,7 +225,7 @@ fun SimpleFlipPageTextComponent(
     fun nextPage() {
         if (pagerState.currentPage + 1 < pagerState.pageCount)
             scope.launch {
-                if (flipAnime != MenuOptions.FlipAnimeOptions.None)
+                if (flipAnimation != MenuOptions.FlipAnimationOptions.None)
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 else
                     pagerState.scrollToPage(pagerState.currentPage + 1)
@@ -266,7 +266,7 @@ fun SimpleFlipPageTextComponent(
             onChapterReadingProgressChange(pagerState.currentPage.toFloat() / (pagerState.pageCount - 1))
         else onChapterReadingProgressChange(1F)
     }
-    DisposableEffect(isUsingVolumeKeyFlip, flipAnime, fastChapterChange) {
+    DisposableEffect(isUsingVolumeKeyFlip, flipAnimation, fastChapterChange) {
         val localBroadcastManager = LocalBroadcastManager.getInstance(current)
         val keycodeVolumeUpReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -320,7 +320,7 @@ fun SimpleFlipPageTextComponent(
                     if (it.absoluteValue > 60) changeIsImmersive.invoke()
                 }
             )
-            .pointerInput(isUsingClickFlip, flipAnime, fastChapterChange) {
+            .pointerInput(isUsingClickFlip, flipAnimation, fastChapterChange) {
                 detectTapGestures(
                     onTap = {
                         if (isUsingClickFlip)

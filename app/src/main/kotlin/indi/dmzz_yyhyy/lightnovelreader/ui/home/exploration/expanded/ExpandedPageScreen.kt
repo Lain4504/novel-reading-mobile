@@ -138,7 +138,7 @@ fun TopBar(
     MediumTopAppBar(
         title = {
             Text(
-                text = stringResource(id = R.string.nav_exploration_child, title),
+                text = stringResource(id = R.string.nav_explore_child, title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,

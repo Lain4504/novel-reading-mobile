@@ -37,7 +37,7 @@ class SettingState(
     val isUsingFlipPage by isUsingFlipPageUserData.safeAsState(false)
     val isUsingClickFlipPage by isUsingClickFlipPageUserData.safeAsState(false)
     val isUsingVolumeKeyFlip by isUsingVolumeKeyFlipUserData.safeAsState(false)
-    val flipAnime by flipAnimeUserData.safeAsState(MenuOptions.FlipAnimeOptions.ScrollWithoutShadow)
+    val flipAnime by flipAnimeUserData.safeAsState(MenuOptions.FlipAnimationOptions.ScrollWithoutShadow)
     val fastChapterChange by fastChapterChangeUserData.safeAsState(false)
     val enableBatteryIndicator by enableBatteryIndicatorUserData.safeAsState(true)
     val enableTimeIndicator by enableTimeIndicatorUserData.safeAsState(true)

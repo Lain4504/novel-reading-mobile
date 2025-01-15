@@ -32,7 +32,7 @@ fun AboutSettingsList(
         title = stringResource(R.string.app_name),
         description = appInfo,
         onClick = { showAppInfoDialog = true },
-        option = "查看详细信息"
+        option = stringResource(R.string.item_view_details)
     )
     SettingsClickableEntry(
         iconRes = R.drawable.group_24px,

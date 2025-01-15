@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8
 
 
+import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
@@ -19,7 +20,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
-import indi.dmzz_yyhyy.lightnovelreader.utils.wenku8.wenku8Api
 import java.net.URLEncoder
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -374,8 +374,8 @@ object Wenku8Api: WebBookDataSource {
                             IsCompletedSwitchFilter { this.refresh() },
                             SingleChoiceFilter(
                                 title = "排序",
-                                dialogTitle = "排序顺序",
-                                description = "书本排序的依据。",
+                                dialogTitleId = R.string.key_pub_filter_title,
+                                descriptionId = R.string.key_pub_filter_desc,
                                 choices = listOf("默认", "按更新时间排序", "按热度排序", "仅动画化"),
                                 defaultChoice = "默认"
                             ) {

@@ -4,10 +4,10 @@
     <string name="nav_reading">阅读中</string>
     <string name="nav_bookshelf">书架</string>
     <string name="nav_bookshelf_select_mode">选择 书架 (%d)</string>
-    <string name="nav_exploration">探索</string>
-    <string name="nav_exploration_child">探索 · %s</string>
-    <string name="nav_exploration_homepage">首页</string>
-    <string name="nav_exploration_categories">分类</string>
+    <string name="nav_explore">探索</string>
+    <string name="nav_explore_child">探索 · %s</string>
+    <string name="nav_explore_homepage">首页</string>
+    <string name="nav_explore_categories">分类</string>
     <string name="nav_settings">设置</string>
     <!-- Operations -->
     <string name="submit">提交</string>
@@ -26,6 +26,9 @@
     <string name="unspecified">未指定</string>
     <string name="ignore">忽略</string>
     <string name="ignore_version">忽略该版本</string>
+    <string name="switch_and_restart">切换并重启</string>
+    <string name="export_to_file">导出至文件</string>
+    <string name="export_and_share">导出并分享</string>
     <!-- Hints -->
     <string name="page_in_progress">施工中</string>
     <string name="page_in_progress_desc">该区域功能暂未完成\n单击下方导航栏以转到其他页面"</string>
@@ -39,17 +42,62 @@
     <string name="app_updates">更新</string>
     <string name="settings_auto_check_updates">自动检查更新</string>
     <string name="settings_auto_check_updates_desc">应用启动后自动检查更新</string>
-    <string name="settings_update_channel">更新渠道</string>
-    <string name="settings_update_channel_desc">检查更新时的首选渠道</string>
+    <string name="settings_update_channel">首选软件版本</string>
+    <string name="settings_update_channel_desc">检查更新的目标版本</string>
     <string name="settings_get_updates">手动检查更新</string>
     <string name="settings_get_updates_desc">手动获取应用更新</string>
+    <string name="settings_distribution_platform">更新分发平台</string>
+    <string name="settings_distribution_platform_settings_desc"><!--reversed--></string>
+    <string name="settings_github_proxy">GitHub 代理</string>
+    <string name="settings_github_proxy_desc">对于中国大陆用户，使用 GitHub 代理地址以获得更流畅的访问 </string>
+
+    <string name="reader_settings">阅读设置</string>
+    <string name="settings_reader_font_size">字体大小</string>
+    <string name="settings_reader_line_spacing">行间距</string>
+    <string name="settings_reader_keep_screen_on">保持屏幕常亮</string>
+    <string name="settings_reader_keep_screen_on_desc">在阅读时保持屏幕亮起。可能会增加电量消耗</string>
+    <string name="settings_reader_battery_indicator">电池指示器</string>
+    <string name="settings_reader_battery_indicator_desc">在左下角显示当前电池电量</string>
+    <string name="settings_reader_time_indicator">时间指示器</string>
+    <string name="settings_reader_time_indicator_desc">在左下角显示当前时间</string>
+    <string name="settings_reader_chapter_indicator">章节指示器</string>
+    <string name="settings_reader_chapter_indicator_desc">在右下角显示当前章节标题</string>
+    <string name="settings_reader_progress_indicator">进度指示器</string>
+    <string name="settings_reader_progress_indicator_desc">在右下角显示阅读进度</string>
+    <string name="settings_reader_page_mode">翻页模式</string>
+    <string name="settings_reader_page_mode_desc">切换滚动模式和翻页模式</string>
+    <string name="settings_reader_volume_key_control">音量键翻页</string>
+    <string name="settings_reader_volume_key_control_desc">使用音量+键翻到上一页，音量-键翻到下一页</string>
+    <string name="settings_reader_t2tp">点击翻页</string>
+    <string name="settings_reader_t2tp_desc">启用点击翻页。垂直滑动以触发菜单</string>
+    <string name="settings_reader_page_turn_anim">翻页动画</string>
+    <string name="settings_reader_page_turn_anim_desc">设置翻页动画，选择“无”时启用快速翻页</string>
+    <string name="settings_reader_quick_chapter_switch">快速章节切换</string>
+    <string name="settings_reader_quick_chapter_switch_desc">允许在章节的开头或结尾翻页时自动切换章节</string>
+    <string name="settings_reader_auto_margin">自动边距调整</string>
+    <string name="settings_reader_auto_margin_desc">自动检测并调整屏幕边距，关闭以手动设置各边距值</string>
+    <string name="settings_reader_top_margin">顶部边距</string>
+    <string name="settings_reader_bottom_margin">底部边距</string>
+    <string name="settings_reader_left_margin">左边距</string>
+    <string name="settings_reader_right_margin">右边距</string>
+
+
     <string name="display_settings">显示</string>
     <string name="settings_dark_theme">深色主题</string>
     <string name="settings_dark_theme_desc">选择是否启用深色主题</string>
     <string name="settings_dynamic_colors">系统动态配色</string>
     <string name="settings_dynamic_colors_desc">从系统主题应用动态配色 (Android 12 +)</string>
     <string name="settings_characters_variant">汉字变体</string>
-    <string name="settings_characters_variant_desc">（实验性）使用指定语言的汉字变体，需要系统字体支持</string>
+    <string name="settings_characters_variant_desc">(实验性) 使用指定语言的汉字变体，需要系统字体支持</string>
+
+    <string name="data_settings">数据</string>
+    <string name="settings_snap_data">快照数据</string>
+    <string name="settings_snap_data_desc">将应用内的用户数据导出为 .lnr 文件</string>
+    <string name="settings_import_data">导入数据</string>
+    <string name="settings_import_data_desc">从选定的 .lnr 文件导入用户数据</string>
+    <string name="settings_select_data_source">切换数据源</string>
+    <string name="settings_select_data_source_desc">清除缓存并切换软件数据源。当前的用户数据不会丢失，并将在下次切换回当前数据源时恢复</string>
+
     <string name="about_settings">关于</string>
     <string name="settings_about_source_code"><![CDATA[在 %1$s 查看源代码<br/>在 %2$s 提交 Bug 或新功能请求]]></string>
     <string name="settings_about_oss">LightNovelReader 是开源软件。</string>
@@ -59,10 +107,20 @@
     <string name="settings_communication_desc">加入我们的 QQ 群讨论或反馈</string>
     <string name="settings_statistics">匿名统计</string>
     <string name="settings_statistics_desc">我们使用 Microsoft AppCenter 匿名收集一些统计数据，以使 LightNovelReader 变得更好</string>
-    <string name="experimental_settings">Experimental</string>
+    <string name="experimental_settings">实验性</string>
+    <string name="item_view_details">View details</string>
+
+    <string name="settings_auto_cache">自动缓存</string>
+    <string name="settings_auto_cache_desc">自动缓存新加入的书本内容</string>
+    <string name="settings_book_update_reminder">更新提醒</string>
+    <string name="settings_book_update_reminder_desc">应用在后台时，检查并通知书本更新</string>
+    <string name="settings_delete_bookshelf">删除书架</string>
+    <string name="settings_delete_bookshelf_desc">永久移除该书架</string>
+
     <!-- UI -->
     <string name="detail_introduction">介绍</string>
     <string name="detail_contents">目录</string>
+    <string name="detail_title">详情</string>
     <string name="changelog">新版变化</string>
     <string name="recent_reads">最近读过 (%d)</string>
     <string name="search_no_results">未搜索到内容</string>
@@ -71,8 +129,9 @@
     <string name="search_history">搜索历史</string>
     <string name="search_history_clear">清除全部</string>
     <string name="continue_reading">继续阅读</string>
-    <string name="navigate_to_exploration">转至『探索』</string>
-    <string name="book_info_detailed">"作者: %1$s / %2$s\n更新: %3$s-%4$s-%5$s · %6$d 字 · %7$s\n%8$s"</string>
+    <string name="resume_last_reading">继续上次阅读</string>
+    <string name="last_read_info">上次阅读 | %s</string>
+    <string name="navigate_to_explore">转至『探索』</string>
     <string name="book_completed">已完结</string>
     <string name="book_ongoing">未完结</string>
     <string name="initial_letter">首字母</string>
@@ -83,6 +142,60 @@
     <string name="filter_by_publishing_house_desc">根据小说文库的筛选。</string>
     <string name="book_info_update_date">%s-%s-%s 更新</string>
     <string name="book_info_word_count_kilo">%dK 字</string>
-
+    <string name="name">名称</string>
+    <string name="settings_preview">设置预览</string>
+    <string name="bookshelf_name">书架名称</string>
+    <string name="bookshelf_name_suggestion">为书架命名，建议长度在6个汉字以内</string>
+    <string name="bookshelf_name_placeholder">输入书架名称</string>
+    <string name="bookshelf_settings">书架设置</string>
+    <string name="bookshelf_create_title">创建书架</string>
+    <string name="bookshelf_book_count">共 %d 本</string>
+    <string name="share_bookshelf">分享书架</string>
+    <string name="import_and_export">导入和导出</string>
+    <string name="export_to_lnr_file">导出为 .lnr 文件</string>
+    <string name="export_all_to_lnr_file">导出全部为 .lnr 文件</string>
+    <string name="import_from_file">从文件导入</string>
+    <string name="add_to_bookshelf">添加至书架</string>
+    <string name="action_cache">缓存</string>
+    <string name="expand">展开</string>
+    <string name="collapse">收起</string>
+    <string name="info_reading_finished">已读完</string>
+    <string name="info_reading_progress">已读 %1$s/%2$s</string>
+    <string name="bookshelf_group_title_updated">已更新 (%s)</string>
+    <string name="bookshelf_group_title_pinned">已固定 (%s)</string>
+    <string name="bookshelf_group_title_all">全部 (%s)</string>
+    <string name="data_source_provider">提供者: %s</string>
+    <string name="read_progress">• 已读 %s</string>
+    <string name="read_minutes">• %d 分钟</string>
+    <!-- Dialogs -->
+    <string name="dialog_about_version">版本</string>
+    <string name="dialog_about_build_time">构建时间</string>
+    <string name="dialog_about_build_host">构建主机</string>
+    <string name="dialog_delete_bookshelf">删除书架</string>
+    <string name="dialog_delete_bookshelf_text">确定要删除这个书架吗？它将会永久失去！（真的很久！）</string>
+    <string name="dialog_add_to_bookshelf_text">将这本书添加至以下书架</string>
+    <string name="dialog_export_to_epub">导出为 EPUB</string>
+    <string name="dialog_export_to_epub_text">EPUB (Electronic Publication) 是一种开放的电子书标准，格式为 .epub。\n\n要将这本书导出为 EPUB 吗？</string>
+    <string name="dialog_updates_available">更新可用</string>
+    <string name="dialog_snap_user_data_text">Select the data you want to export</string>
+    <string name="dialog_snap_bookshelf">书架</string>
+    <string name="dialog_snap_bookshelf_text">包括书架及书本信息</string>
+    <string name="dialog_snap_reading_data">阅读信息</string>
+    <string name="dialog_snap_reading_data_text">包括阅读历史、进度和时长等信息</string>
+    <string name="dialog_snap_settings">设置项</string>
+    <string name="dialog_snap_settings_text">包括应用设置和阅读器设置</string>
+    <string name="dialog_snap_bookmarks">书签</string>
+    <string name="dialog_snap_bookmarks_text">包括全部书本的书签信息</string>
+    <string name="dialog_select_data_source_text">选择使用的数据源，这将清除缓存并切换软件数据源。当前的用户数据不会丢失，并将在下次切换回当前数据源时恢复。</string>
+    <string name="dialog_github_proxy_notice">请注意: 由于代理普遍不支持加速 GitHub API, 所以我们无法在检查环节使用代理。</string>
+    <string name="dialog_github_proxy_supporting_text">协议和结尾的"/"不可省略</string>
+    <string name="dialog_github_proxy_custom_url">自定义 URL</string>
+    <string name="dialog_github_proxy_custom_url_hint">格式示范: \n</string>
+    <!-- Publishing House Filter -->
+    <string name="key_pub_filter_title">文库筛选</string>
+    <string name="key_pub_filter_desc">根据小说的文库筛选</string>
+    <!-- Initial letter Filter -->
+    <string name="key_letter_filter_title">首字母筛选</string>
+    <string name="key_letter_filter_desc">根据小说标题的拼音首字母筛选</string>
 
 </resources>

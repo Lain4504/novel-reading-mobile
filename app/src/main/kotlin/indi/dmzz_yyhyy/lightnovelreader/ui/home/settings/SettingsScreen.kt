@@ -106,7 +106,7 @@ fun SettingsScreen(
                 ) }
             )*/
             SettingsCategory(
-                title = "数据",
+                title = stringResource(R.string.data_settings),
                 icon = ImageVector.vectorResource(R.drawable.hard_disk_24px)
             ) {
                 DataSettingsList(

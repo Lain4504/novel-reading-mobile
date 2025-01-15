@@ -20,12 +20,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -90,7 +87,7 @@ fun ReadingScreen(
             ) {
                 Text(
                     modifier = Modifier.padding(vertical = 4.dp),
-                    text = "继续阅读",
+                    text = stringResource(R.string.continue_reading),
                     maxLines = 1,
                     fontWeight = FontWeight.Bold,
                 )
@@ -154,7 +151,7 @@ fun ReadingScreen(
                     onClick = onClickJumpToExploration
                 ) {
                     Text(
-                        text = stringResource(id = R.string.navigate_to_exploration),
+                        text = stringResource(id = R.string.navigate_to_explore),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.W500,
                         color = MaterialTheme.colorScheme.onPrimary
@@ -188,14 +185,14 @@ private fun TopBar(
                     overflow = TextOverflow.Ellipsis
                 )
             },
-        actions = {
+        /*actions = {
             IconButton(onClick = { }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(R.string.more)
                     )
                 }
-        },
+        },*/
         scrollBehavior = scrollBehavior
     )
 }
@@ -283,10 +280,10 @@ private fun ReadingBookCard(
                     Text(
                         fontSize = 13.sp,
                         lineHeight = 14.sp,
-                        text = "• 已读 ${(book.readingProgress * 100).toInt()}%"
+                        text = stringResource(R.string.read_progress, (book.readingProgress * 100).toInt().toString() + "%")
                     )
                     Text(
-                        text = "• ${(book.totalReadTime) / 60} 分钟",
+                        text = stringResource(R.string.read_minutes, (book.totalReadTime) / 60),
                         modifier = Modifier.align(Alignment.CenterVertically),
                         fontSize = 13.sp,
                         lineHeight = 14.sp
@@ -336,7 +333,7 @@ private fun ReadingHeaderCard(
                         tint = MaterialTheme.colorScheme.secondary
                     )
                     Text(
-                        text = "上次阅读 | ${formTime(book.lastReadTime)}",
+                        text = stringResource(R.string.last_read_info, formTime(book.lastReadTime)),
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = 14.sp,
                     )
@@ -371,7 +368,7 @@ private fun ReadingHeaderCard(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { onClickContinueReading(book.id, book.lastReadChapterId) }) {
                         Text(
-                            text = "继续上次阅读",
+                            text = stringResource(R.string.resume_last_reading),
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
