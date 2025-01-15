@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">LightNovelReader</string>
-    <string name="translators">NightFish, yukonisen</string>
+    <string name="language_translators">yukonisen, NightFish</string>
     <!-- Navigation Items -->
     <string name="nav_reading">Reading</string>
     <string name="nav_bookshelf">Bookshelf</string>
@@ -135,6 +135,7 @@
     <string name="search_results_title">Search Results for "%1$s" (%2$d%3$s)</string>
     <string name="search_history">Search History</string>
     <string name="search_history_clear">Clear All</string>
+    <string name="start_reading">Start Reading</string>
     <string name="continue_reading">Continue Reading</string>
     <string name="resume_last_reading">Resume Last Reading</string>
     <string name="last_read_info">Last Read | %s</string>
@@ -174,6 +175,7 @@
     <string name="data_source_provider">Provider: %s</string>
     <string name="read_progress">• Read %s</string>
     <string name="read_minutes">• %d min</string>
+    <string name="translators">Translate Contributors</string>
     <!-- Dialogs -->
     <string name="dialog_about_version">Version</string>
     <string name="dialog_about_build_time">Build Time</string>
@@ -184,7 +186,7 @@
     <string name="dialog_export_to_epub">Export as EPUB</string>
     <string name="dialog_export_to_epub_text">EPUB (Electronic Publication) is an open e-book standard with a .epub format.\n\nDo you want to export this book as an EPUB?</string>
     <string name="dialog_updates_available">Updates Available</string>
-    <string name="dialog_snap_user_data_text">Select the data to export:</string>
+    <string name="dialog_snap_user_data_text">Select the data to export</string>
     <string name="dialog_snap_bookshelf">Bookshelf</string>
     <string name="dialog_snap_bookshelf_text">Includes bookshelf and book information.</string>
     <string name="dialog_snap_reading_data">Reading Data</string>
