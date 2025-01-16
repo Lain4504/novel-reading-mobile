@@ -16,7 +16,7 @@ LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件�
 
 ## 下载
 
-软件处于开发阶段，要体验最新的功能与 Bug 修复，我们推荐使用 [Actions](actions) 内的最新构建，或从 [GitHub Releases](releases/latest) 下载最新发布版
+软件处于开发阶段，要体验最新的功能与 Bug 修复，我们推荐使用 [Actions](https://github.com/dmzz-yyhyy/LightNovelReader/actions) 内的最新构建，或从 [GitHub Releases](https://github.com/dmzz-yyhyy/LightNovelReader/releases/latest) 下载最新发布版
 
 ## 支持
 
