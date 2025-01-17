@@ -4,6 +4,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.wenku8Cookie
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGet
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +24,7 @@ object Wenku8HomeExplorationPage: ExplorationPageDataSource {
             lock = true
             CoroutineScope(Dispatchers.IO).launch {
                 val soup = Jsoup
-                    .connect("https://www.wenku8.cc/")
+                    .connect(host)
                     .wenku8Cookie()
                     .autoReconnectionGet()
                 (0..2).map { index->

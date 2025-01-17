@@ -43,6 +43,9 @@ object Wenku8Api: WebBookDataSource {
     private val explorationExpandedPageDataSourceMap = mutableMapOf<String, ExplorationExpandedPageDataSource>()
     private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
+    private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
+    private var hostIndex = 0
+    val host get() =  hosts[hostIndex]
 
     override val isOffLineFlow = flow {
         while(true) {
@@ -54,9 +57,10 @@ object Wenku8Api: WebBookDataSource {
     override suspend fun isOffLine(): Boolean =
         try {
             Jsoup.connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString()).get()
-            Jsoup.connect("https://www.wenku8.cc/").get()
+            Jsoup.connect("$host/").get()
             false
         } catch (_: Exception) {
+            hostIndex = (hostIndex + 1) % hosts.size
             true
         }
 
@@ -332,7 +336,7 @@ object Wenku8Api: WebBookDataSource {
             registerExplorationExpandedPageDataSource(
                 id = "${id}Book",
                 expandedPageDataSource = HomeBookExpandPageDataSource(
-                    baseUrl = "https://www.wenku8.cc/modules/article/toplist.php",
+                    baseUrl = "$host/modules/article/toplist.php",
                     title = nameMap[id] ?: "",
                     filtersBuilder = {
                         val choicesMap = mapOf(
@@ -368,7 +372,7 @@ object Wenku8Api: WebBookDataSource {
             registerExplorationExpandedPageDataSource(
                 id = tag,
                 expandedPageDataSource = HomeBookExpandPageDataSource(
-                    baseUrl = "https://www.wenku8.cc/modules/article/tags.php",
+                    baseUrl = "$host/modules/article/tags.php",
                     title = tag,
                     filtersBuilder = {
                         val choicesMap = mapOf(

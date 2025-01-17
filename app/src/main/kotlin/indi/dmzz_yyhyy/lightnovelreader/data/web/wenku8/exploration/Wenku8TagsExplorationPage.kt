@@ -4,6 +4,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.wenku8Cookie
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGet
 import kotlinx.coroutines.CoroutineScope
@@ -24,12 +25,12 @@ object Wenku8TagsExplorationPage: ExplorationPageDataSource {
             lock = true
             CoroutineScope(Dispatchers.IO).launch {
                 Jsoup
-                    .connect("https://www.wenku8.cc/modules/article/tags.php")
+                    .connect("$host/modules/article/tags.php")
                     .wenku8Cookie()
                     .autoReconnectionGet()
                     ?.select("a[href~=tags\\.php\\?t=.*]")
                     ?.slice(0..48)
-                    ?.map { "https://www.wenku8.cc/modules/article/" + it.attr("href") }
+                    ?.map { "$host/modules/article/" + it.attr("href") }
                     ?.map {url ->
                         val soup = Jsoup
                             .connect(url.split("=")[0] + "=" +

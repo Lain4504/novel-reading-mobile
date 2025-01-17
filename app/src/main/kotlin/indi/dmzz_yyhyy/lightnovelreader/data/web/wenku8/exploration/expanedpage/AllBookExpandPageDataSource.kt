@@ -5,15 +5,16 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpanded
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.Filter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.LocalFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.Wenku8Api.getBookInformationListFromBookCards
-import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGet
+import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.wenku8Cookie
+import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import org.jsoup.Jsoup
 
 class HomeBookExpandPageDataSource(
-    private val baseUrl: String = "https://www.wenku8.cc/modules/article/articlelist.php",
+    private val baseUrl: String = "$host/modules/article/articlelist.php",
     private val extendedParameters: String = "",
     private val title: String,
     filtersBuilder: HomeBookExpandPageDataSource.() -> List<Filter>,
