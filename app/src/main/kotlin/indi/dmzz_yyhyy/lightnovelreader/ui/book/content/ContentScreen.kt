@@ -66,6 +66,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -491,36 +492,33 @@ fun ChapterSelectorBottomSheet(
             sheetState = state
         ) {
             LazyColumn(
-                modifier = Modifier.padding(18.dp, 0.dp, 18.dp, 28.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                state = lazyColumnState
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                state = lazyColumnState,
+                contentPadding = PaddingValues(horizontal = 18.dp)
             ) {
                 item {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(9.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.read_more_24px),
                             contentDescription = null
                         )
                         Text(
-                            text = "章节选择",
-                            style = MaterialTheme.typography.displayLarge,
-                            fontWeight = FontWeight.W700,
-                            fontSize = 18.sp,
-                            lineHeight = 32.sp,
-                            color = MaterialTheme.colorScheme.onSurface
+                            modifier = Modifier.padding(start = 8.dp),
+                            text = stringResource(R.string.select_chapter),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
                 items(bookVolumes.volumes) { volume ->
-                    FilledCard(
-                        shape = RoundedCornerShape(12.dp),
-                        onClick = {
+                    Box(
+                        modifier = Modifier.clickable {
                             if (selectedVolumeId == volume.volumeId) {
                                 onChangeSelectedVolumeId(-1)
-                                return@FilledCard
                             }
                             onChangeSelectedVolumeId(volume.volumeId)
                         }
@@ -528,7 +526,7 @@ fun ChapterSelectorBottomSheet(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(10.5.dp, 5.dp, 10.dp, 5.dp),
+                                .padding(vertical = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {

@@ -271,19 +271,17 @@ fun ExplorationSearchScreen(
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 3.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 3.dp)
         ) {
             item {
                 AnimatedText(
-                    modifier = Modifier.padding(16.dp, 8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp),
                     text = stringResource(
                         R.string.search_results_title, searchKeyword, uiState.searchResult.size,
                         if (uiState.isLoadingComplete) "" else "..."
                     ),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.W700,
-                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
                     letterSpacing = 0.5.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

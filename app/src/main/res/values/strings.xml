@@ -176,6 +176,7 @@
     <string name="read_progress">• Read %s</string>
     <string name="read_minutes">• %d min</string>
     <string name="translators">Translate Contributors</string>
+    <string name="select_chapter">Select Chapter</string>
     <!-- Dialogs -->
     <string name="dialog_about_version">Version</string>
     <string name="dialog_about_build_time">Build Time</string>

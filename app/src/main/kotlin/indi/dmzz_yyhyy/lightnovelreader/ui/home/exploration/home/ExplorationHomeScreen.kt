@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +38,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -159,7 +162,7 @@ fun TopBar(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ExplorationPage(
     explorationPageBooksRawList: List<ExplorationBooksRow>,
@@ -223,70 +226,75 @@ fun ExplorationPage(
                     }
                     val lazyRowState = rememberLazyListState()
 
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        state = lazyRowState,
-                        flingBehavior = rememberSnapFlingBehavior(lazyRowState)
-                    ) {
-                        item {
-                            Box(modifier = Modifier.width(10.dp))
-                        }
+                    CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            state = lazyRowState,
+                            flingBehavior = rememberSnapFlingBehavior(lazyRowState)
+                        ) {
+                            item {
+                                Box(modifier = Modifier.width(10.dp))
+                            }
 
-                        items(explorationBooksRow.bookList) { explorationDisplayBook ->
-                            Column(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .clickable {
-                                        onClickBook(explorationDisplayBook.id)
-                                    }
-                            ) {
-                                Box(
-                                    modifier = Modifier.padding(horizontal = 4.dp)
-                                ) {
-                                    Cover(
-                                        width = 98.dp,
-                                        height = 138.dp,
-                                        url = explorationDisplayBook.coverUrl,
-                                        rounded = 6.dp
-                                    )
-                                }
+                            items(explorationBooksRow.bookList) { explorationDisplayBook ->
                                 Column(
                                     modifier = Modifier
-                                        .width(100.dp)
-                                        .padding(horizontal = 2.dp)
-                                        .padding(top = 8.dp, bottom = 2.dp),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .clickable {
+                                            onClickBook(explorationDisplayBook.id)
+                                        }
                                 ) {
-                                    val titleLineHeight = 16.sp
-                                    Text(
-                                        modifier = Modifier.height(
-                                            with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
-                                        ).wrapContentHeight(Alignment.Top),
-                                        text = explorationDisplayBook.title,
-                                        fontSize = 13.sp,
-                                        lineHeight = titleLineHeight,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = explorationDisplayBook.author,
-                                        fontSize = 13.sp,
-                                        lineHeight = 18.sp,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 4.dp)
+                                    ) {
+                                        Cover(
+                                            width = 98.dp,
+                                            height = 138.dp,
+                                            url = explorationDisplayBook.coverUrl,
+                                            rounded = 6.dp
+                                        )
+                                    }
+                                    Column(
+                                        modifier = Modifier
+                                            .width(100.dp)
+                                            .padding(horizontal = 2.dp)
+                                            .padding(top = 8.dp, bottom = 2.dp),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        val titleLineHeight = 16.sp
+                                        Text(
+                                            modifier = Modifier.height(
+                                                with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                                            ).wrapContentHeight(Alignment.Top),
+                                            text = explorationDisplayBook.title,
+                                            fontSize = 13.sp,
+                                            lineHeight = titleLineHeight,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        if (explorationDisplayBook.author.isNotEmpty())
+                                            Text(
+                                                text = explorationDisplayBook.author,
+                                                fontSize = 13.sp,
+                                                lineHeight = 18.sp,
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                    }
                                 }
                             }
-                        }
 
-                        item {
-                            Box(modifier = Modifier.width(12.dp))
+                            item {
+                                Box(modifier = Modifier.width(12.dp))
+                            }
                         }
                     }
+
+
                     Box(
                         Modifier.fillMaxWidth()
                             .padding(horizontal = 16.dp)

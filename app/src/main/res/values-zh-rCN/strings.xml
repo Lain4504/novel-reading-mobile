@@ -169,6 +169,7 @@
     <string name="read_progress">• 已读 %s</string>
     <string name="read_minutes">• %d 分钟</string>
     <string name="translators">翻译贡献者</string>
+    <string name="select_chapter">章节选择</string>
 
     <!-- Dialogs -->
     <string name="dialog_about_version">版本</string>
