@@ -169,6 +169,7 @@
     <string name="collapse">Collapse</string>
     <string name="info_reading_finished">Finished Reading</string>
     <string name="info_reading_progress">Read %1$d of %2$d</string>
+    <string name="info_volume_chapters_count">%d Chapters</string>
     <string name="bookshelf_group_title_updated">Updated (%s)</string>
     <string name="bookshelf_group_title_pinned">Pinned (%s)</string>
     <string name="bookshelf_group_title_all">All (%s)</string>

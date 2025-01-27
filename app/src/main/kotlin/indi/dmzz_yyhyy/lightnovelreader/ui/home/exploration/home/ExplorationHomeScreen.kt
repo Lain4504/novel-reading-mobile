@@ -47,6 +47,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
@@ -62,6 +64,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
+import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -230,6 +233,14 @@ fun ExplorationPage(
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .fadingEdge(
+                                    Brush.horizontalGradient(
+                                        0.01f to Color.Transparent,
+                                        0.03f to Color.White,
+                                        0.97f to Color.White,
+                                        0.99f to Color.Transparent
+                                    )
+                                )
                                 .padding(bottom = 12.dp),
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             state = lazyRowState,

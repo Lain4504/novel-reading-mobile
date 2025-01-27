@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
@@ -71,6 +72,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
+import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -415,16 +417,28 @@ private fun BookCardBlock(bookInformation: BookInformation) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = 8.dp),
+            .fadingEdge(
+                Brush.horizontalGradient(
+                    0.02f to Color.Transparent,
+                    0.05f to Color.White,
+                    0.95f to Color.White,
+                    0.98f to Color.Transparent
+                )
+            )
+            .padding(vertical = 8.dp)
+        ,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            SuggestionChip(
-                label = {
-                    Text(bookInformation.publishingHouse)
-                },
-                onClick = {}
-            )
+            if (bookInformation.publishingHouse.isNotEmpty()) {
+                Spacer(Modifier.width(18.dp))
+                SuggestionChip(
+                    label = {
+                        Text(bookInformation.publishingHouse)
+                    },
+                    onClick = {}
+                )
+            } else Spacer(Modifier.width(10 .dp))
         }
         items(bookInformation.tags) { tag ->
             SuggestionChip(
@@ -433,6 +447,9 @@ private fun BookCardBlock(bookInformation: BookInformation) {
                 },
                 onClick = {}
             )
+        }
+        item {
+            Spacer(Modifier.width(18.dp))
         }
     }
 }
@@ -523,17 +540,30 @@ private fun IntroBlock(description: String) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
-        Text(
-            modifier = Modifier.animateContentSize(),
-            text = description,
-            fontSize = 15.sp,
-            maxLines = if (!expanded) 3 else 80,
-            onTextLayout = {
-                overflowed = it.hasVisualOverflow || expanded
-            },
-            color = MaterialTheme.colorScheme.onSurface,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                modifier = Modifier
+                    .animateContentSize()
+                    .fillMaxWidth()
+                    .fadingEdge(
+                        if (!expanded && overflowed) Brush.verticalGradient(
+                            0.7f to Color.White,
+                            1f to Color.Transparent
+                        )
+                        else Brush.verticalGradient(listOf(Color.White, Color.White))
+                    ),
+                text = description,
+                fontSize = 15.sp,
+                maxLines = if (!expanded) 4 else 99,
+                onTextLayout = {
+                    overflowed = it.hasVisualOverflow || expanded
+                },
+                color = MaterialTheme.colorScheme.onSurface,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         if (overflowed) {
             Button(
                 modifier = Modifier.align(Alignment.End),
