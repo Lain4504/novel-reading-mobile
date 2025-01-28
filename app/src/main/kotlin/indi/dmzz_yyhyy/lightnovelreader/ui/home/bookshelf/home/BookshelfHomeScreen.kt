@@ -85,7 +85,9 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.addToBookshelf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -306,7 +308,6 @@ fun BookshelfHomeScreen(
                                 else changeBookSelectState(it.id)
                             },
                             onLongPress = { onLongPress(it.id) },
-                            progress = {}
                         )
                     }
                 }
@@ -332,8 +333,7 @@ fun BookshelfHomeScreen(
                                     onClickBook(it.id)
                                 else changeBookSelectState(it.id)
                             },
-                            onLongPress = { onLongPress(it.id) },
-                            progress = {}
+                            onLongPress = { onLongPress(it.id) }
                         )
                     }
                 }
@@ -359,8 +359,7 @@ fun BookshelfHomeScreen(
                                     onClickBook(it.id)
                                 else changeBookSelectState(it.id)
                             },
-                            onLongPress = { onLongPress(it.id) },
-                            progress = {}
+                            onLongPress = { onLongPress(it.id) }
                         )
                     }
                 }

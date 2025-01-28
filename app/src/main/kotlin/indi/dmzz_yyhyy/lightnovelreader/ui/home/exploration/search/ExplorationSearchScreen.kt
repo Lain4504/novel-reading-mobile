@@ -56,7 +56,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookCardItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -271,19 +271,17 @@ fun ExplorationSearchScreen(
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 3.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 3.dp)
         ) {
             item {
                 AnimatedText(
-                    modifier = Modifier.padding(16.dp, 8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp),
                     text = stringResource(
                         R.string.search_results_title, searchKeyword, uiState.searchResult.size,
                         if (uiState.isLoadingComplete) "" else "..."
                     ),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.W700,
-                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
                     letterSpacing = 0.5.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -293,8 +291,7 @@ fun ExplorationSearchScreen(
                     bookInformation = it,
                     onClick = { onClickBook(it.id) },
                     onLongPress = withHaptic {},
-                    collected = uiState.allBookshelfBookIds.contains(it.id),
-                    progress = {},
+                    collected = uiState.allBookshelfBookIds.contains(it.id)
                 )
             }
             item {

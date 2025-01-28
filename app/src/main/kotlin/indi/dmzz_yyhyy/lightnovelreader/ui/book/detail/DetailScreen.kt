@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -51,10 +52,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +72,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
+import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -141,6 +143,7 @@ private fun Content(
     val scope = rememberCoroutineScope()
     val uiState = viewModel.uiState
     var showExportEpubDialog by remember { mutableStateOf(false) }
+    var hideReadChapters by remember { mutableStateOf(false) }
 
     @Suppress("SENSELESS_COMPARISON")
     val exportToEPUBLauncher = launcher {
@@ -213,13 +216,25 @@ private fun Content(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 18.dp)
+                        .padding(horizontal = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.detail_contents),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    IconButton(
+                        onClick = { hideReadChapters = !hideReadChapters }
+                    ) {
+                        Icon(
+                            painterResource(if (hideReadChapters) R.drawable.filled_menu_book_24px
+                            else R.drawable.done_all_24px),
+                            tint = MaterialTheme.colorScheme.secondary,
+                            contentDescription = "Hide Read"
+                        )
+                    }
                 }
             }
             item {
@@ -234,6 +249,7 @@ private fun Content(
             items(uiState.bookVolumes.volumes) {
                 VolumeItem(
                     volume = it,
+                    hideReadChapters = hideReadChapters,
                     readCompletedChapterIds = uiState.userReadingData.readCompletedChapterIds,
                     onClickChapter = onClickChapter,
                     volumesSize = uiState.bookVolumes.volumes.size
@@ -256,7 +272,7 @@ private fun Content(
                     )
                 },
                 text = {
-                    Text(if (uiState.userReadingData.lastReadChapterId == -1) "开始阅读"
+                    Text(if (uiState.userReadingData.lastReadChapterId == -1) stringResource(R.string.start_reading)
                     else stringResource(id = R.string.continue_reading))
                 }
             )
@@ -307,7 +323,9 @@ private fun BookCardBlock(bookInformation: BookInformation) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(188.dp)
             .padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Cover(
             height = 178.dp,
@@ -318,24 +336,29 @@ private fun BookCardBlock(bookInformation: BookInformation) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(178.dp)
                 .padding(start = 16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            val titleLineHeight = 24.sp
             Text(
                 modifier = Modifier
-                    .height(
-                        with(LocalDensity.current) { (titleLineHeight * 3.3f).toDp() }
-                    )
+                    .padding(vertical = 4.dp)
                     .wrapContentHeight(Alignment.CenterVertically),
                 text = bookInformation.title,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.Bold,
                 fontSize = 19.sp,
-                lineHeight = titleLineHeight,
+                lineHeight = 24.sp,
             )
+            if (bookInformation.subtitle.isNotEmpty()) {
+                Text(
+                    text = bookInformation.subtitle,
+                    maxLines = 2,
+                    color = MaterialTheme.colorScheme.secondary,
+                    lineHeight = 20.sp,
+                    fontSize = 15.sp,
+                )
+            }
             Text(
                 text = bookInformation.author,
                 maxLines = 1,
@@ -344,7 +367,6 @@ private fun BookCardBlock(bookInformation: BookInformation) {
                 lineHeight = 20.sp,
                 fontSize = 16.sp,
             )
-            Spacer(modifier = Modifier.height(4.dp))
             Column {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -354,7 +376,7 @@ private fun BookCardBlock(bookInformation: BookInformation) {
                     Text(
                         text = if (bookInformation.isComplete)
                             stringResource(R.string.book_completed)
-                            else stringResource(
+                        else stringResource(
                             R.string.book_info_update_date,
                             bookInformation.lastUpdated.year,
                             bookInformation.lastUpdated.monthValue,
@@ -379,7 +401,10 @@ private fun BookCardBlock(bookInformation: BookInformation) {
                         tint = MaterialTheme.colorScheme.outline
                     )
                     Text(
-                        text = stringResource(R.string.book_info_word_count_kilo, bookInformation.wordCount / 1000),
+                        text = stringResource(
+                            R.string.book_info_word_count_kilo,
+                            bookInformation.wordCount / 1000
+                        ),
                         maxLines = 1,
                         fontSize = 14.sp,
                         lineHeight = 17.sp,
@@ -392,16 +417,28 @@ private fun BookCardBlock(bookInformation: BookInformation) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = 8.dp),
+            .fadingEdge(
+                Brush.horizontalGradient(
+                    0.02f to Color.Transparent,
+                    0.05f to Color.White,
+                    0.95f to Color.White,
+                    0.98f to Color.Transparent
+                )
+            )
+            .padding(vertical = 8.dp)
+        ,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            SuggestionChip(
-                label = {
-                    Text(bookInformation.publishingHouse)
-                },
-                onClick = {}
-            )
+            if (bookInformation.publishingHouse.isNotEmpty()) {
+                Spacer(Modifier.width(18.dp))
+                SuggestionChip(
+                    label = {
+                        Text(bookInformation.publishingHouse)
+                    },
+                    onClick = {}
+                )
+            } else Spacer(Modifier.width(10 .dp))
         }
         items(bookInformation.tags) { tag ->
             SuggestionChip(
@@ -410,6 +447,9 @@ private fun BookCardBlock(bookInformation: BookInformation) {
                 },
                 onClick = {}
             )
+        }
+        item {
+            Spacer(Modifier.width(18.dp))
         }
     }
 }
@@ -500,17 +540,30 @@ private fun IntroBlock(description: String) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
-        Text(
-            modifier = Modifier.animateContentSize(),
-            text = description,
-            fontSize = 15.sp,
-            maxLines = if (!expanded) 3 else 80,
-            onTextLayout = {
-                overflowed = it.hasVisualOverflow || expanded
-            },
-            color = MaterialTheme.colorScheme.onSurface,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                modifier = Modifier
+                    .animateContentSize()
+                    .fillMaxWidth()
+                    .fadingEdge(
+                        if (!expanded && overflowed) Brush.verticalGradient(
+                            0.7f to Color.White,
+                            1f to Color.Transparent
+                        )
+                        else Brush.verticalGradient(listOf(Color.White, Color.White))
+                    ),
+                text = description,
+                fontSize = 15.sp,
+                maxLines = if (!expanded) 4 else 99,
+                onTextLayout = {
+                    overflowed = it.hasVisualOverflow || expanded
+                },
+                color = MaterialTheme.colorScheme.onSurface,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         if (overflowed) {
             Button(
                 modifier = Modifier.align(Alignment.End),
@@ -535,6 +588,7 @@ private fun IntroBlock(description: String) {
 @Composable
 private fun VolumeItem(
     volume: Volume,
+    hideReadChapters: Boolean = false,
     readCompletedChapterIds: List<Int>,
     onClickChapter: (Int) -> Unit,
     volumesSize: Int
@@ -546,76 +600,104 @@ private fun VolumeItem(
     }
     val isFullyRead = readCount >= totalCount
 
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier
-                .height(54.dp)
-                .clickable {
-                    expanded = !expanded
-                }
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    if (hideReadChapters && isFullyRead) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            Column {
-                Text(
-                    text = volume.volumeTitle,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = if (isFullyRead) stringResource(R.string.info_reading_finished)
-                    else stringResource(R.string.info_reading_progress, readCount, totalCount),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
-            Spacer(Modifier.weight(1f))
-            Icon(
+            Row(
                 modifier = Modifier
-                    .size(16.dp)
-                    .rotate(if (expanded) 90f else 0f),
-                painter = painterResource(id = R.drawable.arrow_forward_ios_24px),
-                contentDescription = "expand"
-            )
-            Spacer(Modifier.width(12.dp))
+                    .height(54.dp)
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text(
+                        text = volume.volumeTitle,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = stringResource(R.string.info_reading_finished),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
         }
-
-        AnimatedVisibility(
-            visible = expanded,
-            enter = fadeIn(
-                animationSpec = tween(durationMillis = 300)
-            ),
-            exit = fadeOut(
-                animationSpec = tween(durationMillis = 300)
-            )
+    } else {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                volume.chapters.forEach {
-                    Box(
-                        modifier = Modifier
-                            .clickable { onClickChapter(it.id) }
-                            .wrapContentHeight()
-                            .fillMaxWidth()
-                            .padding(horizontal = 32.dp, vertical = 12.dp)
-                    ) {
-                        Text(
-                            text = it.title,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            fontSize = 15.sp,
-                            fontWeight =
-                                if (readCompletedChapterIds.contains(it.id))
-                                    FontWeight.Normal
-                                else FontWeight.Bold,
-                            color =
-                                if (readCompletedChapterIds.contains(it.id))
-                                    MaterialTheme.colorScheme.secondary
-                                else MaterialTheme.colorScheme.onSurface
-                        )
+            Row(
+                modifier = Modifier
+                    .height(54.dp)
+                    .clickable {
+                        expanded = !expanded
+                    }
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text(
+                        text = volume.volumeTitle,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = if (isFullyRead) stringResource(R.string.info_reading_finished)
+                        else stringResource(R.string.info_reading_progress, readCount, totalCount),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                Icon(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .rotate(if (expanded) 90f else 0f),
+                    painter = painterResource(id = R.drawable.arrow_forward_ios_24px),
+                    contentDescription = "expand"
+                )
+                Spacer(Modifier.width(12.dp))
+            }
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = fadeIn(
+                    animationSpec = tween(durationMillis = 300)
+                ),
+                exit = fadeOut(
+                    animationSpec = tween(durationMillis = 300)
+                )
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    volume.chapters.forEach {
+                        if (!(hideReadChapters && readCompletedChapterIds.contains(it.id))) {
+                            Box(
+                                modifier = Modifier
+                                    .clickable { onClickChapter(it.id) }
+                                    .wrapContentHeight()
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 32.dp, vertical = 12.dp)
+                            ) {
+                                Text(
+                                    text = it.title,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    fontSize = 15.sp,
+                                    fontWeight =
+                                    if (readCompletedChapterIds.contains(it.id))
+                                        FontWeight.Normal
+                                    else FontWeight.Bold,
+                                    color =
+                                    if (readCompletedChapterIds.contains(it.id))
+                                        MaterialTheme.colorScheme.secondary
+                                    else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
                     }
                 }
             }

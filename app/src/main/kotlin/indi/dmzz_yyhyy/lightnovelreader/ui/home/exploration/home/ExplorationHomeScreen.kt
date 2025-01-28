@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -35,6 +38,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,8 +47,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +64,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
+import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -157,7 +165,7 @@ fun TopBar(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ExplorationPage(
     explorationPageBooksRawList: List<ExplorationBooksRow>,
@@ -221,68 +229,83 @@ fun ExplorationPage(
                     }
                     val lazyRowState = rememberLazyListState()
 
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        state = lazyRowState,
-                        flingBehavior = rememberSnapFlingBehavior(lazyRowState)
-                    ) {
-                        item {
-                            Box(modifier = Modifier.width(10.dp))
-                        }
-
-                        items(explorationBooksRow.bookList) { explorationDisplayBook ->
-                            Column(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .clickable {
-                                        onClickBook(explorationDisplayBook.id)
-                                    }
-                            ) {
-                                Box(
-                                    modifier = Modifier.padding(horizontal = 4.dp)
-                                ) {
-                                    Cover(
-                                        width = 98.dp,
-                                        height = 138.dp,
-                                        url = explorationDisplayBook.coverUrl,
-                                        rounded = 6.dp
+                    CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fadingEdge(
+                                    Brush.horizontalGradient(
+                                        0.01f to Color.Transparent,
+                                        0.03f to Color.White,
+                                        0.97f to Color.White,
+                                        0.99f to Color.Transparent
                                     )
-                                }
+                                )
+                                .padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            state = lazyRowState,
+                            flingBehavior = rememberSnapFlingBehavior(lazyRowState)
+                        ) {
+                            item {
+                                Box(modifier = Modifier.width(10.dp))
+                            }
+
+                            items(explorationBooksRow.bookList) { explorationDisplayBook ->
                                 Column(
                                     modifier = Modifier
-                                        .width(100.dp)
-                                        .padding(horizontal = 2.dp)
-                                        .padding(top = 4.dp, bottom = 2.dp),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .clickable {
+                                            onClickBook(explorationDisplayBook.id)
+                                        }
                                 ) {
-                                    Text(
-                                        text = explorationDisplayBook.title,
-                                        fontSize = 13.sp,
-                                        lineHeight = 16.sp,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    /* 可选作者（未实现）
-                                    Text(
-                                        text = explorationDisplayBook.author.toString(),
-                                        fontSize = 13.sp,
-                                        lineHeight = 18.sp,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    */
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 4.dp)
+                                    ) {
+                                        Cover(
+                                            width = 98.dp,
+                                            height = 138.dp,
+                                            url = explorationDisplayBook.coverUrl,
+                                            rounded = 6.dp
+                                        )
+                                    }
+                                    Column(
+                                        modifier = Modifier
+                                            .width(100.dp)
+                                            .padding(horizontal = 2.dp)
+                                            .padding(top = 8.dp, bottom = 2.dp),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        val titleLineHeight = 16.sp
+                                        Text(
+                                            modifier = Modifier.height(
+                                                with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                                            ).wrapContentHeight(Alignment.Top),
+                                            text = explorationDisplayBook.title,
+                                            fontSize = 13.sp,
+                                            lineHeight = titleLineHeight,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        if (explorationDisplayBook.author.isNotEmpty())
+                                            Text(
+                                                text = explorationDisplayBook.author,
+                                                fontSize = 13.sp,
+                                                lineHeight = 18.sp,
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                    }
                                 }
                             }
-                        }
 
-                        item {
-                            Box(modifier = Modifier.width(12.dp))
+                            item {
+                                Box(modifier = Modifier.width(12.dp))
+                            }
                         }
                     }
+
+
                     Box(
                         Modifier.fillMaxWidth()
                             .padding(horizontal = 16.dp)
