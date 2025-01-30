@@ -1,0 +1,41 @@
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
+
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToBookContentDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home.navigateToExplorationHomeDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+    composable<Route.Home.Reading> {
+        val readingViewModel = hiltViewModel<ReadingViewModel>()
+        ReadingScreen(
+            controller = navController,
+            selectedRoute = Route.Home.Reading,
+            uiState = hiltViewModel<ReadingViewModel>().uiState,
+            update = readingViewModel::update,
+            onClickBook = {
+                navController.navigateToBookDetailDestination(it)
+            },
+            onClickContinueReading = { bookId, chapterId ->
+                navController.navigateToBookContentDestination(bookId, chapterId)
+            },
+            onClickJumpToExploration = {
+                navController.navigateToExplorationHomeDestination()
+            },
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this
+        )
+    }
+}
+
+@Suppress("unused")
+fun NavController.navigateToHomeReadingDestination() {
+    navigate(Route.Home.Reading)
+}

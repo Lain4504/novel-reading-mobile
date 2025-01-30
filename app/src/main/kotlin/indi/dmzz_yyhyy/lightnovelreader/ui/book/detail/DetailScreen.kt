@@ -35,9 +35,11 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -76,48 +79,43 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
-    viewModel: DetailViewModel = hiltViewModel(),
-    paddingValues: PaddingValues,
     onClickBackButton: () -> Unit,
     onClickChapter: (Int) -> Unit,
-    onClickReadFromStart: () -> Unit = {
-        viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-            onClickChapter(it)
-        }
-    },
-    onClickContinueReading: () -> Unit = {
-        if (viewModel.uiState.userReadingData.lastReadChapterId == -1)
-            viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-                onClickChapter(it)
-            }
-        else
-            onClickChapter(viewModel.uiState.userReadingData.lastReadChapterId)
-    },
-    topBar: (@Composable (TopAppBarScrollBehavior) -> Unit) -> Unit,
+    onClickReadFromStart: () -> Unit,
+    onClickContinueReading: () -> Unit,
     id: Int,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit
 ) {
-    Box(Modifier.padding(paddingValues)) {
-        Content(
-            viewModel = viewModel,
-            onClickBackButton = onClickBackButton,
-            onClickChapter = onClickChapter,
-            onClickReadFromStart = onClickReadFromStart,
-            onClickContinueReading = onClickContinueReading,
-            topBar = topBar,
-            id = id,
-            cacheBook = cacheBook,
-            requestAddBookToBookshelf = requestAddBookToBookshelf
-        )
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            TopBar(
+                onClickBackButton = onClickBackButton,
+                onClickExport = {
+                    //FIXME
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { paddingValues ->
+        Box(Modifier.padding(paddingValues)) {
+            Content(
+                onClickChapter = onClickChapter,
+                onClickReadFromStart = onClickReadFromStart,
+                onClickContinueReading = onClickContinueReading,
+                id = id,
+                cacheBook = cacheBook,
+                requestAddBookToBookshelf = requestAddBookToBookshelf
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
     viewModel: DetailViewModel = hiltViewModel(),
-    onClickBackButton: () -> Unit,
     onClickChapter: (Int) -> Unit,
     onClickReadFromStart: () -> Unit = {
         viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
@@ -132,7 +130,6 @@ private fun Content(
         else
             onClickChapter(viewModel.uiState.userReadingData.lastReadChapterId)
     },
-    topBar: (@Composable (TopAppBarScrollBehavior) -> Unit) -> Unit,
     id: Int,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit
@@ -142,7 +139,6 @@ private fun Content(
     val uiState = viewModel.uiState
     var showExportEpubDialog by remember { mutableStateOf(false) }
 
-    @Suppress("SENSELESS_COMPARISON")
     val exportToEPUBLauncher = launcher {
         scope.launch {
             Toast.makeText(context, "开始导出书本 ${viewModel.uiState.bookInformation.title}", Toast.LENGTH_SHORT).show()
@@ -167,13 +163,6 @@ private fun Content(
                 showExportEpubDialog = false
                 createDataFile(viewModel.uiState.bookInformation.title, exportToEPUBLauncher)
             }
-        )
-    }
-    topBar {
-        TopBar(
-            onClickBackButton = onClickBackButton,
-            onClickExport = { showExportEpubDialog = true },
-            scrollBehavior = it
         )
     }
     LaunchedEffect(id) {

@@ -27,8 +27,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.work.ImportDataWork
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportContext
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.MutableExportContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -78,7 +76,7 @@ class SettingsViewModel @Inject constructor(
         )
         viewModelScope.launch(Dispatchers.IO) {
             workManager.getWorkInfoByIdFlow(workRequest.id).collect {
-                when (it.state) {
+                when (it?.state) {
                     WorkInfo.State.SUCCEEDED -> {
                         ShareCompat.IntentBuilder(context)
                             .setType("application/zip")
@@ -136,7 +134,7 @@ class SettingsViewModel @Inject constructor(
             val fileDir = File(context.filesDir, "data")
             val oldUri = File(fileDir, "${webBookDataSource.id}.data.lnr").toUri()
             workManager.getWorkInfoByIdFlow(exportToFile(oldUri, MutableExportContext().apply { settings = false }).id).collect { workInfo ->
-                when(workInfo.state) {
+                when(workInfo?.state) {
                     WorkInfo.State.SUCCEEDED -> {
                         localBookDataSource.clear()
                         bookshelfRepository.clear()
@@ -149,7 +147,7 @@ class SettingsViewModel @Inject constructor(
                             return@collect
                         }
                         workManager.getWorkInfoByIdFlow(importFromFile(newFile.toUri(), true).id).collect {
-                            when(it.state) {
+                            when(it?.state) {
                                 WorkInfo.State.SUCCEEDED -> { restartApp() }
                                 else -> { }
                             }

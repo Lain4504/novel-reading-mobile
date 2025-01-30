@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
@@ -151,21 +150,6 @@ class LightNovelReaderViewModel @Inject constructor(
     }
 
     fun cacheBook(bookId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val work = bookRepository.cacheBook(bookId)
-            bookRepository.isCacheBookWorkFlow(work.id).collect {
-                if (it == null) {
-                    _updateDialogUiState.toast = "此书本正在缓存中"
-                    return@collect
-                }
-                _updateDialogUiState.toast =
-                    when (it.state) {
-                        WorkInfo.State.SUCCEEDED -> "缓存书本完成"
-                        WorkInfo.State.FAILED -> "缓存书本失败"
-                        WorkInfo.State.RUNNING -> "缓存书本中"
-                        else -> ""
-                    }
-            }
-        }
+
     }
 }

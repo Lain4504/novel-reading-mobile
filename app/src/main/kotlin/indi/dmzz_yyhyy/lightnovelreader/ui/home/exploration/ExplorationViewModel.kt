@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ExplorationViewModel @Inject constructor(
@@ -16,6 +16,7 @@ class ExplorationViewModel @Inject constructor(
     val uiState: ExplorationUiState = _uiState
 
     init {
+        _uiState.isOffLine = webBookDataSource.offLine
         viewModelScope.launch(Dispatchers.IO) {
             webBookDataSource.isOffLineFlow.collect {
                 _uiState.isOffLine = it

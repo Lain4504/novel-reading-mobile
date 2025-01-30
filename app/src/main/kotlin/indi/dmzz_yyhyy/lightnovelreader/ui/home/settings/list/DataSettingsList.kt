@@ -49,7 +49,7 @@ fun DataSettingsList(
     val saveDataToFileLauncher = launcher {
         scope.launch {
             workManager.getWorkInfoByIdFlow(exportDataToFile(it, exportContext).id).collect {
-                when (it.state) {
+                when (it?.state) {
                     WorkInfo.State.FAILED -> {
                         Toast.makeText(context, "导出失败", Toast.LENGTH_SHORT).show()
                     }
@@ -64,7 +64,7 @@ fun DataSettingsList(
     val importDataLauncher = launcher {
         scope.launch {
             workManager.getWorkInfoByIdFlow(importData(it).id).collect {
-                when (it.state) {
+                when (it?.state) {
                     WorkInfo.State.FAILED -> {
                         Toast.makeText(context, "导入失败，请检查文件格式或文件已损坏。", Toast.LENGTH_SHORT).show()
                     }

@@ -18,6 +18,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,7 +45,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
 fun EditBookshelfScreen(
     title: String,
     bookshelfId: Int,
-    topBar: (@Composable () -> Unit) -> Unit,
     dialog: (@Composable () -> Unit) -> Unit,
     bookshelf: Bookshelf,
     inti: (Int) -> Unit,
@@ -59,14 +59,6 @@ fun EditBookshelfScreen(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     var dialogVisible by remember { mutableStateOf(false) }
-    topBar {
-        TopBar(
-            title = title,
-            scrollBehavior = pinnedScrollBehavior,
-            onClickBack = onClickBack,
-            onClickSave = onClickSave
-        )
-    }
     dialog {
         if (dialogVisible)
             DeleteBookshelfDialog(
@@ -80,78 +72,92 @@ fun EditBookshelfScreen(
     LaunchedEffect(bookshelfId) {
         inti(bookshelfId)
     }
-    Column {
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            value = bookshelf.name,
-            onValueChange = onNameChange,
-            label = { Text(stringResource(R.string.name)) },
-            placeholder = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
-            supportingText = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
-            maxLines = 1,
-            interactionSource = interactionSource,
-            trailingIcon = {
-                IconButton(onClick = { onNameChange("") }) {
-                    Icon(
-                        painter = painterResource(R.drawable.cancel_24px),
-                        contentDescription = "cancel",
-                        tint =
-                        if (isFocused) OutlinedTextFieldDefaults.colors().focusedTrailingIconColor
-                        else OutlinedTextFieldDefaults.colors().unfocusedTrailingIconColor
-                    )
-                }
-            }
-        )
-        Text(
-            modifier = Modifier.padding(16.dp, 10.dp),
-            text = stringResource(R.string.bookshelf_settings),
-            style = MaterialTheme.typography.displayLarge,
-            fontWeight = FontWeight.W700,
-            fontSize = 17.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        SwitchSettingItem(
-            iconRes = R.drawable.cloud_download_24px,
-            title = stringResource(R.string.settings_auto_cache),
-            description = stringResource(R.string.settings_auto_cache_desc),
-            value = bookshelf.autoCache,
-            onValueChange = onAutoCacheChange
-        )
-        SwitchSettingItem(
-            iconRes = R.drawable.outline_schedule_24px,
-            title = stringResource(R.string.settings_book_update_reminder),
-            description = stringResource(R.string.settings_book_update_reminder_desc),
-            value = bookshelf.systemUpdateReminder,
-            onValueChange = onSystemUpdateReminderChange
-        )
-        if (bookshelfId >= 0)
-            ListItem(
-                modifier = Modifier.clickable {
-                    dialogVisible = true
-                },
-                leadingContent = {
-                    Icon(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        painter = painterResource(R.drawable.delete_forever_24px),
-                        contentDescription = "Localized description",
-                    )
-                },
-                headlineContent = { Text(
-                        text = stringResource(R.string.settings_delete_bookshelf),
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 2.dp)
-                    ) },
-                supportingContent = {
-                    Text(
-                        text = stringResource(R.string.settings_delete_bookshelf_desc),
-                        fontSize = 14.sp,
-                        lineHeight = 15.sp
-                    ) },
+    Scaffold(
+        topBar = {
+            TopBar(
+                title = title,
+                scrollBehavior = pinnedScrollBehavior,
+                onClickBack = onClickBack,
+                onClickSave = onClickSave
             )
+        }
+    ) {
+        Column(Modifier.padding(it)) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                value = bookshelf.name,
+                onValueChange = onNameChange,
+                label = { Text(stringResource(R.string.name)) },
+                placeholder = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
+                supportingText = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
+                maxLines = 1,
+                interactionSource = interactionSource,
+                trailingIcon = {
+                    IconButton(onClick = { onNameChange("") }) {
+                        Icon(
+                            painter = painterResource(R.drawable.cancel_24px),
+                            contentDescription = "cancel",
+                            tint =
+                            if (isFocused) OutlinedTextFieldDefaults.colors().focusedTrailingIconColor
+                            else OutlinedTextFieldDefaults.colors().unfocusedTrailingIconColor
+                        )
+                    }
+                }
+            )
+            Text(
+                modifier = Modifier.padding(16.dp, 10.dp),
+                text = stringResource(R.string.bookshelf_settings),
+                style = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.W700,
+                fontSize = 17.sp,
+                lineHeight = 16.sp,
+                letterSpacing = 0.5.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            SwitchSettingItem(
+                iconRes = R.drawable.cloud_download_24px,
+                title = stringResource(R.string.settings_auto_cache),
+                description = stringResource(R.string.settings_auto_cache_desc),
+                value = bookshelf.autoCache,
+                onValueChange = onAutoCacheChange
+            )
+            SwitchSettingItem(
+                iconRes = R.drawable.outline_schedule_24px,
+                title = stringResource(R.string.settings_book_update_reminder),
+                description = stringResource(R.string.settings_book_update_reminder_desc),
+                value = bookshelf.systemUpdateReminder,
+                onValueChange = onSystemUpdateReminderChange
+            )
+            if (bookshelfId >= 0)
+                ListItem(
+                    modifier = Modifier.clickable {
+                        dialogVisible = true
+                    },
+                    leadingContent = {
+                        Icon(
+                            modifier = Modifier.padding(horizontal = 10.dp),
+                            painter = painterResource(R.drawable.delete_forever_24px),
+                            contentDescription = "Localized description",
+                        )
+                    },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.settings_delete_bookshelf),
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(bottom = 2.dp)
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(R.string.settings_delete_bookshelf_desc),
+                            fontSize = 14.sp,
+                            lineHeight = 15.sp
+                        )
+                    },
+                )
+        }
     }
 }
 

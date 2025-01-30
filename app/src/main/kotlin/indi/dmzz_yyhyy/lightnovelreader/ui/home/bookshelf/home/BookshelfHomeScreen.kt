@@ -10,6 +10,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -40,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
@@ -76,6 +80,7 @@ import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.navigation.NavController
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
@@ -83,18 +88,21 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
+import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun BookshelfHomeScreen(
+    controller: NavController,
+    selectedRoute: Any,
     init: () -> Unit,
-    topBar: (@Composable () -> Unit) -> Unit,
     dialog: (@Composable () -> Unit) -> Unit,
     changePage: (Int) -> Unit,
     changeBookSelectState: (Int) -> Unit,
@@ -111,7 +119,9 @@ fun BookshelfHomeScreen(
     saveAllBookshelfJsonData: (Uri) -> Unit,
     saveBookshelfJsonData: (Uri) -> Unit,
     importBookshelf: (Uri) -> Unit,
-    clearToast: () -> Unit
+    clearToast: () -> Unit,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    sharedTransitionScope: SharedTransitionScope
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -130,61 +140,6 @@ fun BookshelfHomeScreen(
     var updatedBooksExpanded by remember { mutableStateOf(true) }
     var pinnedBooksExpanded by remember { mutableStateOf(true) }
     var allBooksExpanded by remember { mutableStateOf(true) }
-    topBar {
-        TopBar(
-            scrollBehavior = enterAlwaysScrollBehavior,
-            backgroundColor = animatedBackgroundColor,
-            selectMode = uiState.selectMode,
-            uiState = uiState,
-            onClickCreate = onClickCreate,
-            onClickSearch = {},
-            onClickEdit = { onClickEdit(uiState.selectedBookshelfId) },
-            onClickDisableSelectMode = onClickDisableSelectMode,
-            onClickSelectAll = onClickSelectAll,
-            onClickPin = onClickPin,
-            onClickRemove = onClickRemove,
-            onClickBookmark = { visibleBookshelfSelectDialog = true },
-            onClickShareBookshelf = {
-                println(uiState.selectedBookshelfId)
-                val uri = FileProvider.getUriForFile(
-                    context,
-                    "${context.applicationInfo.processName}.provider",
-                    File(context.cacheDir, "LightNovelReaderBookshelfData.lnr")
-                )
-                val workRequest = OneTimeWorkRequestBuilder<SaveBookshelfWork>()
-                    .setInputData(
-                        workDataOf(
-                            "bookshelfId" to uiState.selectedBookshelfId,
-                            "uri" to uri.toString(),
-                        )
-                    )
-                    .build()
-                workManager.enqueueUniqueWork(
-                    uri.toString(),
-                    ExistingWorkPolicy.KEEP,
-                    workRequest
-                )
-                scope.launch(Dispatchers.IO) {
-                    workManager.getWorkInfoByIdFlow(workRequest.id).collect {
-                        when (it.state) {
-                            WorkInfo.State.SUCCEEDED -> {
-                                ShareCompat.IntentBuilder(context)
-                                    .setType("application/zip")
-                                    .setSubject("分享文件")
-                                    .addStream(uri)
-                                    .setChooserTitle("分享书架")
-                                    .startChooser()
-                            }
-                            else -> return@collect
-                        }
-                    }
-                }
-            },
-            onClickSaveThisBookshelf = { createBookshelfDataFile(uiState.selectedBookshelf.name, saveThisBookshelfLauncher) },
-            onClickSaveAllBookshelf = { createBookshelfDataFile("bookshelves", saveAllBookshelfLauncher) },
-            onClickImportBookshelf = { selectBookshelfDataFile(importBookshelfLauncher) }
-        )
-    }
     LaunchedEffect(visibleBookshelfSelectDialog) {
         dialogSelectedBookshelves.clear()
     }
@@ -212,156 +167,251 @@ fun BookshelfHomeScreen(
         Toast.makeText(context, uiState.toast, Toast.LENGTH_SHORT).show()
         clearToast()
     }
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if (uiState.bookshelfList.size > 4) {
-            ScrollableTabRow(
-                selectedTabIndex = uiState.selectedTabIndex,
-                edgePadding = 16.dp,
-                indicator = { tabPositions ->
-                    SecondaryIndicator(
-                        modifier = Modifier
-                            .tabIndicatorOffset(tabPositions[uiState.selectedTabIndex])
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                            .background(MaterialTheme.colorScheme.secondary),
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                },
+    with(sharedTransitionScope) {
+        Scaffold(
+            topBar = {
+                TopBar(
+                    scrollBehavior = enterAlwaysScrollBehavior,
+                    backgroundColor = animatedBackgroundColor,
+                    selectMode = uiState.selectMode,
+                    uiState = uiState,
+                    onClickCreate = onClickCreate,
+                    onClickSearch = {},
+                    onClickEdit = { onClickEdit(uiState.selectedBookshelfId) },
+                    onClickDisableSelectMode = onClickDisableSelectMode,
+                    onClickSelectAll = onClickSelectAll,
+                    onClickPin = onClickPin,
+                    onClickRemove = onClickRemove,
+                    onClickBookmark = { visibleBookshelfSelectDialog = true },
+                    onClickShareBookshelf = {
+                        println(uiState.selectedBookshelfId)
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.applicationInfo.processName}.provider",
+                            File(context.cacheDir, "LightNovelReaderBookshelfData.lnr")
+                        )
+                        val workRequest = OneTimeWorkRequestBuilder<SaveBookshelfWork>()
+                            .setInputData(
+                                workDataOf(
+                                    "bookshelfId" to uiState.selectedBookshelfId,
+                                    "uri" to uri.toString(),
+                                )
+                            )
+                            .build()
+                        workManager.enqueueUniqueWork(
+                            uri.toString(),
+                            ExistingWorkPolicy.KEEP,
+                            workRequest
+                        )
+                        scope.launch(Dispatchers.IO) {
+                            workManager.getWorkInfoByIdFlow(workRequest.id).collect {
+                                when (it?.state) {
+                                    WorkInfo.State.SUCCEEDED -> {
+                                        ShareCompat.IntentBuilder(context)
+                                            .setType("application/zip")
+                                            .setSubject("分享文件")
+                                            .addStream(uri)
+                                            .setChooserTitle("分享书架")
+                                            .startChooser()
+                                    }
+
+                                    else -> return@collect
+                                }
+                            }
+                        }
+                    },
+                    onClickSaveThisBookshelf = {
+                        createBookshelfDataFile(
+                            uiState.selectedBookshelf.name,
+                            saveThisBookshelfLauncher
+                        )
+                    },
+                    onClickSaveAllBookshelf = {
+                        createBookshelfDataFile(
+                            "bookshelves",
+                            saveAllBookshelfLauncher
+                        )
+                    },
+                    onClickImportBookshelf = { selectBookshelfDataFile(importBookshelfLauncher) }
+                )
+            },
+            bottomBar = {
+                HomeNavigateBar(
+                    modifier = Modifier.sharedElement(
+                        sharedTransitionScope.rememberSharedContentState(SharedContentKey.HomeNavigateBar),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                    selectedRoute = selectedRoute,
+                    controller = controller
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(it)
             ) {
-                uiState.bookshelfList.forEach { bookshelf ->
-                    Tab(
-                        selected = uiState.selectedBookshelfId == bookshelf.id,
-                        onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
-                        text = {
-                            Text(
-                                text = bookshelf.name,
-                                maxLines = 1
+                if (uiState.bookshelfList.size > 4) {
+                    ScrollableTabRow(
+                        selectedTabIndex = uiState.selectedTabIndex,
+                        edgePadding = 16.dp,
+                        indicator = { tabPositions ->
+                            SecondaryIndicator(
+                                modifier = Modifier
+                                    .tabIndicatorOffset(tabPositions[uiState.selectedTabIndex])
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                                    .background(MaterialTheme.colorScheme.secondary),
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                    ) {
+                        uiState.bookshelfList.forEach { bookshelf ->
+                            Tab(
+                                selected = uiState.selectedBookshelfId == bookshelf.id,
+                                onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
+                                text = {
+                                    Text(
+                                        text = bookshelf.name,
+                                        maxLines = 1
+                                    )
+                                }
                             )
                         }
-                    )
-                }
-            }
-        }
-        else {
-            PrimaryTabRow(
-                selectedTabIndex = uiState.selectedTabIndex
-            ) {
-                uiState.bookshelfList.forEach { bookshelf ->
-                    Tab(
-                        selected = uiState.selectedBookshelfId == bookshelf.id,
-                        onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
-                        text = { Text(text = bookshelf.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    )
-                }
-            }
-        }
-
-        AnimatedVisibility(
-            visible = uiState.selectedBookshelf.allBookIds.isEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            EmptyPage(
-                painter = painterResource(R.drawable.bookmarks_90px),
-                title = "没有内容",
-                description = "单击“收藏”按钮，将书本加入此书架"
-            )
-        }
-
-        val onLongPress: (Int) -> Unit = { bookId ->
-            onClickEnableSelectMode.invoke()
-            changeBookSelectState(bookId)
-        }
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            state = lazyListState
-        ) {
-            if (uiState.selectedBookshelf.updatedBookIds.isNotEmpty() && !uiState.selectMode)
-                item {
-                    CollapseGroupTitle(
-                        modifier = Modifier.animateItem(),
-                        icon = painterResource(R.drawable.keep_24px),
-                        title = stringResource(R.string.bookshelf_group_title_updated, uiState.selectedBookshelf.updatedBookIds.size),
-                        expanded = updatedBooksExpanded,
-                        onClickExpand = { updatedBooksExpanded = !updatedBooksExpanded }
-                    )
-                }
-            if (updatedBooksExpanded && !uiState.selectMode) {
-                items(uiState.selectedBookshelf.updatedBookIds.reversed()) { updatedBookId ->
-                    uiState.bookInformationMap[updatedBookId]?.let {
-                        BookCardItem(
-                            bookInformation = it,
-                            selected = uiState.selectedBookIds.contains(it.id),
-                            latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
-                            onClick = {
-                                if (!uiState.selectMode)
-                                    onClickBook(it.id)
-                                else changeBookSelectState(it.id)
-                            },
-                            onLongPress = { onLongPress(it.id) },
-                            progress = {}
-                        )
+                    }
+                } else {
+                    PrimaryTabRow(
+                        selectedTabIndex = uiState.selectedTabIndex
+                    ) {
+                        uiState.bookshelfList.forEach { bookshelf ->
+                            Tab(
+                                selected = uiState.selectedBookshelfId == bookshelf.id,
+                                onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
+                                text = {
+                                    Text(
+                                        text = bookshelf.name,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
-            }
-            if (uiState.selectedBookshelf.pinnedBookIds.isNotEmpty())
-                item {
-                    CollapseGroupTitle(
-                        modifier = Modifier.animateItem(),
-                        icon = painterResource(R.drawable.keep_24px),
-                        title = stringResource(R.string.bookshelf_group_title_pinned, uiState.selectedBookshelf.pinnedBookIds.size),
-                        expanded = pinnedBooksExpanded,
-                        onClickExpand = { pinnedBooksExpanded = !pinnedBooksExpanded }
+
+                AnimatedVisibility(
+                    visible = uiState.selectedBookshelf.allBookIds.isEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    EmptyPage(
+                        painter = painterResource(R.drawable.bookmarks_90px),
+                        title = "没有内容",
+                        description = "单击“收藏”按钮，将书本加入此书架"
                     )
                 }
-            if (pinnedBooksExpanded) {
-                items(uiState.selectedBookshelf.pinnedBookIds.reversed()) { pinnedBookId ->
-                    uiState.bookInformationMap[pinnedBookId]?.let {
-                        BookCardItem(
-                            bookInformation = it,
-                            selected = uiState.selectedBookIds.contains(it.id),
-                            onClick = {
-                                if (!uiState.selectMode)
-                                    onClickBook(it.id)
-                                else changeBookSelectState(it.id)
-                            },
-                            onLongPress = { onLongPress(it.id) },
-                            progress = {}
-                        )
+
+                val onLongPress: (Int) -> Unit = { bookId ->
+                    onClickEnableSelectMode.invoke()
+                    changeBookSelectState(bookId)
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    state = lazyListState
+                ) {
+                    if (uiState.selectedBookshelf.updatedBookIds.isNotEmpty() && !uiState.selectMode)
+                        item {
+                            CollapseGroupTitle(
+                                modifier = Modifier.animateItem(),
+                                icon = painterResource(R.drawable.keep_24px),
+                                title = stringResource(
+                                    R.string.bookshelf_group_title_updated,
+                                    uiState.selectedBookshelf.updatedBookIds.size
+                                ),
+                                expanded = updatedBooksExpanded,
+                                onClickExpand = { updatedBooksExpanded = !updatedBooksExpanded }
+                            )
+                        }
+                    if (updatedBooksExpanded && !uiState.selectMode) {
+                        items(uiState.selectedBookshelf.updatedBookIds.reversed()) { updatedBookId ->
+                            uiState.bookInformationMap[updatedBookId]?.let {
+                                BookCardItem(
+                                    bookInformation = it,
+                                    selected = uiState.selectedBookIds.contains(it.id),
+                                    latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
+                                    onClick = {
+                                        if (!uiState.selectMode)
+                                            onClickBook(it.id)
+                                        else changeBookSelectState(it.id)
+                                    },
+                                    onLongPress = { onLongPress(it.id) },
+                                    progress = {}
+                                )
+                            }
+                        }
                     }
-                }
-            }
-            if (uiState.selectedBookshelf.allBookIds.isNotEmpty())
-                item {
-                    CollapseGroupTitle(
-                        modifier = Modifier.animateItem(),
-                        icon = painterResource(R.drawable.outline_bookmark_24px),
-                        title = stringResource(R.string.bookshelf_group_title_all, uiState.selectedBookshelf.allBookIds.size),
-                        expanded = allBooksExpanded,
-                        onClickExpand = { allBooksExpanded = !allBooksExpanded }
-                    )
-                }
-            if (allBooksExpanded) {
-                items(uiState.selectedBookshelf.allBookIds.reversed()) { bookId ->
-                    uiState.bookInformationMap[bookId]?.let {
-                        BookCardItem(
-                            bookInformation = it,
-                            selected = uiState.selectedBookIds.contains(it.id),
-                            onClick = {
-                                if (!uiState.selectMode)
-                                    onClickBook(it.id)
-                                else changeBookSelectState(it.id)
-                            },
-                            onLongPress = { onLongPress(it.id) },
-                            progress = {}
-                        )
+                    if (uiState.selectedBookshelf.pinnedBookIds.isNotEmpty())
+                        item {
+                            CollapseGroupTitle(
+                                modifier = Modifier.animateItem(),
+                                icon = painterResource(R.drawable.keep_24px),
+                                title = stringResource(
+                                    R.string.bookshelf_group_title_pinned,
+                                    uiState.selectedBookshelf.pinnedBookIds.size
+                                ),
+                                expanded = pinnedBooksExpanded,
+                                onClickExpand = { pinnedBooksExpanded = !pinnedBooksExpanded }
+                            )
+                        }
+                    if (pinnedBooksExpanded) {
+                        items(uiState.selectedBookshelf.pinnedBookIds.reversed()) { pinnedBookId ->
+                            uiState.bookInformationMap[pinnedBookId]?.let {
+                                BookCardItem(
+                                    bookInformation = it,
+                                    selected = uiState.selectedBookIds.contains(it.id),
+                                    onClick = {
+                                        if (!uiState.selectMode)
+                                            onClickBook(it.id)
+                                        else changeBookSelectState(it.id)
+                                    },
+                                    onLongPress = { onLongPress(it.id) },
+                                    progress = {}
+                                )
+                            }
+                        }
+                    }
+                    if (uiState.selectedBookshelf.allBookIds.isNotEmpty())
+                        item {
+                            CollapseGroupTitle(
+                                modifier = Modifier.animateItem(),
+                                icon = painterResource(R.drawable.outline_bookmark_24px),
+                                title = stringResource(
+                                    R.string.bookshelf_group_title_all,
+                                    uiState.selectedBookshelf.allBookIds.size
+                                ),
+                                expanded = allBooksExpanded,
+                                onClickExpand = { allBooksExpanded = !allBooksExpanded }
+                            )
+                        }
+                    if (allBooksExpanded) {
+                        items(uiState.selectedBookshelf.allBookIds.reversed()) { bookId ->
+                            uiState.bookInformationMap[bookId]?.let {
+                                BookCardItem(
+                                    bookInformation = it,
+                                    selected = uiState.selectedBookIds.contains(it.id),
+                                    onClick = {
+                                        if (!uiState.selectMode)
+                                            onClickBook(it.id)
+                                        else changeBookSelectState(it.id)
+                                    },
+                                    onLongPress = { onLongPress(it.id) },
+                                    progress = {}
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -417,7 +467,7 @@ fun TopBar(
     selectMode: Boolean,
     uiState: BookshelfHomeUiState,
     onClickCreate: () -> Unit,
-    onClickSearch: () -> Unit,
+    @Suppress("UNUSED_PARAMETER") onClickSearch: () -> Unit,
     onClickEdit: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,

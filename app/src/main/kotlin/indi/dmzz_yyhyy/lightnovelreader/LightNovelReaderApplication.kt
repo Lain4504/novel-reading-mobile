@@ -15,4 +15,5 @@ class LightNovelReaderApplication : Application(), Configuration.Provider {
         Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+    //FIXME 迁移intent
 }

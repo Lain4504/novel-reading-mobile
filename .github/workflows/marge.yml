@@ -41,6 +41,10 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
+      - name: Rename singed file name
+        id: get-pr-version
+        run: |
+          vm ${{steps.sign_app.outputs.signedReleaseFile}} LightNovelReader-${{steps.android_version.outputs.VERSION_NAME}}-${{steps.android_version.outputs.VERSION_CODE}}-release.apk
       - uses: actions/upload-artifact@v3
         with:
           name: LightNovelReader-${{steps.android_version.outputs.VERSION_NAME}}-${{steps.android_version.outputs.VERSION_CODE}}-release
