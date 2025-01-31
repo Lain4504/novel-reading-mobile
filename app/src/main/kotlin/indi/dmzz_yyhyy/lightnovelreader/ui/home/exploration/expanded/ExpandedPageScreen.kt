@@ -90,8 +90,7 @@ fun ExpandedPageScreen(
                 Loading()
             }
             PullToRefreshBox(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 isRefreshing = isRefreshing,
                 state = rememberPullToRefreshState,
                 onRefresh = {

@@ -1,5 +1,5 @@
 <resources>
-    <string name="translators">NightFish, yukonisen</string>
+    <string name="language_translators">NightFish, yukonisen</string>
     <!-- navigation items -->
     <string name="nav_reading">阅读中</string>
     <string name="nav_bookshelf">书架</string>
@@ -108,7 +108,7 @@
     <string name="settings_statistics">匿名统计</string>
     <string name="settings_statistics_desc">我们使用 Microsoft AppCenter 匿名收集一些统计数据，以使 LightNovelReader 变得更好</string>
     <string name="experimental_settings">实验性</string>
-    <string name="item_view_details">View details</string>
+    <string name="item_view_details">查看详细信息</string>
 
     <string name="settings_auto_cache">自动缓存</string>
     <string name="settings_auto_cache_desc">自动缓存新加入的书本内容</string>
@@ -128,6 +128,7 @@
     <string name="search_results_title">\"%1$s\" 的搜索结果 (%2$d%3$s)</string>
     <string name="search_history">搜索历史</string>
     <string name="search_history_clear">清除全部</string>
+    <string name="start_reading">开始阅读</string>
     <string name="continue_reading">继续阅读</string>
     <string name="resume_last_reading">继续上次阅读</string>
     <string name="last_read_info">上次阅读 | %s</string>
@@ -161,12 +162,16 @@
     <string name="collapse">收起</string>
     <string name="info_reading_finished">已读完</string>
     <string name="info_reading_progress">已读 %1$s/%2$s</string>
+    <string name="info_volume_chapters_count">共 %d 章</string>
     <string name="bookshelf_group_title_updated">已更新 (%s)</string>
     <string name="bookshelf_group_title_pinned">已固定 (%s)</string>
     <string name="bookshelf_group_title_all">全部 (%s)</string>
     <string name="data_source_provider">提供者: %s</string>
     <string name="read_progress">• 已读 %s</string>
     <string name="read_minutes">• %d 分钟</string>
+    <string name="translators">翻译贡献者</string>
+    <string name="select_chapter">章节选择</string>
+
     <!-- Dialogs -->
     <string name="dialog_about_version">版本</string>
     <string name="dialog_about_build_time">构建时间</string>
@@ -177,7 +182,7 @@
     <string name="dialog_export_to_epub">导出为 EPUB</string>
     <string name="dialog_export_to_epub_text">EPUB (Electronic Publication) 是一种开放的电子书标准，格式为 .epub。\n\n要将这本书导出为 EPUB 吗？</string>
     <string name="dialog_updates_available">更新可用</string>
-    <string name="dialog_snap_user_data_text">Select the data you want to export</string>
+    <string name="dialog_snap_user_data_text">选择要导出的用户数据</string>
     <string name="dialog_snap_bookshelf">书架</string>
     <string name="dialog_snap_bookshelf_text">包括书架及书本信息</string>
     <string name="dialog_snap_reading_data">阅读信息</string>
