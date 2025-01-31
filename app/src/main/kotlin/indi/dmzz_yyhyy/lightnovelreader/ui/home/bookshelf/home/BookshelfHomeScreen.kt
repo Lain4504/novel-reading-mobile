@@ -247,7 +247,7 @@ fun BookshelfHomeScreen(
                     controller = controller
                 )
             }
-        ) {
+        ) { it ->
             Column(
                 modifier = Modifier.fillMaxSize().padding(it)
             ) {
@@ -349,8 +349,7 @@ fun BookshelfHomeScreen(
                                             onClickBook(it.id)
                                         else changeBookSelectState(it.id)
                                     },
-                                    onLongPress = { onLongPress(it.id) },
-                                    progress = {}
+                                    onLongPress = { onLongPress(it.id) }
                                 )
                             }
                         }
@@ -379,8 +378,7 @@ fun BookshelfHomeScreen(
                                             onClickBook(it.id)
                                         else changeBookSelectState(it.id)
                                     },
-                                    onLongPress = { onLongPress(it.id) },
-                                    progress = {}
+                                    onLongPress = { onLongPress(it.id) }
                                 )
                             }
                         }
@@ -409,8 +407,7 @@ fun BookshelfHomeScreen(
                                             onClickBook(it.id)
                                         else changeBookSelectState(it.id)
                                     },
-                                    onLongPress = { onLongPress(it.id) },
-                                    progress = {}
+                                    onLongPress = { onLongPress(it.id) }
                                 )
                             }
                         }

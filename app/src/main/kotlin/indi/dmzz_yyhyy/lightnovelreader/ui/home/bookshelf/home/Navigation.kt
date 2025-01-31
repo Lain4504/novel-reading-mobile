@@ -6,6 +6,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.edit.navigateToBookshelfEditDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
@@ -30,7 +31,7 @@ fun NavGraphBuilder.bookshelfHomeDestination(navController: NavController, share
                 navController.navigateToBookshelfEditDestination(it, "编辑书架")
             },
             onClickBook = {
-                //FIXME
+                navController.navigateToBookDetailDestination(it)
             },
             onClickEnableSelectMode = bookshelfHomeViewModel::enableSelectMode,
             onClickDisableSelectMode = bookshelfHomeViewModel::disableSelectMode,

@@ -362,9 +362,6 @@ fun Content(
             selectedVolumeId = selectedVolumeId,
             bookVolumes = uiState.bookVolumes,
             readingChapterId = uiState.chapterContent.id,
-            state = chapterSelectorBottomSheetState,
-            bookVolumes = viewModel.uiState.bookVolumes,
-            readingChapterId = viewModel.uiState.chapterContent.id,
             onDismissRequest = {
                 coroutineScope.launch { chaptersBottomSheetState.hide() }.invokeOnCompletion {
                     if (!chaptersBottomSheetState.isVisible) {
