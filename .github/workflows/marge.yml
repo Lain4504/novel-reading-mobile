@@ -45,7 +45,7 @@ jobs:
         id: get-pr-version
         run: |
           vm ${{steps.sign_app.outputs.signedReleaseFile}} LightNovelReader-${{steps.android_version.outputs.VERSION_NAME}}-${{steps.android_version.outputs.VERSION_CODE}}-release.apk
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: LightNovelReader-${{steps.android_version.outputs.VERSION_NAME}}-${{steps.android_version.outputs.VERSION_CODE}}-release
           path: |
