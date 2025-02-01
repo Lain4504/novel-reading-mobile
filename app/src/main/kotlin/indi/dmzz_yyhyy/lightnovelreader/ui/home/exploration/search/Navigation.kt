@@ -5,6 +5,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
@@ -18,7 +20,7 @@ fun NavGraphBuilder.explorationSearchDestination(navController: NavController) {
             explorationSearchUiState = explorationSearchViewModel.uiState,
             refresh = explorationViewModel::refresh,
             requestAddBookToBookshelf = {
-                //FIXME
+                navController.navigateToAddBookToBookshelfDialog(it)
             },
             onClickBack = { navController.popBackStack() },
             init = explorationSearchViewModel::init,
@@ -27,7 +29,7 @@ fun NavGraphBuilder.explorationSearchDestination(navController: NavController) {
             onClickDeleteHistory = { explorationSearchViewModel.deleteHistory(it) },
             onClickClearAllHistory = explorationSearchViewModel::clearAllHistory,
             onClickBook = {
-                //FIXME
+                navController.navigateToBookDetailDestination(it)
             }
         )
     }

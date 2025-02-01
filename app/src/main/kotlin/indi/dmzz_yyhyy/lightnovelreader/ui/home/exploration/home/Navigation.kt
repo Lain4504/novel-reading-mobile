@@ -22,10 +22,8 @@ fun NavGraphBuilder.explorationHomeDestination(navController: NavController, sha
         ExplorationHomeScreen(
             explorationUiState = explorationViewModel.uiState,
             explorationHomeUiState = explorationHomeViewModel.uiState,
-            onClickExpand = { navController.navigateToExplorationExpandDestination(it) },
-            onClickBook = {
-                navController.navigateToBookDetailDestination(it)
-            },
+            onClickExpand = navController::navigateToExplorationExpandDestination,
+            onClickBook = navController::navigateToBookDetailDestination,
             init = explorationHomeViewModel::init,
             changePage = explorationHomeViewModel::changePage,
             onClickSearch = navController::navigateToSearchDestination,

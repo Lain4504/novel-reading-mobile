@@ -3,6 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.DocumentsContract
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -54,7 +55,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -89,7 +89,6 @@ import androidx.work.workDataOf
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.AddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
@@ -103,7 +102,6 @@ fun BookshelfHomeScreen(
     controller: NavController,
     selectedRoute: Any,
     init: () -> Unit,
-    dialog: (@Composable () -> Unit) -> Unit,
     changePage: (Int) -> Unit,
     changeBookSelectState: (Int) -> Unit,
     uiState: BookshelfHomeUiState,
@@ -115,7 +113,7 @@ fun BookshelfHomeScreen(
     onClickSelectAll: () -> Unit,
     onClickPin: () -> Unit,
     onClickRemove: () -> Unit,
-    markSelectedBooks: (List<Int>) -> Unit,
+    onClickMarkSelectedBooks: () -> Unit,
     saveAllBookshelfJsonData: (Uri) -> Unit,
     saveBookshelfJsonData: (Uri) -> Unit,
     importBookshelf: (Uri) -> Unit,
@@ -135,30 +133,9 @@ fun BookshelfHomeScreen(
     val saveThisBookshelfLauncher = launcher(saveBookshelfJsonData)
     val importBookshelfLauncher = launcher(importBookshelf)
     val lazyListState = rememberLazyListState()
-    var visibleBookshelfSelectDialog by remember { mutableStateOf(false) }
-    val dialogSelectedBookshelves = remember { mutableStateListOf<Int>() }
     var updatedBooksExpanded by remember { mutableStateOf(true) }
     var pinnedBooksExpanded by remember { mutableStateOf(true) }
     var allBooksExpanded by remember { mutableStateOf(true) }
-    LaunchedEffect(visibleBookshelfSelectDialog) {
-        dialogSelectedBookshelves.clear()
-    }
-    dialog {
-        if (visibleBookshelfSelectDialog)
-            AddBookToBookshelfDialog(
-                onDismissRequest = { visibleBookshelfSelectDialog = false },
-                onConfirmation = {
-                    scope.launch {
-                        markSelectedBooks(dialogSelectedBookshelves)
-                        visibleBookshelfSelectDialog = false
-                    }
-                },
-                onSelectBookshelf = dialogSelectedBookshelves::add,
-                onDeselectBookshelf = dialogSelectedBookshelves::remove,
-                allBookshelf = uiState.bookshelfList,
-                selectedBookshelfIds = dialogSelectedBookshelves
-            )
-    }
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
         init.invoke()
     }
@@ -176,13 +153,13 @@ fun BookshelfHomeScreen(
                     selectMode = uiState.selectMode,
                     uiState = uiState,
                     onClickCreate = onClickCreate,
-                    onClickSearch = {},
+                    onClickSearch = {  },
                     onClickEdit = { onClickEdit(uiState.selectedBookshelfId) },
                     onClickDisableSelectMode = onClickDisableSelectMode,
                     onClickSelectAll = onClickSelectAll,
                     onClickPin = onClickPin,
                     onClickRemove = onClickRemove,
-                    onClickBookmark = { visibleBookshelfSelectDialog = true },
+                    onClickBookmark = onClickMarkSelectedBooks,
                     onClickShareBookshelf = {
                         println(uiState.selectedBookshelfId)
                         val uri = FileProvider.getUriForFile(
@@ -678,7 +655,8 @@ fun createBookshelfDataFile(fileName: String, launcher: ManagedActivityResultLau
     val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
         type = "*/*"
-        putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
         putExtra(Intent.EXTRA_TITLE, "$fileName.lnr")
     }
     launcher.launch(Intent.createChooser(intent, "选择一位置"))
@@ -701,7 +679,8 @@ fun selectBookshelfDataFile(launcher: ManagedActivityResultLauncher<Intent, Acti
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
         type = "*/*"
-        putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
     launcher.launch(Intent.createChooser(intent, "选择数据文件"))
 }

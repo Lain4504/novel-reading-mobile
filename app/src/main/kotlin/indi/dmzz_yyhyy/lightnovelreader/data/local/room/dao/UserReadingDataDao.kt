@@ -43,7 +43,6 @@ interface UserReadingDataDao {
     @Query("select * from user_reading_data where id = :id")
     fun getEntity(id: Int): Flow<UserReadingDataEntity?>
 
-    //FiXME
     @Query("select * from user_reading_data")
     fun getAll(): List<UserReadingDataEntity>
 

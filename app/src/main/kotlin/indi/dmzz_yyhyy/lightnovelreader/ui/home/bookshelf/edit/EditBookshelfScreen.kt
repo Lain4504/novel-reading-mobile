@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,16 +20,13 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,12 +41,11 @@ import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
 fun EditBookshelfScreen(
     title: String,
     bookshelfId: Int,
-    dialog: (@Composable () -> Unit) -> Unit,
     bookshelf: Bookshelf,
     inti: (Int) -> Unit,
     onClickBack: () -> Unit,
     onClickSave: () -> Unit,
-    onClickDelete: () -> Unit,
+    onClickDelete: (Int) -> Unit,
     onNameChange: (String) -> Unit,
     onAutoCacheChange: (Boolean) -> Unit,
     onSystemUpdateReminderChange: (Boolean) -> Unit,
@@ -58,17 +53,6 @@ fun EditBookshelfScreen(
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    var dialogVisible by remember { mutableStateOf(false) }
-    dialog {
-        if (dialogVisible)
-            DeleteBookshelfDialog(
-                onDismissRequest = { dialogVisible = false },
-                onConfirmation = {
-                    dialogVisible = false
-                    onClickDelete.invoke()
-                }
-            )
-    }
     LaunchedEffect(bookshelfId) {
         inti(bookshelfId)
     }
@@ -133,7 +117,7 @@ fun EditBookshelfScreen(
             if (bookshelfId >= 0)
                 ListItem(
                     modifier = Modifier.clickable {
-                        dialogVisible = true
+                        onClickDelete(bookshelfId)
                     },
                     leadingContent = {
                         Icon(
@@ -228,58 +212,5 @@ fun SwitchSettingItem(
                 contentDescription = "Localized description",
             )
         },
-    )
-}
-
-@Composable
-private fun DeleteBookshelfDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit) {
-    AlertDialog(
-        title = {
-            Text(
-                text = stringResource(R.string.dialog_delete_bookshelf),
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.W400
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.dialog_delete_bookshelf_text),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.W400
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(
-                onClick = onConfirmation
-            ) {
-                Text(
-                    text = stringResource(android.R.string.ok),
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest
-            ) {
-                Text(
-                    text = stringResource(R.string.cancel),
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
     )
 }

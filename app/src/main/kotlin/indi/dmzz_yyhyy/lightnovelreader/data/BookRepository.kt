@@ -1,6 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.data
 
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
@@ -10,6 +14,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.json.BookUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.work.CacheBookWork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -115,5 +120,19 @@ class BookRepository @Inject constructor(
             }
         }
         return true
+    }
+
+    fun cacheBook(bookId: Int): OneTimeWorkRequest {
+        val workRequest = OneTimeWorkRequestBuilder<CacheBookWork>()
+            .setInputData(workDataOf(
+                "bookId" to bookId
+            ))
+            .build()
+        workManager.enqueueUniqueWork(
+            bookId.toString(),
+            ExistingWorkPolicy.KEEP,
+            workRequest
+        )
+        return workRequest
     }
 }

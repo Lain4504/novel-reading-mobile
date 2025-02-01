@@ -1,8 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,18 +12,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,7 +42,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -66,11 +58,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat.startActivity
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
 import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository.Companion.proxyUrlRegex
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.ObjectOptions
@@ -165,130 +154,6 @@ fun BaseDialog(
             )
             Box(Modifier.height(16.dp))
             content.invoke(this)
-        }
-    }
-}
-
-
-@Composable
-fun UpdatesAvailableDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    contentMarkdown: String? = null,
-    newVersionName: String? = null,
-    newVersionCode: Int = 0,
-    downloadSize: Double? = null,
-    downloadUrl: String? = null
-) {
-    val context = LocalContext.current
-    AlertDialog(
-        title = {
-            Text(
-                text = stringResource(R.string.dialog_updates_available),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        },
-        text = {
-            Column {
-                newVersionName?.let {
-                    val sizeInMB = ((downloadSize ?: 0.0) / 1024) / 1024
-                    val formatted = "%.2f".format(sizeInMB)
-                    Text(
-                        text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE}) → $newVersionName($newVersionCode), ${formatted}MB"
-                    )
-                }
-                contentMarkdown?.let {
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(top = 20.dp)
-                            .wrapContentHeight()
-                            .heightIn(max = 350.dp)
-                    ) {
-                        item {
-                            Text(
-                                text = stringResource(R.string.changelog),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        }
-                        item {
-                            MarkdownText(it)
-                        }
-                    }
-                }
-            }
-        },
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(
-                onClick = onConfirmation
-            ) {
-                Text(text = stringResource(R.string.install_update))
-            }
-        },
-        dismissButton = {
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(
-                    onClick = onDismissRequest
-                ) {
-                    Text(text = stringResource(R.string.decline))
-                }
-                TextButton(
-                    onClick = {
-                        downloadUrl?.let { url ->
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            startActivity(context, intent, null)
-                        }
-                    }
-                ) {
-                    Text(text = stringResource(R.string.manual_download))
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun AddBookToBookshelfDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    onSelectBookshelf: (Int) -> Unit,
-    onDeselectBookshelf: (Int) -> Unit,
-    allBookshelf: List<Bookshelf>,
-    selectedBookshelfIds: List<Int>
-) {
-    val scrollState = rememberScrollState()
-    BaseDialog(
-        icon = painterResource(R.drawable.filled_bookmark_24px),
-        title = stringResource(R.string.add_to_bookshelf),
-        description = stringResource(R.string.dialog_add_to_bookshelf_text),
-        onDismissRequest = onDismissRequest,
-        onConfirmation = onConfirmation,
-        dismissText = stringResource(R.string.cancel),
-        confirmationText = stringResource(R.string.add_to_bookshelf),
-    ) {
-        Column(Modifier.width(IntrinsicSize.Max).sizeIn(maxHeight = 350.dp).verticalScroll(scrollState)) {
-            allBookshelf.forEachIndexed { index, bookshelf ->
-                CheckBoxListItem(
-                    modifier = Modifier
-                        .sizeIn(minWidth = 280.dp, maxWidth = 500.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp),
-                    title = bookshelf.name,
-                    supportingText = stringResource(R.string.bookshelf_book_count, bookshelf.allBookIds.size),
-                    checked = selectedBookshelfIds.contains(bookshelf.id),
-                    onCheckedChange = {
-                        if (it) onSelectBookshelf(bookshelf.id) else onDeselectBookshelf(
-                            bookshelf.id
-                        )
-                    }
-                )
-                if (index != allBookshelf.size - 1) {
-                    HorizontalDivider(Modifier.padding(horizontal = 14.dp))
-                }
-            }
         }
     }
 }

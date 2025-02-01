@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -60,33 +61,35 @@ fun AnimatedText(
     ) {
         for (i in text.indices) {
             val char = text[i]
-
-            AnimatedContent(
-                targetState = char,
-                transitionSpec = {
-                    (slideInVertically(initialOffsetY = { it })).togetherWith(
-                        slideOutVertically(targetOffsetY = { -it })
+            Box {
+                AnimatedContent(
+                    targetState = char,
+                    transitionSpec = {
+                        (slideInVertically(initialOffsetY = { it })).togetherWith(
+                            slideOutVertically(targetOffsetY = { -it })
+                        )
+                    },
+                    label = ""
+                ) {
+                    Text(
+                        style = style,
+                        color = color,
+                        softWrap = softWrap,
+                        text = it.toString(),
+                        fontSize = fontSize,
+                        fontStyle = fontStyle,
+                        fontWeight = fontWeight,
+                        fontFamily = fontFamily,
+                        letterSpacing = letterSpacing,
+                        textDecoration = textDecoration,
+                        textAlign = textAlign,
+                        lineHeight = lineHeight,
+                        overflow = overflow,
+                        maxLines = maxLines,
+                        minLines = minLines,
+                        onTextLayout = onTextLayout
                     )
-                }, label = ""
-            ) {
-                Text(
-                    style = style,
-                    color = color,
-                    softWrap = softWrap,
-                    text = it.toString(),
-                    fontSize = fontSize,
-                    fontStyle = fontStyle,
-                    fontWeight = fontWeight,
-                    fontFamily = fontFamily,
-                    letterSpacing = letterSpacing,
-                    textDecoration = textDecoration,
-                    textAlign = textAlign,
-                    lineHeight = lineHeight,
-                    overflow = overflow,
-                    maxLines = maxLines,
-                    minLines = minLines,
-                    onTextLayout = onTextLayout
-                )
+                }
             }
         }
     }

@@ -11,9 +11,7 @@ fun NavGraphBuilder.bookContentDestination(navController: NavController) {
     composable<Route.Book.Content> {
         val viewModel = hiltViewModel<ContentViewModel>()
         ContentScreen(
-            onClickBackButton = {
-                navController.popBackStack()
-            },
+            onClickBackButton = navController::popBackStack,
             bookId = it.toRoute<Route.Book.Content>().bookId,
             chapterId = it.toRoute<Route.Book.Content>().chapterId,
             uiState = viewModel.uiState,

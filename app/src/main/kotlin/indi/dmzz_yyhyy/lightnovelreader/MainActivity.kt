@@ -62,6 +62,9 @@ class MainActivity : ComponentActivity() {
                 .build()
         )
         coroutineScope.launch(Dispatchers.IO) {
+            updateCheckRepository.checkUpdate()
+        }
+        coroutineScope.launch(Dispatchers.IO) {
             if (bookshelfRepository.getAllBookshelfIds().isEmpty())
                 bookshelfRepository.crateBookShelf(
                     name = "已收藏",

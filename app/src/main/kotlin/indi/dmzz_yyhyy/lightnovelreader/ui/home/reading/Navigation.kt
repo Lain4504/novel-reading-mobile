@@ -20,15 +20,12 @@ fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedT
             selectedRoute = Route.Home.Reading,
             uiState = hiltViewModel<ReadingViewModel>().uiState,
             update = readingViewModel::update,
-            onClickBook = {
-                navController.navigateToBookDetailDestination(it)
-            },
+            onClickBook = navController::navigateToBookDetailDestination,
             onClickContinueReading = { bookId, chapterId ->
+                navController.navigateToBookDetailDestination(bookId)
                 navController.navigateToBookContentDestination(bookId, chapterId)
             },
-            onClickJumpToExploration = {
-                navController.navigateToExplorationHomeDestination()
-            },
+            onClickJumpToExploration = navController::navigateToExplorationHomeDestination,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this
         )

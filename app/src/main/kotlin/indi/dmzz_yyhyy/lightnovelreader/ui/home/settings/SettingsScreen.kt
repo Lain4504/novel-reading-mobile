@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -56,7 +55,6 @@ import androidx.navigation.NavController
 import androidx.work.OneTimeWorkRequest
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportContext
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.AboutSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DataSettingsList
@@ -69,13 +67,10 @@ fun SettingsScreen(
     controller: NavController,
     selectedRoute: Any,
     settingState: SettingState?,
-    dialog: (@Composable () -> Unit) -> Unit,
     checkUpdate: () -> Unit,
-    exportDataToFile: (Uri, ExportContext) -> OneTimeWorkRequest,
-    exportAndSendToFile: (ExportContext, Context) -> Unit,
     importData: (Uri) -> OneTimeWorkRequest,
-    changeWebDataSource: (Int, Context) -> Unit,
-    webDataSourceId: Int,
+    onClickChangeSource: () -> Unit,
+    onClickExportUserData: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
 ) {
@@ -133,13 +128,10 @@ fun SettingsScreen(
                         icon = ImageVector.vectorResource(R.drawable.hard_disk_24px)
                     ) {
                         DataSettingsList(
+                            onClickChangeSource = onClickChangeSource,
+                            onClickExportUserData = onClickExportUserData,
                             settingState = settingState,
-                            dialog = dialog,
-                            exportDataToFile = exportDataToFile,
-                            exportAndSendToFile = exportAndSendToFile,
-                            importData = importData,
-                            changeWebDataSource = changeWebDataSource,
-                            webDataSourceId = webDataSourceId,
+                            importData = importData
                         )
                     }
                     SettingsCategory(

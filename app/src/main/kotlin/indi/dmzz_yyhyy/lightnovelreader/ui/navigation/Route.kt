@@ -16,6 +16,14 @@ object Route {
                 val id: Int,
                 val title: String
             )
+            @Serializable
+            data class DeleteBookshelfDialog(
+                val bookshelfId: Int
+            )
+            @Serializable
+            data class AddBookToBookshelfDialog(
+                val selectedBookIds: List<Int>
+            )
         }
         @Serializable
         object Exploration {
@@ -30,6 +38,10 @@ object Route {
         }
         @Serializable
         object Settings
+        @Serializable
+        object SourceChangeDialog
+        @Serializable
+        object ExportUserDataDialog
     }
     @Serializable
     object Book {
@@ -42,5 +54,16 @@ object Route {
             val bookId: Int,
             val chapterId: Int
         )
+        @Serializable
+        data class ExportUserDataDialog(
+            val bookId: Int,
+            val title: String
+        )
     }
+    @Serializable
+    object UpdatesAvailableDialog
+    @Serializable
+    data class AddBookToBookshelfDialog(
+        val bookId: Int
+    )
 }
