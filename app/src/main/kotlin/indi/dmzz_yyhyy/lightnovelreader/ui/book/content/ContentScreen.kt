@@ -5,6 +5,7 @@ import android.content.Context.BATTERY_SERVICE
 import android.os.BatteryManager
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -41,11 +42,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -62,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -77,7 +81,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
@@ -92,56 +95,98 @@ import java.time.LocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentScreen(
-    paddingValues: PaddingValues,
-    onClickBackButton: () -> Unit,
-    topBar: (@Composable (TopAppBarScrollBehavior) -> Unit) -> Unit,
     bookId: Int,
     chapterId: Int,
-    viewModel: ContentViewModel = hiltViewModel()
+    uiState: ContentScreenUiState,
+    settingState: SettingState,
+    onClickBackButton: () -> Unit,
+    addToReadingBook: (Int) -> Unit,
+    init: (Int, Int) -> Unit,
+    updateTotalReadingTime: (Int, Int) -> Unit,
+    onClickLastChapter: () -> Unit,
+    onClickNextChapter: () -> Unit,
+    onChapterReadingProgressChange: (Float) -> Unit,
+    onChangeChapter: (Int) -> Unit,
 ) {
-    Box(Modifier.padding(
-        start = paddingValues.calculateStartPadding(LayoutDirection.Rtl),
-        top = paddingValues.calculateTopPadding(),
-        bottom = 0.dp,
-        end = paddingValues.calculateEndPadding(LayoutDirection.Rtl),
-    )) {
-        Content(
-            onClickBackButton = onClickBackButton,
-            topBar = topBar,
-            bookId = bookId,
-            chapterId = chapterId,
-            viewModel = viewModel
-        )
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var isImmersive by remember { mutableStateOf(false) }
+    DisposableEffect(Unit) {
+        onDispose {
+            isImmersive = false
+        }
+    }
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            AnimatedVisibility(
+                visible = !isImmersive,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                TopBar(
+                    onClickBackButton = onClickBackButton,
+                    title = uiState.chapterContent.title,
+                    scrollBehavior
+                )
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            Modifier.padding(
+                start = paddingValues.calculateStartPadding(LayoutDirection.Rtl),
+                top = paddingValues.calculateTopPadding(),
+                bottom = 0.dp,
+                end = paddingValues.calculateEndPadding(LayoutDirection.Rtl),
+            )
+        ) {
+            Content(
+                isImmersive = isImmersive,
+                bookId = bookId,
+                chapterId = chapterId,
+                uiState = uiState,
+                settingState = settingState,
+                addToReadingBook = addToReadingBook,
+                init = init,
+                updateTotalReadingTime = updateTotalReadingTime,
+                onClickLastChapter = onClickLastChapter,
+                onClickNextChapter = onClickNextChapter,
+                onChapterReadingProgressChange = onChapterReadingProgressChange,
+                onChangeChapter = onChangeChapter,
+                onChangeIsImmersive = { isImmersive = !isImmersive }
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Content(
-    onClickBackButton: () -> Unit,
-    topBar: (@Composable (TopAppBarScrollBehavior) -> Unit) -> Unit,
     bookId: Int,
     chapterId: Int,
-    viewModel: ContentViewModel = hiltViewModel()
+    isImmersive: Boolean,
+    uiState: ContentScreenUiState,
+    settingState: SettingState,
+    addToReadingBook: (Int) -> Unit,
+    init: (Int, Int) -> Unit,
+    updateTotalReadingTime: (Int, Int) -> Unit,
+    onClickLastChapter: () -> Unit,
+    onClickNextChapter: () -> Unit,
+    onChapterReadingProgressChange: (Float) -> Unit,
+    onChangeChapter: (Int) -> Unit,
+    onChangeIsImmersive: () -> Unit,
 ) {
-    val activity = LocalContext.current as Activity
+    val activity = LocalActivity.current as Activity
     val coroutineScope = rememberCoroutineScope()
     val view = LocalView.current
     val context = LocalContext.current
     val settingsBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val chaptersBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var isRunning by remember { mutableStateOf(false) }
-    var isImmersive by remember { mutableStateOf(false) }
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
     var totalReadingTime by remember { mutableIntStateOf(0) }
     var selectedVolumeId by remember { mutableIntStateOf(-1) }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            isImmersive = false
-        }
-    }
 
     LaunchedEffect(isImmersive) {
         val window = (context as ComponentActivity).window
@@ -154,40 +199,26 @@ fun Content(
         }
     }
 
-    topBar {
-        AnimatedVisibility(
-            visible = !isImmersive,
-            enter = expandVertically(),
-            exit = shrinkVertically()
-        ) {
-            TopBar(
-                onClickBackButton = onClickBackButton,
-                title = viewModel.uiState.chapterContent.title,
-                it
-            )
-        }
-    }
-
     LaunchedEffect(bookId) {
-        viewModel.addToReadingBook(bookId)
+        addToReadingBook(bookId)
     }
     LaunchedEffect(chapterId) {
-        viewModel.init(bookId, chapterId)
+        init(bookId, chapterId)
         totalReadingTime = 0
     }
-    LaunchedEffect(viewModel.uiState.bookVolumes) {
-        selectedVolumeId = viewModel.uiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == chapterId } }?.volumeId ?: -1
+    LaunchedEffect(uiState.bookVolumes) {
+        selectedVolumeId = uiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == chapterId } }?.volumeId ?: -1
     }
     LifecycleResumeEffect(Unit) {
         isRunning = true
         onPauseOrDispose {
             isRunning = false
-            viewModel.updateTotalReadingTime(bookId, totalReadingTime)
+            updateTotalReadingTime(bookId, totalReadingTime)
             totalReadingTime = 0
         }
     }
-    LaunchedEffect(viewModel.settingState.keepScreenOn) {
-        if (viewModel.settingState.keepScreenOn)
+    LaunchedEffect(settingState.keepScreenOn) {
+        if (settingState.keepScreenOn)
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         else
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -196,7 +227,7 @@ fun Content(
         while (isRunning) {
             totalReadingTime += 1
             if (totalReadingTime > 300) {
-                viewModel.updateTotalReadingTime(bookId, totalReadingTime)
+                updateTotalReadingTime(bookId, totalReadingTime)
                 totalReadingTime = 0
             }
             delay(1000)
@@ -208,7 +239,7 @@ fun Content(
         }
     }
     AnimatedVisibility(
-        visible =  viewModel.uiState.isLoading,
+        visible =  uiState.isLoading,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -216,38 +247,38 @@ fun Content(
     }
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedVisibility(
-            visible = viewModel.uiState.isLoading,
+            visible = uiState.isLoading,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
             Loading()
         }
         AnimatedVisibility(
-            visible = !viewModel.uiState.isLoading,
+            visible = !uiState.isLoading,
             enter = fadeIn() + scaleIn(initialScale = 0.7f),
             exit = fadeOut() + scaleOut(targetScale = 0.7f)
         ) {
-            val isEnableIndicator = viewModel.settingState.enableBatteryIndicator || viewModel.settingState.enableTimeIndicator || viewModel.settingState.enableReadingChapterProgressIndicator
+            val isEnableIndicator = settingState.enableBatteryIndicator || settingState.enableTimeIndicator || settingState.enableReadingChapterProgressIndicator
             Box(Modifier.fillMaxSize()) {
                 AnimatedContent(
-                    viewModel.uiState.chapterContent.content,
+                    uiState.chapterContent.content,
                     label = "ContentAnimate"
                 ) { text ->
                     ContentText(
                         content = text,
-                        onClickLastChapter = viewModel::lastChapter,
-                        onClickNextChapter = viewModel::nextChapter,
-                        fontSize = viewModel.settingState.fontSize.sp,
-                        fontLineHeight = viewModel.settingState.fontLineHeight.sp,
-                        readingProgress = viewModel.uiState.readingProgress,
-                        isUsingFlipPage = viewModel.settingState.isUsingFlipPage,
-                        isUsingClickFlip = viewModel.settingState.isUsingClickFlipPage,
-                        isUsingVolumeKeyFlip = viewModel.settingState.isUsingVolumeKeyFlip,
-                        flipAnime = viewModel.settingState.flipAnime,
-                        onChapterReadingProgressChange = viewModel::changeChapterReadingProgress,
-                        changeIsImmersive = { isImmersive = !isImmersive },
+                        onClickLastChapter = onClickLastChapter,
+                        onClickNextChapter = onClickNextChapter,
+                        fontSize = settingState.fontSize.sp,
+                        fontLineHeight = settingState.fontLineHeight.sp,
+                        readingProgress = uiState.readingProgress,
+                        isUsingFlipPage = settingState.isUsingFlipPage,
+                        isUsingClickFlip = settingState.isUsingClickFlipPage,
+                        isUsingVolumeKeyFlip = settingState.isUsingVolumeKeyFlip,
+                        flipAnime = settingState.flipAnime,
+                        onChapterReadingProgressChange = onChapterReadingProgressChange,
+                        changeIsImmersive = onChangeIsImmersive,
                         paddingValues =
-                        if (viewModel.settingState.autoPadding)
+                        if (settingState.autoPadding)
                             PaddingValues(
                                 top = 12.dp,
                                 bottom = if (isEnableIndicator) 46.dp else 12.dp,
@@ -255,13 +286,13 @@ fun Content(
                                 end = 16.dp
                             )
                         else PaddingValues(
-                            top = viewModel.settingState.topPadding.dp,
-                            bottom = if (isEnableIndicator) (viewModel.settingState.bottomPadding + 38).dp else viewModel.settingState.bottomPadding.dp,
-                            start = viewModel.settingState.leftPadding.dp,
-                            end = viewModel.settingState.rightPadding.dp
+                            top = settingState.topPadding.dp,
+                            bottom = if (isEnableIndicator) (settingState.bottomPadding + 38).dp else settingState.bottomPadding.dp,
+                            start = settingState.leftPadding.dp,
+                            end = settingState.rightPadding.dp
                         ),
-                        autoPadding = viewModel.settingState.autoPadding,
-                        fastChapterChange = viewModel.settingState.fastChapterChange
+                        autoPadding = settingState.autoPadding,
+                        fastChapterChange = settingState.fastChapterChange
                     )
                 }
                 AnimatedVisibility (
@@ -273,24 +304,24 @@ fun Content(
                     Indicator(
                         Modifier
                             .padding(
-                                if (viewModel.settingState.autoPadding)
+                                if (settingState.autoPadding)
                                     PaddingValues(
                                         bottom = 8.dp,
                                         start = 16.dp,
                                         end = 16.dp
                                     )
                                 else PaddingValues(
-                                    bottom = viewModel.settingState.bottomPadding.dp,
-                                    start = viewModel.settingState.leftPadding.dp,
-                                    end = viewModel.settingState.rightPadding.dp
+                                    bottom = settingState.bottomPadding.dp,
+                                    start = settingState.leftPadding.dp,
+                                    end = settingState.rightPadding.dp
                                 )
                             ),
-                        enableBatteryIndicator = viewModel.settingState.enableBatteryIndicator,
-                        enableTimeIndicator = viewModel.settingState.enableTimeIndicator,
-                        enableChapterTitle = viewModel.settingState.enableChapterTitleIndicator,
-                        chapterTitle = viewModel.uiState.chapterContent.title,
-                        enableReadingChapterProgressIndicator = viewModel.settingState.enableReadingChapterProgressIndicator,
-                        readingChapterProgress = viewModel.uiState.readingProgress
+                        enableBatteryIndicator = settingState.enableBatteryIndicator,
+                        enableTimeIndicator = settingState.enableTimeIndicator,
+                        enableChapterTitle = settingState.enableChapterTitleIndicator,
+                        chapterTitle = uiState.chapterContent.title,
+                        enableReadingChapterProgressIndicator = settingState.enableReadingChapterProgressIndicator,
+                        readingChapterProgress = uiState.readingProgress
                     )
                 }
             }
@@ -302,14 +333,10 @@ fun Content(
             exit = shrinkVertically()
         ) {
             BottomBar(
-                chapterContent = viewModel.uiState.chapterContent,
-                readingChapterProgress = viewModel.uiState.readingProgress,
-                onClickLastChapter = {
-                    viewModel.lastChapter()
-                },
-                onClickNextChapter = {
-                    viewModel.nextChapter()
-                },
+                chapterContent = uiState.chapterContent,
+                readingChapterProgress = uiState.readingProgress,
+                onClickLastChapter = onClickLastChapter,
+                onClickNextChapter = onClickNextChapter,
                 onClickSettings = { showSettingsBottomSheet = true },
                 onClickChapterSelector = { showChapterSelectorBottomSheet = true },
             )
@@ -325,16 +352,16 @@ fun Content(
                     }
                     showSettingsBottomSheet = false
                 },
-                settingState = viewModel.settingState,
-                uiState = viewModel.uiState
+                settingState = settingState,
+                uiState = uiState
             )
         }
         ChapterSelectorBottomSheet(
             sheetState = chaptersBottomSheetState,
             display = showChapterSelectorBottomSheet,
             selectedVolumeId = selectedVolumeId,
-            bookVolumes = viewModel.uiState.bookVolumes,
-            readingChapterId = viewModel.uiState.chapterContent.id,
+            bookVolumes = uiState.bookVolumes,
+            readingChapterId = uiState.chapterContent.id,
             onDismissRequest = {
                 coroutineScope.launch { chaptersBottomSheetState.hide() }.invokeOnCompletion {
                     if (!chaptersBottomSheetState.isVisible) {
@@ -342,9 +369,9 @@ fun Content(
                     }
                 }
                 showChapterSelectorBottomSheet = false
-                selectedVolumeId = viewModel.uiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == chapterId } }?.volumeId ?: -1
+                selectedVolumeId = uiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == chapterId } }?.volumeId ?: -1
             },
-            onClickChapter = { viewModel.changeChapter(it) },
+            onClickChapter = onChangeChapter,
             onChangeSelectedVolumeId = {
                 selectedVolumeId = it
             }
@@ -485,7 +512,7 @@ fun ChapterSelectorBottomSheet(
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val screenHeight = LocalConfiguration.current.screenHeightDp
-    val indexedItems = bookVolumes.volumes.flatMapIndexed { volumeIndex, volume ->
+    val indexedItems = bookVolumes.volumes.flatMap { volume ->
         listOf(volume to null) + volume.chapters.map { volume to it }
     }
 
@@ -676,9 +703,10 @@ fun Indicator(
         Box(Modifier.width(12.dp))
         Box {
             if (enableChapterTitle)
-                LazyRow(Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(end = progressIndicatorWidth + 12.dp)) {
+                LazyRow(
+                    Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(end = progressIndicatorWidth + 12.dp)) {
                     item {
                         AnimatedText(
                             text = chapterTitle,

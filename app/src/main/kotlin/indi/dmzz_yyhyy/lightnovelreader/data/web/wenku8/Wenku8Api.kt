@@ -47,9 +47,18 @@ object Wenku8Api: WebBookDataSource {
     private var hostIndex = 0
     val host get() =  hosts[hostIndex]
 
+    init {
+        coroutineScope.launch {
+            offLine = isOffLine()
+        }
+    }
+
+    override var offLine: Boolean = true
+
     override val isOffLineFlow = flow {
         while(true) {
-            emit(isOffLine())
+            offLine = isOffLine()
+            emit(offLine)
             delay(500)
         }
     }

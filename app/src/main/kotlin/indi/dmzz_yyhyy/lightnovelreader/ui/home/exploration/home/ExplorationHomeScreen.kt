@@ -2,6 +2,9 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -31,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -60,69 +64,105 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
+import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ExplorationHomeScreen(
-    topBar: (@Composable () -> Unit) -> Unit,
+    explorationUiState: ExplorationUiState,
+    explorationHomeUiState: ExplorationHomeUiState,
+    selectedRoute: Any,
+    controller: NavController,
     onClickExpand: (String) -> Unit,
     onClickBook: (Int) -> Unit,
-    uiState: ExplorationHomeUiState,
     init: () -> Unit,
     changePage: (Int) -> Unit,
     onClickSearch: () -> Unit,
-    refresh: () -> Unit
+    refresh: () -> Unit,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    sharedTransitionScope: SharedTransitionScope
 ) {
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    topBar {
-        TopBar(
-            scrollBehavior = enterAlwaysScrollBehavior,
-            onClickSearch = onClickSearch
-        )
-    }
     LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         init()
     }
-    Column {
-        PrimaryTabRow(selectedTabIndex = uiState.selectedPage) {
-            uiState.pageTitles.forEachIndexed { index, title ->
-                Tab(
-                    selected = uiState.selectedPage == index,
-                    onClick = {
-                        changePage(index)
-                    },
-                    text = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+    with(sharedTransitionScope) {
+        Scaffold(
+            topBar = {
+                TopBar(
+                    scrollBehavior = enterAlwaysScrollBehavior,
+                    onClickSearch = onClickSearch
+                )
+            },
+            bottomBar = {
+                HomeNavigateBar(
+                    modifier = Modifier.sharedElement(
+                        state = sharedTransitionScope.rememberSharedContentState(SharedContentKey.HomeNavigateBar),
+                        animatedVisibilityScope
+                    ),
+                    selectedRoute = selectedRoute,
+                    controller = controller
                 )
             }
-        }
-        AnimatedVisibility(
-            visible = uiState.explorationPageBooksRawList.isEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Loading()
-        }
-        AnimatedContent(
-            targetState = uiState.explorationPageBooksRawList,
-            contentKey = { uiState.selectedPage },
-            transitionSpec = {
-                    (fadeIn(initialAlpha = 0.7f)).togetherWith(fadeOut(targetAlpha = 0.7f))
-                },
-            label = "ExplorationPageBooksRawsAnime"
-        ) {
-            ExplorationPage(
-                explorationPageBooksRawList = it,
-                onClickExpand = onClickExpand,
-                onClickBook = onClickBook,
-                nestedScrollConnection = enterAlwaysScrollBehavior.nestedScrollConnection,
-                refresh = refresh
-            )
+        ) { paddingValues ->
+            ExplorationScreen(
+                modifier = Modifier.padding(paddingValues),
+                refresh = refresh,
+                uiState = explorationUiState
+            ) {
+                Column {
+                    PrimaryTabRow(selectedTabIndex = explorationHomeUiState.selectedPage) {
+                        explorationHomeUiState.pageTitles.forEachIndexed { index, title ->
+                            Tab(
+                                selected = explorationHomeUiState.selectedPage == index,
+                                onClick = {
+                                    changePage(index)
+                                },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            )
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = explorationHomeUiState.explorationPageBooksRawList.isEmpty(),
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Loading()
+                    }
+                    AnimatedContent(
+                        targetState = explorationHomeUiState.explorationPageBooksRawList,
+                        contentKey = { explorationHomeUiState.selectedPage },
+                        transitionSpec = {
+                            (fadeIn(initialAlpha = 0.7f)).togetherWith(fadeOut(targetAlpha = 0.7f))
+                        },
+                        label = "ExplorationPageBooksRawAnime"
+                    ) {
+                        ExplorationPage(
+                            explorationPageBooksRawList = it,
+                            onClickExpand = onClickExpand,
+                            onClickBook = onClickBook,
+                            nestedScrollConnection = enterAlwaysScrollBehavior.nestedScrollConnection,
+                            refresh = refresh
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -307,7 +347,8 @@ fun ExplorationPage(
 
 
                     Box(
-                        Modifier.fillMaxWidth()
+                        Modifier
+                            .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
                         HorizontalDivider()

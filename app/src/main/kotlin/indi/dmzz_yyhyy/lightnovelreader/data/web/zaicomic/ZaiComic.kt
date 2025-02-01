@@ -14,12 +14,11 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.exploration.TypesExplo
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.exploration.UpdateExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.ComicChapterComic
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.DataContent
+import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.DetailData
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.ListDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.SearchItem
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.ZaiComicData
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
-import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.DetailData
-import java.net.URLEncoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,6 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.net.URLEncoder
 
 object ZaiComic : WebBookDataSource {
     class LimitedMap<K, V>(private val limitNum: Int): LinkedHashMap<K, V>() {
@@ -50,10 +50,12 @@ object ZaiComic : WebBookDataSource {
     private val comicDetailCacheMap: MutableMap<Int, DetailData> = LimitedMap(10)
     private val comicVolumesCacheMap: MutableMap<Int, BookVolumes> = LimitedMap(10)
     private var searchJob: Job? = null
+    override var offLine = true
 
     override val isOffLineFlow = flow {
         while(true) {
-            emit(isOffLine())
+            offLine = isOffLine()
+            emit(offLine)
             delay(2500)
         }
     }

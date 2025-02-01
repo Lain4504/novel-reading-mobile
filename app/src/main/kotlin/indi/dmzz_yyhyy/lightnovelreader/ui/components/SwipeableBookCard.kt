@@ -1,20 +1,15 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
@@ -88,7 +83,6 @@ fun BookCardItem(
     swipeToRightActions: List<SwipeAction> = listOf(),
     swipeToLeftActions: List<SwipeAction> = listOf(),
 ){
-
     SwipeableActionsBox(
         startActions = swipeToRightActions,
         endActions = swipeToLeftActions

@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object  WebDataSourceModule {
+object WebDataSourceModule {
     private val webDataSources = listOf(ZaiComic, Wenku8Api)
     @Singleton
     @Provides

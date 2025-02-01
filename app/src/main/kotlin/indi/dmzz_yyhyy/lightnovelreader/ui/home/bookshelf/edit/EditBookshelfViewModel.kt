@@ -6,9 +6,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.MutableBookshelf
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class EditBookshelfViewModel @Inject constructor(
@@ -59,12 +59,6 @@ class EditBookshelfViewModel @Inject constructor(
                 _uiState.updatedBookIds = it.updatedBookIds
                 _uiState
             }
-        }
-    }
-
-    fun delete() {
-        viewModelScope.launch(Dispatchers.IO) {
-            bookshelfRepository.deleteBookshelf(_uiState.id)
         }
     }
 }
