@@ -141,7 +141,7 @@
     <string name="publishing_house">文库</string>
     <string name="filter_by_publishing_house">文库筛选</string>
     <string name="filter_by_publishing_house_desc">根据小说文库的筛选。</string>
-    <string name="book_info_update_date">%s-%s-%s 更新</string>
+    <string name="book_info_update_date">%d-%d-%d 更新</string>
     <string name="book_info_word_count_kilo">%dK 字</string>
     <string name="name">名称</string>
     <string name="settings_preview">设置预览</string>
