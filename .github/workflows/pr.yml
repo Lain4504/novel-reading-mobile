@@ -43,7 +43,7 @@ jobs:
       - name: Rename singed file name
         id: get-pr-version
         run: |
-          vm ${{steps.sign_app.outputs.signedReleaseFile}} LightNovelReader-${{steps.android_version.outputs.VERSION_CODE}}-debug.apk
+          rename ${{steps.sign_app.outputs.signedReleaseFile}} LightNovelReader-${{steps.android_version.outputs.VERSION_CODE}}-debug.apk
       - uses: actions/upload-artifact@v4
         with:
           name: LightNovelReader-${{steps.android_version.outputs.VERSION_CODE}}-debug
