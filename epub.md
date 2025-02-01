@@ -71,7 +71,7 @@ EpubBuilder().apply {
 ### 添加章节
 这之后你可以开始向epub中添加章节了，章节是有层级的，这可以很明显的看出来
 ```kotlin
-chapte {
+chapter {
     title("xxx")
     chapter {
         title("xxxx")
@@ -82,12 +82,12 @@ chapte {
         content(...)
     }
 }
-chaper {
+chapter {
     title("xxxx")
     content(...)
 }
 ```
-但值得注意的是，当一个``chapter``中存在了内容时，就不可以存在``chapter``，反之亦然，``chapter``和``content``互斥。同时一个``chapter``可以包含多个``chapter``，但仅可以包含一个``content``。每个``chapter``必须指定``title``。
+但值得注意的是，当一个``chapter``中存在了`content`时，就不可以存在``chapter``，反之亦然，``chapter``和``content``互斥。同时一个``chapter``可以包含多个``chapter``，但仅可以包含一个``content``。每个``chapter``必须指定``title``。
 ### 章节内容
 ``content``的本质是``Document``，你可以选择使用``SimpleContentBuilder``来创建或者手动创建
 #### SimpleContentBuilder

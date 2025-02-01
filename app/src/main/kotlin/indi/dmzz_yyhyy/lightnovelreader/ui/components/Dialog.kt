@@ -560,6 +560,13 @@ fun SettingsAboutInfoDialog(
                         stringResource(R.string.info_build_os), color = contentColor
                     )
                     Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        stringResource(R.string.translators), color = titleColor
+                    )
+                    Text(
+                        stringResource(R.string.language_translators), color = contentColor
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
             }
         },

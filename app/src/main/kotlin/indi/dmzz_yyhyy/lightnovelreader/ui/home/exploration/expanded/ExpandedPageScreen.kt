@@ -41,9 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Component
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
@@ -128,8 +128,7 @@ fun ExpandedPageScreen(
                             onLongPress = withHaptic {},
                             collected = explorationExpandedPageUiState.allBookshelfBookIds.contains(
                                 bookInformation.id
-                            ),
-                            progress = {},
+                            )
                         )
                         LaunchedEffect(explorationExpandedPageUiState.bookList.size) {
                             if (explorationExpandedPageUiState.bookList.size - index == 3) {
