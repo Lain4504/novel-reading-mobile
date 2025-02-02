@@ -27,6 +27,8 @@
     <string name="ignore">忽略</string>
     <string name="ignore_version">忽略该版本</string>
     <string name="switch_and_restart">切换并重启</string>
+    <string name="show_read">显示全部</string>
+    <string name="hide_read">仅显示未读</string>
     <string name="export_to_file">导出至文件</string>
     <string name="export_and_share">导出并分享</string>
     <!-- Hints -->

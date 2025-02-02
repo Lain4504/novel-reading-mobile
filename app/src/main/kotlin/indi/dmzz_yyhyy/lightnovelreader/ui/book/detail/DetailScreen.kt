@@ -39,7 +39,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
@@ -88,7 +87,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
-import kotlinx.coroutines.launch
 import java.text.NumberFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -223,7 +221,12 @@ private fun Content(
                     )
                     AssistChip(
                         onClick = { hideReadChapters = !hideReadChapters },
-                        label = { Text(text = if (hideReadChapters) "显示已读" else "隐藏已读") },
+                        label = {
+                            Text(
+                                text = stringResource(
+                                    if (hideReadChapters) R.string.show_read
+                                    else R.string.hide_read))
+                                },
                         leadingIcon = {
                             Icon(
                                 modifier = Modifier.scale(0.75f, 0.75f),
@@ -648,13 +651,12 @@ private fun VolumeItem(
 
     if (hideReadChapters && isFullyRead) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Row(
                 modifier = Modifier
                     .height(54.dp)
-                    .padding(horizontal = itemHorizontalPadding, vertical = itemVerticalPadding),
+                    .padding(horizontal = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
