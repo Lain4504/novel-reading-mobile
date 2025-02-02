@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
@@ -54,24 +55,27 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExplorationSearchScreen(
-    topBar: (@Composable () -> Unit) -> Unit,
-    requestAddBookToBookshelf: (Int) -> Unit,
+    explorationUiState: ExplorationUiState,
+    explorationSearchUiState: ExplorationSearchUiState,
+    refresh: () -> Unit,
+    @Suppress("UNUSED_PARAMETER") requestAddBookToBookshelf: (Int) -> Unit,
     onClickBack: () -> Unit,
     init: () -> Unit,
     onChangeSearchType: (String) -> Unit,
     onSearch: (String) -> Unit,
     onClickDeleteHistory: (String) -> Unit,
     onClickClearAllHistory: () -> Unit,
-    onClickBook: (Int) -> Unit,
-    uiState: ExplorationSearchUiState
+    onClickBook: (Int) -> Unit
 ) {
     var searchKeyword by rememberSaveable { mutableStateOf("") }
     var searchBarExpanded by rememberSaveable { mutableStateOf(true) }
@@ -80,163 +84,172 @@ fun ExplorationSearchScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
         init.invoke()
     }
-    topBar {
-        Box(Modifier.fillMaxWidth().semantics { isTraversalGroup = true }) {
-            Box(Modifier.align(Alignment.TopEnd).height(56.dp)) {
-                DropdownMenu(
-                    offset = DpOffset((-12).dp, 0.dp),
-                    expanded = dropdownMenuExpanded,
-                    onDismissRequest = { dropdownMenuExpanded = false }) {
-                    uiState.searchTypeNameList.forEach {
-                        DropdownMenuItem(
-                            text = { Text(
-                                text = it,
+    Scaffold(
+        topBar = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .semantics { isTraversalGroup = true }) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .height(56.dp)) {
+                    DropdownMenu(
+                        offset = DpOffset((-12).dp, 0.dp),
+                        expanded = dropdownMenuExpanded,
+                        onDismissRequest = { dropdownMenuExpanded = false }) {
+                        explorationSearchUiState.searchTypeNameList.forEach {
+                            DropdownMenuItem(
+                                text = { Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.W400
+                                ) },
+                                onClick = {
+                                    dropdownMenuExpanded = false
+                                    onChangeSearchType(it)
+                                }
+                            )
+                        }
+                    }
+                }
+                SearchBar(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = if (!searchBarExpanded) 12.dp else 0.dp)
+                        .onGloballyPositioned { coordinates ->
+                            searchBarRect = coordinates.boundsInParent()
+                        }
+                        .semantics { traversalIndex = 0f },
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = searchKeyword,
+                            onQueryChange = { searchKeyword = it },
+                            onSearch = {
+                                searchBarExpanded = false
+                                onSearch(it)
+                            },
+                            expanded = searchBarExpanded,
+                            onExpandedChange = { searchBarExpanded = it },
+                            placeholder = { AnimatedText(
+                                text = explorationSearchUiState.searchTip,
                                 style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.W400
+                                fontWeight = FontWeight.W400,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             ) },
-                            onClick = {
-                                dropdownMenuExpanded = false
-                                onChangeSearchType(it)
-                            }
+                            leadingIcon = {
+                                IconButton(onClick = onClickBack) {
+                                    Icon(painter = painterResource(R.drawable.arrow_back_24px), contentDescription = "back")
+                                }
+                            },
+                            trailingIcon = {
+                                Row {
+                                    if (searchKeyword.isNotBlank())
+                                        IconButton(onClick = {
+                                            searchBarExpanded = true
+                                            searchKeyword = ""
+                                        }) {
+                                            Icon(painter = painterResource(R.drawable.close_24px), contentDescription = "clear")
+                                        }
+                                    if (searchBarExpanded)
+                                        IconButton(onClick = { dropdownMenuExpanded = true }) {
+                                            Icon(painter = painterResource(R.drawable.menu_open_24px), contentDescription = "menu")
+                                        }
+                                }
+                            },
+                        )
+                    },
+                    expanded = searchBarExpanded,
+                    onExpandedChange = { if (!it) onClickBack.invoke() }
+                ) {
+                    AnimatedVisibility(
+                        visible = explorationSearchUiState.historyList.isEmpty() || explorationSearchUiState.historyList.all { it.isEmpty() },
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        EmptyPage(
+                            painter = painterResource(R.drawable.schedule_90dp),
+                            title = stringResource(id = R.string.nothing_here),
+                            description = stringResource(id = R.string.nothing_here_desc_search)
                         )
                     }
-                }
-            }
-            SearchBar(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = if (!searchBarExpanded) 12.dp else 0.dp)
-                    .onGloballyPositioned { coordinates ->
-                        searchBarRect = coordinates.boundsInParent()
-                    }
-                    .semantics { traversalIndex = 0f },
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = searchKeyword,
-                        onQueryChange = { searchKeyword = it },
-                        onSearch = {
-                            searchBarExpanded = false
-                            onSearch(it)
-                        },
-                        expanded = searchBarExpanded,
-                        onExpandedChange = { searchBarExpanded = it },
-                        placeholder = { AnimatedText(
-                            text = uiState.searchTip,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.W400,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ) },
-                        leadingIcon = {
-                            IconButton(onClick = onClickBack) {
-                                Icon(painter = painterResource(R.drawable.arrow_back_24px), contentDescription = "back")
-                            }
-                        },
-                        trailingIcon = {
-                            Row {
-                                if (searchKeyword.isNotBlank())
-                                    IconButton(onClick = {
-                                        searchBarExpanded = true
-                                        searchKeyword = ""
-                                    }) {
-                                        Icon(painter = painterResource(R.drawable.close_24px), contentDescription = "clear")
-                                    }
-                                if (searchBarExpanded)
-                                    IconButton(onClick = { dropdownMenuExpanded = true }) {
-                                        Icon(painter = painterResource(R.drawable.menu_open_24px), contentDescription = "menu")
-                                    }
-                            }
-                        },
-                    )
-                },
-                expanded = searchBarExpanded,
-                onExpandedChange = { if (!it) onClickBack.invoke() }
-            ) {
-                AnimatedVisibility(
-                    visible = uiState.historyList.isEmpty() || uiState.historyList.all { it.isEmpty() },
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    EmptyPage(
-                        painter = painterResource(R.drawable.schedule_90dp),
-                        title = stringResource(id = R.string.nothing_here),
-                        description = stringResource(id = R.string.nothing_here_desc_search)
-                    )
-                }
-                AnimatedVisibility(
-                    visible = uiState.historyList.isNotEmpty() || !uiState.historyList.any { it.isEmpty() },
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Column(Modifier
-                        .padding(vertical = 8.dp)
-                        .verticalScroll(rememberScrollState())
+                    AnimatedVisibility(
+                        visible = explorationSearchUiState.historyList.isNotEmpty() || !explorationSearchUiState.historyList.any { it.isEmpty() },
+                        enter = fadeIn(),
+                        exit = fadeOut()
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                        Column(
+                            Modifier
+                                .padding(vertical = 8.dp)
+                                .verticalScroll(rememberScrollState())
                         ) {
-                            Text(
-                                text = stringResource(id = R.string.search_history),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.W700,
-                                lineHeight = 16.sp,
-                            )
-
-                            Box(Modifier.weight(2f))
-
-                            Button(
-                                onClick = onClickClearAllHistory,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.Transparent,
-                                    contentColor = MaterialTheme.colorScheme.primary
-                                ),
-                                elevation = ButtonDefaults.buttonElevation(0.dp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
-                                    text = stringResource(id = R.string.search_history_clear),
+                                    text = stringResource(id = R.string.search_history),
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.W700,
                                     lineHeight = 16.sp,
                                 )
-                            }
-                        }
 
-                        Box(Modifier.height(8.dp))
+                                Box(Modifier.weight(2f))
 
-                        uiState.historyList.forEach { history ->
-                            if (history.isEmpty()) return@forEach
-                            AnimatedContent(
-                                targetState = history,
-                                label = "HistoryItemAnimation"
-                            ) {
-                                Row (
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(46.dp)
-                                        .padding(horizontal = 16.dp)
-                                        .clickable {
-                                            searchKeyword = it
-                                            searchBarExpanded = false
-                                            onSearch.invoke(history)
-                                        },
-                                    verticalAlignment = Alignment.CenterVertically
+                                Button(
+                                    onClick = onClickClearAllHistory,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                        contentColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(0.dp)
                                 ) {
                                     Text(
-                                        modifier = Modifier.padding(start = 8.dp),
-                                        text = it,
+                                        text = stringResource(id = R.string.search_history_clear),
                                         fontSize = 16.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        fontWeight = FontWeight.Bold,
+                                        lineHeight = 16.sp,
                                     )
-                                    Box(Modifier.weight(2f))
-                                    IconButton(onClick = { onClickDeleteHistory(history) }) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.close_24px),
-                                            contentDescription = "delete",
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            }
+
+                            Box(Modifier.height(8.dp))
+
+                            explorationSearchUiState.historyList.forEach { history ->
+                                if (history.isEmpty()) return@forEach
+                                AnimatedContent(
+                                    targetState = history,
+                                    label = "HistoryItemAnimation"
+                                ) {
+                                    Row (
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(46.dp)
+                                            .padding(horizontal = 16.dp)
+                                            .clickable {
+                                                searchKeyword = it
+                                                searchBarExpanded = false
+                                                onSearch.invoke(history)
+                                            },
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            modifier = Modifier.padding(start = 8.dp),
+                                            text = it,
+                                            fontSize = 16.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
+                                        Box(Modifier.weight(2f))
+                                        IconButton(onClick = { onClickDeleteHistory(history) }) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.close_24px),
+                                                contentDescription = "delete",
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -245,64 +258,77 @@ fun ExplorationSearchScreen(
                 }
             }
         }
-    }
-    AnimatedVisibility(
-        visible = uiState.isLoading,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Loading()
-    }
-    AnimatedVisibility(
-        visible = uiState.isLoadingComplete && uiState.searchResult.isEmpty(),
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        EmptyPage(
-            painter = painterResource(R.drawable.not_found_90dp),
-            title = stringResource(id = R.string.search_no_results),
-            description = stringResource(id = R.string.search_no_results_desc)
-        )
-    }
-    AnimatedVisibility(
-        visible = !uiState.isLoading && uiState.searchResult.isNotEmpty(),
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 3.dp)
+    ) { paddingValues ->
+        ExplorationScreen(
+            modifier = Modifier.padding(paddingValues),
+            uiState = explorationUiState,
+            refresh = refresh
         ) {
-            item {
-                AnimatedText(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    text = stringResource(
-                        R.string.search_results_title, searchKeyword, uiState.searchResult.size,
-                        if (uiState.isLoadingComplete) "" else "..."
-                    ),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    letterSpacing = 0.5.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            AnimatedVisibility(
+                visible = explorationSearchUiState.isLoading,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Loading()
+            }
+            AnimatedVisibility(
+                visible = explorationSearchUiState.isLoadingComplete && explorationSearchUiState.searchResult.isEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                EmptyPage(
+                    painter = painterResource(R.drawable.not_found_90dp),
+                    title = stringResource(id = R.string.search_no_results),
+                    description = stringResource(id = R.string.search_no_results_desc)
                 )
             }
-            items(uiState.searchResult) {
-                BookCardItem(
-                    bookInformation = it,
-                    onClick = { onClickBook(it.id) },
-                    onLongPress = withHaptic {},
-                    collected = uiState.allBookshelfBookIds.contains(it.id)
-                )
-            }
-            item {
-                AnimatedVisibility(
-                    visible = !uiState.isLoadingComplete,
-                    enter = fadeIn(),
-                    exit = fadeOut()
+            AnimatedVisibility(
+                visible = !explorationSearchUiState.isLoading && explorationSearchUiState.searchResult.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 3.dp)
                 ) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp)
-                    )
+                    item {
+                        AnimatedText(
+                            modifier = Modifier.padding(16.dp, 8.dp),
+                            text = stringResource(
+                                R.string.search_results_title,
+                                searchKeyword,
+                                explorationSearchUiState.searchResult.size,
+                                if (explorationSearchUiState.isLoadingComplete) "" else "..."
+                            ),
+                            style = MaterialTheme.typography.displayLarge,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.W700,
+                            lineHeight = 16.sp,
+                            letterSpacing = 0.5.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    items(explorationSearchUiState.searchResult) {
+                        BookCardItem(
+                            bookInformation = it,
+                            onClick = { onClickBook(it.id) },
+                            onLongPress = withHaptic {},
+                            collected = explorationSearchUiState.allBookshelfBookIds.contains(it.id)
+                        )
+                    }
+                    item {
+                        AnimatedVisibility(
+                            visible = !explorationSearchUiState.isLoadingComplete,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            )
+                        }
+                    }
                 }
             }
         }

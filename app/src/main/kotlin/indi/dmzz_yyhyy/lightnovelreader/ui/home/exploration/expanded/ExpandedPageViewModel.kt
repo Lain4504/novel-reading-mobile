@@ -6,10 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.ExplorationRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ExpandedPageViewModel @Inject constructor(
@@ -33,16 +33,19 @@ class ExpandedPageViewModel @Inject constructor(
             expandedPageDataSource?.let { explorationExpandedPageDataSource ->
                 explorationExpandedPageDataSource.refresh()
                 _uiState.pageTitle = explorationExpandedPageDataSource.getTitle()
-                _uiState.filters = explorationExpandedPageDataSource.getFilters().toMutableList()
+                _uiState.filters.clear()
+                _uiState.filters.addAll(explorationExpandedPageDataSource.getFilters())
                 explorationExpandedPageDataSource.getResultFlow().collect {
-                    _uiState.bookList = it.toMutableList()
+                    _uiState.bookList.clear()
+                    _uiState.bookList.addAll(it)
                     if (it.isEmpty()) { explorationExpandedPageDataSource.loadMore() }
                 }
             }
         }
         viewModelScope.launch {
             bookshelfRepository.getAllBookshelfBookIdsFlow().collect {
-                _uiState.allBookshelfBookIds = it.toMutableList()
+                _uiState.allBookshelfBookIds.clear()
+                _uiState.allBookshelfBookIds.addAll(it)
             }
         }
     }

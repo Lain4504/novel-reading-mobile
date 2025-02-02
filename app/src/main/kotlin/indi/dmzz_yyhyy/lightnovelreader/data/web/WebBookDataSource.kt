@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * LightNovelReader 的网络数据提供源接口，可以通过实现此接口使软件支持新的数据源
- * 版本: 0.1
+ * 版本: 0.2
  */
 interface WebBookDataSource {
     val id: Int
@@ -17,6 +17,11 @@ interface WebBookDataSource {
      * 获取当前软件整体是否处于离线状态
      */
     suspend fun isOffLine(): Boolean
+
+    /**
+     * 当前软件整体是否处于离线状态
+     */
+    val offLine: Boolean
 
     /**
      * 获取当前软件整体是否处于离线状态的数据流

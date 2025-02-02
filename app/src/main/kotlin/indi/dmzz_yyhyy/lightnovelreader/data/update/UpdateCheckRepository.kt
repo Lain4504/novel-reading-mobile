@@ -17,16 +17,18 @@ import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
-import java.util.Locale
 import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -68,13 +70,18 @@ class UpdateCheckRepository @Inject constructor(
     private val updateChannel = StringUserData(UserDataPath.Settings.App.UpdateChannel.path, userDataDao)
     private val distributionPlatform = StringUserData(UserDataPath.Settings.App.DistributionPlatform.path, userDataDao)
     private val githubProxyUrl = StringUserData(UserDataPath.Settings.App.ProxyUrl.path, userDataDao)
+    var release: Release = Release(ReleaseStatus.NULL)
+        private set
+    private val releaseMutableFlow = MutableStateFlow(release)
+    val releaseFlow: Flow<Release> = releaseMutableFlow
 
     companion object {
         private val _updatePhase = MutableStateFlow("Not checked")
         val updatePhase: StateFlow<String> get() = _updatePhase
         val proxyUrlRegex = Regex("(https?://)+[a-zA-Z0-9.-]+(\\.[a-zA-Z]{2,})(/)")
     }
-    fun checkUpdates(): Release {
+
+    private fun getUpdates(): Release {
         val channel = updateChannel.getOrDefault("Development")
         val platform = distributionPlatform.getOrDefault("AppCenter")
         val proxyUrl = githubProxyUrl.getOrDefault("").ifBlank { "" }.trim()
@@ -112,7 +119,7 @@ class UpdateCheckRepository @Inject constructor(
                 "GitHub" -> {
                     _updatePhase.value = "GitHub 步骤: 提取分支版本"
                     if (proxyUrl.isNotEmpty() && !proxyUrlRegex.matches(proxyUrl)) {
-                         throw IllegalArgumentException("代理地址不合法")
+                        throw IllegalArgumentException("代理地址不合法")
                     }
                     val build = Jsoup
                         .connect(proxyUrl + GITHUB_BUILD_URL.replace("%TAG%", gsonData.versionName))
@@ -125,7 +132,6 @@ class UpdateCheckRepository @Inject constructor(
                 }
                 else -> false
             }
-
             return if (available) {
                 _updatePhase.value = "${dateFormat.format(Date())} | 有可用更新: ${gsonData.versionName}"
                 Release(
@@ -152,6 +158,11 @@ class UpdateCheckRepository @Inject constructor(
             _updatePhase.value = "${dateFormat.format(Date())} | 失败: ${e.javaClass.simpleName}\n${e.message}"
             return Release(ReleaseStatus.NULL)
         }
+    }
+
+    fun checkUpdate() {
+        release = getUpdates()
+        releaseMutableFlow.update { release }
     }
 
     /**

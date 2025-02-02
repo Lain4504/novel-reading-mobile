@@ -1,10 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
-import android.content.Intent
-import android.provider.DocumentsContract
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.result.ActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -43,6 +39,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
@@ -59,7 +56,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -83,16 +79,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.work.WorkInfo
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import kotlinx.coroutines.launch
@@ -101,40 +94,38 @@ import java.text.NumberFormat
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
-    viewModel: DetailViewModel = hiltViewModel(),
-    paddingValues: PaddingValues,
+    onClickExportToEpub: () -> Unit,
     onClickBackButton: () -> Unit,
     onClickChapter: (Int) -> Unit,
-    onClickReadFromStart: () -> Unit = {
-        viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-            onClickChapter(it)
-        }
-    },
-    onClickContinueReading: () -> Unit = {
-        if (viewModel.uiState.userReadingData.lastReadChapterId == -1)
-            viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-                onClickChapter(it)
-            }
-        else
-            onClickChapter(viewModel.uiState.userReadingData.lastReadChapterId)
-    },
-    topBar: (@Composable (TopAppBarScrollBehavior) -> Unit) -> Unit,
+    onClickReadFromStart: () -> Unit,
+    onClickContinueReading: () -> Unit,
     id: Int,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit
 ) {
-    Box(Modifier.padding(paddingValues)) {
-        Content(
-            viewModel = viewModel,
-            onClickBackButton = onClickBackButton,
-            onClickChapter = onClickChapter,
-            onClickReadFromStart = onClickReadFromStart,
-            onClickContinueReading = onClickContinueReading,
-            topBar = topBar,
-            id = id,
-            cacheBook = cacheBook,
-            requestAddBookToBookshelf = requestAddBookToBookshelf
-        )
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            TopBar(
+                onClickBackButton = onClickBackButton,
+                onClickExport = {
+                    onClickExportToEpub.invoke()
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { paddingValues ->
+        Box(Modifier.padding(paddingValues)) {
+            Content(
+                onClickChapter = onClickChapter,
+                onClickReadFromStart = onClickReadFromStart,
+                onClickContinueReading = onClickContinueReading,
+                id = id,
+                cacheBook = cacheBook,
+                requestAddBookToBookshelf = requestAddBookToBookshelf
+            )
+        }
     }
 }
 
@@ -145,7 +136,6 @@ private val itemVerticalPadding = 8.dp
 @Composable
 private fun Content(
     viewModel: DetailViewModel = hiltViewModel(),
-    onClickBackButton: () -> Unit,
     onClickChapter: (Int) -> Unit,
     onClickReadFromStart: () -> Unit = {
         viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
@@ -160,17 +150,13 @@ private fun Content(
         else
             onClickChapter(viewModel.uiState.userReadingData.lastReadChapterId)
     },
-    topBar: (@Composable (TopAppBarScrollBehavior) -> Unit) -> Unit,
     id: Int,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val uiState = viewModel.uiState
     val infoBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
-    var showExportEpubDialog by remember { mutableStateOf(false) }
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     var hideReadChapters by remember { mutableStateOf(false) }
 
@@ -178,39 +164,6 @@ private fun Content(
     var scrolledY by remember { mutableFloatStateOf(0f) }
     var previousOffset by remember { mutableIntStateOf(0) }
 
-    val exportToEPUBLauncher = launcher {
-        scope.launch {
-            Toast.makeText(context, "开始导出书本 ${viewModel.uiState.bookInformation.title}", Toast.LENGTH_SHORT).show()
-            viewModel.exportToEpub(it, id, uiState.bookInformation.title).collect {
-                if (it != null)
-                    when (it.state) {
-                        WorkInfo.State.SUCCEEDED -> {
-                            Toast.makeText(context, "成功导出书本 ${viewModel.uiState.bookInformation.title}", Toast.LENGTH_SHORT).show()
-                        }
-                        WorkInfo.State.FAILED -> {
-                            Toast.makeText(context, "导出书本 ${viewModel.uiState.bookInformation.title} 失败", Toast.LENGTH_SHORT).show()
-                        }
-                        else -> {}
-                    }
-            }
-        }
-    }
-    if (showExportEpubDialog) {
-        ExportToEpubDialog (
-            onDismissRequest = { showExportEpubDialog = false },
-            onConfirmation = {
-                showExportEpubDialog = false
-                createDataFile(viewModel.uiState.bookInformation.title, exportToEPUBLauncher)
-            }
-        )
-    }
-    topBar {
-        TopBar(
-            onClickBackButton = onClickBackButton,
-            onClickExport = { showExportEpubDialog = true },
-            scrollBehavior = it
-        )
-    }
     LaunchedEffect(id) {
         viewModel.init(id)
     }
@@ -942,17 +895,4 @@ fun BookInfoBottomSheet(
             }
         }
     }
-}
-
-
-@Suppress("DuplicatedCode")
-fun createDataFile(fileName: String, launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
-    val initUri = DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:Documents")
-    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-        addCategory(Intent.CATEGORY_OPENABLE)
-        type = "application/epub+zip"
-        putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
-        putExtra(Intent.EXTRA_TITLE, fileName)
-    }
-    launcher.launch(Intent.createChooser(intent, "选择一位置"))
 }

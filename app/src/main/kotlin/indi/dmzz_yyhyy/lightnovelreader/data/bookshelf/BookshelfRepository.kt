@@ -32,9 +32,23 @@ class BookshelfRepository @Inject constructor(
 ) {
     fun getAllBookshelfIds(): List<Int> = bookshelfDao.getAllBookshelfIds()
 
-    @Suppress("DuplicatedCode")
+    fun getAllBookshelvesFlow(): Flow<List<MutableBookshelf>> = bookshelfDao.getAllBookshelfFlow().map {
+        it.map { bookshelfEntity ->
+            MutableBookshelf().apply {
+                this.id =   bookshelfEntity.id
+                this.name = bookshelfEntity.name
+                this.sortType = BookshelfSortType.entries.first { it.key == bookshelfEntity.sortType }
+                this.autoCache = bookshelfEntity.autoCache
+                this.systemUpdateReminder = bookshelfEntity.systemUpdateReminder
+                this.allBookIds = bookshelfEntity.allBookIds
+                this.pinnedBookIds = bookshelfEntity.pinnedBookIds
+                this.updatedBookIds = bookshelfEntity.updatedBookIds
+            }
+        }
+    }
+
     fun getBookshelf(id: Int): MutableBookshelf? = MutableBookshelf().apply {
-        val bookshelfEntity = bookshelfDao.getBookShelf(id) ?: return null
+        val bookshelfEntity = bookshelfDao.getBookshelf(id) ?: return null
         this.id = id
         this.name = bookshelfEntity.name
         this.sortType = BookshelfSortType.entries.first { it.key == bookshelfEntity.sortType }
@@ -45,7 +59,6 @@ class BookshelfRepository @Inject constructor(
         this.updatedBookIds = bookshelfEntity.updatedBookIds
     }
 
-    @Suppress("DuplicatedCode")
     fun getBookshelfFlow(id: Int): Flow<MutableBookshelf?> = bookshelfDao
         .getBookShelfFlow(id)
         .map { bookshelfEntity ->
@@ -82,7 +95,7 @@ class BookshelfRepository @Inject constructor(
     }
 
     fun deleteBookshelf(bookshelfId: Int) {
-        bookshelfDao.getBookShelf(bookshelfId)?.let { bookshelf ->
+        bookshelfDao.getBookshelf(bookshelfId)?.let { bookshelf ->
             bookshelf.allBookIds.forEach { bookId ->
                 clearBookshelfIdFromBookshelfBookMetadata(bookshelfId, bookId)
             }
@@ -91,7 +104,7 @@ class BookshelfRepository @Inject constructor(
     }
 
     fun addBookIntoBookShelf(bookshelfId: Int, bookInformation: BookInformation) {
-        val bookshelf = bookshelfDao.getBookShelf(bookshelfId) ?: return
+        val bookshelf = bookshelfDao.getBookshelf(bookshelfId) ?: return
         bookshelfDao.addBookshelfMetadata(
             id = bookInformation.id,
             lastUpdate = bookInformation.lastUpdated,
@@ -121,7 +134,7 @@ class BookshelfRepository @Inject constructor(
     }
 
     fun addUpdatedBooksIntoBookShelf(bookShelfId: Int, bookId: Int) {
-        val bookshelf = bookshelfDao.getBookShelf(bookShelfId) ?: return
+        val bookshelf = bookshelfDao.getBookshelf(bookShelfId) ?: return
         (bookshelf.updatedBookIds + listOf(bookId)).let {
             bookshelfDao.updateBookshelfEntity(
                 bookshelf.copy(

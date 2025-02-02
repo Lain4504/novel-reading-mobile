@@ -8,10 +8,10 @@ import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ReadingViewModel @Inject constructor(

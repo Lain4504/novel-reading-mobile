@@ -1,6 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -25,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -41,61 +45,94 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.ui.Screen
+import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.NavItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
 
-val ReadingScreenInfo = NavItem(
-    route = Screen.Home.Reading.route,
-    drawable = R.drawable.animated_book,
-    label = R.string.nav_reading
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ReadingScreen(
+    controller: NavController,
+    uiState: ReadingUiState,
+    update: () -> Unit,
+    selectedRoute: Any,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
-    topBar: (@Composable () -> Unit) -> Unit,
-    viewModel: ReadingViewModel = hiltViewModel()
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-    val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val readingBooks = viewModel.uiState.recentReadingBooks.reversed()
-    topBar {
-        TopBar(pinnedScrollBehavior)
+    with(sharedTransitionScope) {
+        LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+            update.invoke()
+        }
+        Scaffold(
+            topBar = {
+                TopBar(TopAppBarDefaults.pinnedScrollBehavior())
+            },
+            bottomBar = {
+                HomeNavigateBar(
+                    modifier = Modifier.sharedElement(
+                        sharedTransitionScope.rememberSharedContentState(SharedContentKey.HomeNavigateBar),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                    selectedRoute = selectedRoute,
+                    controller = controller
+                )
+            }
+        ) {
+            Box(Modifier.padding(it)) {
+                ReadingContent(
+                    uiState = uiState,
+                    onClickBook = onClickBook,
+                    onClickContinueReading = onClickContinueReading,
+                    onClickJumpToExploration = onClickJumpToExploration,
+                )
+            }
+        }
     }
-    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
-        viewModel.update()
-    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReadingContent(
+    uiState: ReadingUiState,
+    onClickBook: (Int) -> Unit,
+    onClickContinueReading: (Int, Int) -> Unit,
+    onClickJumpToExploration: () -> Unit,
+) {
+    val readingBooks = uiState.recentReadingBooks.reversed()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp)
-            .nestedScroll(pinnedScrollBehavior.nestedScrollConnection),
+            .nestedScroll(TopAppBarDefaults.pinnedScrollBehavior().nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
-            ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    text = stringResource(R.string.continue_reading),
-                    maxLines = 1,
-                    fontWeight = FontWeight.Bold,
-                )
+        if (uiState.recentReadingBooks.isNotEmpty())
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        text = stringResource(R.string.continue_reading),
+                        maxLines = 1,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
             }
-        }
         item {
             AnimatedVisibility(
-                visible =  !viewModel.uiState.isLoading,
+                visible =  !uiState.isLoading,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -107,7 +144,9 @@ fun ReadingScreen(
         }
         item {
             Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
             ) {
                 Text(
                     modifier = Modifier.padding(vertical = 4.dp),
@@ -121,7 +160,7 @@ fun ReadingScreen(
         }
         items(readingBooks) {
             AnimatedVisibility(
-                visible =  !viewModel.uiState.isLoading,
+                visible =  !uiState.isLoading,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -138,7 +177,7 @@ fun ReadingScreen(
         }
     }
     AnimatedVisibility(
-        visible =  viewModel.uiState.isLoading && viewModel.uiState.recentReadingBooks.isEmpty(),
+        visible =  uiState.isLoading && uiState.recentReadingBooks.isEmpty(),
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -161,7 +200,7 @@ fun ReadingScreen(
         )
     }
     AnimatedVisibility(
-        visible =  viewModel.uiState.isLoading && viewModel.uiState.recentReadingBooks.isNotEmpty(),
+        visible =  uiState.isLoading && uiState.recentReadingBooks.isNotEmpty(),
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -204,13 +243,16 @@ private fun ReadingBookCard(
     onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier.height(144.dp)
+        modifier = Modifier
+            .height(144.dp)
             .clip(RoundedCornerShape(12.dp))
     ) {
         Row(
-            modifier = Modifier.combinedClickable(
-                onClick = onClick
-            ).padding(4.dp),
+            modifier = Modifier
+                .combinedClickable(
+                    onClick = onClick
+                )
+                .padding(4.dp),
         ) {
             Cover(
                 width = 94.dp,
@@ -219,15 +261,19 @@ private fun ReadingBookCard(
                 rounded = 8.dp
             )
             Column(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
                     .padding(start = 12.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
                 val titleLineHeight = 20.sp
                 Text(
-                    modifier = Modifier.height(
-                        with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
-                    ).wrapContentHeight(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .height(
+                            with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                        )
+                        .wrapContentHeight(Alignment.CenterVertically),
                     text = book.title,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -263,7 +309,8 @@ private fun ReadingBookCard(
                 ) {
                     Row {
                         Icon(
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier
+                                .size(14.dp)
                                 .align(Alignment.CenterVertically)
                                 .padding(top = 2.dp, end = 2.dp),
                             painter = painterResource(id = R.drawable.outline_schedule_24px),
@@ -306,7 +353,9 @@ private fun ReadingHeaderCard(
 ) {
     Box {
         Row(
-            modifier = Modifier.fillMaxWidth().height(178.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(178.dp)
                 .padding(4.dp),
         ) {
             Box {
@@ -318,7 +367,8 @@ private fun ReadingHeaderCard(
                 )
             }
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(start = 16.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -340,9 +390,11 @@ private fun ReadingHeaderCard(
                 }
                 val titleLineHeight = 24.sp
                 Text(
-                    modifier = Modifier.height(
-                        with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
-                    ).wrapContentHeight(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .height(
+                            with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                        )
+                        .wrapContentHeight(Alignment.CenterVertically),
                     text = book.title,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,

@@ -8,8 +8,8 @@ import androidx.room.Update
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfBookMetadata
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfBookMetadataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfEntity
-import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 @Dao
 interface BookshelfDao {
@@ -24,10 +24,13 @@ interface BookshelfDao {
     fun deleteBookshelf(id: Int)
 
     @Query("select * from book_shelf where id=:id")
-    fun getBookShelf(id: Int): BookshelfEntity?
+    fun getBookshelf(id: Int): BookshelfEntity?
 
     @Query("select * from book_shelf where id=:id")
     fun getBookShelfFlow(id: Int): Flow<BookshelfEntity?>
+
+    @Query("select * from book_shelf")
+    fun getAllBookshelfFlow(): Flow<List<BookshelfEntity>>
 
     @Query("select * from book_shelf_book_metadata")
     fun getAllBookshelfBookMetadataEntities(): List<BookshelfBookMetadataEntity>

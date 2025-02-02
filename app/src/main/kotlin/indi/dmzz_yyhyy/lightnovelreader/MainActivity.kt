@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private var isUsingVolumeKeyFlip = false
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var appLocale by mutableStateOf("${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}")
@@ -62,6 +61,9 @@ class MainActivity : ComponentActivity() {
             PeriodicWorkRequestBuilder<CheckUpdateWork>(2, TimeUnit.HOURS)
                 .build()
         )
+        coroutineScope.launch(Dispatchers.IO) {
+            updateCheckRepository.checkUpdate()
+        }
         coroutineScope.launch(Dispatchers.IO) {
             if (bookshelfRepository.getAllBookshelfIds().isEmpty())
                 bookshelfRepository.crateBookShelf(

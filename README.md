@@ -10,13 +10,21 @@
 
 ## 介绍
 
-LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件，使用 Kotlin 和 Jetpack Compose 编写，提供轻量化的体积和流畅的阅读体验。
+LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件，使用 Kotlin 和 Jetpack Compose 编写，具有轻量化的体积和流畅的阅读体验。此外，还有多种有用的功能，如 EPUB 导出、离线阅读和多数据源支持。
 
-查看重构前的 [分支](https://github.com/dmzz-yyhyy/LightNovelReader/tree/master)
+## 特性
+
+- 完全重构的版本（可在[ 此处 ](https://github.com/dmzz-yyhyy/LightNovelReader/tree/master)查看重构前的分支）
+- 使用 Jetpack Compose，提供流畅的阅读体验，支持 Android 7.0 ~ 15
+- 缓存－支持缓存书本内容，以及离线优先的阅读
+- 探索－发现新书、推荐榜，标签分类，关键词搜索……
+- 多数据源支持－可以切换数据源，甚至可以看漫画。数据源之间数据独立
+- 书架－完整的书架系统，支持创建和命名书架，将书本加入收藏、获取书本更新提示
+- 将书本导出为 EPUB 文件
+- 热情的开发者，还有更多…
 
 ## 下载
-
-软件处于开发阶段，要体验最新的功能与 Bug 修复，我们推荐使用 [Actions](https://github.com/dmzz-yyhyy/LightNovelReader/actions) 内的最新构建，或从 [GitHub Releases](https://github.com/dmzz-yyhyy/LightNovelReader/releases/latest) 下载最新发布版
+从 [GitHub Releases](https://github.com/dmzz-yyhyy/LightNovelReader/releases/latest) 下载最新发布版。要体验最新的功能与 Bug 修复，请从 [Actions](https://github.com/dmzz-yyhyy/LightNovelReader/actions) 下载最新构建。
 
 ## 支持
 
@@ -34,7 +42,7 @@ LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件�
 | ![image](assets/light3.png) |
 | ![image](assets/dark3.png)  |
 
-### EpubLib
+### 关于 EpubLib
 为了处理epub的导出问题，我们单独创建了一个epub处理模块，如果您感兴趣，可以看[**这里**](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/epub.md)
 
 ## License
