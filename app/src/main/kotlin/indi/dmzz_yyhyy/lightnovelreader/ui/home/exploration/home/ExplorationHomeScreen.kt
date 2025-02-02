@@ -344,11 +344,8 @@ fun ExplorationPage(
                             }
                         }
                     }
-
-
                     Box(
-                        Modifier
-                            .fillMaxWidth()
+                        Modifier.fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
                         HorizontalDivider()

@@ -180,7 +180,7 @@ fun Content(
     val view = LocalView.current
     val context = LocalContext.current
     val settingsBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val chaptersBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val chaptersBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isRunning by remember { mutableStateOf(false) }
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
@@ -634,7 +634,6 @@ fun ChapterSelectorBottomSheet(
                                 }
                             }
                         }
-
                     }
                 }
                 item {
