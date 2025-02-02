@@ -182,9 +182,9 @@ private fun ReadingContent(
         exit = fadeOut()
     ) {
         EmptyPage(
-            painter = painterResource(R.drawable.empty_90dp),
-            title = stringResource(id = R.string.nothing_here),
-            description = stringResource(id = R.string.nothing_here_desc_reading),
+            icon = painterResource(R.drawable.empty_90dp),
+            titleId = R.string.nothing_here,
+            descriptionId = R.string.nothing_here_desc_reading,
             button = {
                 Button(
                     onClick = onClickJumpToExploration

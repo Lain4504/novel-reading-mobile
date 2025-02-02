@@ -50,9 +50,9 @@ fun ExplorationScreen(
             LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
                 item {
                     EmptyPage(
-                        painter = painterResource(R.drawable.wifi_off_90dp),
-                        title = stringResource(id = R.string.offline),
-                        description = stringResource(id = R.string.offline_desc)
+                        icon = painterResource(R.drawable.link_off_24px),
+                        titleId = R.string.offline,
+                        descriptionId = R.string.offline_desc
                     )
                 }
             }

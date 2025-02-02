@@ -540,7 +540,7 @@ private fun QuickOperationsBlock(
                 .weight(1f)
         ) {
             QuickOperationButton(
-                icon = painterResource(R.drawable.bookmark_add_24px),
+                icon = painterResource(R.drawable.outline_book_24px),
                 title = stringResource(R.string.add_to_bookshelf),
                 onClick = onClickAddToBookShelf
             )

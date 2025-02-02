@@ -281,9 +281,9 @@ fun BookshelfHomeScreen(
                     exit = fadeOut()
                 ) {
                     EmptyPage(
-                        painter = painterResource(R.drawable.bookmarks_90px),
-                        title = "没有内容",
-                        description = "单击“收藏”按钮，将书本加入此书架"
+                        icon = painterResource(R.drawable.bookmarks_90px),
+                        titleId = R.string.nothing_here,
+                        descriptionId = R.string.nothing_here_desc_bookshelf
                     )
                 }
 
