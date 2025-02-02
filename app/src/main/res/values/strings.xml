@@ -29,6 +29,8 @@
     <string name="ignore">Ignore</string>
     <string name="ignore_version">Ignore Version</string>
     <string name="switch_and_restart">Switch and Restart</string>
+    <string name="show_read">Show Read</string>
+    <string name="hide_read">Hide Read</string>
     <string name="export_to_file">Export to File</string>
     <string name="export_and_share">Share</string>
 

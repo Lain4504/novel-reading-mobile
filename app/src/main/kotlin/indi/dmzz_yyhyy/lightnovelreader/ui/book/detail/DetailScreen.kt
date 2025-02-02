@@ -223,7 +223,12 @@ private fun Content(
                     )
                     AssistChip(
                         onClick = { hideReadChapters = !hideReadChapters },
-                        label = { Text(text = if (hideReadChapters) "显示已读" else "隐藏已读") },
+                        label = {
+                            Text(
+                                text = stringResource(
+                                    if (hideReadChapters) R.string.show_read
+                                    else R.string.hide_read))
+                                },
                         leadingIcon = {
                             Icon(
                                 modifier = Modifier.scale(0.75f, 0.75f),
@@ -648,13 +653,12 @@ private fun VolumeItem(
 
     if (hideReadChapters && isFullyRead) {
         Column(
-            modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Row(
                 modifier = Modifier
                     .height(54.dp)
-                    .padding(horizontal = itemHorizontalPadding, vertical = itemVerticalPadding),
+                    .padding(horizontal = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
