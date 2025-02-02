@@ -410,6 +410,7 @@ private fun TopBar(
         },
         actions = {
             IconButton(
+                enabled = false,
                 onClick = {
                     //TODO 全屏
                 }) {
@@ -445,6 +446,7 @@ private fun BottomBar(
                 contentDescription = "lastChapter")
         }
         IconButton(
+            enabled = false,
             onClick = {
                 //TODO 添加至书签
             }) {
