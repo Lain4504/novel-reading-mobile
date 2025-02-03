@@ -1,0 +1,40 @@
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.search
+
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
+import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+
+fun NavGraphBuilder.explorationSearchDestination(navController: NavController) {
+    composable<Route.Home.Exploration.Search> { entry ->
+        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Home) }
+        val explorationViewModel = hiltViewModel<ExplorationViewModel>(parentEntry)
+        val explorationSearchViewModel = hiltViewModel<ExplorationSearchViewModel>()
+        ExplorationSearchScreen(
+            explorationUiState = explorationViewModel.uiState,
+            explorationSearchUiState = explorationSearchViewModel.uiState,
+            refresh = explorationViewModel::refresh,
+            requestAddBookToBookshelf = {
+                navController.navigateToAddBookToBookshelfDialog(it)
+            },
+            onClickBack = { navController.popBackStack() },
+            init = explorationSearchViewModel::init,
+            onChangeSearchType = { explorationSearchViewModel.changeSearchType(it) },
+            onSearch = { explorationSearchViewModel.search(it) },
+            onClickDeleteHistory = { explorationSearchViewModel.deleteHistory(it) },
+            onClickClearAllHistory = explorationSearchViewModel::clearAllHistory,
+            onClickBook = {
+                navController.navigateToBookDetailDestination(it)
+            }
+        )
+    }
+}
+
+fun NavController.navigateToSearchDestination() {
+    navigate(Route.Home.Exploration.Search)
+}

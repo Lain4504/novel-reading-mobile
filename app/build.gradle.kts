@@ -1,6 +1,7 @@
 import java.net.InetAddress
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 plugins {
     id("com.android.application")
@@ -8,19 +9,21 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.serialization") version("2.0.21")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "indi.dmzz_yyhyy.lightnovelreader"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         multiDexEnabled = true
         applicationId = "indi.dmzz_yyhyy.lightnovelreader"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*100+debug版本号(开发需要时迭代, 两位数)
-        versionCode = 1_00_00_007
+        versionCode = 1_00_00_027
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -32,10 +35,8 @@ android {
             InetAddress.getLocalHost().hostName
         } catch (_: Exception) {}
         resValue("string", "info_build_date", dateFormat.format(Date()))
-        resValue("string", "info_build_host",
-            System.getProperty("user.name") + "@" + hostname + "\n"
-                    + " " + System.getProperty("os.name") + "/" + System.getProperty("os.arch"))
-        setProperty("archivesBaseName", "LightNovelReader-${versionName}")
+        resValue("string", "info_build_host", System.getProperty("user.name") + "@" + hostname )
+        resValue("string", "info_build_os", System.getProperty("os.name") + "/" + System.getProperty("os.arch"))
     }
 
     buildTypes {
@@ -46,11 +47,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            setProperty("archivesBaseName", "LightNovelReader-${defaultConfig.versionName}")
         }
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
             isJniDebuggable = true
+            setProperty("archivesBaseName", "LightNovelReader-${defaultConfig.versionCode}")
         }
     }
     compileOptions {
@@ -77,19 +80,19 @@ android {
 
 dependencies {
     // desugaring support
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     // android lib
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation ("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     // compose
-    implementation("androidx.activity:activity-compose:1.9.2")
-    implementation("androidx.compose.animation:animation-graphics-android:1.7.1")
-    implementation(platform("androidx.compose:compose-bom:2024.09.01"))
-    implementation("androidx.compose.material3:material3:1.3.0")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.09.01"))
+    implementation("androidx.activity:activity-compose:1.10.0")
+    implementation("androidx.compose.animation:animation-graphics-android:1.7.7")
+    implementation(platform("androidx.compose:compose-bom:2025.01.01"))
+    implementation("androidx.compose.material3:material3:1.3.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.01.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -101,7 +104,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     // hilt
-    val hilt = "2.49"
+    val hilt = "2.55"
     implementation("com.google.dagger:hilt-android:$hilt")
     kapt("com.google.dagger:hilt-android-compiler:$hilt")
     val androidXHilt = "1.2.0"
@@ -111,7 +114,7 @@ dependencies {
     implementation("androidx.hilt:hilt-work:$androidXHilt")
     implementation("androidx.hilt:hilt-navigation-compose:$androidXHilt")
     // navigation
-    val navVersion = "2.8.0"
+    val navVersion = "2.8.6"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     implementation("androidx.navigation:navigation-dynamic-features-fragment:$navVersion")
@@ -122,7 +125,7 @@ dependencies {
     // jsoup
     implementation("org.jsoup:jsoup:1.18.1")
     // Gson
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
     // markdown
     implementation("com.github.jeziellago:compose-markdown:0.5.2")
     // Ketch
@@ -144,12 +147,16 @@ dependencies {
     val appCenterSdkVersion = "5.0.4"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
-    val workVersion = "2.9.1"
+    val workVersion = "2.10.0"
     implementation("androidx.work:work-runtime-ktx:$workVersion")
     implementation("androidx.work:work-rxjava2:$workVersion")
     implementation("androidx.work:work-gcm:$workVersion")
     androidTestImplementation("androidx.work:work-testing:$workVersion")
     implementation("androidx.work:work-multiprocess:$workVersion")
+    implementation(project(":epub"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    // Swipe
+    implementation("me.saket.swipe:swipe:1.3.0")
 }
 
 kapt {

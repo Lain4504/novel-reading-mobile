@@ -1,6 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -10,7 +14,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,84 +51,96 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.work.OneTimeWorkRequest
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.ui.Screen
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.NavItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.AboutSettingsList
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.AppSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DataSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DisplaySettingsList
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.UpdatesSettingsList
 
-val SettingsScreenInfo = NavItem (
-    route = Screen.Home.Settings.route,
-    drawable = R.drawable.animated_settings,
-    label = R.string.nav_settings
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun SettingsScreen(
-    topBar: (@Composable () -> Unit) -> Unit,
-    dialog: (@Composable () -> Unit) -> Unit,
+    controller: NavController,
+    selectedRoute: Any,
+    settingState: SettingState?,
     checkUpdate: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    importData: (Uri) -> OneTimeWorkRequest,
+    onClickChangeSource: () -> Unit,
+    onClickExportUserData: () -> Unit,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    sharedTransitionScope: SharedTransitionScope,
 ) {
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    topBar {
-        TopBar(pinnedScrollBehavior,)
-    }
-    AnimatedVisibility(
-         visible = viewModel.settingState != null,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        val settingState = viewModel.settingState!!
-        Column(
-            Modifier.verticalScroll(rememberScrollState())
-                .nestedScroll(pinnedScrollBehavior.nestedScrollConnection)
-        ) {
-            SettingsCard(
-                title = stringResource(R.string.app_settings),
-                icon = ImageVector.vectorResource(R.drawable.outline_settings_24px)
-            ) {
-                AppSettingsList(
-                    settingState = settingState,
-                    checkUpdate = checkUpdate
+    with(sharedTransitionScope) {
+        Scaffold(
+            topBar = { TopBar(pinnedScrollBehavior) },
+            bottomBar = {
+                HomeNavigateBar(
+                    Modifier.sharedElement(
+                        sharedTransitionScope.rememberSharedContentState(SharedContentKey.HomeNavigateBar),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                    selectedRoute,
+                    controller
                 )
             }
-            SettingsCard(
-                title = stringResource(R.string.display_settings),
-                icon = ImageVector.vectorResource(R.drawable.light_mode_24px)
+        ) {
+            AnimatedVisibility(
+                modifier = Modifier.padding(it),
+                visible = settingState != null,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                DisplaySettingsList(settingState = settingState)
-            }
-            /*SettingsCard(
-                indi.dmzz_yyhyy.lightnovelreader.data.statistics.getTitle = "阅读",
+                settingState!!
+                Column(
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .nestedScroll(pinnedScrollBehavior.nestedScrollConnection)
+                ) {
+                    SettingsCategory(
+                        title = stringResource(R.string.app_updates),
+                        icon = ImageVector.vectorResource(R.drawable.deployed_code_update_24px)
+                    ) {
+                        UpdatesSettingsList(
+                            settingState = settingState,
+                            checkUpdate = checkUpdate,
+                        )
+                    }
+                    SettingsCategory(
+                        title = stringResource(R.string.display_settings),
+                        icon = ImageVector.vectorResource(R.drawable.light_mode_24px)
+                    ) {
+                        DisplaySettingsList(settingState = settingState)
+                    }
+                    /*SettingsCategory(
+                title = "阅读",
                 icon = ImageVector.vectorResource(R.drawable.outline_bookmark_24px),
                 content = { ReaderSettingsList(
                     state = state,
                 ) }
             )*/
-            SettingsCard(
-                title = "数据",
-                icon = ImageVector.vectorResource(R.drawable.hard_disk_24px)
-            ) {
-                DataSettingsList(
-                    settingState = settingState,
-                    dialog = dialog,
-                    exportDataToFile = viewModel::exportToFile,
-                    exportAndSendToFile = viewModel::exportAndSendToFile,
-                    importData = viewModel::importFromFile,
-                    changeWebDataSource = viewModel::changeWebSource,
-                    webDataSourceId = viewModel.webBookDataSourceId,
-                )
-            }
-            SettingsCard(
-                title = stringResource(R.string.about_settings),
-                icon = ImageVector.vectorResource(R.drawable.info_24px)
-            ) {
-                AboutSettingsList(settingState = settingState)
+                    SettingsCategory(
+                        title = stringResource(R.string.data_settings),
+                        icon = ImageVector.vectorResource(R.drawable.hard_disk_24px)
+                    ) {
+                        DataSettingsList(
+                            onClickChangeSource = onClickChangeSource,
+                            onClickExportUserData = onClickExportUserData,
+                            settingState = settingState,
+                            importData = importData
+                        )
+                    }
+                    SettingsCategory(
+                        title = stringResource(R.string.about_settings),
+                        icon = ImageVector.vectorResource(R.drawable.info_24px)
+                    ) {
+                        AboutSettingsList(settingState = settingState)
+                    }
+                }
             }
         }
     }
@@ -160,62 +176,54 @@ private fun TopBar(
     )
 }
 
-
 @Composable
-fun SettingsCard(
+fun SettingsCategory(
     title: String,
     icon: ImageVector,
     content: @Composable ColumnScope.() -> Unit
 ) {
     var expanded by remember { mutableStateOf(true) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp, start = 14.dp, end = 14.dp),
+            .padding(vertical = 8.dp, horizontal = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(2.dp)
     ) {
         Column {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(68.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(start = 14.dp)
+                        .size(40.dp)
+                        .background(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        modifier = Modifier.padding(start = 16.dp)
+                    Icon(
+                        imageVector = icon,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = null,
                     )
                 }
+
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 14.dp)
+                )
+
                 IconButton(
                     onClick = { expanded = !expanded },
                     modifier = Modifier.padding(16.dp)
@@ -228,11 +236,11 @@ fun SettingsCard(
             }
             AnimatedVisibility(visible = expanded) {
                 Box(
-                    modifier = Modifier.padding(top = 0.dp, end = 14.dp, start = 14.dp, bottom = 14.dp)
+                    modifier = Modifier.padding(top = 0.dp, end = 12.dp, start = 12.dp, bottom = 12.dp)
                 ) {
                     Column(
                         modifier = Modifier.clip(RoundedCornerShape(16.dp)),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                         content = content
                     )
                 }

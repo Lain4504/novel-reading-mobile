@@ -64,8 +64,8 @@ fun Filter.Component(dialog: (@Composable () -> Unit) -> Unit) {
                         FilterChipsDialog(
                             enable = displayDialog,
                             selected = selected,
-                            title = this@Component.dialogTitle,
-                            description = this@Component.description,
+                            title = stringResource(this@Component.dialogTitleId),
+                            description = stringResource(this@Component.descriptionId),
                             onSelectedChange = {
                                 selected = it
                                 enabled = it != this@Component.getDefaultChoice()

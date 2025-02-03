@@ -13,10 +13,11 @@ import java.time.LocalDateTime
 @Dao
 interface BookInformationDao {
     @TypeConverters(LocalDateTimeConverter::class)
-    @Query("replace into book_information (id, title, cover_url, author, description, tags, publishing_house, word_count, last_update, is_complete) " +
-            "values (:id, :title, :coverUrl, :author, :description, :tags, :publishingHouse, :wordCount, :lastUpdated, :isComplete) ")
+    @Query("replace into book_information (id, title, subtitle, cover_url, author, description, tags, publishing_house, word_count, last_update, is_complete) " +
+            "values (:id, :title, :subtitle, :coverUrl, :author, :description, :tags, :publishingHouse, :wordCount, :lastUpdated, :isComplete) ")
     fun update(id: Int,
                title: String,
+               subtitle: String,
                coverUrl: String,
                author: String,
                description: String,
@@ -31,6 +32,7 @@ interface BookInformationDao {
         return update(
             information.id,
             information.title,
+            information.subtitle,
             information.coverUrl,
             information.author,
             information.description,
@@ -51,6 +53,7 @@ interface BookInformationDao {
         return BookInformation(
             entity.id,
             entity.title,
+            entity.subtitle,
             entity.coverUrl,
             entity.author,
             entity.description,

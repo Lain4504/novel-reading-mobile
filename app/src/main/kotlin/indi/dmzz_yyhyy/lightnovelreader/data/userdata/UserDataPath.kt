@@ -20,7 +20,7 @@ sealed class UserDataPath(
         data object IsUsingFlipPage : UserDataPath("isUsingFlipPage", Reader)
         data object IsUsingClickFlipPage : UserDataPath("isUsingClickFlipPage", Reader)
         data object IsUsingVolumeKeyFlip : UserDataPath("isUsingVolumeKeyFlip", Reader)
-        data object IsUsingFlipAnime : UserDataPath("isUsingFlipAnime", Reader)
+        data object FlipAnime : UserDataPath("flipAnime", Reader)
         data object FastChapterChange : UserDataPath("fastChapterChange", Reader)
         data object EnableBatteryIndicator : UserDataPath("enableBatteryIndicator", Reader)
         data object EnableTimeIndicator : UserDataPath("enableTimeIndicator", Reader)
@@ -40,6 +40,8 @@ sealed class UserDataPath(
         data object App : UserDataPath("app", Settings) {
             data object AutoCheckUpdate : UserDataPath("auto_check_update", App)
             data object UpdateChannel: UserDataPath("update_channel", App)
+            data object DistributionPlatform: UserDataPath("update_platform", App)
+            data object ProxyUrl: UserDataPath("proxy_url", App)
             data object Statistics : UserDataPath("statistics", App)
             data object MaxCache : UserDataPath("max_cache", App)
         }
@@ -51,19 +53,11 @@ sealed class UserDataPath(
         data object Data: UserDataPath("data", Settings) {
             data object WebDataSourceId : UserDataPath("web_data_source_id", Data)
         }
-        data object Reader : UserDataPath("reader", Settings) {
+        /*data object Reader : UserDataPath("reader", Settings) {
             data object FontSize : LinkUserData(Reader.FontSize)
             data object FontLineHeight : LinkUserData(Reader.FontLineHeight)
             data object KeepScreenOn : LinkUserData(Reader.KeepScreenOn)
-        }
+        }*/
     }
 }
 
-open class LinkUserData(
-    private val userDataPath: UserDataPath
-): UserDataPath("") {
-    override val path: String
-        get() = userDataPath.path
-    override val groupChildrenPath = userDataPath.groupChildrenPath
-    override val groupChildren = userDataPath.groupChildren
-}

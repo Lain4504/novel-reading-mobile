@@ -3,6 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven { setUrl("https://kotlin.bintray.com/kotlinx") }
     }
 }
 dependencyResolutionManagement {
@@ -16,3 +17,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "LightNovelReaderRefactoring"
 include(":app")
+include(":epub")

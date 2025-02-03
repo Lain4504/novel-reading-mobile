@@ -1,8 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,19 +9,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,8 +27,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,22 +39,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat.startActivity
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
+import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository.Companion.proxyUrlRegex
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.ObjectOptions
 
 @Composable
 fun BaseDialog(
@@ -152,130 +158,6 @@ fun BaseDialog(
     }
 }
 
-
-@Composable
-fun UpdatesAvailableDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    contentMarkdown: String? = null,
-    newVersionName: String? = null,
-    newVersionCode: Int = 0,
-    downloadSize: Double? = null,
-    downloadUrl: String? = null
-) {
-    val context = LocalContext.current
-    AlertDialog(
-        title = {
-            Text(
-                text = "更新可用",
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        },
-        text = {
-            Column {
-                newVersionName?.let {
-                    val sizeInMB = ((downloadSize ?: 0.0) / 1024) / 1024
-                    val formatted = "%.2f".format(sizeInMB)
-                    Text(
-                        text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE}) → $newVersionName($newVersionCode), ${formatted}MB"
-                    )
-                }
-                contentMarkdown?.let {
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(top = 20.dp)
-                            .wrapContentHeight()
-                            .heightIn(max = 350.dp)
-                    ) {
-                        item {
-                            Text(
-                                text = stringResource(R.string.changelog),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        }
-                        item {
-                            MarkdownText(it)
-                        }
-                    }
-                }
-            }
-        },
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(
-                onClick = onConfirmation
-            ) {
-                Text(text = stringResource(R.string.install_update))
-            }
-        },
-        dismissButton = {
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(
-                    onClick = onDismissRequest
-                ) {
-                    Text(text = stringResource(R.string.decline))
-                }
-                TextButton(
-                    onClick = {
-                        downloadUrl?.let { url ->
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            startActivity(context, intent, null)
-                        }
-                    }
-                ) {
-                    Text(text = stringResource(R.string.manual_download))
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun AddBookToBookshelfDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    onSelectBookshelf: (Int) -> Unit,
-    onDeselectBookshelf: (Int) -> Unit,
-    allBookshelf: List<Bookshelf>,
-    selectedBookshelfIds: List<Int>
-) {
-    val scrollState = rememberScrollState()
-    BaseDialog(
-        icon = painterResource(R.drawable.filled_bookmark_24px),
-        title = "添加至书架",
-        description = "将这本小说添加到以下分组",
-        onDismissRequest = onDismissRequest,
-        onConfirmation = onConfirmation,
-        dismissText = "取消",
-        confirmationText = "添加至选定分组",
-    ) {
-        Column(Modifier.width(IntrinsicSize.Max).sizeIn(maxHeight = 350.dp).verticalScroll(scrollState)) {
-            allBookshelf.forEachIndexed { index, bookshelf ->
-                CheckBoxListItem(
-                    modifier = Modifier
-                        .sizeIn(minWidth = 280.dp, maxWidth = 500.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp),
-                    title = bookshelf.name,
-                    supportingText = "共 ${bookshelf.allBookIds.size} 本",
-                    checked = selectedBookshelfIds.contains(bookshelf.id),
-                    onCheckedChange = {
-                        if (it) onSelectBookshelf(bookshelf.id) else onDeselectBookshelf(
-                            bookshelf.id
-                        )
-                    }
-                )
-                if (index != allBookshelf.size - 1) {
-                    HorizontalDivider(Modifier.padding(horizontal = 14.dp))
-                }
-            }
-        }
-    }
-}
-
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun SliderDialog(
@@ -354,7 +236,7 @@ class MutableExportContext: ExportContext {
 }
 
 @Composable
-fun ExportDialog(
+fun ExportUserDataDialog(
     onDismissRequest: () -> Unit,
     onClickSaveAndSend: (ExportContext) -> Unit,
     onClickSaveToFile: (ExportContext) -> Unit
@@ -366,39 +248,39 @@ fun ExportDialog(
         .padding(horizontal = 14.dp)
     BaseDialog(
         icon = painterResource(R.drawable.output_24px),
-        title = "导出数据",
-        description = "选择需要导出的数据。",
+        title = stringResource(R.string.settings_snap_data),
+        description = stringResource(R.string.dialog_snap_user_data_text),
         onDismissRequest = onDismissRequest,
     ) {
         Column(Modifier.width(IntrinsicSize.Max).sizeIn(maxHeight = 350.dp)) {
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "书架",
-                supportingText = "包括书架及书本信息",
+                title = stringResource(R.string.dialog_snap_bookshelf),
+                supportingText = stringResource(R.string.dialog_snap_bookshelf_text),
                 checked = mutableExportContext.bookshelf,
                 onCheckedChange = { mutableExportContext.bookshelf = it }
             )
             HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "阅读信息",
-                supportingText = "包括阅读历史、进度和时长等信息",
+                title = stringResource(R.string.dialog_snap_reading_data),
+                supportingText = stringResource(R.string.dialog_snap_reading_data_text),
                 checked = mutableExportContext.readingData,
                 onCheckedChange = { mutableExportContext.readingData = it }
             )
             HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "设置项",
-                supportingText = "包括应用设置和阅读器设置",
+                title = stringResource(R.string.dialog_snap_settings),
+                supportingText = stringResource(R.string.dialog_snap_settings_text),
                 checked = mutableExportContext.settings,
                 onCheckedChange = { mutableExportContext.settings = it }
             )
             HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
-                title = "书签",
-                supportingText = "包括全部书本的书签信息",
+                title = stringResource(R.string.dialog_snap_bookmarks),
+                supportingText = stringResource(R.string.dialog_snap_bookmarks_text),
                 checked = mutableExportContext.bookmark,
                 onCheckedChange = { mutableExportContext.bookmark = it }
             )
@@ -414,7 +296,7 @@ fun ExportDialog(
                 onClick = onDismissRequest
             ) {
                 Text(
-                    text = "取消",
+                    text = stringResource(R.string.cancel),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -423,7 +305,7 @@ fun ExportDialog(
                 onClick = { onClickSaveAndSend(mutableExportContext) }
             ) {
                 Text(
-                    text = "导出并分享",
+                    text = stringResource(R.string.export_and_share),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -432,7 +314,7 @@ fun ExportDialog(
                 onClick = { onClickSaveToFile(mutableExportContext) }
             ) {
                 Text(
-                    text = "导出至文件",
+                    text = stringResource(R.string.export_to_file),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -469,12 +351,12 @@ fun SourceChangeDialog(
 ) {
     BaseDialog(
         icon = painterResource(R.drawable.public_24px),
-        title = "切换数据源",
-        description = "选择使用的数据源，切换软件的网络数据提供源，但这会导致你的用户数据被暂存，将在下次切换到此数据源后恢复。但是你的缓存数据会被永久删除，并且需要重启应用。",
+        title = stringResource(R.string.settings_select_data_source),
+        description = stringResource(R.string.dialog_select_data_source_text),
         onDismissRequest = onDismissRequest,
         onConfirmation = onConfirmation,
-        dismissText = "取消",
-        confirmationText = "切换并重启"
+        dismissText = stringResource(R.string.cancel),
+        confirmationText = stringResource(R.string.switch_and_restart)
     ) {
         webDataSourceItems.forEachIndexed { index, webDataSourceItem ->
             RadioButtonListItem(
@@ -483,7 +365,7 @@ fun SourceChangeDialog(
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp),
                 title = webDataSourceItem.name,
-                supportingText = "提供者: ${webDataSourceItem.provider}",
+                supportingText = stringResource(R.string.data_source_provider, webDataSourceItem.provider),
                 selected = selectedWebDataSourceId == webDataSourceItem.id,
                 onClick = { onClickItem(webDataSourceItem.id) }
             )
@@ -492,4 +374,230 @@ fun SourceChangeDialog(
             }
         }
     }
+}
+
+@Composable
+fun SettingsGitHubProxyDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: (String) -> Unit,
+    proxyUrlUserData: StringUserData,
+) {
+    val proxyUrl = proxyUrlUserData.getOrDefault("")
+    var selectedOption by remember {
+        mutableStateOf(
+            ObjectOptions.GitHubProxyUrlOptions.optionsList.find { it.url == proxyUrl }
+                ?: ObjectOptions.GitHubProxyUrlOptions.optionsList.first { it.key == "custom" }
+        )
+    }
+    var input by remember { mutableStateOf(if (selectedOption.url == null) proxyUrl else "") }
+    var isValid by remember { mutableStateOf(true) }
+
+    AlertDialog (
+        onDismissRequest = onDismissRequest,
+        title = { Text(stringResource(R.string.settings_github_proxy)) },
+        text = {
+            Column {
+                ObjectOptions.GitHubProxyUrlOptions.optionsList.forEach { option ->
+                    RadioButtonListItem(
+                        title = stringResource(option.name),
+                        selected = selectedOption.key == option.key,
+                        supportingText = stringResource(option.description),
+                        onClick = { selectedOption = option },
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(stringResource(R.string.dialog_github_proxy_notice))
+                if (selectedOption.key == "custom") {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    TextField(
+                        isError = !isValid,
+                        value = input,
+                        supportingText = {
+                            Text(
+                                stringResource(R.string.dialog_github_proxy_supporting_text),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        },
+                        onValueChange = {
+                            isValid = (it.isEmpty() || proxyUrlRegex.matches(it))
+                            input = it
+                        },
+                        label = {
+                            Text(stringResource(R.string.dialog_github_proxy_custom_url))
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (!isValid) {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = stringResource(R.string.dialog_github_proxy_custom_url_hint) +
+                                    "https://example.com/\n" +
+                                    "https://nth.3rd.example.com/",
+                            fontFamily = FontFamily.Monospace,
+                        )
+                    }
+                }
+
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    when (selectedOption.key) {
+                        "custom" -> onConfirmation(input.ifBlank { "" })
+                        "disabled" -> onConfirmation("")
+                        else -> onConfirmation(selectedOption.url.toString().ifBlank { "" })
+                    }
+                }
+            ) {
+                Text(stringResource(R.string.apply))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun SettingsAboutInfoDialog(
+    onDismissRequest: () -> Unit,
+) {
+    AlertDialog (
+        onDismissRequest = onDismissRequest,
+        text = {
+            Column {
+                Row {
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        color = colorResource(id = R.color.ic_launcher_background),
+                        shape = CircleShape
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.icon_foreground),
+                            contentDescription = "appIcon",
+                            modifier = Modifier.scale(1.4f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+
+                        Text(
+                            stringResource(id = R.string.app_name),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            BuildConfig.APPLICATION_ID,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+
+                Text(
+                    text = stringResource(R.string.settings_about_oss),
+                    fontSize = 14.sp,
+                )
+                val annotatedString = AnnotatedString.Companion.fromHtml(
+                    htmlString = stringResource(
+                        id = R.string.settings_about_source_code,
+                        "<b><a href=\"https://github.com/dmzz-yyhyy/LightNovelReader\">GitHub</a></b>",
+                        "<b><a href=\"https://github.com/dmzz-yyhyy/LightNovelReader/issues\">GitHub Issues</a></b>"
+                    ),
+                    linkStyles = TextLinkStyles(
+                        style = SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        pressedStyle = SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            background = MaterialTheme.colorScheme.secondaryContainer,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    )
+                )
+                Text(
+                    text = annotatedString,
+                    style = TextStyle(
+                        fontSize = 14.sp
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                val titleColor = MaterialTheme.colorScheme.onSurface
+                val contentColor = MaterialTheme.colorScheme.secondary
+                Column {
+                    Text(
+                        stringResource(R.string.dialog_about_version), color = titleColor
+                    )
+                    Text(
+                        "${BuildConfig.VERSION_NAME} [${BuildConfig.VERSION_CODE}]", color = contentColor
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        stringResource(R.string.dialog_about_build_time), color = titleColor
+                    )
+                    Text(
+                        stringResource(R.string.info_build_date), color = contentColor
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(stringResource(R.string.dialog_about_build_host), color = titleColor)
+                    Text(
+                        stringResource(R.string.info_build_host), color = contentColor
+                    )
+                    Text(
+                        stringResource(R.string.info_build_os), color = contentColor
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        stringResource(R.string.translators), color = titleColor
+                    )
+                    Text(
+                        stringResource(R.string.language_translators), color = contentColor
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+            }
+        },
+        confirmButton = {},
+    )
+}
+
+@Composable
+fun ExportToEpubDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+) {
+    AlertDialog (
+        onDismissRequest = onDismissRequest,
+        title = { Text(stringResource(R.string.dialog_export_to_epub)) },
+        text = {
+            Text(stringResource(R.string.dialog_export_to_epub_text))
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirmation
+            ) {
+                Text(stringResource(android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }

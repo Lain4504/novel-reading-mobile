@@ -1,38 +1,49 @@
-<div align="center"><h1>LightNovelReader</h1></div>
-
 <div align="center">
+    <h1>LightNovelReader</h1>
     <a><img alt="Android" src="https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white&style=for-the-badge"/></a>
     <a><img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-0095D5.svg?logo=kotlin&logoColor=white&style=for-the-badge"/></a>
     <a><img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white&style=for-the-badge"></a>
     <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526"><img alt="QQ Group" src="https://img.shields.io/badge/QQ讨论群-867785526-brightgreen.svg?logoColor=white&style=for-the-badge"></a>
     <p>轻小说阅读软件，使用 Jetpack Compose 框架编写</p>
+    <img src="assets/header.png" alt="drawing" width="80%"/>
 </div>
 
 ## 介绍
 
-LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件，追求轻量化的体积和流畅的阅读体验。
+LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件，使用 Kotlin 和 Jetpack Compose 编写，具有轻量化的体积和流畅的阅读体验。此外，还有多种有用的功能，如 EPUB 导出、离线阅读和多数据源支持。
 
-查看重构前的 [分支](https://github.com/dmzz-yyhyy/LightNovelReader/tree/master)
+## 特性
+
+- 完全重构的版本（可在[ 此处 ](https://github.com/dmzz-yyhyy/LightNovelReader/tree/master)查看重构前的分支）
+- 使用 Jetpack Compose，提供流畅的阅读体验，支持 Android 7.0 ~ 15
+- 缓存－支持缓存书本内容，以及离线优先的阅读
+- 探索－发现新书、推荐榜，标签分类，关键词搜索……
+- 多数据源支持－可以切换数据源，甚至可以看漫画。数据源之间数据独立
+- 书架－完整的书架系统，支持创建和命名书架，将书本加入收藏、获取书本更新提示
+- 将书本导出为 EPUB 文件
+- 热情的开发者，还有更多…
 
 ## 下载
-
-软件虽然有release发布, 但由于目前处于开发阶段, 更新速度较快, 我们推荐使用CI内的最新构建进行使用
+从 [GitHub Releases](https://github.com/dmzz-yyhyy/LightNovelReader/releases/latest) 下载最新发布版。要体验最新的功能与 Bug 修复，请从 [Actions](https://github.com/dmzz-yyhyy/LightNovelReader/actions) 下载最新构建。
 
 ## 支持
 
-- 在 [**此处**](https://github.com/dmzz-yyhyy/LightNovelReader/issues/new/choose) 提交一个 Bug 反馈或功能请求
+- 在 [**此处**](https://github.com/dmzz-yyhyy/LightNovelReader/issues/new/choose) 提交一个 Bug 反馈或新功能请求
 - 欢迎加入 QQ 讨论群：`867785526` | [**邀请链接**](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526)
 
 ## 软件截图
 
-|                                                                                                        |
-|--------------------------------------------------------------------------------------------------------|
-| ![image](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/assets/bookshelf_light.png)   |
-| ![image](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/assets/bookshelf_dark.png)    |
-| ![image](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/assets/exploration_light.png) |
-| ![image](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/assets/exploration_dark.png)  |
-| ![image](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/assets/reading_light.png)     |
-| ![image](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/assets/reading_dark.png)      |
+|                             |
+|-----------------------------|
+| ![image](assets/light1.png) |
+| ![image](assets/dark1.png)  |
+| ![image](assets/light2.png) |
+| ![image](assets/dark2.png)  |
+| ![image](assets/light3.png) |
+| ![image](assets/dark3.png)  |
+
+### 关于 EpubLib
+为了处理epub的导出问题，我们单独创建了一个epub处理模块，如果您感兴趣，可以看[**这里**](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/epub.md)
 
 ## License
 

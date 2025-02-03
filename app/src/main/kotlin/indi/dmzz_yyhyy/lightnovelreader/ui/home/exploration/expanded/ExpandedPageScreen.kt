@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -39,21 +41,24 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Component
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationBookCard
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
+import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpandedPageScreen(
-    topBar: (@Composable () -> Unit) -> Unit,
+    explorationUiState: ExplorationUiState,
+    explorationExpandedPageUiState: ExpandedPageUiState,
     dialog: (@Composable () -> Unit) -> Unit,
     expandedPageDataSourceId: String,
-    uiState: ExpandedPageUiState,
     init: (String) -> Unit,
     loadMore: () -> Unit,
-    requestAddBookToBookshelf: (Int) -> Unit,
+    @Suppress("UNUSED_PARAMETER") requestAddBookToBookshelf: (Int) -> Unit,
     onClickBack: () -> Unit,
     onClickBook: (Int) -> Unit,
     refresh: () -> Unit,
@@ -63,63 +68,73 @@ fun ExpandedPageScreen(
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isRefreshing by remember{ mutableStateOf(false) }
     LifecycleEventEffect(Lifecycle.Event.ON_START) { init.invoke(expandedPageDataSourceId) }
-    topBar {
-        TopBar(
-            scrollBehavior =  enterAlwaysScrollBehavior,
-            title = uiState.pageTitle,
-            onClickBack = onClickBack
-        )
-    }
-    AnimatedVisibility(
-        visible = uiState.bookList.isEmpty(),
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Loading()
-    }
-    PullToRefreshBox(
-        modifier = Modifier.fillMaxSize(),
-        isRefreshing = isRefreshing,
-        state = rememberPullToRefreshState,
-        onRefresh = {
-            isRefreshing = true
-            refresh()
-            isRefreshing = false
-            scope.launch {
-                rememberPullToRefreshState.animateToHidden()
-            }
+    Scaffold(
+        topBar = {
+            TopBar(
+                scrollBehavior =  enterAlwaysScrollBehavior,
+                title = explorationExpandedPageUiState.pageTitle,
+                onClickBack = onClickBack
+            )
         }
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) { paddingValues ->
+        ExplorationScreen(
+            modifier = Modifier.padding(paddingValues),
+            uiState = explorationUiState,
+            refresh = refresh
         ) {
-            item {
-                LazyRow(
-                    modifier = Modifier.padding(start = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    items(uiState.filters) {
-                        it.Component(dialog)
+            AnimatedVisibility(
+                visible = explorationExpandedPageUiState.bookList.isEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Loading()
+            }
+            PullToRefreshBox(
+                modifier = Modifier
+                    .fillMaxSize(),
+                isRefreshing = isRefreshing,
+                state = rememberPullToRefreshState,
+                onRefresh = {
+                    isRefreshing = true
+                    refresh()
+                    isRefreshing = false
+                    scope.launch {
+                        rememberPullToRefreshState.animateToHidden()
                     }
                 }
-                Box(Modifier.height(3.dp))
-            }
-            itemsIndexed(uiState.bookList) { index, bookInformation ->
-                ExplorationBookCard(
+            ) {
+                LazyColumn(
                     modifier = Modifier
-                        .padding(start = 19.dp, end = 10.dp)
-                        .animateItem(),
-                    bookInformation = bookInformation,
-                    requestAddBookToBookshelf = requestAddBookToBookshelf,
-                    allBookshelfBookIds = uiState.allBookshelfBookIds,
-                    onClickBook = onClickBook
-                )
-                LaunchedEffect(uiState.bookList.size) {
-                    if (uiState.bookList.size - index == 3) {
-                        loadMore.invoke()
+                        .fillMaxSize()
+                        .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 3.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    item {
+                        LazyRow(
+                            modifier = Modifier.padding(start = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            items(explorationExpandedPageUiState.filters) {
+                                it.Component(dialog)
+                            }
+                        }
+                        Box(Modifier.height(3.dp))
+                    }
+                    itemsIndexed(explorationExpandedPageUiState.bookList) { index, bookInformation ->
+                        BookCardItem(
+                            bookInformation = bookInformation,
+                            onClick = { onClickBook(bookInformation.id) },
+                            onLongPress = withHaptic {},
+                            collected = explorationExpandedPageUiState.allBookshelfBookIds.contains(
+                                bookInformation.id
+                            )
+                        )
+                        LaunchedEffect(explorationExpandedPageUiState.bookList.size) {
+                            if (explorationExpandedPageUiState.bookList.size - index == 3) {
+                                loadMore.invoke()
+                            }
+                        }
                     }
                 }
             }
@@ -137,7 +152,7 @@ fun TopBar(
     MediumTopAppBar(
         title = {
             Text(
-                text = "${stringResource(id = R.string.nav_exploration)} · $title",
+                text = stringResource(id = R.string.nav_explore_child, title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,

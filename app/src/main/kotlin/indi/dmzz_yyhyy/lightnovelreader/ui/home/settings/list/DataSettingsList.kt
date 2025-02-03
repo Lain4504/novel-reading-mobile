@@ -1,48 +1,53 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.DocumentsContract
+import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportContext
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportDialog
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.MutableExportContext
+import androidx.compose.ui.res.stringResource
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SourceChangeDialog
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
+import kotlinx.coroutines.launch
 
 @Composable
 fun DataSettingsList(
+    onClickChangeSource: () -> Unit,
+    onClickExportUserData: () -> Unit,
     @Suppress("UNUSED_PARAMETER") settingState: SettingState,
-    exportDataToFile: (Uri, ExportContext) -> Unit,
-    exportAndSendToFile: (Uri, ExportContext, Context) -> Unit,
-    changeWebDataSource: (Int, Context) -> Unit,
-    webDataSourceId: Int,
-    importData: (Uri) -> Unit,
-    dialog: (@Composable () -> Unit) -> Unit,
+    importData: (Uri) -> OneTimeWorkRequest,
 ) {
-    var exportContext: ExportContext by remember { mutableStateOf(MutableExportContext()) }
     val context = LocalContext.current
-    val saveDataToFileLauncher = launcher {
-        exportDataToFile(it, exportContext)
+    val workManager = WorkManager.getInstance(context)
+    val scope = rememberCoroutineScope()
+    val importDataLauncher = launcher {
+        scope.launch {
+            workManager.getWorkInfoByIdFlow(importData(it).id).collect {
+                when (it?.state) {
+                    WorkInfo.State.FAILED -> {
+                        Toast.makeText(context, "导入失败，请检查文件格式或文件已损坏。", Toast.LENGTH_SHORT).show()
+                    }
+                    WorkInfo.State.SUCCEEDED -> {
+                        Toast.makeText(context, "导入成功", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {}
+                }
+            }
+        }
     }
-    val saveAndSendDataToFileLauncher = launcher {
-        exportAndSendToFile(it, exportContext, context)
-    }
-    val importDataLauncher = launcher(importData)
+    /*
     var displayExportDialog by remember { mutableStateOf(false) }
     var displaySourceChangeDialog by remember { mutableStateOf(false) }
     dialog {
@@ -65,11 +70,11 @@ fun DataSettingsList(
             )
         }
         if (displayExportDialog) {
-            ExportDialog(
+            ExportUserDataDialog(
                 onDismissRequest = { displayExportDialog = false },
                 onClickSaveAndSend = {
                     displayExportDialog = false
-                    createDataFile("LightNovelReaderData", saveAndSendDataToFileLauncher)
+                    exportAndSendToFile(exportContext, context)
                 },
                 onClickSaveToFile = {
                     displayExportDialog = false
@@ -78,35 +83,27 @@ fun DataSettingsList(
                 }
             )
         }
-    }
+    }*/
     SettingsClickableEntry(
-        title = "导出数据",
-        description = "将当前应用内的用户数据导出为.lnr文件",
-        onClick = { displayExportDialog = true }
+        iconRes = R.drawable.output_24px,
+        title = stringResource(R.string.settings_snap_data),
+        description = stringResource(R.string.settings_snap_data_desc),
+        onClick = onClickExportUserData
     )
     SettingsClickableEntry(
-        title = "导入数据",
-        description = "从外部.lnr文件内导入数据至软件",
+        iconRes = R.drawable.input_24px,
+        title = stringResource(R.string.settings_import_data),
+        description = stringResource(R.string.settings_import_data_desc),
         onClick = { selectDataFile(importDataLauncher) }
     )
     SettingsClickableEntry(
-        title = "切换数据源",
-        description = "切换软件的网络数据提供源，但这会导致你的用户数据被暂存，将在下次切换到此数据源后恢复。但是你的缓存数据会被永久删除。",
-        onClick = { displaySourceChangeDialog = true }
+        iconRes = R.drawable.public_24px,
+        title = stringResource(R.string.settings_select_data_source),
+        description = stringResource(R.string.settings_select_data_source_desc),
+        onClick = onClickChangeSource
     )
 }
 
-@Suppress("DuplicatedCode")
-fun createDataFile(fileName: String, launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
-    val initUri = DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:Documents")
-    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-        addCategory(Intent.CATEGORY_OPENABLE)
-        type = "*/*"
-        putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
-        putExtra(Intent.EXTRA_TITLE, "$fileName.lnr")
-    }
-    launcher.launch(Intent.createChooser(intent, "选择一位置"))
-}
 
 @Suppress("DuplicatedCode")
 fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
@@ -114,7 +111,8 @@ fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResul
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
         type = "*/*"
-        putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
     launcher.launch(Intent.createChooser(intent, "选择数据文件"))
 }

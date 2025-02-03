@@ -4,6 +4,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.wenku8Cookie
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGet
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +48,7 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
 
     private fun getCompletedBooksRow(): ExplorationBooksRow {
         val soup = Jsoup
-            .connect("https://www.wenku8.cc/modules/article/articlelist.php?fullflag=1")
+            .connect("$host/modules/article/articlelist.php?fullflag=1")
             .wenku8Cookie()
             .autoReconnectionGet()
         return getBooksRow(soup, "完结全本").copy(
@@ -58,7 +59,7 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
 
     private fun getTopListBookBooksRow(title: String, sort: String): ExplorationBooksRow {
         val soup = Jsoup
-            .connect("https://www.wenku8.cc/modules/article/toplist.php?sort=$sort")
+            .connect("$host/modules/article/toplist.php?sort=$sort")
             .wenku8Cookie()
             .autoReconnectionGet()
         return getBooksRow(soup, title).copy(
@@ -69,7 +70,7 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
 
     private fun getAllBookBooksRow(): ExplorationBooksRow {
         val soup = Jsoup
-            .connect("https://www.wenku8.cc/modules/article/articlelist.php")
+            .connect("$host/modules/article/articlelist.php")
             .wenku8Cookie()
             .autoReconnectionGet()
         return getBooksRow(soup, "轻小说列表")
@@ -82,6 +83,9 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
         val titleList = soup?.select("#content > table.grid > tbody > tr > td > div > div:nth-child(2) > b > a")
             ?.slice(0..5)
             ?.map { it.text().split("(").getOrNull(0) ?: "" } ?: emptyList()
+        val authorList = soup?.select("#content > table.grid > tbody > tr > td > div > div:nth-child(2) > p:nth-child(2)")
+            ?.slice(0..5)
+            ?.map { it.text().split("/").getOrNull(0)?.split(":")?.get(1) ?: ""} ?: emptyList()
         val coverUrlList = soup?.select("#content > table.grid > tbody > tr > td > div > div:nth-child(1) > a > img")
             ?.slice(0..5)
             ?.map { it.attr("src") } ?: emptyList()
@@ -91,6 +95,7 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
                 ExplorationDisplayBook(
                     id = idlList[it],
                     title = titleList[it],
+                    author = authorList[it],
                     coverUrl = coverUrlList[it],
                 )
             } ?: emptyList(),

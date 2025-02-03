@@ -14,6 +14,7 @@ data class BookInformationEntity(
     @PrimaryKey
     val id: Int,
     val title: String,
+    val subtitle: String,
     @ColumnInfo(name = "cover_url")
     val coverUrl: String,
     val author: String,
