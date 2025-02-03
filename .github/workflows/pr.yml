@@ -29,18 +29,7 @@ jobs:
         id: android_version
       - name: Build debug APK
         run: ./gradlew assembleDebug
-      - uses: r0adkll/sign-android-release@v1
-        name: Sign app APK
-        id: sign_app
-        with:
-          releaseDirectory: app/build/outputs/apk/debug
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
       - uses: actions/upload-artifact@v4
         with:
           name: LightNovelReader-${{steps.android_version.outputs.VERSION_CODE}}-debug
-          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          path: app/build/outputs/apk/debug/*
