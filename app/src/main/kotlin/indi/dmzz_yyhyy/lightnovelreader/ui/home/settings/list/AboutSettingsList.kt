@@ -15,7 +15,9 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 
 @Composable
 fun AboutSettingsList(
-    settingState: SettingState) {
+    settingState: SettingState,
+    onClickDebugMode: () -> Unit
+) {
     val appInfo: String = buildString {
         appendLine(BuildConfig.APPLICATION_ID)
         append("${BuildConfig.VERSION_NAME} [${BuildConfig.VERSION_CODE}] - ")
@@ -53,4 +55,11 @@ fun AboutSettingsList(
         booleanUserData = settingState.statisticsUserData,
         disabled = BuildConfig.DEBUG
     )
+    if (BuildConfig.DEBUG)
+        SettingsClickableEntry(
+            iconRes = R.drawable.adb_24px,
+            title = "调试工具",
+            description = "debug用调试工具",
+            onClick = onClickDebugMode
+        )
 }

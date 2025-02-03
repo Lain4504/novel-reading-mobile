@@ -29,17 +29,18 @@
     <string name="ignore">Ignore</string>
     <string name="ignore_version">Ignore Version</string>
     <string name="switch_and_restart">Switch and Restart</string>
+    <string name="show_read">Show Read</string>
+    <string name="hide_read">Hide Read</string>
     <string name="export_to_file">Export to File</string>
     <string name="export_and_share">Share</string>
 
     <!-- Hints -->
-    <string name="page_in_progress">In Progress</string>
-    <string name="page_in_progress_desc">Feature coming soon.\nCheck out other pages using the navigation bar.</string>
     <string name="nothing_here">Nothing Here</string>
-    <string name="nothing_here_desc_reading">Once you’ve read some books, they will show up here.</string>
+    <string name="nothing_here_desc_reading">Once you\'ve read some books, they will show up here.</string>
     <string name="nothing_here_desc_search">Recent searches will be saved here. Use the search bar to search for something.</string>
-    <string name="offline">Offline</string>
-    <string name="offline_desc">Please check your network connection and proxy settings.</string>
+    <string name="nothing_here_desc_bookshelf">Click the "Favorite" button to add the book to this bookshelf.</string>
+    <string name="offline">Oops</string>
+    <string name="offline_desc">Please check the availability of the source website and your proxy settings.</string>
 
     <!-- Settings -->
     <string name="app_settings">App</string>
@@ -52,7 +53,7 @@
     <string name="settings_get_updates">Check for Updates</string>
     <string name="settings_get_updates_desc">Check and install the latest version.</string>
     <string name="settings_distribution_platform">Distribution Platform</string>
-    <string name="settings_distribution_platform_settings_desc"><!--reversed--></string>
+    <string name="settings_distribution_platform_settings_desc"><!--reserved--></string>
     <string name="settings_github_proxy">GitHub Proxy</string>
     <string name="settings_github_proxy_desc">Choose a GitHub proxy for faster access, if applicable</string>
 
@@ -148,7 +149,7 @@
     <string name="publishing_house">Publishing House</string>
     <string name="filter_by_publishing_house">Filter by Publishing House</string>
     <string name="filter_by_publishing_house_desc">Filter by the book\'s publishing house</string>
-    <string name="book_info_update_date">Updated on %s-%s-%s</string>
+    <string name="book_info_update_date">Updated on %d-%d-%d</string>
     <string name="book_info_word_count_kilo">%dK Words</string>
     <string name="name">Name</string>
     <string name="settings_preview">Settings Preview</string>
@@ -163,8 +164,9 @@
     <string name="export_to_lnr_file">Export to .lnr File</string>
     <string name="export_all_to_lnr_file">Export All to .lnr File</string>
     <string name="import_from_file">Import from File</string>
-    <string name="add_to_bookshelf">Add to Bookshelf</string>
+    <string name="add_to_bookshelf">Favorite</string>
     <string name="action_cache">Cache</string>
+    <string name="action_show_info">Info</string>
     <string name="expand">Expand</string>
     <string name="collapse">Collapse</string>
     <string name="info_reading_finished">Finished Reading</string>

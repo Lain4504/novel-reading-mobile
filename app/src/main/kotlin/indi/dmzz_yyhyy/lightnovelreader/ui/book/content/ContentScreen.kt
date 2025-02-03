@@ -180,7 +180,7 @@ fun Content(
     val view = LocalView.current
     val context = LocalContext.current
     val settingsBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val chaptersBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val chaptersBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isRunning by remember { mutableStateOf(false) }
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
@@ -410,6 +410,7 @@ private fun TopBar(
         },
         actions = {
             IconButton(
+                enabled = false,
                 onClick = {
                     //TODO 全屏
                 }) {
@@ -445,6 +446,7 @@ private fun BottomBar(
                 contentDescription = "lastChapter")
         }
         IconButton(
+            enabled = false,
             onClick = {
                 //TODO 添加至书签
             }) {
@@ -634,7 +636,6 @@ fun ChapterSelectorBottomSheet(
                                 }
                             }
                         }
-
                     }
                 }
                 item {
