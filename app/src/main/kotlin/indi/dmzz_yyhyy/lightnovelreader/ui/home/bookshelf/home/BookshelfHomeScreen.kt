@@ -325,7 +325,7 @@ fun BookshelfHomeScreen(
                                             onClickBook(it.id)
                                         else changeBookSelectState(it.id)
                                     },
-                                    onLongPress = { onLongPress(it.id) }
+                                    onLongPress = { }
                                 )
                             }
                         }

@@ -71,6 +71,7 @@ fun SettingsScreen(
     importData: (Uri) -> OneTimeWorkRequest,
     onClickChangeSource: () -> Unit,
     onClickExportUserData: () -> Unit,
+    onClickDebugMode: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
 ) {
@@ -138,7 +139,10 @@ fun SettingsScreen(
                         title = stringResource(R.string.about_settings),
                         icon = ImageVector.vectorResource(R.drawable.info_24px)
                     ) {
-                        AboutSettingsList(settingState = settingState)
+                        AboutSettingsList(
+                            settingState = settingState,
+                            onClickDebugMode = onClickDebugMode
+                        )
                     }
                 }
             }
