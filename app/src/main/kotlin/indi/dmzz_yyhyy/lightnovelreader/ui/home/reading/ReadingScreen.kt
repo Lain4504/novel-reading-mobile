@@ -174,9 +174,7 @@ private fun ReadingContent(
                     userReadingData = userReadingData,
                     onClick = {
                         onClickBook(bookInformation.id)
-                    },
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope
+                    }
                 )
         }
         item {
@@ -243,113 +241,109 @@ private fun ReadingBookCard(
     bookInformation: BookInformation,
     userReadingData: UserReadingData,
     onClick: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-    with(sharedTransitionScope) {
-        Box(
-            modifier = modifier
-                .height(144.dp)
-                .clip(RoundedCornerShape(12.dp))
-        ) {
-            Row(
-                modifier = Modifier
-                    .combinedClickable(
-                        onClick = onClick
-                    )
-                    .padding(4.dp),
-            ) {
-                Cover(
-                    width = 94.dp,
-                    height = 142.dp,
-                    url = bookInformation.coverUrl,
-                    rounded = 8.dp,
+    Box(
+        modifier = modifier
+            .height(144.dp)
+            .clip(RoundedCornerShape(12.dp))
+    ) {
+        Row(
+            modifier = Modifier
+                .combinedClickable(
+                    onClick = onClick
                 )
-                Column(
+                .padding(4.dp),
+        ) {
+            Cover(
+                width = 94.dp,
+                height = 142.dp,
+                url = bookInformation.coverUrl,
+                rounded = 8.dp,
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(start = 12.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                val titleLineHeight = 20.sp
+                Text(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween,
+                        .height(
+                            with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                        )
+                        .wrapContentHeight(Alignment.CenterVertically),
+                    text = bookInformation.title,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.W600,
+                    fontSize = 16.sp,
+                    lineHeight = titleLineHeight,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val titleLineHeight = 20.sp
                     Text(
-                        modifier = Modifier
-                            .height(
-                                with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
-                            )
-                            .wrapContentHeight(Alignment.CenterVertically),
-                        text = bookInformation.title,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+                        text = bookInformation.author,
+                        maxLines = 1,
                         fontWeight = FontWeight.W600,
-                        fontSize = 16.sp,
-                        lineHeight = titleLineHeight,
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = bookInformation.author,
-                            maxLines = 1,
-                            fontWeight = FontWeight.W600,
-                            color = MaterialTheme.colorScheme.primary,
-                            lineHeight = 20.sp,
-                            fontSize = 14.sp,
-                        )
-                    }
-                    Text(
-                        text = bookInformation.description.trim(),
-                        maxLines = 2,
-                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.primary,
+                        lineHeight = 20.sp,
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary,
-                        lineHeight = 18.sp,
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Row {
-                            Icon(
-                                modifier = Modifier
-                                    .size(14.dp)
-                                    .align(Alignment.CenterVertically)
-                                    .padding(top = 2.dp, end = 2.dp),
-                                painter = painterResource(id = R.drawable.outline_schedule_24px),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                            Text(
-                                text = formTime(userReadingData.lastReadTime),
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                                fontSize = 13.sp,
-                                lineHeight = 14.sp
-                            )
-                        }
-                        Text(
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            text = stringResource(
-                                R.string.read_progress,
-                                (userReadingData.readingProgress * 100).toInt().toString() + "%"
-                            )
+                }
+                Text(
+                    text = bookInformation.description.trim(),
+                    maxLines = 2,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    lineHeight = 18.sp,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Row {
+                        Icon(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .align(Alignment.CenterVertically)
+                                .padding(top = 2.dp, end = 2.dp),
+                            painter = painterResource(id = R.drawable.outline_schedule_24px),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = stringResource(R.string.read_minutes, (userReadingData.totalReadTime) / 60),
+                            text = formTime(userReadingData.lastReadTime),
                             modifier = Modifier.align(Alignment.CenterVertically),
                             fontSize = 13.sp,
                             lineHeight = 14.sp
                         )
                     }
-
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
-                        progress = { userReadingData.readingProgress }
+                    Text(
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        text = stringResource(
+                            R.string.read_progress,
+                            (userReadingData.readingProgress * 100).toInt().toString() + "%"
+                        )
+                    )
+                    Text(
+                        text = stringResource(R.string.read_minutes, (userReadingData.totalReadTime) / 60),
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp
                     )
                 }
+
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    progress = { userReadingData.readingProgress }
+                )
             }
         }
     }
