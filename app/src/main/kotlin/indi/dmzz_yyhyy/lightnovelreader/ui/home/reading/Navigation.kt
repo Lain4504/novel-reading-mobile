@@ -14,12 +14,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Home.Reading> {
-        val readingViewModel = hiltViewModel<ReadingViewModel>()
         ReadingScreen(
             controller = navController,
             selectedRoute = Route.Home.Reading,
             uiState = hiltViewModel<ReadingViewModel>().uiState,
-            update = readingViewModel::update,
             onClickBook = navController::navigateToBookDetailDestination,
             onClickContinueReading = { bookId, chapterId ->
                 navController.navigateToBookDetailDestination(bookId)
