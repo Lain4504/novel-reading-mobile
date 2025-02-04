@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 @Composable
 fun withHaptic(action: (() -> Unit)?): () -> Unit {
@@ -31,6 +33,23 @@ fun Modifier.fadingEdge(brush: Brush) = this
         drawContent()
         drawRect(brush = brush, blendMode = BlendMode.DstIn)
     }
+
+fun <T> Flow<T>.throttleLatest(periodMillis: Long): Flow<T> = flow {
+    var lastTime = 0L
+    var pendingValue: T? = null
+    collect { value ->
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastTime >= periodMillis) {
+            lastTime = currentTime
+            pendingValue = null
+            emit(value)
+        } else {
+            pendingValue = value
+        }
+    }
+
+    pendingValue?.let { emit(it) }
+}
 
 @Composable
 fun LazyListState.isScrollingUp(): State<Boolean> {
