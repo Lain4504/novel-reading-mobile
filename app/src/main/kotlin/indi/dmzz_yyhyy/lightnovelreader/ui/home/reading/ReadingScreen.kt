@@ -88,14 +88,13 @@ fun ReadingScreen(
                 )
             }
         ) {
-            Box(Modifier.padding(it)) {
-                ReadingContent(
-                    uiState = uiState,
-                    onClickBook = onClickBook,
-                    onClickContinueReading = onClickContinueReading,
-                    onClickJumpToExploration = onClickJumpToExploration,
-                )
-            }
+            ReadingContent(
+                modifier = Modifier.padding(it),
+                uiState = uiState,
+                onClickBook = onClickBook,
+                onClickContinueReading = onClickContinueReading,
+                onClickJumpToExploration = onClickJumpToExploration,
+            )
         }
     }
 }
@@ -103,19 +102,51 @@ fun ReadingScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ReadingContent(
+    modifier: Modifier,
     uiState: ReadingUiState,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
 ) {
     val readingBooks = uiState.recentReadingBooks.reversed()
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp)
-            .nestedScroll(TopAppBarDefaults.pinnedScrollBehavior().nestedScrollConnection),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (uiState.recentReadingBooks.isNotEmpty())
+    AnimatedVisibility(
+        visible =  !uiState.isLoading,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp)
+                .nestedScroll(TopAppBarDefaults.pinnedScrollBehavior().nestedScrollConnection),
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (uiState.recentReadingBooks.isNotEmpty())
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            text = stringResource(R.string.continue_reading),
+                            maxLines = 1,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            item {
+                AnimatedVisibility(
+                    visible =  !uiState.isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    ReadingHeaderCard(
+                        book = readingBooks[0],
+                        onClickContinueReading = onClickContinueReading
+                    )
+                }
+            }
             item {
                 Box(
                     modifier = Modifier
@@ -124,46 +155,15 @@ private fun ReadingContent(
                 ) {
                     Text(
                         modifier = Modifier.padding(vertical = 4.dp),
-                        text = stringResource(R.string.continue_reading),
+                        text = stringResource(
+                            R.string.recent_reads, readingBooks.size,
+                        ),
                         maxLines = 1,
                         fontWeight = FontWeight.Bold,
                     )
                 }
             }
-        item {
-            AnimatedVisibility(
-                visible =  !uiState.isLoading,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                ReadingHeaderCard(
-                    book = readingBooks[0],
-                    onClickContinueReading = onClickContinueReading
-                )
-            }
-        }
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp)
-            ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    text = stringResource(
-                        R.string.recent_reads, readingBooks.size,
-                    ),
-                    maxLines = 1,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        }
-        items(readingBooks) {
-            AnimatedVisibility(
-                visible =  !uiState.isLoading,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
+            items(readingBooks) {
                 ReadingBookCard(
                     book = it,
                     onClick = {
@@ -171,11 +171,12 @@ private fun ReadingContent(
                     }
                 )
             }
-        }
-        item {
-            Spacer(Modifier.height(12.dp))
+            item {
+                Spacer(Modifier.height(12.dp))
+            }
         }
     }
+
     AnimatedVisibility(
         visible =  uiState.isLoading && uiState.recentReadingBooks.isEmpty(),
         enter = fadeIn(),
