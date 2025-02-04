@@ -193,7 +193,7 @@ fun ExplorationSearchScreen(
                                 Text(
                                     text = stringResource(id = R.string.search_history),
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.W700,
+                                    fontWeight = FontWeight.W600,
                                     lineHeight = 16.sp,
                                 )
 
@@ -210,7 +210,7 @@ fun ExplorationSearchScreen(
                                     Text(
                                         text = stringResource(id = R.string.search_history_clear),
                                         fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.W600,
                                         lineHeight = 16.sp,
                                     )
                                 }
@@ -293,7 +293,7 @@ fun ExplorationSearchScreen(
                 ) {
                     item {
                         AnimatedText(
-                            modifier = Modifier.padding(16.dp, 8.dp),
+                            modifier = Modifier.padding(vertical = 12.dp),
                             text = stringResource(
                                 R.string.search_results_title,
                                 searchKeyword,
@@ -302,7 +302,7 @@ fun ExplorationSearchScreen(
                             ),
                             style = MaterialTheme.typography.displayLarge,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.W700,
+                            fontWeight = FontWeight.W600,
                             lineHeight = 16.sp,
                             letterSpacing = 0.5.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant

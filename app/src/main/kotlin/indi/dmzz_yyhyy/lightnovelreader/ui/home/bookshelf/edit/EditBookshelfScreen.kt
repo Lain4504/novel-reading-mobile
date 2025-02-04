@@ -94,7 +94,7 @@ fun EditBookshelfScreen(
                 modifier = Modifier.padding(16.dp, 10.dp),
                 text = stringResource(R.string.bookshelf_settings),
                 style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.W700,
+                fontWeight = FontWeight.W600,
                 fontSize = 17.sp,
                 lineHeight = 16.sp,
                 letterSpacing = 0.5.sp,

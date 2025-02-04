@@ -548,7 +548,7 @@ fun ChapterSelectorBottomSheet(
                     modifier = Modifier.padding(start = 8.dp),
                     text = stringResource(R.string.select_chapter),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.W600
                 )
             }
             Spacer(Modifier.height(8.dp))
@@ -576,7 +576,7 @@ fun ChapterSelectorBottomSheet(
                                 Column {
                                     Text(
                                         text = volume.volumeTitle,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.W600,
                                         fontSize = 16.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )

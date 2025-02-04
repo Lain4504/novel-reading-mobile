@@ -131,7 +131,7 @@ private fun ReadingContent(
                             modifier = Modifier.padding(vertical = 4.dp),
                             text = stringResource(R.string.continue_reading),
                             maxLines = 1,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.W600,
                         )
                     }
                 }
@@ -159,7 +159,7 @@ private fun ReadingContent(
                             R.string.recent_reads, readingBooks.size,
                         ),
                         maxLines = 1,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Medium,
                     )
                 }
             }
@@ -193,7 +193,7 @@ private fun ReadingContent(
                     Text(
                         text = stringResource(id = R.string.navigate_to_explore),
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.W500,
+                        fontWeight = FontWeight.W600,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -278,7 +278,7 @@ private fun ReadingBookCard(
                     text = book.title,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.W600,
                     fontSize = 16.sp,
                     lineHeight = titleLineHeight,
                 )
@@ -289,7 +289,7 @@ private fun ReadingBookCard(
                     Text(
                         text = book.author,
                         maxLines = 1,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.W600,
                         color = MaterialTheme.colorScheme.primary,
                         lineHeight = 20.sp,
                         fontSize = 14.sp,
@@ -399,7 +399,7 @@ private fun ReadingHeaderCard(
                     text = book.title,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.W700,
                     fontSize = 19.sp,
                     lineHeight = titleLineHeight,
                 )
@@ -409,7 +409,7 @@ private fun ReadingHeaderCard(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.primary,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.W600
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(
@@ -422,7 +422,7 @@ private fun ReadingHeaderCard(
                         onClick = { onClickContinueReading(book.id, book.lastReadChapterId) }) {
                         Text(
                             text = stringResource(R.string.resume_last_reading),
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.W600,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

@@ -221,7 +221,7 @@ fun SettingsCategory(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.W600,
                     fontSize = 18.sp,
                     modifier = Modifier
                         .weight(1f)

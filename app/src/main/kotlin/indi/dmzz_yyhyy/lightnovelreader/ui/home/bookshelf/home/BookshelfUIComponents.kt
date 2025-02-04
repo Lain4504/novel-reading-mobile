@@ -134,7 +134,7 @@ fun BookCardContent(
                 text = bookInformation.title,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.W600,
                 fontSize = 16.sp,
                 lineHeight = titleLineHeight,
             )
@@ -145,7 +145,7 @@ fun BookCardContent(
                 Text(
                     text = bookInformation.author,
                     maxLines = 1,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.W600,
                     color = MaterialTheme.colorScheme.primary,
                     lineHeight = 20.sp,
                     fontSize = 14.sp,
@@ -193,7 +193,7 @@ fun BookCardContent(
                     )
                     Text(
                         text = latestChapterTitle,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.W500,
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 14.sp,
                         lineHeight = 18.sp,
