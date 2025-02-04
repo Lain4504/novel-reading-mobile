@@ -1,26 +1,37 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.CounterConverter
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.BookRecordConverter
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.CountConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateConverter
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalTimeConverter
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.statistics.Count
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.BookRecord
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
 import java.time.LocalDate
-import java.time.LocalTime
 
-@TypeConverters(LocalDateConverter::class, CounterConverter::class, ListConverter::class, LocalTimeConverter::class)
+@TypeConverters(
+    LocalDateConverter::class,
+    CountConverter::class,
+    ListConverter::class,
+    BookRecordConverter::class
+)
 @Entity(tableName = "reading_statistics")
 data class ReadingStatisticsEntity(
     @PrimaryKey
     val date: LocalDate,
+    @ColumnInfo(name = "reading_time_count")
     val readingTimeCount: Count,
-    val avgSpeed: Int, // avg reading speed (wpm)
-    val topBookId: Int,
-    val topBookReadingTime: Int,
-    val tags: List<String>,
-    val startReadingTime: LocalTime,
-    val latestReadingTime: LocalTime
+    @ColumnInfo(name = "book_records")
+    val bookRecords: Map<Int, BookRecord>,
+    @ColumnInfo(name = "avg_speed")
+    val avgSpeed: Int,
+    @ColumnInfo(name = "favorite_books")
+    val favoriteBooks: List<Int>,
+    @ColumnInfo(name = "started_books")
+    val startedBooks: List<Int>,
+    @ColumnInfo(name = "finished_books")
+    val finishedBooks: List<Int>
 )

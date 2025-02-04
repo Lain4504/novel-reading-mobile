@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.statistics
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
 import androidx.compose.ui.graphics.Color
 

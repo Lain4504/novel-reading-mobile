@@ -6,7 +6,12 @@ object Route {
     @Serializable
     object Home {
         @Serializable
-        object Reading
+        object Reading {
+            @Serializable
+            object Home
+            @Serializable
+            object Stats
+        }
         @Serializable
         object Bookshelf {
             @Serializable

@@ -2,37 +2,19 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToBookContentDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home.navigateToExplorationHomeDestination
+import androidx.navigation.compose.navigation
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.readingStatsDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import readingHomeDestination
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Home.Reading> {
-        val readingViewModel = hiltViewModel<ReadingViewModel>()
-        ReadingScreen(
-            controller = navController,
-            selectedRoute = Route.Home.Reading,
-            uiState = hiltViewModel<ReadingViewModel>().uiState,
-            update = readingViewModel::update,
-            onClickBook = navController::navigateToBookDetailDestination,
-            onClickContinueReading = { bookId, chapterId ->
-                navController.navigateToBookDetailDestination(bookId)
-                navController.navigateToBookContentDestination(bookId, chapterId)
-            },
-            onClickJumpToExploration = navController::navigateToExplorationHomeDestination,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = this
-        )
+    navigation<Route.Home.Reading>(
+        startDestination = Route.Home.Reading.Home
+    ) {
+        readingHomeDestination(navController, sharedTransitionScope)
+        readingStatsDestination(navController)
     }
-}
-
-@Suppress("unused")
-fun NavController.navigateToHomeReadingDestination() {
-    navigate(Route.Home.Reading)
 }

@@ -1,8 +1,10 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.statistics
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -21,11 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.CalendarLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.*
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.rememberHeatMapCalendarState
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.edit.SwitchSettingItem
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
@@ -35,10 +39,9 @@ import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReadingStatisticsScreen(
-    topBar: (@Composable () -> Unit) -> Unit,
+fun ReadingStatsScreen(
     onClickBack: () -> Unit,
-    viewModel: ReadingStatisticsViewModel = hiltViewModel(),
+    viewModel: ReadingStatsViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState
     val startDate by viewModel.startDate.collectAsState()
@@ -50,78 +53,116 @@ fun ReadingStatisticsScreen(
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var selection by remember { mutableStateOf<Pair<LocalDate, Level>?>(null) }
-
-    topBar {
-        TopBar(
-            scrollBehavior = pinnedScrollBehavior,
-            onClickBack = onClickBack,
-            onClickSettings = {
-                showSettingsBottomSheet = true
-            }
-        )
-    }
-
-    if (isLoading) {
-        CircularProgressIndicator()
-    } else {
-        Column(modifier = Modifier.fillMaxSize()) {
-            val state = rememberHeatMapCalendarState(
-                startMonth = startDate.yearMonth,
-                endMonth = endDate.yearMonth,
-                firstVisibleMonth = LocalDate.now().yearMonth,
-                firstDayOfWeek = DayOfWeek.MONDAY
+    
+    Scaffold(
+        topBar = {
+            TopBar(
+                scrollBehavior = pinnedScrollBehavior,
+                onClickBack = onClickBack,
+                onClickSettings = {
+                    showSettingsBottomSheet = true
+                }
             )
+        }
+    ) { it ->
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Column(modifier = Modifier.fillMaxSize().padding(it)) {
+                val state = rememberHeatMapCalendarState(
+                    startMonth = startDate.yearMonth,
+                    endMonth = endDate.yearMonth,
+                    firstVisibleMonth = LocalDate.now().yearMonth,
+                    firstDayOfWeek = DayOfWeek.MONDAY
+                )
 
-            HeatMapCalendar(
-                modifier = Modifier.padding(vertical = 10.dp),
-                state = state,
-                contentPadding = PaddingValues(end = 6.dp),
-                dayContent = { day, week ->
-                    val isClicked = selectedDate == day.date
-                    val level = statisticsData[day.date] ?: Level.Zero
-                    Day(
-                        selected = isClicked,
-                        day = day,
-                        startDate = startDate,
-                        endDate = endDate,
-                        week = week,
-                        level = level,
-                    ) { date ->
-                        selection = Pair(date, level)
-                        viewModel.selectDate(date)
-                    }
-                },
-                weekHeader = { WeekHeader(it) },
-                monthHeader = { MonthHeader(it, LocalDate.now()) },
-            )
-
-            CalendarHint(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), viewModel)
-
-            Box(modifier = Modifier.weight(1f)) {
-                BottomContent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .align(Alignment.BottomCenter),
-                    selection = selection,
-                    /*scrollToPrev = {
-                        coroutineScope.launch {
-                            state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                HeatMapCalendar(
+                    modifier = Modifier.padding(vertical = 10.dp),
+                    state = state,
+                    contentPadding = PaddingValues(end = 6.dp),
+                    dayContent = { day, week ->
+                        val isClicked = selectedDate == day.date
+                        val level = statisticsData[day.date] ?: Level.Zero
+                        Day(
+                            selected = isClicked,
+                            day = day,
+                            startDate = startDate,
+                            endDate = endDate,
+                            week = week,
+                            level = level,
+                        ) { date ->
+                            selection = Pair(date, level)
+                            viewModel.selectDate(date)
                         }
                     },
-                    scrollToNext = {
-                        coroutineScope.launch {
-                            state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
-                        }
-                    },*/
+                    weekHeader = { WeekHeader(it) },
+                    monthHeader = { MonthHeader(it, LocalDate.now()) },
                 )
+
+                CalendarHint(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), viewModel)
+
+                Box(modifier = Modifier.weight(1f)) {
+                    BottomContent(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .align(Alignment.BottomCenter),
+                        selection = selection,
+                        /*scrollToPrev = {
+                            coroutineScope.launch {
+                                state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.previousMonth)
+                            }
+                        },
+                        scrollToNext = {
+                            coroutineScope.launch {
+                                state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.nextMonth)
+                            }
+                        },*/
+                    )
+                }
             }
         }
     }
 }
 
-
-
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TopBar(
+    scrollBehavior: TopAppBarScrollBehavior,
+    onClickBack: () -> Unit,
+    onClickSettings: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.nav_statistics),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.W600,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onClickBack) {
+                Icon(
+                    painter = painterResource(id = R.drawable.arrow_back_24px),
+                    contentDescription = "back"
+                )
+            }
+        },
+        /*actions = {
+            IconButton(
+                onClick = onClickSettings
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_settings_24px),
+                    contentDescription = "settings")
+            }
+        },*/
+        scrollBehavior = scrollBehavior,
+    )
+}
 
 private val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
 
@@ -152,7 +193,7 @@ private fun BottomContent(
 @Composable
 private fun CalendarHint(
     modifier: Modifier = Modifier,
-    viewModel: ReadingStatisticsViewModel
+    viewModel: ReadingStatsViewModel
 ) {
     val threshold by viewModel.threshold.collectAsState()
 
@@ -284,43 +325,4 @@ private fun getMonthWithYear(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TopBar(
-    scrollBehavior: TopAppBarScrollBehavior,
-    onClickBack: () -> Unit,
-    onClickSettings: () -> Unit
-) {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.nav_statistics),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.W600,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onClickBack) {
-                Icon(
-                    painter = painterResource(id = R.drawable.arrow_back_24px),
-                    contentDescription = "back"
-                )
-            }
-        },
-        /*actions = {
-            IconButton(
-                onClick = onClickSettings
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.outline_settings_24px),
-                    contentDescription = "settings")
-            }
-        },*/
-        scrollBehavior = scrollBehavior,
-    )
 }

@@ -35,7 +35,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
         BookshelfBookMetadataEntity::class,
         ReadingStatisticsEntity::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 abstract class LightNovelReaderDatabase : RoomDatabase() {
@@ -57,7 +57,8 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                     context.applicationContext,
                     LightNovelReaderDatabase::class.java,
                     "light_novel_reader_database")
-                    .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                    .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10,
+                        MIGRATION_10_11)
                     .allowMainThreadQueries()
                     .build()
                 INSTANCE = instance
@@ -129,6 +130,22 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                         "last_update TEXT NOT NULL, " +
                         "is_complete INTEGER NOT NULL, " +
                         "PRIMARY KEY(id))" )
+            }
+        }
+
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+            CREATE TABLE reading_statistics (
+                date INTEGER NOT NULL PRIMARY KEY,
+                count BLOB NOT NULL,
+                book_records TEXT NOT NULL,
+                avg_speed INTEGER NOT NULL DEFAULT 0,
+                favorite_books TEXT NOT NULL,
+                started_books TEXT NOT NULL,
+                finished_books TEXT NOT NULL                
+            )
+        """)
             }
         }
     }

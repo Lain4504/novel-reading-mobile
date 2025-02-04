@@ -19,6 +19,7 @@ fun NavGraphBuilder.bookContentDestination(navController: NavController) {
             addToReadingBook = viewModel::addToReadingBook,
             init = viewModel::init,
             updateTotalReadingTime = viewModel::updateTotalReadingTime,
+            updateReadingStats = viewModel::updateReadingProgress,
             onClickLastChapter = viewModel::lastChapter,
             onClickNextChapter = viewModel::nextChapter,
             onChangeChapter = viewModel::changeChapter,

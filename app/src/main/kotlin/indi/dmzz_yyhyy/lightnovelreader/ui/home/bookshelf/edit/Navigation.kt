@@ -24,7 +24,7 @@ fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
             title = edit.title,
             bookshelfId = edit.id,
             bookshelf = editBookshelfViewModel.uiState,
-            inti = editBookshelfViewModel::init,
+            init = editBookshelfViewModel::init,
             onClickBack = navController::popBackStack,
             onClickSave = {
                 navController.popBackStack()

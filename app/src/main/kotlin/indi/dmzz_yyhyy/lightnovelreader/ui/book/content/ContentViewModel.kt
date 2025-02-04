@@ -5,26 +5,26 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatisticsRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.statistics.Count
 import java.time.LocalDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalTime
 
 @HiltViewModel
 class ContentViewModel @Inject constructor(
-    private val statisticsRepository: StatisticsRepository,
+    private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
     private val _uiState = MutableContentScreenUiState()
     private var _bookId: Int = -1
     private val readingBookListUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
+    private var sessionStartTime = 0L
+
     val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
 
@@ -142,15 +142,40 @@ class ContentViewModel @Inject constructor(
         }
     }
 
-    suspend fun addMinutesToReadingStatistics(min: Int) {
-        val date = LocalDate.now()
-        val hour = LocalTime.now().hour
-        val data = statisticsRepository.getReadingTimeForDate(date) ?: Count()
+    fun startReadingSession(bookId: Int) {
+        sessionStartTime = System.currentTimeMillis()
+        viewModelScope.launch {
+            statsRepository.updateReadingStatistics(
+                ReadingStatsUpdate(
+                    bookId = bookId,
+                    isStart = true,
+                    startTime = sessionStartTime
+                )
+            )
+        }
+    }
 
-        val newMinuteCount = data.getMinute(hour) + min
-        if (newMinuteCount <= 60) {
-            data.setMinute(hour, newMinuteCount)
-            statisticsRepository.updateReadingStatistics(date, data)
+    fun updateReadingProgress(update: ReadingStatsUpdate) {
+        viewModelScope.launch {
+            statsRepository.updateReadingStatistics(
+                update.copy(
+                    endTime = System.currentTimeMillis(),
+                    seconds = update.seconds
+                )
+            )
+        }
+    }
+
+    fun finishReadingSession(bookId: Int) {
+        viewModelScope.launch {
+            statsRepository.updateReadingStatistics(
+                ReadingStatsUpdate(
+                    bookId = bookId,
+                    isFinish = true,
+                    endTime = System.currentTimeMillis()
+                )
+            )
+            sessionStartTime = 0
         }
     }
 

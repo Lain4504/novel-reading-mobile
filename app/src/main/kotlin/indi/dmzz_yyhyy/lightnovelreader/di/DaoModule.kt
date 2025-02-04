@@ -12,7 +12,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserReadingDataDao
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatisticsRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import javax.inject.Singleton
 
 @Module
@@ -56,7 +56,7 @@ object DaoModule {
 
     @Provides
     @Singleton
-    fun provideStatisticsRepository(readingStatisticsDao: ReadingStatisticsDao): StatisticsRepository {
-        return StatisticsRepository(readingStatisticsDao)
+    fun provideStatisticsRepository(readingStatisticsDao: ReadingStatisticsDao): StatsRepository {
+        return StatsRepository(readingStatisticsDao)
     }
 }

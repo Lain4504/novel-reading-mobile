@@ -85,10 +85,9 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -105,6 +104,7 @@ fun ContentScreen(
     addToReadingBook: (Int) -> Unit,
     init: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
+    updateReadingStats: (ReadingStatsUpdate) -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
@@ -150,6 +150,7 @@ fun ContentScreen(
                 addToReadingBook = addToReadingBook,
                 init = init,
                 updateTotalReadingTime = updateTotalReadingTime,
+                updateReadingStats = updateReadingStats,
                 onClickLastChapter = onClickLastChapter,
                 onClickNextChapter = onClickNextChapter,
                 onChapterReadingProgressChange = onChapterReadingProgressChange,
@@ -171,6 +172,7 @@ fun Content(
     addToReadingBook: (Int) -> Unit,
     init: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
+    updateReadingStats: (ReadingStatsUpdate) -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
@@ -234,6 +236,26 @@ fun Content(
                 totalReadingTime = 0
             }
             delay(1000)
+        }
+    }
+
+    LaunchedEffect(isRunning) {
+        var counter = 0
+        while (isRunning) {
+            delay(10000)
+            counter += 10
+            if(counter >= 60) {
+                updateReadingStats(
+                    ReadingStatsUpdate(
+                        bookId = bookId,
+                        seconds = 60,
+                        isStart = false,
+                        isFinish = false,
+                        currentSpeed = null
+                    )
+                )
+                counter = 0
+            }
         }
     }
 
