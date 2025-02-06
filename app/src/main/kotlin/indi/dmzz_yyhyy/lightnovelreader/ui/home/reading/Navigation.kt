@@ -20,7 +20,8 @@ fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedT
         ReadingScreen(
             controller = navController,
             selectedRoute = Route.Home.Reading,
-            uiState = readingViewModel.uiState,
+            recentReadingBookInformation = readingViewModel.recentReadingBookInformation,
+            recentReadingUserReadingData = readingViewModel.recentReadingUserReadingData,
             onClickBook = navController::navigateToBookDetailDestination,
             onClickContinueReading = { bookId, chapterId ->
                 navController.navigateToBookDetailDestination(bookId)
