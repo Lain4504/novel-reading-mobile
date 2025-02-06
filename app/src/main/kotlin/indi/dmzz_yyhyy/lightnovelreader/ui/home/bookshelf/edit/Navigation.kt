@@ -52,6 +52,7 @@ private fun NavGraphBuilder.deleteBookshelfDialog(navController: NavController) 
             onConfirmation = {
                 viewModel.deleteBookshelf(it.toRoute<Route.Home.Bookshelf.DeleteBookshelfDialog>().bookshelfId)
                 navController.popBackStack()
+                navController.popBackStackIfResumed()
             }
         )
     }

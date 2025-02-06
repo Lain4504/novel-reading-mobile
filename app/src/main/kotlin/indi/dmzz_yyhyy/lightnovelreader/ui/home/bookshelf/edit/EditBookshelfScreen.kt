@@ -53,6 +53,7 @@ fun EditBookshelfScreen(
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    val isNameEmpty = bookshelf.name.isBlank()
     LaunchedEffect(bookshelfId) {
         inti(bookshelfId)
     }
@@ -62,7 +63,7 @@ fun EditBookshelfScreen(
                 title = title,
                 scrollBehavior = pinnedScrollBehavior,
                 onClickBack = onClickBack,
-                onClickSave = onClickSave
+                onClickSave = if (isNameEmpty) { {} } else onClickSave
             )
         }
     ) {
@@ -75,9 +76,18 @@ fun EditBookshelfScreen(
                 onValueChange = onNameChange,
                 label = { Text(stringResource(R.string.name)) },
                 placeholder = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
-                supportingText = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
+                supportingText = {
+                    if (isNameEmpty) {
+                        Text(
+                            text = stringResource(R.string.bookshelf_name_placeholder),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                },
                 maxLines = 1,
                 interactionSource = interactionSource,
+                isError = isNameEmpty,
                 trailingIcon = {
                     IconButton(onClick = { onNameChange("") }) {
                         Icon(
