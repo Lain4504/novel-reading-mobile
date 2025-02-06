@@ -889,7 +889,7 @@ fun BookInfoBottomSheet(
 
                 InfoItem(
                     title = "统计",
-                    content = "${NumberFormat.getInstance().format(bookInformation.wordCount)} 字\n共计 ${bookVolumes.volumes.count()} 章节, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size}} 卷",
+                    content = "${NumberFormat.getInstance().format(bookInformation.wordCount)} 字\n共计 ${bookVolumes.volumes.count()} 卷, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size}} 章节",
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
                     icon = painterResource(R.drawable.text_fields_24px)

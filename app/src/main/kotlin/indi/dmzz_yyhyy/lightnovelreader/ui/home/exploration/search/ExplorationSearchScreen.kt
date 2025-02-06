@@ -154,7 +154,7 @@ fun ExplorationSearchScreen(
                                         }
                                     if (searchBarExpanded)
                                         IconButton(onClick = { dropdownMenuExpanded = true }) {
-                                            Icon(painter = painterResource(R.drawable.menu_open_24px), contentDescription = "menu")
+                                            Icon(painter = painterResource(R.drawable.filter_alt_24px), contentDescription = "filter")
                                         }
                                 }
                             },
