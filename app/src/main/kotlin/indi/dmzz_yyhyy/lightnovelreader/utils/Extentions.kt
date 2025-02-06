@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -66,5 +68,11 @@ fun LazyListState.isScrollingUp(): State<Boolean> {
                 lastScroll = currentScroll
             }
         }
+    }
+}
+
+fun NavController.popBackStackIfResumed() {
+    if (this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+        popBackStack()
     }
 }

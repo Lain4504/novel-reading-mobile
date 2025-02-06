@@ -9,6 +9,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDesti
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationSearchDestination(navController: NavController) {
     composable<Route.Home.Exploration.Search> { entry ->
@@ -22,7 +23,7 @@ fun NavGraphBuilder.explorationSearchDestination(navController: NavController) {
             requestAddBookToBookshelf = {
                 navController.navigateToAddBookToBookshelfDialog(it)
             },
-            onClickBack = { navController.popBackStack() },
+            onClickBack = { navController.popBackStackIfResumed() },
             init = explorationSearchViewModel::init,
             onChangeSearchType = { explorationSearchViewModel.changeSearchType(it) },
             onSearch = { explorationSearchViewModel.search(it) },
