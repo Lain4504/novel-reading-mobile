@@ -122,3 +122,7 @@
 -keepclasseswithmembers class indi.dmzz_yyhyy.lightnovelreader.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+-dontwarn org.dom4j.**
+-keep class org.dom4j.**{*;}
+-keep interface org.dom4j.** { *; }
