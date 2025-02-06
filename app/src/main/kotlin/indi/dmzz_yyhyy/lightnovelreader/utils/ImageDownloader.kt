@@ -15,9 +15,11 @@ import java.net.URL
 class ImageDownloader(
     private val tasks: List<Task>,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    val onProgress: (Int, Int) -> Unit,
     onFinished: () -> Unit,
 ) {
-    private var count = 0
+    var count = 0
+        private set
     val isDone get() = count == tasks.size
     data class Task(val file: File, val url: String)
 
@@ -27,6 +29,7 @@ class ImageDownloader(
             coroutineScope.launch {
                 getImageFromNetByUrl(task.url)?.let { writeImageToDisk(it, task.file) }
                 count++
+                onProgress(count, tasks.size)
                 Log.i("ImageDownloader", "tasks: ${count}/${tasks.size}")
                 if (count == tasks.size) {
                     onFinished.invoke()

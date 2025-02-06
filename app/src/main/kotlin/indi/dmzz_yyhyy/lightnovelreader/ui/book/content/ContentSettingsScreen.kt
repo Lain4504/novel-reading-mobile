@@ -138,7 +138,7 @@ fun SettingsBottomSheet(
                             modifier = Modifier.padding(start = 8.dp),
                             text = stringResource(R.string.settings_preview),
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.W600
                         )
                     }
 
@@ -222,7 +222,8 @@ fun SettingsBottomSheet(
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.titleLarge,
-                    text = stringResource(R.string.reader_settings)
+                    text = stringResource(R.string.reader_settings),
+                    fontWeight = FontWeight.W600
                 )
             }
 

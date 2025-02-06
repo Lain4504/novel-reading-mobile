@@ -319,7 +319,7 @@ private fun TopBar(
                     Text(
                         text = stringResource(R.string.detail_title),
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.W400,
+                        fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1
                     )
@@ -374,7 +374,7 @@ private fun BookCardBlock(
                 text = bookInformation.title,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.W600,
                 fontSize = 19.sp,
                 lineHeight = 24.sp,
             )
@@ -390,7 +390,7 @@ private fun BookCardBlock(
             Text(
                 text = bookInformation.author,
                 maxLines = 1,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.primary,
                 lineHeight = 20.sp,
                 fontSize = 16.sp,
@@ -662,7 +662,7 @@ private fun VolumeItem(
                 Column {
                     Text(
                         text = volume.volumeTitle,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.W600,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -690,7 +690,7 @@ private fun VolumeItem(
                 Column {
                     Text(
                         text = volume.volumeTitle,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.W600,
                         fontSize = 16.sp,
                         color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
                     )
@@ -739,7 +739,7 @@ private fun VolumeItem(
                                     fontWeight =
                                     if (readCompletedChapterIds.contains(it.id))
                                         FontWeight.Normal
-                                    else FontWeight.Bold,
+                                    else FontWeight.W600,
                                     color =
                                     if (readCompletedChapterIds.contains(it.id))
                                         MaterialTheme.colorScheme.secondary
@@ -825,7 +825,7 @@ fun BookInfoBottomSheet(
         ) {
             val titleStyle = TextStyle(
                 color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Medium,
                 fontSize = 16.sp
             )
             val contentStyle = TextStyle(
@@ -889,7 +889,7 @@ fun BookInfoBottomSheet(
 
                 InfoItem(
                     title = "统计",
-                    content = "${NumberFormat.getInstance().format(bookInformation.wordCount)} 字\n共计 ${bookVolumes.volumes.count()} 章节, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size}} 卷",
+                    content = "${NumberFormat.getInstance().format(bookInformation.wordCount)} 字\n共计 ${bookVolumes.volumes.count()} 卷, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size}} 章节",
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
                     icon = painterResource(R.drawable.text_fields_24px)

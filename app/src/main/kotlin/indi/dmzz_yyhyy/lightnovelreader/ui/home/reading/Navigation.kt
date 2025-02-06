@@ -2,6 +2,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -14,12 +15,13 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Home.Reading> {
-        val readingViewModel = hiltViewModel<ReadingViewModel>()
+        val parentEntry = remember(it) { navController.getBackStackEntry(Route.Home) }
+        val readingViewModel = hiltViewModel<ReadingViewModel>(parentEntry)
         ReadingScreen(
             controller = navController,
             selectedRoute = Route.Home.Reading,
-            uiState = hiltViewModel<ReadingViewModel>().uiState,
-            update = readingViewModel::update,
+            recentReadingBookInformation = readingViewModel.recentReadingBookInformation,
+            recentReadingUserReadingData = readingViewModel.recentReadingUserReadingData,
             onClickBook = navController::navigateToBookDetailDestination,
             onClickContinueReading = { bookId, chapterId ->
                 navController.navigateToBookDetailDestination(bookId)

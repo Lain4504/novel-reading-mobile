@@ -31,8 +31,8 @@ class SettingState(
     val leftPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.LeftPadding.path)
     val rightPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.RightPadding.path)
 
-    val fontSize by fontSizeUserData.safeAsState(14f)
-    val fontLineHeight by fontLineHeightUserData.safeAsState(0f)
+    val fontSize by fontSizeUserData.safeAsState(15f)
+    val fontLineHeight by fontLineHeightUserData.safeAsState(7f)
     val keepScreenOn by keepScreenOnUserData.safeAsState(false)
     val isUsingFlipPage by isUsingFlipPageUserData.safeAsState(false)
     val isUsingClickFlipPage by isUsingClickFlipPageUserData.safeAsState(false)

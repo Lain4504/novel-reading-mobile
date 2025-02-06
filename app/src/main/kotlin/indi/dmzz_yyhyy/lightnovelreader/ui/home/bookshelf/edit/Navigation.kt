@@ -15,6 +15,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
     composable<Route.Home.Bookshelf.Edit> {
@@ -25,9 +26,9 @@ fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
             bookshelfId = edit.id,
             bookshelf = editBookshelfViewModel.uiState,
             inti = editBookshelfViewModel::init,
-            onClickBack = navController::popBackStack,
+            onClickBack = navController::popBackStackIfResumed,
             onClickSave = {
-                navController.popBackStack()
+                navController.popBackStackIfResumed()
                 editBookshelfViewModel.save()
             },
             onClickDelete = navController::navigateToDeleteBookshelfDialog,
@@ -51,6 +52,7 @@ private fun NavGraphBuilder.deleteBookshelfDialog(navController: NavController) 
             onConfirmation = {
                 viewModel.deleteBookshelf(it.toRoute<Route.Home.Bookshelf.DeleteBookshelfDialog>().bookshelfId)
                 navController.popBackStack()
+                navController.popBackStackIfResumed()
             }
         )
     }

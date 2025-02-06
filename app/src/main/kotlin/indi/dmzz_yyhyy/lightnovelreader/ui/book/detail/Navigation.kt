@@ -20,6 +20,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,7 +35,7 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
             onClickExportToEpub = {
                 navController.navigateToExportToEpubDialog(bookId, viewModel.uiState.bookInformation.title)
             },
-            onClickBackButton = navController::popBackStack,
+            onClickBackButton = navController::popBackStackIfResumed,
             onClickChapter = {
                 navController.navigateToBookContentDestination(bookId, it)
             },

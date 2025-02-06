@@ -14,6 +14,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDesti
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
     composable<Route.Home.Exploration.Expanded> { entry ->
@@ -34,7 +35,7 @@ fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
             },
             onClickBack = {
                 explorationExpandedPageHomeViewModel.clear()
-                navController.popBackStack()
+                navController.popBackStackIfResumed()
             },
             onClickBook = {
                 navController.navigateToBookDetailDestination(it)

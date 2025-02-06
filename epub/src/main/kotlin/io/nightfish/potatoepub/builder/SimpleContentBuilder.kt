@@ -18,7 +18,7 @@ class SimpleContentBuilder {
     val contentElement: Element = bodyElement.addElement("div").addAttribute("id", "content")
 
     init {
-        document.addDocType("htlm", "", "")
+        document.addDocType("html", "", "")
         rootElement
             .addAttribute("xmlns", "http://www.w3.org/1999/xhtml")
             .addAttribute("xmlns:epub", "http://www.idpf.org/2007/ops")

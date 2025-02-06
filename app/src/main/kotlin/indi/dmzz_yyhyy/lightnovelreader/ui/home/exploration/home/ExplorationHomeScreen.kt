@@ -248,7 +248,7 @@ fun ExplorationPage(
                             modifier = Modifier.weight(2f),
                             text = explorationBooksRow.title,
                             fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.W600,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         if (explorationBooksRow.expandable) {
@@ -323,6 +323,7 @@ fun ExplorationPage(
                                             text = explorationDisplayBook.title,
                                             fontSize = 13.sp,
                                             lineHeight = titleLineHeight,
+                                            fontWeight = FontWeight.W500,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis
                                         )

@@ -51,10 +51,13 @@ fun HomeNavigateBar(
         controller.popBackStack()
         controller.navigate(route)
     }
+
     NavigationBar(modifier) {
         NavigationBarItem(
             selected = selectedRoute is Route.Home.Reading,
-            onClick = { coverNavigate(Route.Home.Reading) },
+            onClick = {
+                if (selectedRoute !is Route.Home.Reading) coverNavigate(Route.Home.Reading)
+            },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
@@ -73,7 +76,9 @@ fun HomeNavigateBar(
         )
         NavigationBarItem(
             selected = selectedRoute is Route.Home.Bookshelf,
-            onClick = { coverNavigate(Route.Home.Bookshelf) },
+            onClick = {
+                if (selectedRoute !is Route.Home.Bookshelf) coverNavigate(Route.Home.Bookshelf)
+            },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
@@ -92,7 +97,9 @@ fun HomeNavigateBar(
         )
         NavigationBarItem(
             selected = selectedRoute is Route.Home.Exploration,
-            onClick = { coverNavigate(Route.Home.Exploration) },
+            onClick = {
+                if (selectedRoute !is Route.Home.Exploration) coverNavigate(Route.Home.Exploration)
+            },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
@@ -111,7 +118,9 @@ fun HomeNavigateBar(
         )
         NavigationBarItem(
             selected = selectedRoute is Route.Home.Settings,
-            onClick = { coverNavigate(Route.Home.Settings) },
+            onClick = {
+                if (selectedRoute !is Route.Home.Settings) coverNavigate(Route.Home.Settings)
+            },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
