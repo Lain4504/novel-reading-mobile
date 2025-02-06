@@ -408,7 +408,7 @@ private fun TopBar(
                 }
             }
         },
-        actions = {
+        /*actions = {
             IconButton(
                 enabled = false,
                 onClick = {
@@ -418,7 +418,7 @@ private fun TopBar(
                     painter = painterResource(R.drawable.fullscreen_24px),
                     contentDescription = "fullscreen")
             }
-        },
+        },*/
         scrollBehavior = scrollBehavior
     )
 }
