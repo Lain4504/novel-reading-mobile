@@ -56,13 +56,15 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ReadingScreen(
     controller: NavController,
-    uiState: ReadingUiState,
     selectedRoute: Any,
+    recentReadingBookInformation: List<Flow<BookInformation>>,
+    recentReadingUserReadingData: List<Flow<UserReadingData>>,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
@@ -87,12 +89,13 @@ fun ReadingScreen(
         ) {
             Box(Modifier.padding(it)) {
                 ReadingContent(
-                    uiState = uiState,
                     onClickBook = onClickBook,
                     onClickContinueReading = onClickContinueReading,
                     onClickJumpToExploration = onClickJumpToExploration,
                     sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    recentReadingBookInformation = recentReadingBookInformation,
+                    recentReadingUserReadingData =  recentReadingUserReadingData,
                 )
             }
         }
@@ -102,22 +105,21 @@ fun ReadingScreen(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ReadingContent(
-    uiState: ReadingUiState,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
+    recentReadingBookInformation: List<Flow<BookInformation>>,
+    recentReadingUserReadingData: List<Flow<UserReadingData>>,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-    val recentReadingBookInformation = uiState.recentReadingBookInformation.reversed()
-    val recentReadingUserReadingData = uiState.recentReadingUserReadingData.reversed()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp)
             .nestedScroll(TopAppBarDefaults.pinnedScrollBehavior().nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (uiState.recentReadingBookInformation.isNotEmpty())
+        if (recentReadingBookInformation.isNotEmpty())
             item {
                 Box(
                     modifier = Modifier
@@ -182,7 +184,7 @@ private fun ReadingContent(
         }
     }
     AnimatedVisibility(
-        visible =  uiState.recentReadingBookInformation.isEmpty(),
+        visible = recentReadingBookInformation.isEmpty(),
         enter = fadeIn(),
         exit = fadeOut()
     ) {

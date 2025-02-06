@@ -17,7 +17,8 @@ class ImageDownloader(
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     onFinished: () -> Unit,
 ) {
-    private var count = 0
+    var count = 0
+        private set
     val isDone get() = count == tasks.size
     data class Task(val file: File, val url: String)
 
