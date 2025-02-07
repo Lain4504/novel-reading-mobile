@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,8 +34,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +45,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
@@ -56,21 +56,25 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
-import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ReadingScreen(
     controller: NavController,
     selectedRoute: Any,
-    recentReadingBookInformation: List<Flow<BookInformation>>,
-    recentReadingUserReadingData: List<Flow<UserReadingData>>,
+    updateReadingBooks: () -> Unit,
+    recentReadingBookInformationMap: Map<Int, BookInformation>,
+    recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
+    recentReadingBookIds: List<Int>,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
+    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+        updateReadingBooks()
+    }
     with(sharedTransitionScope) {
         Scaffold(
             topBar = {
@@ -94,8 +98,9 @@ fun ReadingScreen(
                     onClickJumpToExploration = onClickJumpToExploration,
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
-                    recentReadingBookInformation = recentReadingBookInformation,
-                    recentReadingUserReadingData =  recentReadingUserReadingData,
+                    recentReadingBookInformationMap = recentReadingBookInformationMap,
+                    recentReadingUserReadingDataMap = recentReadingUserReadingDataMap,
+                    recentReadingBookIds = recentReadingBookIds
                 )
             }
         }
@@ -108,8 +113,9 @@ private fun ReadingContent(
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
-    recentReadingBookInformation: List<Flow<BookInformation>>,
-    recentReadingUserReadingData: List<Flow<UserReadingData>>,
+    recentReadingBookInformationMap: Map<Int, BookInformation>,
+    recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
+    recentReadingBookIds: List<Int>,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
@@ -119,7 +125,7 @@ private fun ReadingContent(
             .padding(start = 16.dp, end = 16.dp)
             .nestedScroll(TopAppBarDefaults.pinnedScrollBehavior().nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (recentReadingBookInformation.isNotEmpty())
+        if (recentReadingBookIds.isNotEmpty())
             item {
                 Box(
                     modifier = Modifier
@@ -135,47 +141,42 @@ private fun ReadingContent(
                     )
                 }
             }
-        if (recentReadingBookInformation.isNotEmpty() && recentReadingUserReadingData.isNotEmpty()) {
+        if (recentReadingBookIds.isNotEmpty() && recentReadingUserReadingDataMap[recentReadingBookIds.first()] != null && recentReadingBookInformationMap[recentReadingBookIds.first()] != null) {
             item {
-                val bookInformation by recentReadingBookInformation[0].collectAsState(BookInformation.empty())
-                val userReadingData by recentReadingUserReadingData[0].collectAsState(UserReadingData.empty())
-                if (!bookInformation.isEmpty())
-                    ReadingHeaderCard(
-                        bookInformation = bookInformation,
-                        userReadingData = userReadingData,
-                        onClickContinueReading = onClickContinueReading
-                    )
+                ReadingHeaderCard(
+                    bookInformation = recentReadingBookInformationMap[recentReadingBookIds.first()]!!,
+                    userReadingData = recentReadingUserReadingDataMap[recentReadingBookIds.first()]!!,
+                    onClickContinueReading = onClickContinueReading
+                )
             }
-            if (recentReadingBookInformation.isNotEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp)
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(vertical = 4.dp),
-                            text = stringResource(
-                                R.string.recent_reads, recentReadingBookInformation.size,
-                            ),
-                            maxLines = 1,
-                            fontWeight = FontWeight.Medium,
-                        )
-                    }
+        }
+        if (recentReadingBookIds.isNotEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        text = stringResource(
+                            R.string.recent_reads, recentReadingBookIds.size,
+                        ),
+                        maxLines = 1,
+                        fontWeight = FontWeight.Medium,
+                    )
                 }
             }
-
         }
-        itemsIndexed(recentReadingBookInformation) { index, _ ->
-            val bookInformation by recentReadingBookInformation[index].collectAsState(BookInformation.empty())
-            val userReadingData by recentReadingUserReadingData[index].collectAsState(UserReadingData.empty())
-            if (!bookInformation.isEmpty())
+        items(recentReadingBookIds) { id ->
+            println(id)
+            if (recentReadingUserReadingDataMap[id] != null && recentReadingBookInformationMap[id] != null)
                 ReadingBookCard(
                     modifier = Modifier.animateItem(),
-                    bookInformation = bookInformation,
-                    userReadingData = userReadingData,
+                    bookInformation = recentReadingBookInformationMap[id]!!,
+                    userReadingData = recentReadingUserReadingDataMap[id]!!,
                     onClick = {
-                        onClickBook(bookInformation.id)
+                        onClickBook(recentReadingBookInformationMap[id]!!.id)
                     }
                 )
         }
@@ -184,7 +185,7 @@ private fun ReadingContent(
         }
     }
     AnimatedVisibility(
-        visible = recentReadingBookInformation.isEmpty(),
+        visible = recentReadingBookIds.isEmpty(),
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -236,7 +237,7 @@ private fun TopBar(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ReadingBookCard(
     modifier: Modifier = Modifier,
