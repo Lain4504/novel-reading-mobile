@@ -18,7 +18,6 @@ fun NavGraphBuilder.debugDestination(navController: NavController) {
     }
 }
 
-@Suppress("unused")
 fun NavController.navigateToDebug() {
     navigate(Route.Debug)
 }

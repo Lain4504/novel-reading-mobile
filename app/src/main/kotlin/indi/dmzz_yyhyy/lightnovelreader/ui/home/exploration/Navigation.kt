@@ -13,7 +13,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.explorationNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Home.Exploration>(
-        startDestination = Route.Home.Exploration.Home
+        startDestination = Route.Home.Exploration.Home,
     ) {
         explorationHomeDestination(navController, sharedTransitionScope)
         explorationExpandDestination(navController)
