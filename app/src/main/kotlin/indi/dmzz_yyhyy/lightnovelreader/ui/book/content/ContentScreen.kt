@@ -67,7 +67,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -180,7 +179,7 @@ fun Content(
     val view = LocalView.current
     val context = LocalContext.current
     val settingsBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val chaptersBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val chaptersBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var isRunning by remember { mutableStateOf(false) }
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
@@ -513,12 +512,16 @@ fun ChapterSelectorBottomSheet(
 ) {
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val screenHeight = LocalConfiguration.current.screenHeightDp
     val indexedItems = bookVolumes.volumes.flatMap { volume ->
         listOf(volume to null) + volume.chapters.map { volume to it }
     }
 
-    LaunchedEffect(sheetState.currentValue == PartiallyExpanded) {
+    val localDensity = LocalDensity.current
+    var columnHeightDp by remember {
+        mutableStateOf(0.dp)
+    }
+
+    LaunchedEffect(sheetState.currentValue == PartiallyExpanded && sheetState.currentValue != Expanded) {
         val targetIndex = indexedItems.indexOfFirst { (_, chapter) ->
             chapter?.id == readingChapterId
         }
@@ -553,6 +556,9 @@ fun ChapterSelectorBottomSheet(
             }
             Spacer(Modifier.height(8.dp))
             LazyColumn(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    columnHeightDp = with(localDensity) { coordinates.size.height.toDp() }
+                },
                 state = lazyColumnState
             ) {
                 items(indexedItems) { (volume, chapter) ->
@@ -636,15 +642,6 @@ fun ChapterSelectorBottomSheet(
                                 }
                             }
                         }
-                    }
-                }
-                item {
-                    AnimatedVisibility(
-                        visible = sheetState.currentValue != Expanded,
-                        enter = expandVertically(),
-                        exit = shrinkVertically()
-                    ) {
-                        Spacer(Modifier.height((screenHeight * 0.6).dp))
                     }
                 }
             }

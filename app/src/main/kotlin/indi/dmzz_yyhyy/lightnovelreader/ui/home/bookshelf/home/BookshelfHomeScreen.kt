@@ -162,7 +162,6 @@ fun BookshelfHomeScreen(
                     onClickRemove = onClickRemove,
                     onClickBookmark = onClickMarkSelectedBooks,
                     onClickShareBookshelf = {
-                        println(uiState.selectedBookshelfId)
                         val uri = FileProvider.getUriForFile(
                             context,
                             "${context.applicationInfo.processName}.provider",

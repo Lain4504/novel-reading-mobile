@@ -92,8 +92,6 @@ fun ReadingScreen(
                     onClickBook = onClickBook,
                     onClickContinueReading = onClickContinueReading,
                     onClickJumpToExploration = onClickJumpToExploration,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
                     recentReadingBookInformation = recentReadingBookInformation,
                     recentReadingUserReadingData =  recentReadingUserReadingData,
                 )
@@ -110,8 +108,6 @@ private fun ReadingContent(
     onClickJumpToExploration: () -> Unit,
     recentReadingBookInformation: List<Flow<BookInformation>>,
     recentReadingUserReadingData: List<Flow<UserReadingData>>,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     LazyColumn(
         modifier = Modifier
@@ -236,7 +232,7 @@ private fun TopBar(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ReadingBookCard(
     modifier: Modifier = Modifier,
@@ -331,6 +327,7 @@ private fun ReadingBookCard(
                         lineHeight = 14.sp,
                         text = stringResource(
                             R.string.read_progress,
+                            if (userReadingData.readingProgress > 1f) "0%" else
                             (userReadingData.readingProgress * 100).toInt().toString() + "%"
                         )
                     )
@@ -344,7 +341,7 @@ private fun ReadingBookCard(
 
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
-                    progress = { userReadingData.readingProgress }
+                    progress = { if (userReadingData.readingProgress > 100F) 0F else userReadingData.readingProgress }
                 )
             }
         }

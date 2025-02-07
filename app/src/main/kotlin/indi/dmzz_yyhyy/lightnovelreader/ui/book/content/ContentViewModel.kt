@@ -121,7 +121,7 @@ class ContentViewModel @Inject constructor(
     private val _readingProgressChannel = Channel<Float>(Channel.CONFLATED)
 
     init {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.IO) {
             val progressFlow = _readingProgressChannel.receiveAsFlow()
 
             merge(

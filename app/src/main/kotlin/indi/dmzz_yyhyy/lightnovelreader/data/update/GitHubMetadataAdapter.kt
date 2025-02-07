@@ -35,7 +35,6 @@ class GitHubReleaseMetadataAdapter : TypeAdapter<GitHubReleaseMetadata>() {
         val assets = mutableListOf<GitHubAsset>()
 
         reader.beginObject()
-        println("DEBUG $reader")
         while (reader.hasNext()) {
             when (reader.nextName()) {
                 "tag_name" -> tagName = reader.nextString()
