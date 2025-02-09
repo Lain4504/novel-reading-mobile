@@ -169,7 +169,6 @@ private fun ReadingContent(
             }
         }
         items(recentReadingBookIds) { id ->
-            println(id)
             if (recentReadingUserReadingDataMap[id] != null && recentReadingBookInformationMap[id] != null)
                 ReadingBookCard(
                     modifier = Modifier.animateItem(),

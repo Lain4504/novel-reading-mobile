@@ -20,7 +20,6 @@ import io.nightfish.potatoepub.builder.EpubBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.FileInputStream
 import java.time.LocalDateTime
@@ -205,16 +204,13 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                         }
                     }
                     tempDir.delete()
-                    delay(500)
-                    updateCompletionNotification(bookId)
                 }
             }
         )
-
         while (!imageDownloader.isDone) {
-            Thread.sleep(1000)
+            Thread.sleep(500)
         }
-
+        updateCompletionNotification(bookId)
         return Result.success()
     }
 
