@@ -259,7 +259,8 @@ private fun Content(
                     hideReadChapters = hideReadChapters,
                     readCompletedChapterIds = uiState.userReadingData.readCompletedChapterIds,
                     onClickChapter = onClickChapter,
-                    volumesSize = uiState.bookVolumes.volumes.size
+                    volumesSize = uiState.bookVolumes.volumes.size,
+                    lastReadingChapterId = uiState.userReadingData.lastReadChapterId
                 )
             }
         }
@@ -648,7 +649,8 @@ private fun VolumeItem(
     hideReadChapters: Boolean = false,
     readCompletedChapterIds: List<Int>,
     onClickChapter: (Int) -> Unit,
-    volumesSize: Int
+    volumesSize: Int,
+    lastReadingChapterId: Int
 ) {
     val readCount = volume.chapters.count { it.id in readCompletedChapterIds }
     val totalCount = volume.chapters.size
@@ -732,12 +734,12 @@ private fun VolumeItem(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     volume.chapters.forEach {
                         if (!(hideReadChapters && readCompletedChapterIds.contains(it.id))) {
-                            Box(
+                            Column(
                                 modifier = Modifier
                                     .clickable { onClickChapter(it.id) }
                                     .wrapContentHeight()
                                     .fillMaxWidth()
-                                    .padding(horizontal = 32.dp, vertical = 12.dp)
+                                    .padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = if (it.id == lastReadingChapterId) 6.dp else 12.dp)
                             ) {
                                 Text(
                                     text = it.title,
@@ -753,6 +755,14 @@ private fun VolumeItem(
                                         MaterialTheme.colorScheme.secondary
                                     else MaterialTheme.colorScheme.onSurface
                                 )
+                                if (it.id == lastReadingChapterId)
+                                    Text(
+                                        text = "上次阅读",
+                                        maxLines = 1,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.W700,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                             }
                         }
                     }
