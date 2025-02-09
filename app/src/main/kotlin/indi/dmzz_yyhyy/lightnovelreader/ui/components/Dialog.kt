@@ -1,12 +1,16 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -55,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -600,4 +606,93 @@ fun ExportToEpubDialog(
             }
         }
     )
+}
+
+@Preview
+@Composable
+fun ColorPickerDialogPreview() {
+    ColorPickerDialog(
+        onConfirmation = {},
+        onDismissRequest = {},
+        selectedColor = MaterialTheme.colorScheme.surfaceContainer
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ColorPickerDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: (Color) -> Unit,
+    selectedColor: Color
+) {
+    var currentColor by remember {
+        mutableStateOf(selectedColor)
+    }
+    val colorList = listOf(
+        MaterialTheme.colorScheme.surfaceContainer,
+        Color(0x38FF9800),
+        Color(0x38FF8080),
+        Color(0x38FFCC00),
+        Color(0x3834C759),
+        Color(0x3832ADE6),
+        Color(0x38007AFF),
+        Color(0x385856D6),
+        Color(0x38AF52DE)
+    )
+    BaseDialog (
+        icon = painterResource(R.drawable.palette_24px),
+        title = "调色盘",
+        description = "选择一个颜色用于阅读器背景。",
+        onDismissRequest = onDismissRequest,
+        onConfirmation = { onConfirmation(currentColor) },
+        dismissText = stringResource(R.string.cancel),
+        confirmationText = stringResource(R.string.apply),
+    ) {
+        FlowRow(
+            modifier = Modifier.padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            colorList.forEachIndexed { index, color ->
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clickable(
+                            interactionSource = null,
+                            indication = null
+                        ) {
+                            currentColor = color
+                        }
+                ) {
+                    val secondary = MaterialTheme.colorScheme.secondary
+                    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
+                    val blockIconId = painterResource(R.drawable.block_24px)
+                    Canvas(
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        if (currentColor == color)
+                            drawCircle(
+                                color = secondary,
+                                radius = 22.dp.toPx(),
+                            )
+
+                        drawCircle(
+                            color = surfaceContainer,
+                            radius = 20.dp.toPx(),
+                        )
+                        drawCircle(
+                            color = color,
+                            radius = 20.dp.toPx(),
+                        )
+                    }
+                    if (index == 0)
+                        Icon(
+                            modifier = Modifier.align(Alignment.Center),
+                            painter = blockIconId,
+                            contentDescription = null
+                        )
+                }
+            }
+        }
+    }
 }

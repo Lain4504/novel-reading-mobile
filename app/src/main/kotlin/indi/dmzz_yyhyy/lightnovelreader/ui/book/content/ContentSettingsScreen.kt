@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +45,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
@@ -362,6 +361,39 @@ fun LazyListScope.AppearancePage(settingState: SettingState) {
             description = stringResource(R.string.settings_reader_keep_screen_on_desc),
             checked = settingState.keepScreenOn,
             booleanUserData = settingState.keepScreenOnUserData,
+        )
+    }
+    item {
+        SettingsSwitchEntry(
+            title = "背景图片",
+            description = "自定义阅读器背景图片",
+            checked = settingState.enableBackgroundImage,
+            booleanUserData = settingState.enableBackgroundImageUserData
+        )
+    }
+    item {
+        SettingsClickableEntry (
+            title = "选择图片",
+            description = "使用应用内置的图片背景或自定义图片(.png)文件",
+            onClick = { /**/ },
+            option = settingState.customBackgroundImage
+        )
+    }
+    item {
+        SettingsMenuEntry (
+            title = "背景显示模式",
+            description = "指定自定义背景图片的显示模式",
+            options = MenuOptions.ReaderBgImageDisplayModeOptions,
+            selectedOptionKey = settingState.backgroundImageDisplayMode,
+            onOptionChange = { /**/ }
+        )
+    }
+    item {
+        SettingsClickableEntry (
+            title = "调色盘",
+            description = "使用“背景图片”时，该选项不可用",
+            onClick = { /**/ },
+            option = settingState.paletteColor.toString() /*预览还没实装*/
         )
     }
     item {
