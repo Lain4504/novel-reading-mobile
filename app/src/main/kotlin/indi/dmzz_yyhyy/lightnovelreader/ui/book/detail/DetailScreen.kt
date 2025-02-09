@@ -82,6 +82,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
@@ -150,7 +151,7 @@ private fun Content(
     },
     id: Int,
     cacheBook: (Int) -> Unit,
-    requestAddBookToBookshelf: (Int) -> Unit
+    requestAddBookToBookshelf: (Int) -> Unit,
 ) {
     val uiState = viewModel.uiState
     val infoBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -184,11 +185,12 @@ private fun Content(
             item {
                 BookCardBlock(
                     bookInformation = uiState.bookInformation,
-                    modifier = Modifier.graphicsLayer {
-                        scrolledY += lazyListState.firstVisibleItemScrollOffset - previousOffset
-                        translationY = scrolledY * 0.5f
-                        previousOffset = lazyListState.firstVisibleItemScrollOffset
-                    }
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scrolledY += lazyListState.firstVisibleItemScrollOffset - previousOffset
+                            translationY = scrolledY * 0.5f
+                            previousOffset = lazyListState.firstVisibleItemScrollOffset
+                        }
                         .fillMaxWidth()
                 )
             }
@@ -197,6 +199,7 @@ private fun Content(
             }
             item {
                 QuickOperationsBlock(
+                    uiState = uiState,
                     onClickAddToBookShelf = { requestAddBookToBookshelf(uiState.bookInformation.id) },
                     onClickCache = { cacheBook(uiState.bookInformation.id) },
                     onClickShowInfo = { showInfoBottomSheet = true }
@@ -491,6 +494,7 @@ private fun TagsBlock(
 
 @Composable
 private fun QuickOperationsBlock(
+    uiState: DetailUiState,
     onClickAddToBookShelf: () -> Unit,
     onClickCache: () -> Unit,
     onClickShowInfo: () -> Unit
@@ -519,7 +523,7 @@ private fun QuickOperationsBlock(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
-                Text(
+                AnimatedText(
                     text = title,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1
@@ -554,9 +558,13 @@ private fun QuickOperationsBlock(
                 .weight(1f)
         ) {
             QuickOperationButton(
-                icon = painterResource(R.drawable.cloud_download_24px),
-                title = stringResource(R.string.action_cache),
-                onClick = onClickCache
+                icon = if(uiState.isCached) painterResource(R.drawable.filled_cloud_download_24px) else painterResource(R.drawable.cloud_download_24px),
+                title =
+                if (uiState.isCached && uiState.cacheProgress == -1)
+                    "已缓存"
+                else if(uiState.cacheProgress == -1) "缓存"
+                else "${uiState.cacheProgress}%",
+                onClick = if(uiState.cacheProgress == -1) onClickCache else {{}}
             )
         }
         Box(
@@ -805,12 +813,15 @@ fun BookInfoBottomSheet(
                 Text(
                     text = content,
                     style = contentStyle,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .combinedClickable(
                             onClick = {},
                             onLongClick = {
                                 clipboardManager.setText(AnnotatedString(content))
-                                Toast.makeText(context, "内容已复制", Toast.LENGTH_SHORT).show()
+                                Toast
+                                    .makeText(context, "内容已复制", Toast.LENGTH_SHORT)
+                                    .show()
                             },
                         )
                 )

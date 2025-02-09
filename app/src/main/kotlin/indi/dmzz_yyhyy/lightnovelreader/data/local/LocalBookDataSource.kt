@@ -8,9 +8,9 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserReadingDataDao
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.map
 
 @Singleton
 class LocalBookDataSource @Inject constructor(
@@ -73,6 +73,9 @@ class LocalBookDataSource @Inject constructor(
                 it.readCompletedChapterIds
             )
         }
+
+    suspend fun isChapterContentExists(id: Int): Boolean =
+        chapterContentDao.getId(id) != null
 
     fun clear() {
         userReadingDataDao.clear()

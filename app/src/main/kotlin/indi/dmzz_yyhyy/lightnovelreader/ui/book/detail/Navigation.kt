@@ -70,7 +70,7 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
                     }
                 }
             },
-            requestAddBookToBookshelf = navController::navigateToAddBookToBookshelfDialog,
+            requestAddBookToBookshelf = navController::navigateToAddBookToBookshelfDialog
         )
     }
     exportToEpubDialog(navController)
