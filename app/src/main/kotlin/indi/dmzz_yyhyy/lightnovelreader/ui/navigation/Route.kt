@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 object Route {
     @Serializable
-    object Home {
+    object Main {
         @Serializable
         object Reading {
             @Serializable

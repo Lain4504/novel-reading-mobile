@@ -21,7 +21,7 @@ fun LightNovelReaderNavHost(
     SharedTransitionLayout {
         NavHost(
             navController = navController,
-            startDestination = Route.Home,
+            startDestination = Route.Main,
             enterTransition = { fadeIn() },
             exitTransition = { fadeOut() }
         ) {

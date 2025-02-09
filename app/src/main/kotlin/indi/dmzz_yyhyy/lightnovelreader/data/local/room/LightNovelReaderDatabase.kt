@@ -148,7 +148,7 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
             }
         }
 
-        private val MIGRATION_11_12 = object : Migration(10, 11) {
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("""
             CREATE TABLE reading_statistics (

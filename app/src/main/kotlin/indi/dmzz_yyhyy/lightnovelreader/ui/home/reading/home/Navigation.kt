@@ -1,5 +1,6 @@
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -14,13 +15,16 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.readingHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Home.Reading.Home> {
-        val readingHomeViewModel = hiltViewModel<ReadingHomeViewModel>()
+    composable<Route.Main.Reading.Home> {
+        val parentEntry = remember(it) { navController.getBackStackEntry(Route.Main) }
+        val readingViewModel = hiltViewModel<ReadingHomeViewModel>(parentEntry)
         ReadingHomeScreen(
             controller = navController,
-            selectedRoute = Route.Home.Reading,
-            uiState = readingHomeViewModel.uiState,
-            update = readingHomeViewModel::update,
+            selectedRoute = Route.Main.Reading,
+            updateReadingBooks = readingViewModel::updateReadingBooks,
+            recentReadingBookIds = readingViewModel.recentReadingBookIds,
+            recentReadingUserReadingDataMap = readingViewModel.recentReadingUserReadingDataMap,
+            recentReadingBookInformationMap = readingViewModel.recentReadingBookInformationMap,
             onClickBook = navController::navigateToBookDetailDestination,
             onClickContinueReading = { bookId, chapterId ->
                 navController.navigateToBookDetailDestination(bookId)
@@ -29,7 +33,9 @@ fun NavGraphBuilder.readingHomeDestination(navController: NavController, sharedT
             onClickJumpToExploration = navController::navigateToExplorationHomeDestination,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
-            onClickStats = navController::navigateToReadingStatsDestination
+            onClickStats = {
+                navController.navigateToReadingStatsDestination()
+            }
         )
     }
 }

@@ -38,12 +38,12 @@ import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.homeSettingDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Home.Settings> {
+    composable<Route.Main.Settings> {
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         SettingsScreen(
             controller = navController,
-            selectedRoute = Route.Home.Settings,
+            selectedRoute = Route.Main.Settings,
             settingState = settingsViewModel.settingState,
             checkUpdate = updatesAvailableDialogViewModel::checkUpdate,
             importData = settingsViewModel::importFromFile,
@@ -60,11 +60,11 @@ fun NavGraphBuilder.homeSettingDestination(navController: NavController, sharedT
 
 @Suppress("unused")
 fun NavController.navigateToHomeSettingDestination() {
-    navigate(Route.Home.Settings)
+    navigate(Route.Main.Settings)
 }
 
 private fun NavGraphBuilder.sourceChangeDialog(navController: NavController) {
-    dialog<Route.Home.SourceChangeDialog> {
+    dialog<Route.Main.SourceChangeDialog> {
         val viewModel = hiltViewModel<SourceChangeDialogViewModel>()
         var selectedWebDataSourceId by remember { mutableIntStateOf(viewModel.webBookDataSourceId) }
         val context = LocalContext.current
@@ -87,11 +87,11 @@ private fun NavGraphBuilder.sourceChangeDialog(navController: NavController) {
 }
 
 private fun NavController.navigateToSourceChangeDialog() {
-    navigate(Route.Home.SourceChangeDialog)
+    navigate(Route.Main.SourceChangeDialog)
 }
 
 private fun NavGraphBuilder.exportUserDataDialog(navController: NavController) {
-    dialog<Route.Home.ExportUserDataDialog> {
+    dialog<Route.Main.ExportUserDataDialog> {
         val context = LocalContext.current
         val workManager = WorkManager.getInstance(context)
         val viewModel = hiltViewModel<ExportUserDataDialogViewModel>()
@@ -127,7 +127,7 @@ private fun NavGraphBuilder.exportUserDataDialog(navController: NavController) {
 }
 
 private fun NavController.navigateToExportUserDataDialog() {
-    navigate(Route.Home.ExportUserDataDialog)
+    navigate(Route.Main.ExportUserDataDialog)
 }
 
 

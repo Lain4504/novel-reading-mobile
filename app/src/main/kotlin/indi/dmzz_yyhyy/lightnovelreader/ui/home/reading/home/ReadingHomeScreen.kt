@@ -62,8 +62,6 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
 @Composable
 fun ReadingHomeScreen(
     controller: NavController,
-    uiState: ReadingHomeUiState,
-    update: () -> Unit,
     selectedRoute: Any,
     updateReadingBooks: () -> Unit,
     recentReadingBookInformationMap: Map<Int, BookInformation>,
@@ -100,7 +98,6 @@ fun ReadingHomeScreen(
         ) {
             Box(Modifier.padding(it)) {
                 ReadingContent(
-                    uiState = uiState,
                     onClickBook = onClickBook,
                     onClickContinueReading = onClickContinueReading,
                     onClickJumpToExploration = onClickJumpToExploration,
@@ -118,7 +115,6 @@ fun ReadingHomeScreen(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ReadingContent(
-    uiState: ReadingHomeUiState,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
@@ -178,7 +174,6 @@ private fun ReadingContent(
             }
         }
         items(recentReadingBookIds) { id ->
-            println(id)
             if (recentReadingUserReadingDataMap[id] != null && recentReadingBookInformationMap[id] != null)
                 ReadingBookCard(
                     modifier = Modifier.animateItem(),

@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 fun NavGraphBuilder.readingStatsDestination(navController: NavController) {
-    composable<Route.Home.Reading.Stats> {
+    composable<Route.Main.Reading.Stats> {
         val readingStatsViewModel = hiltViewModel<ReadingStatsViewModel>()
         ReadingStatsScreen(
             onClickBack = navController::popBackStack,
@@ -17,5 +17,5 @@ fun NavGraphBuilder.readingStatsDestination(navController: NavController) {
 }
 
 fun NavController.navigateToReadingStatsDestination() {
-    navigate(Route.Home.Reading.Stats)
+    navigate(Route.Main.Reading.Stats)
 }
