@@ -67,7 +67,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -435,8 +434,9 @@ private fun TopBar(
                 }
             }
         },
-        actions = {
+        /*actions = {
             IconButton(
+                enabled = false,
                 onClick = {
                     //TODO 全屏
                 }) {
@@ -444,7 +444,7 @@ private fun TopBar(
                     painter = painterResource(R.drawable.fullscreen_24px),
                     contentDescription = "fullscreen")
             }
-        },
+        },*/
         scrollBehavior = scrollBehavior
     )
 }
@@ -472,6 +472,7 @@ private fun BottomBar(
                 contentDescription = "lastChapter")
         }
         IconButton(
+            enabled = false,
             onClick = {
                 //TODO 添加至书签
             }) {
@@ -538,12 +539,16 @@ fun ChapterSelectorBottomSheet(
 ) {
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val screenHeight = LocalConfiguration.current.screenHeightDp
     val indexedItems = bookVolumes.volumes.flatMap { volume ->
         listOf(volume to null) + volume.chapters.map { volume to it }
     }
 
-    LaunchedEffect(sheetState.currentValue == PartiallyExpanded) {
+    val localDensity = LocalDensity.current
+    var columnHeightDp by remember {
+        mutableStateOf(0.dp)
+    }
+
+    LaunchedEffect(sheetState.currentValue == PartiallyExpanded && sheetState.currentValue != Expanded) {
         val targetIndex = indexedItems.indexOfFirst { (_, chapter) ->
             chapter?.id == readingChapterId
         }
@@ -573,11 +578,14 @@ fun ChapterSelectorBottomSheet(
                     modifier = Modifier.padding(start = 8.dp),
                     text = stringResource(R.string.select_chapter),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.W600
                 )
             }
             Spacer(Modifier.height(8.dp))
             LazyColumn(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    columnHeightDp = with(localDensity) { coordinates.size.height.toDp() }
+                },
                 state = lazyColumnState
             ) {
                 items(indexedItems) { (volume, chapter) ->
@@ -601,7 +609,7 @@ fun ChapterSelectorBottomSheet(
                                 Column {
                                     Text(
                                         text = volume.volumeTitle,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.W600,
                                         fontSize = 16.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -661,16 +669,6 @@ fun ChapterSelectorBottomSheet(
                                 }
                             }
                         }
-
-                    }
-                }
-                item {
-                    AnimatedVisibility(
-                        visible = sheetState.currentValue != Expanded,
-                        enter = expandVertically(),
-                        exit = shrinkVertically()
-                    ) {
-                        Spacer(Modifier.height((screenHeight * 0.6).dp))
                     }
                 }
             }

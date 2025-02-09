@@ -57,7 +57,6 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
@@ -154,7 +153,7 @@ fun ExplorationSearchScreen(
                                         }
                                     if (searchBarExpanded)
                                         IconButton(onClick = { dropdownMenuExpanded = true }) {
-                                            Icon(painter = painterResource(R.drawable.menu_open_24px), contentDescription = "menu")
+                                            Icon(painter = painterResource(R.drawable.filter_alt_24px), contentDescription = "filter")
                                         }
                                 }
                             },
@@ -169,9 +168,9 @@ fun ExplorationSearchScreen(
                         exit = fadeOut()
                     ) {
                         EmptyPage(
-                            painter = painterResource(R.drawable.schedule_90dp),
-                            title = stringResource(id = R.string.nothing_here),
-                            description = stringResource(id = R.string.nothing_here_desc_search)
+                            icon = painterResource(R.drawable.schedule_90dp),
+                            titleId = R.string.nothing_here,
+                            descriptionId = R.string.nothing_here_desc_search
                         )
                     }
                     AnimatedVisibility(
@@ -193,7 +192,7 @@ fun ExplorationSearchScreen(
                                 Text(
                                     text = stringResource(id = R.string.search_history),
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.W700,
+                                    fontWeight = FontWeight.W600,
                                     lineHeight = 16.sp,
                                 )
 
@@ -210,7 +209,7 @@ fun ExplorationSearchScreen(
                                     Text(
                                         text = stringResource(id = R.string.search_history_clear),
                                         fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.W600,
                                         lineHeight = 16.sp,
                                     )
                                 }
@@ -265,21 +264,14 @@ fun ExplorationSearchScreen(
             refresh = refresh
         ) {
             AnimatedVisibility(
-                visible = explorationSearchUiState.isLoading,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Loading()
-            }
-            AnimatedVisibility(
                 visible = explorationSearchUiState.isLoadingComplete && explorationSearchUiState.searchResult.isEmpty(),
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
                 EmptyPage(
-                    painter = painterResource(R.drawable.not_found_90dp),
-                    title = stringResource(id = R.string.search_no_results),
-                    description = stringResource(id = R.string.search_no_results_desc)
+                    icon = painterResource(R.drawable.not_found_90dp),
+                    titleId = R.string.search_no_results,
+                    descriptionId = R.string.search_no_results_desc
                 )
             }
             AnimatedVisibility(
@@ -293,7 +285,7 @@ fun ExplorationSearchScreen(
                 ) {
                     item {
                         AnimatedText(
-                            modifier = Modifier.padding(16.dp, 8.dp),
+                            modifier = Modifier.padding(vertical = 12.dp),
                             text = stringResource(
                                 R.string.search_results_title,
                                 searchKeyword,
@@ -302,7 +294,7 @@ fun ExplorationSearchScreen(
                             ),
                             style = MaterialTheme.typography.displayLarge,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.W700,
+                            fontWeight = FontWeight.W600,
                             lineHeight = 16.sp,
                             letterSpacing = 0.5.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant

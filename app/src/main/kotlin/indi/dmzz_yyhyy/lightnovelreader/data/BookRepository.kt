@@ -60,12 +60,10 @@ class BookRepository @Inject constructor(
         val bookVolumes: MutableStateFlow<BookVolumes> =
             MutableStateFlow(localBookDataSource.getBookVolumes(id) ?: BookVolumes.empty())
         coroutineScope.launch {
-            webBookDataSource.getBookVolumes(id)?.let { information ->
-                localBookDataSource.updateBookVolumes(id, information)
-                localBookDataSource.getBookVolumes(id)?.let { newBookVolumes ->
-                    bookVolumes.update {
-                        newBookVolumes
-                    }
+            webBookDataSource.getBookVolumes(id)?.let { newBookVolumes ->
+                localBookDataSource.updateBookVolumes(id, newBookVolumes)
+                bookVolumes.update {
+                    newBookVolumes
                 }
             }
         }

@@ -15,19 +15,29 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
-    composable<Route.Home.Bookshelf.Edit> {
+    composable<Route.Home.Bookshelf.Edit>(
+        enterTransition = { expandEnter() },
+        exitTransition = { expandExit() },
+        popEnterTransition = { expandPopEnter() },
+        popExitTransition = { expandPopExit() }
+    ) {
         val editBookshelfViewModel = hiltViewModel<EditBookshelfViewModel>()
         val edit = it.toRoute<Route.Home.Bookshelf.Edit>()
         EditBookshelfScreen(
             title = edit.title,
             bookshelfId = edit.id,
             bookshelf = editBookshelfViewModel.uiState,
-            init = editBookshelfViewModel::init,
-            onClickBack = navController::popBackStack,
+            inti = editBookshelfViewModel::init,
+            onClickBack = navController::popBackStackIfResumed,
             onClickSave = {
-                navController.popBackStack()
+                navController.popBackStackIfResumed()
                 editBookshelfViewModel.save()
             },
             onClickDelete = navController::navigateToDeleteBookshelfDialog,
@@ -51,6 +61,7 @@ private fun NavGraphBuilder.deleteBookshelfDialog(navController: NavController) 
             onConfirmation = {
                 viewModel.deleteBookshelf(it.toRoute<Route.Home.Bookshelf.DeleteBookshelfDialog>().bookshelfId)
                 navController.popBackStack()
+                navController.popBackStackIfResumed()
             }
         )
     }

@@ -18,4 +18,6 @@ data class VolumeEntity(
     val volumeTitle: String,
     @ColumnInfo(name = "chapter_id_list")
     val chapterIds: List<Int>,
+    @ColumnInfo(name = "volume_index")
+    val index: Int
 )

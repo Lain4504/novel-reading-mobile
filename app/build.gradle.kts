@@ -23,7 +23,7 @@ android {
         minSdk = 24
         targetSdk = 35
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*100+debug版本号(开发需要时迭代, 两位数)
-        versionCode = 1_00_00_028
+        versionCode = 1_00_01_001
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -144,7 +144,7 @@ dependencies {
     implementation("androidx.room:room-paging:$roomVersion")
     // Splash API
     implementation("androidx.core:core-splashscreen:1.0.1")
-    val appCenterSdkVersion = "5.0.4"
+    val appCenterSdkVersion = "5.0.6"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     val workVersion = "2.10.0"

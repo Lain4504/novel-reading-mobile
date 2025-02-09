@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.google.android.material.bottomsheet.BottomSheetBehavior.State
@@ -16,7 +17,7 @@ interface ExplorationHomeUiState {
 
 class MutableExplorationHomeUiState : ExplorationHomeUiState {
     override var pageTitles: MutableList<String> by mutableStateOf(mutableListOf())
-    override var selectedPage: Int by mutableStateOf(0)
+    override var selectedPage: Int by mutableIntStateOf(0)
     override var explorationPageTitle: String by mutableStateOf("")
     override var explorationPageBooksRawList: List<ExplorationBooksRow> by mutableStateOf(mutableListOf())
 }

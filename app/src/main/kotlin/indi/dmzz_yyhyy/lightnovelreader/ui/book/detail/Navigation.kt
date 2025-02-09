@@ -20,6 +20,9 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
@@ -32,7 +35,7 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
             onClickExportToEpub = {
                 navController.navigateToExportToEpubDialog(bookId, viewModel.uiState.bookInformation.title)
             },
-            onClickBackButton = navController::popBackStack,
+            onClickBackButton = navController::popBackStackIfResumed,
             onClickChapter = {
                 navController.navigateToBookContentDestination(bookId, it)
             },
@@ -80,13 +83,12 @@ fun NavController.navigateToBookDetailDestination(bookId: Int) {
 fun NavGraphBuilder.exportToEpubDialog(navController: NavController) {
     dialog<Route.Book.ExportUserDataDialog> { entry ->
         val viewModel = hiltViewModel<ExportToEpubDialogViewModel>()
-        val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
         val route = entry.toRoute<Route.Book.ExportUserDataDialog>()
         val bookId = route.bookId
         val title = route.title
         val exportToEPUBLauncher = launcher {
-            coroutineScope.launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 Toast.makeText(context, "开始导出书本 $title", Toast.LENGTH_SHORT).show()
                 viewModel.exportToEpub(it, bookId, title).collect {
                     if (it != null)
@@ -101,11 +103,11 @@ fun NavGraphBuilder.exportToEpubDialog(navController: NavController) {
                         }
                 }
             }
+            navController.popBackStack()
         }
         ExportToEpubDialog (
             onDismissRequest = { navController.popBackStack() },
             onConfirmation = {
-                navController.popBackStack()
                 createDataFile(title, exportToEPUBLauncher)
             }
         )

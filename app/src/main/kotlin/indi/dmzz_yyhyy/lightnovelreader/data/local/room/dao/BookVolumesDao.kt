@@ -13,9 +13,9 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
 @Dao
 interface BookVolumesDao {
     @TypeConverters(ListConverter::class)
-    @Query("replace into volume (book_id, volume_id, volume_title, chapter_id_list)" +
-            " values (:bookId, :volumeId, :volumeTitle, :chapterIds)")
-    fun update(bookId: Int, volumeId: Int, volumeTitle: String, chapterIds: String)
+    @Query("replace into volume (book_id, volume_id, volume_title, chapter_id_list, volume_index)" +
+            " values (:bookId, :volumeId, :volumeTitle, :chapterIds, :index)")
+    fun update(bookId: Int, volumeId: Int, volumeTitle: String, chapterIds: String, index: Int)
 
     @Query("replace into chapter_information (id, title) values (:id, :title)")
     fun updateChapterInformation(id: Int, title: String)
@@ -25,8 +25,8 @@ interface BookVolumesDao {
 
     @Transaction
     fun update(bookId: Int, volumes: BookVolumes) {
-        volumes.volumes.forEach { volume ->
-            update(bookId, volume.volumeId, volume.volumeTitle, volume.chapters.map { it.id }.joinToString(","))
+        volumes.volumes.forEachIndexed { index, volume ->
+            update(bookId, volume.volumeId, volume.volumeTitle, volume.chapters.map { it.id }.joinToString(","), index)
             volume.chapters.forEach {
                 updateChapterInformation(it.id, it.title)
             }
@@ -42,9 +42,11 @@ interface BookVolumesDao {
     @Transaction
     suspend fun getBookVolumes(bookId: Int): BookVolumes? {
         return getVolumeEntitiesByBookId(bookId)?.let { volumeEntities ->
-            BookVolumes(volumeEntities.map { volumeEntity ->
-                Volume(volumeEntity.volumeId, volumeEntity.volumeTitle, volumeEntity.chapterIds.map {
-                    getChapterInformation(it) ?: ChapterInformation(0, "")
+            BookVolumes(volumeEntities
+                .sortedBy { it.index }
+                .map { volumeEntity ->
+                    Volume(volumeEntity.volumeId, volumeEntity.volumeTitle, volumeEntity.chapterIds.map {
+                        getChapterInformation(it) ?: ChapterInformation(0, "")
                 })
             })
         }

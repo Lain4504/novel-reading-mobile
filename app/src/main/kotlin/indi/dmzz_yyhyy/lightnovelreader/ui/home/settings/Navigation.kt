@@ -27,6 +27,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.MutableExportContext
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SourceChangeDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.debug.navigateToDebug
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
@@ -46,6 +47,7 @@ fun NavGraphBuilder.homeSettingDestination(navController: NavController, sharedT
             settingState = settingsViewModel.settingState,
             checkUpdate = updatesAvailableDialogViewModel::checkUpdate,
             importData = settingsViewModel::importFromFile,
+            onClickDebugMode = navController::navigateToDebug,
             onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             animatedVisibilityScope = this,

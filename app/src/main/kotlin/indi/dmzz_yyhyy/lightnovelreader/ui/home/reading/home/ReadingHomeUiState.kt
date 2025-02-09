@@ -1,38 +1,18 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
 
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
-import java.time.LocalDateTime
-
-data class ReadingBook(
-    private val bookInformation: BookInformation,
-    private val userReadingData: UserReadingData
-) {
-    val id: Int get() = bookInformation.id
-    val title: String get() = bookInformation.title
-    val coverUrl: String get() = bookInformation.coverUrl
-    val author: String get() = bookInformation.author
-    val description: String get() = bookInformation.description
-    val publishingHouse : String get() = bookInformation.publishingHouse
-    val lastReadTime: LocalDateTime get() = userReadingData.lastReadTime
-    val totalReadTime: Int get() = userReadingData.totalReadTime
-    val readingProgress: Float get() = userReadingData.readingProgress
-    val lastReadChapterId: Int get() = userReadingData.lastReadChapterId
-    val lastReadChapterTitle: String get() = userReadingData.lastReadChapterTitle
-}
+import kotlinx.coroutines.flow.Flow
 
 @Stable
-interface ReadingHomeUiState {
-    val recentReadingBooks: List<ReadingBook>
-    val isLoading: Boolean
+interface ReadingUiState {
+    val recentReadingBookInformation: List<Flow<BookInformation>>
+    val recentReadingUserReadingData: List<Flow<UserReadingData>>
 }
 
-class MutableReadingUiState: ReadingHomeUiState {
-    override var recentReadingBooks: MutableList<ReadingBook> = mutableStateListOf()
-    override var isLoading: Boolean by mutableStateOf(true)
+class MutableReadingUiState: ReadingUiState {
+    override var recentReadingBookInformation: MutableList<Flow<BookInformation>> = mutableStateListOf()
+    override var recentReadingUserReadingData: MutableList<Flow<UserReadingData>> = mutableStateListOf()
 }

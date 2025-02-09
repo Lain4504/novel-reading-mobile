@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -137,7 +138,7 @@ fun SettingsBottomSheet(
                             modifier = Modifier.padding(start = 8.dp),
                             text = stringResource(R.string.settings_preview),
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.W600
                         )
                     }
 
@@ -221,7 +222,8 @@ fun SettingsBottomSheet(
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.titleLarge,
-                    text = stringResource(R.string.reader_settings)
+                    text = stringResource(R.string.reader_settings),
+                    fontWeight = FontWeight.W600
                 )
             }
 
@@ -247,62 +249,38 @@ fun ContentSettings(
         TabItem("操作", R.drawable.settings_applications_24px),
         TabItem("边距", R.drawable.aspect_ratio_24px),
     )
-    val pagerState by remember { mutableStateOf(PagerState { tabs.size }) }
+
+    val pagerState = rememberPagerState(initialPage = selectedTabIndex, pageCount = { tabs.size })
+
     LaunchedEffect(selectedTabIndex) {
-        pagerState.animateScrollToPage(selectedTabIndex)
+        pagerState.scrollToPage(selectedTabIndex)
     }
     LaunchedEffect(pagerState.currentPage) {
         onTabSelected(pagerState.currentPage)
     }
+
     Column {
-        TabRow(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        TabsRow(
+            tabs = tabs,
             selectedTabIndex = selectedTabIndex,
-            indicator = { tabPositions ->
-                SecondaryIndicator(
-                    modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                        .padding(horizontal = 24.dp)
-                        .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                )
-            }
-        ) {
-            tabs.forEachIndexed { index, tab ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { onTabSelected(index) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).clip(RoundedCornerShape(6.dp)),
-                    content = {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(tab.iconRes),
-                                contentDescription = tab.title,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text(
-                                text = tab.title,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
-                    }
-                )
-            }
-        }
+            onTabSelected = onTabSelected
+        )
+
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 .padding(horizontal = 8.dp, vertical = 12.dp),
-        ) {
+            userScrollEnabled = false
+        ) { pageIndex ->
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .clip(RoundedCornerShape(14.dp)),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                when(it) {
+                when (pageIndex) {
                     0 -> AppearancePage(settingState)
                     1 -> ActionPage(settingState)
                     2 -> PaddingPage(settingState)
@@ -311,6 +289,53 @@ fun ContentSettings(
         }
     }
 }
+
+@Composable
+fun TabsRow(
+    tabs: List<TabItem>,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    TabRow(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        selectedTabIndex = selectedTabIndex,
+        indicator = { tabPositions ->
+            SecondaryIndicator(
+                modifier = Modifier
+                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                    .padding(horizontal = 24.dp)
+                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+            )
+        }
+    ) {
+        tabs.forEachIndexed { index, tab ->
+            Tab(
+                selected = selectedTabIndex == index,
+                onClick = { onTabSelected(index) },
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .clip(RoundedCornerShape(6.dp)),
+                content = {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(tab.iconRes),
+                            contentDescription = tab.title,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = tab.title,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+            )
+        }
+    }
+}
+
 
 fun LazyListScope.AppearancePage(settingState: SettingState) {
     item {

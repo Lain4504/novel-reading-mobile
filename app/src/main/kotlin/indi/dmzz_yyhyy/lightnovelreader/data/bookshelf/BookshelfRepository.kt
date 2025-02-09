@@ -248,7 +248,6 @@ class BookshelfRepository @Inject constructor(
         }
         .build()
         .toJson()
-        .let { println(it);it }
 
     fun saveBookshelfJsonData(bookshelfId: Int, uri: Uri): OneTimeWorkRequest {
         val workRequest = OneTimeWorkRequestBuilder<SaveBookshelfWork>()

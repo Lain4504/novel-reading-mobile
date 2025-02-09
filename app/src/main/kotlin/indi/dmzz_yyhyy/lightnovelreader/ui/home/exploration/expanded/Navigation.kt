@@ -14,9 +14,19 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDesti
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
-    composable<Route.Home.Exploration.Expanded> { entry ->
+    composable<Route.Home.Exploration.Expanded>(
+        enterTransition = { expandEnter() },
+        exitTransition = { expandExit() },
+        popEnterTransition = { expandPopEnter() },
+        popExitTransition = { expandPopExit() }
+    ) { entry ->
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Home) }
         val explorationViewModel = hiltViewModel<ExplorationViewModel>(parentEntry)
         val explorationExpandedPageHomeViewModel = hiltViewModel<ExpandedPageViewModel>()
@@ -34,7 +44,7 @@ fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
             },
             onClickBack = {
                 explorationExpandedPageHomeViewModel.clear()
-                navController.popBackStack()
+                navController.popBackStackIfResumed()
             },
             onClickBook = {
                 navController.navigateToBookDetailDestination(it)

@@ -8,12 +8,22 @@ import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class ContentViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
@@ -27,6 +37,8 @@ class ContentViewModel @Inject constructor(
 
     val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
+    val coroutineScope = CoroutineScope(Dispatchers.IO)
+
 
     @Suppress("DuplicatedCode")
     fun init(bookId: Int, chapterId: Int) {
@@ -111,24 +123,56 @@ class ContentViewModel @Inject constructor(
         }
     }
 
+    private val _readingProgressChannel = Channel<Float>(Channel.CONFLATED)
+
+    init {
+        coroutineScope.launch(Dispatchers.IO) {
+            val progressFlow = _readingProgressChannel.receiveAsFlow()
+
+            merge(
+                progressFlow.throttleLatest(1000),
+                progressFlow.debounce(200)
+            )
+                .distinctUntilChanged()
+                .collectLatest { progress ->
+                    saveReadingProgress(progress)
+                }
+        }
+    }
+
+    private fun saveReadingProgress(progress: Float) {
+        if (progress.isNaN()) return
+
+        val chapterId = _uiState.chapterContent.id
+        val currentTime = LocalDateTime.now()
+
+        bookRepository.updateUserReadingData(_bookId) { userReadingData ->
+            val isChapterCompleted = progress > 0.945 &&
+                    !userReadingData.readCompletedChapterIds.contains(chapterId)
+
+            userReadingData.copy(
+                lastReadTime = currentTime,
+                lastReadChapterId = chapterId,
+                lastReadChapterProgress = progress.coerceIn(0f..1f),
+                readingProgress = if (isChapterCompleted) {
+                    (userReadingData.readCompletedChapterIds.size + 1) /
+                            _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
+                } else {
+                    userReadingData.readCompletedChapterIds.size /
+                            _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
+                },
+                readCompletedChapterIds = if (isChapterCompleted) {
+                    userReadingData.readCompletedChapterIds + chapterId
+                } else {
+                    userReadingData.readCompletedChapterIds
+                }
+            )
+        }
+    }
+
     fun changeChapterReadingProgress(progress: Float) {
         if (progress.isNaN()) return
-        viewModelScope.launch(Dispatchers.IO) {
-            bookRepository.updateUserReadingData(_bookId) { userReadingData ->
-                val readCompletedChapterIds =
-                    if (progress > 0.945 && !userReadingData.readCompletedChapterIds.contains(_uiState.chapterContent.id))
-                        userReadingData.readCompletedChapterIds + listOf(_uiState.chapterContent.id)
-                    else
-                        userReadingData.readCompletedChapterIds
-                userReadingData.copy(
-                    lastReadTime = LocalDateTime.now(),
-                    lastReadChapterId = _uiState.chapterContent.id,
-                    lastReadChapterProgress = progress,
-                    readingProgress = readCompletedChapterIds.size / _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat(),
-                    readCompletedChapterIds = readCompletedChapterIds
-                )
-            }
-        }
+        _readingProgressChannel.trySend(progress)
     }
 
     fun updateTotalReadingTime(bookId: Int, totalReadingTime: Int) {

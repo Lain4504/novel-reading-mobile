@@ -276,7 +276,7 @@ fun ExportUserDataDialog(
                 checked = mutableExportContext.settings,
                 onCheckedChange = { mutableExportContext.settings = it }
             )
-            HorizontalDivider(Modifier.padding(horizontal = 14.dp))
+            /*HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
                 title = stringResource(R.string.dialog_snap_bookmarks),
@@ -284,7 +284,7 @@ fun ExportUserDataDialog(
                 checked = mutableExportContext.bookmark,
                 onCheckedChange = { mutableExportContext.bookmark = it }
             )
-            HorizontalDivider(Modifier.padding(horizontal = 14.dp))
+            HorizontalDivider(Modifier.padding(horizontal = 14.dp))*/
         }
         Row(
             modifier = Modifier

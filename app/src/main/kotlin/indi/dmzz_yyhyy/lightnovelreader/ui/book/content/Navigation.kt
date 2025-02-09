@@ -6,12 +6,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.bookContentDestination(navController: NavController) {
     composable<Route.Book.Content> {
         val viewModel = hiltViewModel<ContentViewModel>()
         ContentScreen(
-            onClickBackButton = navController::popBackStack,
+            onClickBackButton = navController::popBackStackIfResumed,
             bookId = it.toRoute<Route.Book.Content>().bookId,
             chapterId = it.toRoute<Route.Book.Content>().chapterId,
             uiState = viewModel.uiState,

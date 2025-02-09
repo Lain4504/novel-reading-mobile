@@ -112,3 +112,17 @@
 }
 -keep class org.xmlpull.** { *; }
 -keepclassmembers class org.xmlpull.** { *; }
+-keepattributes Annotation, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-dontnote kotlinx.serialization.SerializationKt
+-keep,includedescriptorclasses class indi.dmzz_yyhyy.lightnovelreader.**$$serializer { *; }
+-keepclassmembers class indi.dmzz_yyhyy.lightnovelreader.** {
+    *** Companion;
+}
+-keepclasseswithmembers class indi.dmzz_yyhyy.lightnovelreader.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+-dontwarn org.dom4j.**
+-keep class org.dom4j.**{*;}
+-keep interface org.dom4j.** { *; }

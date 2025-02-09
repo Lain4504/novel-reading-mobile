@@ -66,6 +66,8 @@ object Route {
         )
     }
     @Serializable
+    object Debug
+    @Serializable
     object UpdatesAvailableDialog
     @Serializable
     data class AddBookToBookshelfDialog(
