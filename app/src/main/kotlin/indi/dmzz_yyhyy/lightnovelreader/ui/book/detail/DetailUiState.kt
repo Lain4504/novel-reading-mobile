@@ -16,6 +16,7 @@ interface DetailUiState {
     val userReadingData: UserReadingData
     val isCached: Boolean
     val cacheProgress: Int
+    val isInBookshelf: Boolean
 }
 
 class MutableDetailUiState: DetailUiState {
@@ -24,6 +25,7 @@ class MutableDetailUiState: DetailUiState {
     override var userReadingData: UserReadingData by mutableStateOf(UserReadingData.empty())
     override var isCached: Boolean by mutableStateOf(false)
     override var cacheProgress: Int by mutableIntStateOf(-1)
+    override var isInBookshelf: Boolean by mutableStateOf(false)
 }
 
 

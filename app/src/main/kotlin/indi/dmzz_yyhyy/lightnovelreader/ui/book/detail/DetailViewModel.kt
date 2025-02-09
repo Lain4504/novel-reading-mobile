@@ -57,6 +57,11 @@ class DetailViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch(Dispatchers.IO) {
+            bookshelfRepository.getBookshelfBookMetadataFlow(bookId).collect {
+                _uiState.isInBookshelf = it != null
+            }
+        }
     }
 
     @SuppressLint("WrongConstant")
