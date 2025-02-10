@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ class BookRepository @Inject constructor(
     private val workManager: WorkManager
 ) {
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+    private val bookCacheProgressFlowMap: MutableMap<Int, SharedFlow<Int>> = mutableMapOf()
 
     suspend fun getBookInformation(id: Int): Flow<BookInformation> {
         val bookInformation: MutableStateFlow<BookInformation> =
@@ -133,4 +135,22 @@ class BookRepository @Inject constructor(
         )
         return workRequest
     }
+
+    suspend fun getIsBookCached(bookId: Int): Boolean {
+        localBookDataSource.getBookVolumes(bookId)?.let { bookVolumes ->
+            if (bookVolumes.volumes.isEmpty())
+                return false
+            bookVolumes.volumes.forEach { bookVolume ->
+                bookVolume.chapters.forEach {
+                    if (!localBookDataSource.isChapterContentExists(it.id))
+                        return false
+                }
+            }
+        } ?: return false
+        return true
+    }
+
+    fun addCacheBookProgressFlow(bookId: Int, progressFlow: SharedFlow<Int>) = bookCacheProgressFlowMap.put(bookId, progressFlow)
+    fun getCacheBookProgressFlow(bookId: Int) = bookCacheProgressFlowMap[bookId]
+    fun clearCacheBookProgressFlow(bookId: Int) = bookCacheProgressFlowMap.remove(bookId)
 }

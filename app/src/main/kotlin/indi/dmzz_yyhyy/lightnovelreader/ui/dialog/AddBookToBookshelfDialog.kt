@@ -1,9 +1,11 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.dialog
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -63,13 +65,12 @@ fun AddBookToBookshelfDialog(
         dismissText = stringResource(R.string.cancel),
         confirmationText = stringResource(R.string.add_to_bookshelf),
     ) {
-        Column(Modifier.fillMaxWidth()
-            .sizeIn(maxHeight = 350.dp).verticalScroll(scrollState)) {
+        Column(Modifier.width(IntrinsicSize.Max).sizeIn(maxHeight = 350.dp).verticalScroll(scrollState)) {
             allBookshelf.forEachIndexed { index, bookshelf ->
                 CheckBoxListItem(
                     modifier = Modifier
-                        .sizeIn(minWidth = 280.dp, maxWidth = 500.dp)
-                        .fillMaxWidth()
+                        .wrapContentWidth()
+                        .sizeIn(minWidth = 325.dp)
                         .padding(horizontal = 14.dp),
                     title = bookshelf.name,
                     supportingText = stringResource(R.string.bookshelf_book_count, bookshelf.allBookIds.size),

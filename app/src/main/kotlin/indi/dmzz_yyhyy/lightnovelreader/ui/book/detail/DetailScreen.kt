@@ -82,6 +82,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
@@ -150,7 +151,7 @@ private fun Content(
     },
     id: Int,
     cacheBook: (Int) -> Unit,
-    requestAddBookToBookshelf: (Int) -> Unit
+    requestAddBookToBookshelf: (Int) -> Unit,
 ) {
     val uiState = viewModel.uiState
     val infoBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -184,11 +185,12 @@ private fun Content(
             item {
                 BookCardBlock(
                     bookInformation = uiState.bookInformation,
-                    modifier = Modifier.graphicsLayer {
-                        scrolledY += lazyListState.firstVisibleItemScrollOffset - previousOffset
-                        translationY = scrolledY * 0.5f
-                        previousOffset = lazyListState.firstVisibleItemScrollOffset
-                    }
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scrolledY += lazyListState.firstVisibleItemScrollOffset - previousOffset
+                            translationY = scrolledY * 0.5f
+                            previousOffset = lazyListState.firstVisibleItemScrollOffset
+                        }
                         .fillMaxWidth()
                 )
             }
@@ -197,6 +199,7 @@ private fun Content(
             }
             item {
                 QuickOperationsBlock(
+                    uiState = uiState,
                     onClickAddToBookShelf = { requestAddBookToBookshelf(uiState.bookInformation.id) },
                     onClickCache = { cacheBook(uiState.bookInformation.id) },
                     onClickShowInfo = { showInfoBottomSheet = true }
@@ -256,7 +259,8 @@ private fun Content(
                     hideReadChapters = hideReadChapters,
                     readCompletedChapterIds = uiState.userReadingData.readCompletedChapterIds,
                     onClickChapter = onClickChapter,
-                    volumesSize = uiState.bookVolumes.volumes.size
+                    volumesSize = uiState.bookVolumes.volumes.size,
+                    lastReadingChapterId = uiState.userReadingData.lastReadChapterId
                 )
             }
         }
@@ -491,6 +495,7 @@ private fun TagsBlock(
 
 @Composable
 private fun QuickOperationsBlock(
+    uiState: DetailUiState,
     onClickAddToBookShelf: () -> Unit,
     onClickCache: () -> Unit,
     onClickShowInfo: () -> Unit
@@ -519,7 +524,7 @@ private fun QuickOperationsBlock(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
-                Text(
+                AnimatedText(
                     text = title,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1
@@ -543,8 +548,8 @@ private fun QuickOperationsBlock(
                 .weight(1f)
         ) {
             QuickOperationButton(
-                icon = painterResource(R.drawable.outline_book_24px),
-                title = stringResource(R.string.add_to_bookshelf),
+                icon = if(uiState.isInBookshelf) painterResource(R.drawable.filled_bookmark_add_24px) else painterResource(R.drawable.bookmark_add_24px),
+                title = if(uiState.isInBookshelf) "查看收藏" else stringResource(R.string.add_to_bookshelf),
                 onClick = onClickAddToBookShelf
             )
         }
@@ -554,9 +559,13 @@ private fun QuickOperationsBlock(
                 .weight(1f)
         ) {
             QuickOperationButton(
-                icon = painterResource(R.drawable.cloud_download_24px),
-                title = stringResource(R.string.action_cache),
-                onClick = onClickCache
+                icon = if(uiState.isCached) painterResource(R.drawable.filled_cloud_download_24px) else painterResource(R.drawable.cloud_download_24px),
+                title =
+                if (uiState.isCached && uiState.cacheProgress == -1)
+                    "已缓存"
+                else if(uiState.cacheProgress == -1) "缓存"
+                else "${uiState.cacheProgress}%",
+                onClick = if(uiState.cacheProgress == -1) onClickCache else {{}}
             )
         }
         Box(
@@ -640,7 +649,8 @@ private fun VolumeItem(
     hideReadChapters: Boolean = false,
     readCompletedChapterIds: List<Int>,
     onClickChapter: (Int) -> Unit,
-    volumesSize: Int
+    volumesSize: Int,
+    lastReadingChapterId: Int
 ) {
     val readCount = volume.chapters.count { it.id in readCompletedChapterIds }
     val totalCount = volume.chapters.size
@@ -724,12 +734,12 @@ private fun VolumeItem(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     volume.chapters.forEach {
                         if (!(hideReadChapters && readCompletedChapterIds.contains(it.id))) {
-                            Box(
+                            Column(
                                 modifier = Modifier
                                     .clickable { onClickChapter(it.id) }
                                     .wrapContentHeight()
                                     .fillMaxWidth()
-                                    .padding(horizontal = 32.dp, vertical = 12.dp)
+                                    .padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = if (it.id == lastReadingChapterId) 6.dp else 12.dp)
                             ) {
                                 Text(
                                     text = it.title,
@@ -745,6 +755,14 @@ private fun VolumeItem(
                                         MaterialTheme.colorScheme.secondary
                                     else MaterialTheme.colorScheme.onSurface
                                 )
+                                if (it.id == lastReadingChapterId)
+                                    Text(
+                                        text = "上次阅读",
+                                        maxLines = 1,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.W700,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                             }
                         }
                     }
@@ -805,12 +823,15 @@ fun BookInfoBottomSheet(
                 Text(
                     text = content,
                     style = contentStyle,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .combinedClickable(
                             onClick = {},
                             onLongClick = {
                                 clipboardManager.setText(AnnotatedString(content))
-                                Toast.makeText(context, "内容已复制", Toast.LENGTH_SHORT).show()
+                                Toast
+                                    .makeText(context, "内容已复制", Toast.LENGTH_SHORT)
+                                    .show()
                             },
                         )
                 )

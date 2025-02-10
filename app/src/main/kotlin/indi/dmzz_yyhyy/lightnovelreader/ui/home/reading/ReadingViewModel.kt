@@ -36,7 +36,6 @@ class ReadingViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             recentReadingBookIds = readingBooksUserData.getOrDefault(emptyList()).reversed()
                 .mapNotNull { if (it == -1) null else it  }
-            println(recentReadingBookIds)
             recentReadingBookIds.forEach { id ->
                 bookRepository.getBookInformation(id).let { flow ->
                     viewModelScope.launch {

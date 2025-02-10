@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
@@ -7,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,6 +19,7 @@ class DetailViewModel @Inject constructor(
     private val bookshelfRepository: BookshelfRepository,
 ) : ViewModel() {
     private val _uiState = MutableDetailUiState()
+    private var cacheBookProgressCollectJob: Job? = null
     val uiState: DetailUiState = _uiState
 
     fun init(bookId: Int) {
@@ -42,10 +45,48 @@ class DetailViewModel @Inject constructor(
                 _uiState.userReadingData = it
             }
         }
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.isCached = bookRepository.getIsBookCached(bookId)
+        }
+        bookRepository.getCacheBookProgressFlow(bookId)?.let { flow ->
+            cacheBookProgressCollectJob?.cancel()
+            cacheBookProgressCollectJob =
+                viewModelScope.launch(Dispatchers.IO) {
+                flow.collect {
+                    _uiState.cacheProgress = it
+                }
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            bookshelfRepository.getBookshelfBookMetadataFlow(bookId).collect {
+                _uiState.isInBookshelf = it != null
+            }
+        }
     }
 
+    @SuppressLint("WrongConstant")
     fun cacheBook(bookId: Int): Flow<WorkInfo?> {
         val work = bookRepository.cacheBook(bookId)
-        return bookRepository.isCacheBookWorkFlow(work.id)
+        val isCachedFlow = bookRepository.isCacheBookWorkFlow(work.id)
+        viewModelScope.launch(Dispatchers.IO) {
+            isCachedFlow.collect { workInfo ->
+                if (workInfo?.state == WorkInfo.State.RUNNING) {
+                    bookRepository.getCacheBookProgressFlow(bookId)?.let { flow ->
+                        cacheBookProgressCollectJob?.cancel()
+                        cacheBookProgressCollectJob =
+                            viewModelScope.launch(Dispatchers.IO) {
+                                flow.collect {
+                                    _uiState.cacheProgress = it
+                                }
+                            }
+                    }
+                }
+                if (workInfo?.state == WorkInfo.State.SUCCEEDED) {
+                    _uiState.cacheProgress = -1
+                    _uiState.isCached = bookRepository.getIsBookCached(bookId)
+                }
+            }
+        }
+        return isCachedFlow
     }
 }
