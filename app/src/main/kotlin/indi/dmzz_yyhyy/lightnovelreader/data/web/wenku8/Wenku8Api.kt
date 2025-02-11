@@ -87,7 +87,8 @@ object Wenku8Api: WebBookDataSource {
     override fun getBookInformation(id: Int): BookInformation {
         if (isAppDataSourceOffLine()) return BookInformation.empty()
         return wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
-            val titleGroup = it.selectFirst("[name=Title]")?.text()
+            val titleGroup = it
+                .selectFirst("[name=Title]")?.text()
                 ?.let { it1 -> titleRegex.find(it1)?.groups }
             BookInformation(
                 id = id,

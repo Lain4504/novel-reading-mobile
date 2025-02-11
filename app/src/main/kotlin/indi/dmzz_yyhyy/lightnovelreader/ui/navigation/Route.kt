@@ -59,6 +59,8 @@ object Route {
             val bookId: Int,
             val title: String
         )
+        @Serializable
+        object ColorPickerDialog
     }
     @Serializable
     object Debug

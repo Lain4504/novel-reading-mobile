@@ -18,9 +18,9 @@ import androidx.work.WorkInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToBookContentDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
+import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ fun NavGraphBuilder.exportToEpubDialog(navController: NavController) {
         val route = entry.toRoute<Route.Book.ExportUserDataDialog>()
         val bookId = route.bookId
         val title = route.title
-        val exportToEPUBLauncher = launcher {
+        val exportToEPUBLauncher = uriLauncher {
             CoroutineScope(Dispatchers.Main).launch {
                 Toast.makeText(context, "开始导出书本 $title", Toast.LENGTH_SHORT).show()
                 viewModel.exportToEpub(it, bookId, title).collect {

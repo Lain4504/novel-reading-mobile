@@ -1,10 +1,12 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -19,6 +21,8 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -45,6 +49,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -58,8 +63,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import indi.dmzz_yyhyy.lightnovelreader.AppEvent
+import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -82,7 +89,8 @@ fun ContentText(
     onChapterReadingProgressChange: (Float) -> Unit,
     changeIsImmersive: () -> Unit,
     paddingValues: PaddingValues,
-    autoPadding: Boolean
+    autoPadding: Boolean,
+    settingState: SettingState
 ) {
     val autoAvoidPaddingValues = with(LocalDensity.current) {
         PaddingValues(
@@ -101,17 +109,18 @@ fun ContentText(
             modifier = Modifier
                 .animateContentSize()
                 .fillMaxSize()
-                .padding(paddingValues)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = changeIsImmersive
                 ),
+            paddingValues = if (autoPadding) autoAvoidPaddingValues else paddingValues,
             content = content,
             fontSize = fontSize,
             fontLineHeight = fontLineHeight,
             readingProgress = readingProgress,
-            onChapterReadingProgressChange = onChapterReadingProgressChange
+            onChapterReadingProgressChange = onChapterReadingProgressChange,
+            settingState = settingState
         )
     else
         SimpleFlipPageTextComponent(
@@ -129,21 +138,27 @@ fun ContentText(
             onChapterReadingProgressChange = onChapterReadingProgressChange,
             changeIsImmersive = changeIsImmersive,
             paddingValues =
-                if (autoPadding) autoAvoidPaddingValues else paddingValues
+                if (autoPadding) autoAvoidPaddingValues else paddingValues,
+            settingState = settingState
         )
 }
 
+@SuppressLint("FrequentlyChangedStateReadInComposition")
 @Composable
 fun ScrollContentTextComponent(
     modifier: Modifier,
+    paddingValues: PaddingValues,
     content: String,
     fontSize: TextUnit,
     fontLineHeight: TextUnit,
     readingProgress: Float,
     onChapterReadingProgressChange: (Float) -> Unit,
+    settingState: SettingState
 ) {
+    val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
     val contentLazyColumnState = rememberLazyListState()
+    val screenHeight = LocalContext.current.resources.displayMetrics.heightPixels
     var contentKey by remember { mutableIntStateOf(0) }
     LaunchedEffect(readingProgress) {
         if (contentKey == content.hashCode()) return@LaunchedEffect
@@ -163,17 +178,63 @@ fun ScrollContentTextComponent(
                 (visibleItemsHeight - viewportHeight)
         onChapterReadingProgressChange(progress)
     }
+    if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
+        Image(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(with(density) {
+                    screenHeight.toDp()
+                })
+                .offset(y = with(density) {
+                    ((contentLazyColumnState.layoutInfo.visibleItemsInfo.getOrNull(0)?.offset ?: 0) % screenHeight + screenHeight).toDp()
+                }),
+            painter =
+            if (settingState.backgroundImageUri.toString()
+                    .isEmpty()
+            ) painterResource(id = R.drawable.paper)
+            else rememberAsyncImagePainter(settingState.backgroundImageUri),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+        Image(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(with(density) {
+                    screenHeight.toDp()
+                })
+                .offset(y = with(density) {
+                    ((contentLazyColumnState.layoutInfo.visibleItemsInfo.getOrNull(0)?.offset ?: 0) % screenHeight).toDp()
+                }),
+            painter =
+            if (settingState.backgroundImageUri.toString()
+                    .isEmpty()
+            ) painterResource(id = R.drawable.paper)
+            else rememberAsyncImagePainter(settingState.backgroundImageUri),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+    }
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.padding(
+            bottom = paddingValues.calculateBottomPadding()
+        ),
         state = contentLazyColumnState,
     ) {
+        item {
+            Box(Modifier.height(paddingValues.calculateTopPadding()))
+        }
         items(
             content
                 .split("[image]")
                 .filter { it.isNotBlank() }
         ) {
             BasicContentComponent(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    ),
                 text = it,
                 fontSize = fontSize,
                 fontLineHeight = fontLineHeight,
@@ -197,7 +258,8 @@ fun SimpleFlipPageTextComponent(
     fastChapterChange: Boolean,
     onChapterReadingProgressChange: (Float) -> Unit,
     changeIsImmersive: () -> Unit,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    settingState: SettingState
 ) {
     val textMeasurer = rememberTextMeasurer()
     val scope = rememberCoroutineScope()
@@ -330,7 +392,20 @@ fun SimpleFlipPageTextComponent(
                     }
                 )
             },
-        ) {
+    ) {
+        Box(Modifier.fillMaxSize()) {
+            if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    painter =
+                    if (settingState.backgroundImageUri.toString()
+                            .isEmpty()
+                    ) painterResource(id = R.drawable.paper)
+                    else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
             BasicContentComponent(
                 modifier = modifier
                     .fillMaxSize()
@@ -339,6 +414,7 @@ fun SimpleFlipPageTextComponent(
                 fontSize = fontSize,
                 fontLineHeight = fontLineHeight,
             )
+        }
     }
 }
 
@@ -355,7 +431,9 @@ fun BasicContentComponent(
         ) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.align(Alignment.Center).padding(16.dp)
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
             )
             AsyncImage(
                 modifier = Modifier
@@ -378,6 +456,7 @@ fun BasicContentComponent(
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.W400,
                 fontSize = fontSize,
+                color = MaterialTheme.colorScheme.onBackground,
                 lineHeight = (fontSize.value + fontLineHeight.value).sp
             )
         }

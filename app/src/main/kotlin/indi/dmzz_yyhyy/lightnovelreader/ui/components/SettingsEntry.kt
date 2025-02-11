@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -372,11 +374,13 @@ fun SettingsMenuEntry(
 
 @Composable
 fun SettingsClickableEntry(
+    modifier: Modifier = Modifier,
     iconRes: Int = -1,
     title: String,
     description: String
 ) {
     SettingsClickableEntry(
+        modifier = modifier,
         iconRes = iconRes,
         title = title,
         description = description,
@@ -386,6 +390,7 @@ fun SettingsClickableEntry(
 
 @Composable
 fun SettingsClickableEntry(
+    modifier: Modifier = Modifier,
     iconRes: Int = -1,
     title: String,
     description: String,
@@ -393,6 +398,7 @@ fun SettingsClickableEntry(
 ) {
     val context = LocalContext.current
     SettingsClickableEntry(
+        modifier = modifier,
         iconRes = iconRes,
         title = title,
         description = description,
@@ -407,14 +413,16 @@ fun SettingsClickableEntry(
 
 @Composable
 fun SettingsClickableEntry(
+    modifier: Modifier = Modifier,
     iconRes: Int = -1,
     title: String,
     option: String? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
     description: String,
     onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -471,6 +479,15 @@ fun SettingsClickableEntry(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                 )
+            }
+        }
+        trailingContent?.let {
+            Box(
+                modifier = Modifier.wrapContentWidth(Alignment.End)
+            ) {
+                Box(Modifier.width(52.dp)) {
+                    it.invoke()
+                }
             }
         }
     }

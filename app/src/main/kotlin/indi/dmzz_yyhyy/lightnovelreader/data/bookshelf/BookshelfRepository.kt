@@ -76,13 +76,14 @@ class BookshelfRepository @Inject constructor(
         }
 
     fun crateBookShelf(
+        id: Int = Instant.now().epochSecond.hashCode(),
         name: String,
         sortType: BookshelfSortType,
         autoCache: Boolean,
         systemUpdateReminder: Boolean,
     ): Int {
         bookshelfDao.createBookshelf(BookshelfEntity(
-            id = Instant.now().epochSecond.hashCode(),
+            id = id,
             name = name,
             sortType = sortType.key,
             autoCache = autoCache,

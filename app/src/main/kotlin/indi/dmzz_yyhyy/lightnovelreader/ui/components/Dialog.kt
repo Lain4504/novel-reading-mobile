@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -60,7 +61,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -608,16 +608,6 @@ fun ExportToEpubDialog(
     )
 }
 
-@Preview
-@Composable
-fun ColorPickerDialogPreview() {
-    ColorPickerDialog(
-        onConfirmation = {},
-        onDismissRequest = {},
-        selectedColor = MaterialTheme.colorScheme.surfaceContainer
-    )
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ColorPickerDialog(
@@ -629,10 +619,10 @@ fun ColorPickerDialog(
         mutableStateOf(selectedColor)
     }
     val colorList = listOf(
-        MaterialTheme.colorScheme.surfaceContainer,
-        Color(0x38FF9800),
+        Color.Unspecified,
+        Color(0x38E8CCA5),
         Color(0x38FF8080),
-        Color(0x38FFCC00),
+        Color(0x38d3b17d),
         Color(0x3834C759),
         Color(0x3832ADE6),
         Color(0x38007AFF),
@@ -657,10 +647,7 @@ fun ColorPickerDialog(
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .clickable(
-                            interactionSource = null,
-                            indication = null
-                        ) {
+                        .clickable {
                             currentColor = color
                         }
                 ) {
@@ -670,18 +657,17 @@ fun ColorPickerDialog(
                     Canvas(
                         modifier = Modifier.size(44.dp)
                     ) {
-                        if (currentColor == color)
+                        if (color == currentColor)
                             drawCircle(
                                 color = secondary,
                                 radius = 22.dp.toPx(),
                             )
-
                         drawCircle(
                             color = surfaceContainer,
                             radius = 20.dp.toPx(),
                         )
                         drawCircle(
-                            color = color,
+                            color = if (color.isUnspecified) surfaceContainer else color,
                             radius = 20.dp.toPx(),
                         )
                     }

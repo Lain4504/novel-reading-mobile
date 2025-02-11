@@ -18,9 +18,7 @@ sealed class UserDataPath(
         data object FontLineHeight : UserDataPath("fontLineHeight", Reader)
         data object KeepScreenOn : UserDataPath("keepScreenOn", Reader)
         data object EnableBackgroundImage : UserDataPath("enableBackgroundImage", Reader)
-        data object CustomBackgroundImage : UserDataPath("customBackgroundImage", Reader)
         data object BackgroundImageDisplayMode : UserDataPath("backgroundImageDisplayMode", Reader)
-        data object PaletteColor : UserDataPath("paletteColor", Reader)
         data object IsUsingFlipPage : UserDataPath("isUsingFlipPage", Reader)
         data object IsUsingClickFlipPage : UserDataPath("isUsingClickFlipPage", Reader)
         data object IsUsingVolumeKeyFlip : UserDataPath("isUsingVolumeKeyFlip", Reader)
@@ -35,6 +33,8 @@ sealed class UserDataPath(
         data object BottomPadding : UserDataPath("bottomPadding", Reader)
         data object LeftPadding : UserDataPath("leftPadding", Reader)
         data object RightPadding : UserDataPath("rightPadding", Reader)
+        data object BackgroundColor : UserDataPath("backgroundColor", Reader)
+        data object BackgroundImageUri : UserDataPath("backgroundImageUri", Reader)
     }
     data object ReadingBooks : UserDataPath("reading_books")
     data object Search: UserDataPath("search") {

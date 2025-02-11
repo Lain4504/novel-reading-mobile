@@ -204,5 +204,7 @@
     <!-- Initial letter Filter -->
     <string name="key_letter_filter_title">首字母筛选</string>
     <string name="key_letter_filter_desc">根据小说标题的拼音首字母筛选</string>
+    <string name="key_customize_image">自定义图片</string>
+    <string name="key_default_image">默认图片</string>
 
 </resources>
