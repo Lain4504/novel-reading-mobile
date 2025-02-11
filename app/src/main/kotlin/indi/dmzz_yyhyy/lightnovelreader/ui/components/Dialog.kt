@@ -613,22 +613,13 @@ fun ExportToEpubDialog(
 fun ColorPickerDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: (Color) -> Unit,
-    selectedColor: Color
+    selectedColor: Color,
+    colors: List<Color>,
 ) {
     var currentColor by remember {
         mutableStateOf(selectedColor)
     }
-    val colorList = listOf(
-        Color.Unspecified,
-        Color(0x38E8CCA5),
-        Color(0x38FF8080),
-        Color(0x38d3b17d),
-        Color(0x3834C759),
-        Color(0x3832ADE6),
-        Color(0x38007AFF),
-        Color(0x385856D6),
-        Color(0x38AF52DE)
-    )
+
     BaseDialog (
         icon = painterResource(R.drawable.palette_24px),
         title = "调色盘",
@@ -643,7 +634,7 @@ fun ColorPickerDialog(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            colorList.forEachIndexed { index, color ->
+            colors.forEachIndexed { index, color ->
                 Box(
                     modifier = Modifier
                         .size(44.dp)

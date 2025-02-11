@@ -91,7 +91,8 @@ fun SettingsBottomSheet(
     onDismissRequest: () -> Unit,
     uiState: ContentScreenUiState,
     settingState: SettingState,
-    onClickChangeBackgroundColor: () -> Unit
+    onClickChangeBackgroundColor: () -> Unit,
+    onClickChangeTextColor: () -> Unit
 ) {
     val isEnableIndicator = (settingState.enableBatteryIndicator
             || settingState.enableTimeIndicator
@@ -264,7 +265,8 @@ fun SettingsBottomSheet(
                 settingState = settingState,
                 selectedTabIndex = selectedTabIndex,
                 onTabSelected = { index -> selectedTabIndex = index },
-                onClickChangeBackgroundColor = onClickChangeBackgroundColor
+                onClickChangeBackgroundColor = onClickChangeBackgroundColor,
+                onClickChangeTextColor = onClickChangeTextColor
             )
         }
     }
@@ -277,7 +279,8 @@ fun ContentSettings(
     settingState: SettingState,
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit,
-    onClickChangeBackgroundColor: () -> Unit
+    onClickChangeBackgroundColor: () -> Unit,
+    onClickChangeTextColor: () -> Unit
 ) {
     val tabs = listOf(
         TabItem("外观", R.drawable.filled_menu_book_24px),
@@ -316,7 +319,11 @@ fun ContentSettings(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 when (pageIndex) {
-                    0 -> AppearancePage(settingState, onClickChangeBackgroundColor)
+                    0 -> AppearancePage(
+                        settingState,
+                        onClickChangeBackgroundColor,
+                        onClickChangeTextColor
+                    )
                     1 -> ActionPage(settingState)
                     2 -> PaddingPage(settingState)
                 }
@@ -372,7 +379,11 @@ fun TabsRow(
 }
 
 
-fun LazyListScope.AppearancePage(settingState: SettingState, onClickChangeBackgroundColor: () -> Unit) {
+fun LazyListScope.AppearancePage(
+    settingState: SettingState,
+    onClickChangeBackgroundColor: () -> Unit,
+    onClickChangeTextColor: () -> Unit
+) {
     item {
         SettingsSliderEntry(
             iconRes = R.drawable.text_fields_24px,
@@ -391,6 +402,46 @@ fun LazyListScope.AppearancePage(settingState: SettingState, onClickChangeBackgr
             valueRange = 0f..32f,
             value = settingState.fontLineHeight,
             floatUserData = settingState.fontLineHeightUserData
+        )
+    }
+    item {
+        SettingsSliderEntry(
+            iconRes = R.drawable.format_bold_24px,
+            title = "字重",
+            unit = "",
+            valueRange = 100f..900f,
+            value = settingState.fontWeigh,
+            valueFormat = { (it / 100).toInt() * 100f },
+            floatUserData = settingState.fontWeighUserData
+        )
+    }
+    item {
+        val onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer
+        val background = MaterialTheme.colorScheme.background
+        SettingsClickableEntry (
+            modifier = Modifier.animateItem(),
+            iconRes = R.drawable.palette_24px,
+            title = "字体颜色",
+            description = "自定义阅读器字体色",
+            onClick = onClickChangeTextColor,
+            trailingContent = {
+                androidx.compose.foundation.Canvas(
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    drawCircle(
+                        color = onSecondaryContainer,
+                        radius = 20.dp.toPx(),
+                    )
+                    drawCircle(
+                        color = background,
+                        radius = 17.5.dp.toPx(),
+                    )
+                    drawCircle(
+                        color = if (settingState.textColor.isUnspecified) background else settingState.textColor,
+                        radius = 17.5.dp.toPx(),
+                    )
+                }
+            }
         )
     }
     item {

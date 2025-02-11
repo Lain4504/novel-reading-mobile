@@ -45,6 +45,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -68,6 +70,7 @@ import coil.request.ImageRequest
 import indi.dmzz_yyhyy.lightnovelreader.AppEvent
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -238,6 +241,8 @@ fun ScrollContentTextComponent(
                 text = it,
                 fontSize = fontSize,
                 fontLineHeight = fontLineHeight,
+                fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
             )
         }
     }
@@ -314,7 +319,7 @@ fun SimpleFlipPageTextComponent(
                     fontWeight = FontWeight.W400,
                     lineHeight = (fontLineHeight.value + fontSize.value).sp
                 )
-            )
+            ).debugPrint()
             pagerState = PagerState { slippedTextList.size }
             resumedReadingProgressJob?.cancel()
             resumedReadingProgressJob = scope.launch {
@@ -413,6 +418,8 @@ fun SimpleFlipPageTextComponent(
                 text = slippedTextList[it],
                 fontSize = fontSize,
                 fontLineHeight = fontLineHeight,
+                fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
             )
         }
     }
@@ -424,6 +431,8 @@ fun BasicContentComponent(
     text: String,
     fontSize: TextUnit,
     fontLineHeight: TextUnit,
+    fontWeight: FontWeight,
+    color: Color
 ) {
     if (text.trim().startsWith("http://") || text.trim().startsWith("https://")) {
         Box(modifier
@@ -451,12 +460,12 @@ fun BasicContentComponent(
         SelectionContainer {
             Text(
                 modifier = modifier.fillMaxSize(),
-                text = text,
+                text = text.debugPrint("line"),
                 textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.W400,
+                fontWeight = fontWeight,
                 fontSize = fontSize,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = color,
                 lineHeight = (fontSize.value + fontLineHeight.value).sp
             )
         }
@@ -470,16 +479,16 @@ fun slipText(
 ): List<String> {
     val resultList: MutableList<String> = mutableListOf()
     text.split("[image]").filter { it.isNotEmpty() }.forEach { single ->
-        if (single.trim().startsWith("http://") || single.trim().startsWith("https://"))
+        if (single.debugPrint().trim().startsWith("http://") || single.trim().startsWith("https://"))
             resultList.add(single)
         else {
             textMeasurer
                 .measure(
-                    text = single,
+                    text = single.debugPrint(),
                     style = style,
                     constraints = constraints
                 )
-                .getSlipString(text, constraints)
+                .getSlipString(single, constraints)
                 .let(resultList::addAll)
         }
     }

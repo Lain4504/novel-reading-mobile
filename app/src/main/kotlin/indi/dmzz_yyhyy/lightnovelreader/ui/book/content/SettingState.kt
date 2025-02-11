@@ -16,6 +16,7 @@ class SettingState(
 ) : AbstractSettingState(coroutineScope) {
     val fontSizeUserData = userDataRepository.floatUserData(UserDataPath.Reader.FontSize.path)
     val fontLineHeightUserData = userDataRepository.floatUserData(UserDataPath.Reader.FontLineHeight.path)
+    val fontWeighUserData = userDataRepository.floatUserData(UserDataPath.Reader.FontWeigh.path)
     val keepScreenOnUserData = userDataRepository.booleanUserData(UserDataPath.Reader.KeepScreenOn.path)
     val enableBackgroundImageUserData = userDataRepository.booleanUserData(UserDataPath.Reader.EnableBackgroundImage.path)
     val backgroundImageDisplayModeUserData = userDataRepository.stringUserData(UserDataPath.Reader.BackgroundImageDisplayMode.path)
@@ -35,11 +36,13 @@ class SettingState(
     val bottomPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.BottomPadding.path)
     val leftPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.LeftPadding.path)
     val rightPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.RightPadding.path)
+    val textColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.TextColor.path)
     val backgroundColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.BackgroundColor.path)
     val backgroundImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundImageUri.path)
 
     val fontSize by fontSizeUserData.safeAsState(15f)
     val fontLineHeight by fontLineHeightUserData.safeAsState(7f)
+    val fontWeigh by fontWeighUserData.safeAsState(500f)
     val keepScreenOn by keepScreenOnUserData.safeAsState(false)
     val enableBackgroundImage by enableBackgroundImageUserData.safeAsState(false)
     val backgroundImageDisplayMode by backgroundImageDisplayModeUserData.safeAsState("fixed")
@@ -57,6 +60,7 @@ class SettingState(
     val bottomPadding by bottomPaddingUserData.safeAsState(12f)
     val leftPadding by leftPaddingUserData.safeAsState(16f)
     val rightPadding by rightPaddingUserData.safeAsState(16f)
+    val textColor by textColorUserData.safeAsState(Color.Unspecified)
     val backgroundColor by backgroundColorUserData.safeAsState(Color.Unspecified)
     val backgroundImageUri by backgroundImageUriUserData.safeAsState(Uri.EMPTY)
 }

@@ -161,6 +161,7 @@ fun SettingsSliderEntry(
     unit: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
     floatUserData: FloatUserData
 ) {
     var tempValue by remember { mutableFloatStateOf(value) }
@@ -174,6 +175,7 @@ fun SettingsSliderEntry(
         unit = unit,
         value = tempValue,
         valueRange = valueRange,
+        valueFormat = valueFormat,
         onSlideChange = { tempValue = it },
         onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) }
     )
@@ -187,6 +189,7 @@ private fun SettingsSliderEntry(
     unit: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
     onSlideChange: (Float) -> Unit,
     onSliderChangeFinished: () -> Unit
 ) {
@@ -243,7 +246,7 @@ private fun SettingsSliderEntry(
                 modifier = Modifier.fillMaxWidth(),
                 value = value,
                 valueRange = valueRange,
-                onValueChange = { onSlideChange((it * 2).roundToInt().toFloat() / 2) },
+                onValueChange = { onSlideChange(valueFormat(it)) },
                 onValueChangeFinished = onSliderChangeFinished,
                 colors = SliderDefaults.colors(
                     inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,

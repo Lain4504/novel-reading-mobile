@@ -60,7 +60,28 @@ object Route {
             val title: String
         )
         @Serializable
-        object ColorPickerDialog
+        data class ColorPickerDialog(
+            val colorUserDataPath: String,
+            val colors: LongArray
+        ) {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as ColorPickerDialog
+
+                if (colorUserDataPath != other.colorUserDataPath) return false
+                if (!colors.contentEquals(other.colors)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = colorUserDataPath.hashCode()
+                result = 31 * result + colors.contentHashCode()
+                return result
+            }
+        }
     }
     @Serializable
     object Debug

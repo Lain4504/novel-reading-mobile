@@ -107,7 +107,8 @@ fun ContentScreen(
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
     onChangeChapter: (Int) -> Unit,
-    onClickChangeBackgroundColor: () -> Unit
+    onClickChangeBackgroundColor: () -> Unit,
+    onClickChangeTextColor: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isImmersive by remember { mutableStateOf(false) }
@@ -157,7 +158,8 @@ fun ContentScreen(
             onChapterReadingProgressChange = onChapterReadingProgressChange,
             onChangeChapter = onChangeChapter,
             onChangeIsImmersive = { isImmersive = !isImmersive },
-            onClickChangeBackgroundColor = onClickChangeBackgroundColor
+            onClickChangeBackgroundColor = onClickChangeBackgroundColor,
+            onClickChangeTextColor = onClickChangeTextColor
         )
     }
 }
@@ -178,7 +180,8 @@ fun Content(
     onChapterReadingProgressChange: (Float) -> Unit,
     onChangeChapter: (Int) -> Unit,
     onChangeIsImmersive: () -> Unit,
-    onClickChangeBackgroundColor: () -> Unit
+    onClickChangeBackgroundColor: () -> Unit,
+    onClickChangeTextColor: () -> Unit
 ) {
     val activity = LocalActivity.current as Activity
     val coroutineScope = rememberCoroutineScope()
@@ -360,7 +363,8 @@ fun Content(
                 },
                 settingState = settingState,
                 uiState = uiState,
-                onClickChangeBackgroundColor = onClickChangeBackgroundColor
+                onClickChangeBackgroundColor = onClickChangeBackgroundColor,
+                onClickChangeTextColor = onClickChangeTextColor
             )
         }
         ChapterSelectorBottomSheet(
