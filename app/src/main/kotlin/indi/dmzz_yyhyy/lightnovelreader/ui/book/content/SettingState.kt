@@ -1,19 +1,25 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.setting.AbstractSettingState
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import kotlinx.coroutines.CoroutineScope
 
+@Suppress("MemberVisibilityCanBePrivate")
 class SettingState(
     userDataRepository: UserDataRepository,
     coroutineScope: CoroutineScope
 ) : AbstractSettingState(coroutineScope) {
     val fontSizeUserData = userDataRepository.floatUserData(UserDataPath.Reader.FontSize.path)
     val fontLineHeightUserData = userDataRepository.floatUserData(UserDataPath.Reader.FontLineHeight.path)
+    val fontWeighUserData = userDataRepository.floatUserData(UserDataPath.Reader.FontWeigh.path)
     val keepScreenOnUserData = userDataRepository.booleanUserData(UserDataPath.Reader.KeepScreenOn.path)
+    val enableBackgroundImageUserData = userDataRepository.booleanUserData(UserDataPath.Reader.EnableBackgroundImage.path)
+    val backgroundImageDisplayModeUserData = userDataRepository.stringUserData(UserDataPath.Reader.BackgroundImageDisplayMode.path)
     val isUsingFlipPageUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingFlipPage.path)
     val isUsingClickFlipPageUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingClickFlipPage.path)
     val isUsingVolumeKeyFlipUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingVolumeKeyFlip.path)
@@ -30,10 +36,16 @@ class SettingState(
     val bottomPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.BottomPadding.path)
     val leftPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.LeftPadding.path)
     val rightPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.RightPadding.path)
+    val textColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.TextColor.path)
+    val backgroundColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.BackgroundColor.path)
+    val backgroundImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundImageUri.path)
 
     val fontSize by fontSizeUserData.safeAsState(15f)
     val fontLineHeight by fontLineHeightUserData.safeAsState(7f)
+    val fontWeigh by fontWeighUserData.safeAsState(500f)
     val keepScreenOn by keepScreenOnUserData.safeAsState(false)
+    val enableBackgroundImage by enableBackgroundImageUserData.safeAsState(false)
+    val backgroundImageDisplayMode by backgroundImageDisplayModeUserData.safeAsState("fixed")
     val isUsingFlipPage by isUsingFlipPageUserData.safeAsState(false)
     val isUsingClickFlipPage by isUsingClickFlipPageUserData.safeAsState(false)
     val isUsingVolumeKeyFlip by isUsingVolumeKeyFlipUserData.safeAsState(false)
@@ -48,4 +60,7 @@ class SettingState(
     val bottomPadding by bottomPaddingUserData.safeAsState(12f)
     val leftPadding by leftPaddingUserData.safeAsState(16f)
     val rightPadding by rightPaddingUserData.safeAsState(16f)
+    val textColor by textColorUserData.safeAsState(Color.Unspecified)
+    val backgroundColor by backgroundColorUserData.safeAsState(Color.Unspecified)
+    val backgroundImageUri by backgroundImageUriUserData.safeAsState(Uri.EMPTY)
 }

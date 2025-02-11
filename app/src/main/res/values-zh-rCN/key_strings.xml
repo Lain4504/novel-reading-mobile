@@ -17,5 +17,7 @@
     <!-- FlipAnime -->
     <string name="key_flip_animation_none">无</string>
     <string name="key_flip_animation_scroll">滚动</string>
-
+    <!-- Reader Bg Image Display Mode -->
+    <string name="key_bg_image_display_mode_loop">循环</string>
+    <string name="key_bg_image_display_mode_fixed">固定</string>
 </resources>

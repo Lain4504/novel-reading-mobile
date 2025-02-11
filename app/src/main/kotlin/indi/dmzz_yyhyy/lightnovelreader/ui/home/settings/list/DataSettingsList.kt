@@ -1,15 +1,12 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +17,7 @@ import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
+import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.launch
 
 @Composable
@@ -32,7 +30,7 @@ fun DataSettingsList(
     val context = LocalContext.current
     val workManager = WorkManager.getInstance(context)
     val scope = rememberCoroutineScope()
-    val importDataLauncher = launcher {
+    val importDataLauncher = uriLauncher {
         scope.launch {
             workManager.getWorkInfoByIdFlow(importData(it).id).collect {
                 when (it?.state) {
@@ -115,15 +113,4 @@ fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResul
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
     launcher.launch(Intent.createChooser(intent, "选择数据文件"))
-}
-
-@Composable
-fun launcher(block: (Uri) -> Unit): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
-        if (activityResult.resultCode == Activity.RESULT_OK) {
-            activityResult.data?.data?.let { uri ->
-                block(uri)
-            }
-        }
-    }
 }

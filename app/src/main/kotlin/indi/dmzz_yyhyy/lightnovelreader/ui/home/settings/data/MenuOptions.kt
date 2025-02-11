@@ -44,8 +44,18 @@ sealed class MenuOptions(vararg options: Option) {
         Option("ko-kp", R.string.key_locale_ko_kp)
     )
 
+    data object ReaderBgImageDisplayModeOptions: MenuOptions() {
+        val Fixed = option("fixed", R.string.key_bg_image_display_mode_fixed)
+        val Loop = option("loop", R.string.key_bg_image_display_mode_loop)
+    }
+
     data object FlipAnimationOptions: MenuOptions() {
         val None = option("none", R.string.key_flip_animation_none)
         val ScrollWithoutShadow = option("scroll", R.string.key_flip_animation_scroll)
+    }
+
+    data object SelectImage: MenuOptions() {
+        val Default = option("default", R.string.key_default_image)
+        val Customize = option("customize", R.string.key_customize_image)
     }
 }

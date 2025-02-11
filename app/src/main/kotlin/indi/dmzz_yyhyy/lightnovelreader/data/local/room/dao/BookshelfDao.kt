@@ -48,6 +48,9 @@ interface BookshelfDao {
     @Query("select * from book_shelf_book_metadata where id=:id")
     fun getBookshelfBookMetadataEntity(id: Int): BookshelfBookMetadataEntity?
 
+    @Query("select * from book_shelf_book_metadata where id=:id")
+    fun getBookshelfBookMetadataEntityFlow(id: Int): Flow<BookshelfBookMetadataEntity?>
+
     @Query("replace into book_shelf_book_metadata (id, last_update, book_shelf_ids)" +
             " values (:id, :lastUpdate, :bookshelfIds)")
     fun updateBookshelfBookMetaDataEntity(
@@ -58,6 +61,7 @@ interface BookshelfDao {
 
     @Query("select id from book_shelf")
     fun getAllBookshelfIds(): List<Int>
+
     @Transaction
     fun getBookshelfBookMetadata(id: Int): BookshelfBookMetadata? = getBookshelfBookMetadataEntity(id)?.let {
         BookshelfBookMetadata(

@@ -208,6 +208,8 @@
     <string name="key_pub_filter_desc">Filter by publishing house.</string>
     <string name="key_letter_filter_title">First Letter Filter</string>
     <string name="key_letter_filter_desc">Filter by the first letter of the book\'s title (Pinyin).</string>
+    <string name="key_customize_image">Customize Image</string>
+    <string name="key_default_image">Default Image</string>
 
 
 </resources>

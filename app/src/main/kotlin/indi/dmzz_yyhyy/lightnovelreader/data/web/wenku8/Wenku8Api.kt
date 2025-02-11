@@ -19,6 +19,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.Wenku8TagsEx
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.HomeBookExpandPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -87,7 +88,8 @@ object Wenku8Api: WebBookDataSource {
     override fun getBookInformation(id: Int): BookInformation {
         if (isAppDataSourceOffLine()) return BookInformation.empty()
         return wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
-            val titleGroup = it.selectFirst("[name=Title]")?.text()
+            val titleGroup = it
+                .selectFirst("[name=Title]")?.text()
                 ?.let { it1 -> titleRegex.find(it1)?.groups }
             BookInformation(
                 id = id,
@@ -137,7 +139,7 @@ object Wenku8Api: WebBookDataSource {
                 return@let list
             }
         }
-        return wenku8Api("action=book&do=text&aid=$bookId&cid=$chapterId&t=0")
+        return wenku8Api("action=book&do=text&aid=$bookId&cid=$chapterId&t=0").debugPrint("content")
             .let { document ->
                 document
                     ?.wholeText()
@@ -155,16 +157,16 @@ object Wenku8Api: WebBookDataSource {
                                 return@forEachIndexed
                             }
                         }
-                        val images = Regex("(<!--image-->)(.*?)(<!--image-->)")
+                        val imagesResult = Regex("(http.*?)(<!--image-->)")
                             .findAll(document.toString())
-                            .map { it.groups[2]?.value ?: "" }
                             .toList()
+                        imagesResult.forEach {
+                            content = content.replace(it.groups[1]?.value ?: it.value, "[image]${it.groups[1]?.value ?: ""}[image]")
+                        }
                         ChapterContent(
                             id = chapterId,
                             title = title,
-                            content =
-                                if (images.isEmpty()) content else images.joinToString { "[image]$it[image]" }.replace(", ", "")
-                            ,
+                            content = content.debugPrint("content"),
                             lastChapter = allBookChapterListCache
                                 .indexOfFirst { it.id == chapterId }
                                 .let {

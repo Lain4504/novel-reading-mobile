@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +23,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,7 +64,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -74,13 +75,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
@@ -106,6 +107,8 @@ fun ContentScreen(
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
     onChangeChapter: (Int) -> Unit,
+    onClickChangeBackgroundColor: () -> Unit,
+    onClickChangeTextColor: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isImmersive by remember { mutableStateOf(false) }
@@ -128,32 +131,36 @@ fun ContentScreen(
                     scrollBehavior
                 )
             }
-        }
-    ) { paddingValues ->
-        Box(
-            Modifier.padding(
-                start = paddingValues.calculateStartPadding(LayoutDirection.Rtl),
-                top = paddingValues.calculateTopPadding(),
-                bottom = 0.dp,
-                end = paddingValues.calculateEndPadding(LayoutDirection.Rtl),
-            )
-        ) {
-            Content(
-                isImmersive = isImmersive,
-                bookId = bookId,
-                chapterId = chapterId,
-                uiState = uiState,
-                settingState = settingState,
-                addToReadingBook = addToReadingBook,
-                init = init,
-                updateTotalReadingTime = updateTotalReadingTime,
-                onClickLastChapter = onClickLastChapter,
-                onClickNextChapter = onClickNextChapter,
-                onChapterReadingProgressChange = onChapterReadingProgressChange,
-                onChangeChapter = onChangeChapter,
-                onChangeIsImmersive = { isImmersive = !isImmersive }
+        },
+        containerColor = if (settingState.backgroundColor.isUnspecified) MaterialTheme.colorScheme.background else settingState.backgroundColor
+    ) { _ ->
+        if (settingState.enableBackgroundImage) {
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter =
+                if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
+                else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                contentDescription = null,
+                contentScale = ContentScale.Crop
             )
         }
+        Content(
+            isImmersive = isImmersive,
+            bookId = bookId,
+            chapterId = chapterId,
+            uiState = uiState,
+            settingState = settingState,
+            addToReadingBook = addToReadingBook,
+            init = init,
+            updateTotalReadingTime = updateTotalReadingTime,
+            onClickLastChapter = onClickLastChapter,
+            onClickNextChapter = onClickNextChapter,
+            onChapterReadingProgressChange = onChapterReadingProgressChange,
+            onChangeChapter = onChangeChapter,
+            onChangeIsImmersive = { isImmersive = !isImmersive },
+            onClickChangeBackgroundColor = onClickChangeBackgroundColor,
+            onClickChangeTextColor = onClickChangeTextColor
+        )
     }
 }
 
@@ -173,6 +180,8 @@ fun Content(
     onChapterReadingProgressChange: (Float) -> Unit,
     onChangeChapter: (Int) -> Unit,
     onChangeIsImmersive: () -> Unit,
+    onClickChangeBackgroundColor: () -> Unit,
+    onClickChangeTextColor: () -> Unit
 ) {
     val activity = LocalActivity.current as Activity
     val coroutineScope = rememberCoroutineScope()
@@ -291,7 +300,8 @@ fun Content(
                             end = settingState.rightPadding.dp
                         ),
                         autoPadding = settingState.autoPadding,
-                        fastChapterChange = settingState.fastChapterChange
+                        fastChapterChange = settingState.fastChapterChange,
+                        settingState = settingState
                     )
                 }
                 AnimatedVisibility (
@@ -352,7 +362,9 @@ fun Content(
                     showSettingsBottomSheet = false
                 },
                 settingState = settingState,
-                uiState = uiState
+                uiState = uiState,
+                onClickChangeBackgroundColor = onClickChangeBackgroundColor,
+                onClickChangeTextColor = onClickChangeTextColor
             )
         }
         ChapterSelectorBottomSheet(

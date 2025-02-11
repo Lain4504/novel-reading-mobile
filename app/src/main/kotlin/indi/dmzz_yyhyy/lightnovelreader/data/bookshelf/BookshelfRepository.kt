@@ -76,13 +76,14 @@ class BookshelfRepository @Inject constructor(
         }
 
     fun crateBookShelf(
+        id: Int = Instant.now().epochSecond.hashCode(),
         name: String,
         sortType: BookshelfSortType,
         autoCache: Boolean,
         systemUpdateReminder: Boolean,
     ): Int {
         bookshelfDao.createBookshelf(BookshelfEntity(
-            id = Instant.now().epochSecond.hashCode(),
+            id = id,
             name = name,
             sortType = sortType.key,
             autoCache = autoCache,
@@ -176,6 +177,15 @@ class BookshelfRepository @Inject constructor(
     fun getAllBookshelfBookIdsFlow(): Flow<List<Int>> = bookshelfDao.getAllBookshelfBookIdsFlow()
 
     fun getBookshelfBookMetadata(id: Int): BookshelfBookMetadata? = bookshelfDao.getBookshelfBookMetadata(id)
+
+    fun getBookshelfBookMetadataFlow(id: Int): Flow<BookshelfBookMetadata?> = bookshelfDao.getBookshelfBookMetadataEntityFlow(id).map {
+        it ?: return@map null
+        BookshelfBookMetadata(
+            it.id,
+            it.lastUpdate,
+            it.bookShelfIds
+        )
+    }
 
     private fun clearBookshelfIdFromBookshelfBookMetadata(bookshelfId: Int, bookId: Int) {
         bookshelfDao.getBookshelfBookMetadata(bookId)?.let { bookshelfBookMetadata ->
