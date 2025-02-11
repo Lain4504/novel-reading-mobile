@@ -416,6 +416,15 @@ fun LazyListScope.AppearancePage(
         )
     }
     item {
+        SettingsSwitchEntry(
+            iconRes = R.drawable.translate_24px,
+            title = "简繁转换",
+            description = "将内容从简体转换为繁体",
+            checked = settingState.enableSimplifiedTraditionalTransform,
+            booleanUserData = settingState.enableSimplifiedTraditionalTransformUserData,
+        )
+    }
+    item {
         val onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer
         val background = MaterialTheme.colorScheme.background
         SettingsClickableEntry (

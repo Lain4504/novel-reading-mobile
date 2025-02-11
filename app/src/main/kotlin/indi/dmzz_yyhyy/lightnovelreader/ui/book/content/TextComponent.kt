@@ -319,7 +319,7 @@ fun SimpleFlipPageTextComponent(
                     fontWeight = FontWeight.W400,
                     lineHeight = (fontLineHeight.value + fontSize.value).sp
                 )
-            ).debugPrint()
+            )
             pagerState = PagerState { slippedTextList.size }
             resumedReadingProgressJob?.cancel()
             resumedReadingProgressJob = scope.launch {
@@ -479,12 +479,12 @@ fun slipText(
 ): List<String> {
     val resultList: MutableList<String> = mutableListOf()
     text.split("[image]").filter { it.isNotEmpty() }.forEach { single ->
-        if (single.debugPrint().trim().startsWith("http://") || single.trim().startsWith("https://"))
+        if (single.trim().startsWith("http://") || single.trim().startsWith("https://"))
             resultList.add(single)
         else {
             textMeasurer
                 .measure(
-                    text = single.debugPrint(),
+                    text = single,
                     style = style,
                     constraints = constraints
                 )
