@@ -13,6 +13,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.json.BookUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CacheBookWork
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,7 @@ class BookRepository @Inject constructor(
     private val webBookDataSource: WebBookDataSource,
     private val localBookDataSource: LocalBookDataSource,
     private val bookshelfRepository: BookshelfRepository,
+    private val textProcessingRepository: TextProcessingRepository,
     private val workManager: WorkManager
 ) {
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
@@ -88,7 +90,7 @@ class BookRepository @Inject constructor(
                 }
             }
         }
-        return chapterContent
+        return textProcessingRepository.processChapterContent(chapterContent)
     }
 
     fun getUserReadingData(bookId: Int): Flow<UserReadingData> =

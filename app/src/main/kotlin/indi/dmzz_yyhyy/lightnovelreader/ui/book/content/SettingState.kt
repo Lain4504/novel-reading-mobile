@@ -31,12 +31,15 @@ class SettingState(
         UserDataPath.Reader.EnableChapterTitleIndicator.path)
     val enableReadingChapterProgressIndicatorUserData = userDataRepository.booleanUserData(
         UserDataPath.Reader.EnableReadingChapterProgressIndicator.path)
+    val enableSimplifiedTraditionalTransformUserData = userDataRepository.booleanUserData(
+        UserDataPath.Reader.EnableSimplifiedTraditionalTransform.path)
     val autoPaddingUserData = userDataRepository.booleanUserData(UserDataPath.Reader.AutoPadding.path)
     val topPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.TopPadding.path)
     val bottomPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.BottomPadding.path)
     val leftPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.LeftPadding.path)
     val rightPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.RightPadding.path)
     val textColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.TextColor.path)
+    val fontFamilyUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.FontFamilyUri.path)
     val backgroundColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.BackgroundColor.path)
     val backgroundImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundImageUri.path)
 
@@ -55,12 +58,14 @@ class SettingState(
     val enableTimeIndicator by enableTimeIndicatorUserData.safeAsState(true)
     val enableChapterTitleIndicator by enableChapterTitleIndicatorUserData.safeAsState(true)
     val enableReadingChapterProgressIndicator by enableReadingChapterProgressIndicatorUserData.safeAsState(true)
+    val enableSimplifiedTraditionalTransform by enableSimplifiedTraditionalTransformUserData.safeAsState(false)
     val autoPadding by autoPaddingUserData.safeAsState(true)
     val topPadding by topPaddingUserData.safeAsState(12f)
     val bottomPadding by bottomPaddingUserData.safeAsState(12f)
     val leftPadding by leftPaddingUserData.safeAsState(16f)
     val rightPadding by rightPaddingUserData.safeAsState(16f)
     val textColor by textColorUserData.safeAsState(Color.Unspecified)
+    val fontFamilyUri by fontFamilyUriUserData.safeAsState(Uri.EMPTY)
     val backgroundColor by backgroundColorUserData.safeAsState(Color.Unspecified)
     val backgroundImageUri by backgroundImageUriUserData.safeAsState(Uri.EMPTY)
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ContentViewModel @Inject constructor(
     private val bookRepository: BookRepository,
+    private val textProcessingRepository: TextProcessingRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
     private val _uiState = MutableContentScreenUiState()
@@ -54,6 +56,11 @@ class ContentViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.getUserReadingData(bookId).collect {
                 _uiState.userReadingData = it
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            textProcessingRepository.updateFlow.collect {
+                loadChapterContent(bookId, uiState.chapterContent.id)
             }
         }
     }

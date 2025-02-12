@@ -55,6 +55,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +65,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toFile
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
@@ -70,7 +73,6 @@ import coil.request.ImageRequest
 import indi.dmzz_yyhyy.lightnovelreader.AppEvent
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -242,6 +244,7 @@ fun ScrollContentTextComponent(
                 fontSize = fontSize,
                 fontLineHeight = fontLineHeight,
                 fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                fontFamily = if (settingState.fontFamilyUri.toString().isEmpty()) MaterialTheme.typography.bodyMedium.fontFamily else FontFamily(Font(settingState.fontFamilyUri.toFile())),
                 color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
             )
         }
@@ -319,7 +322,7 @@ fun SimpleFlipPageTextComponent(
                     fontWeight = FontWeight.W400,
                     lineHeight = (fontLineHeight.value + fontSize.value).sp
                 )
-            ).debugPrint()
+            )
             pagerState = PagerState { slippedTextList.size }
             resumedReadingProgressJob?.cancel()
             resumedReadingProgressJob = scope.launch {
@@ -419,6 +422,7 @@ fun SimpleFlipPageTextComponent(
                 fontSize = fontSize,
                 fontLineHeight = fontLineHeight,
                 fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                fontFamily = if (settingState.fontFamilyUri.toString().isEmpty()) MaterialTheme.typography.bodyMedium.fontFamily else FontFamily(Font(settingState.fontFamilyUri.toFile())),
                 color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
             )
         }
@@ -432,6 +436,7 @@ fun BasicContentComponent(
     fontSize: TextUnit,
     fontLineHeight: TextUnit,
     fontWeight: FontWeight,
+    fontFamily: FontFamily?,
     color: Color
 ) {
     if (text.trim().startsWith("http://") || text.trim().startsWith("https://")) {
@@ -460,11 +465,12 @@ fun BasicContentComponent(
         SelectionContainer {
             Text(
                 modifier = modifier.fillMaxSize(),
-                text = text.debugPrint("line"),
+                text = text,
                 textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = fontWeight,
                 fontSize = fontSize,
+                fontFamily = fontFamily,
                 color = color,
                 lineHeight = (fontSize.value + fontLineHeight.value).sp
             )
@@ -479,12 +485,12 @@ fun slipText(
 ): List<String> {
     val resultList: MutableList<String> = mutableListOf()
     text.split("[image]").filter { it.isNotEmpty() }.forEach { single ->
-        if (single.debugPrint().trim().startsWith("http://") || single.trim().startsWith("https://"))
+        if (single.trim().startsWith("http://") || single.trim().startsWith("https://"))
             resultList.add(single)
         else {
             textMeasurer
                 .measure(
-                    text = single.debugPrint(),
+                    text = single,
                     style = style,
                     constraints = constraints
                 )
