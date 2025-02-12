@@ -58,4 +58,9 @@ sealed class MenuOptions(vararg options: Option) {
         val Default = option("default", R.string.key_default_image)
         val Customize = option("customize", R.string.key_customize_image)
     }
+
+    data object SelectText: MenuOptions() {
+        val Default = option("default", R.string.key_default_text)
+        val Customize = option("customize", R.string.key_customize_text)
+    }
 }

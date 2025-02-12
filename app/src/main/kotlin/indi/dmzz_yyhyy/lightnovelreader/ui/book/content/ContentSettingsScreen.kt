@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.animation.AnimatedVisibility
@@ -54,6 +55,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,7 +68,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -386,7 +392,7 @@ fun LazyListScope.AppearancePage(
 ) {
     item {
         SettingsSliderEntry(
-            iconRes = R.drawable.text_fields_24px,
+            iconRes = R.drawable.format_size_24px,
             title = stringResource(R.string.settings_reader_font_size),
             unit = "sp",
             valueRange = 8f..64f,
@@ -454,6 +460,64 @@ fun LazyListScope.AppearancePage(
         )
     }
     item {
+        val textMeasurer = rememberTextMeasurer()
+        val coroutineScope = rememberCoroutineScope()
+        val content = LocalContext.current
+        val launcher = uriLauncher {
+            CoroutineScope(Dispatchers.IO).launch {
+                val font = content.filesDir.resolve("readerTextFont")
+                    .also {
+                        if (it.exists()) {
+                            it.delete()
+                            it.createNewFile()
+                        } else it.createNewFile()
+                    }
+                try {
+                    content.contentResolver.openFileDescriptor(it, "r")
+                        ?.use { parcelFileDescriptor ->
+                            FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
+                                fileInputStream.readBytes()
+                            }.let(font::writeBytes)
+                        }
+                } catch (e: Exception) {
+                    Log.e("ReaderTextFont", "failed to load chosen file")
+                    e.printStackTrace()
+                }
+                try {
+                    textMeasurer
+                        .measure(
+                            text = "",
+                            style = TextStyle(
+                                fontFamily = FontFamily(Font(font))
+                            )
+                        )
+                } catch (exception: Exception) {
+                    coroutineScope.launch {
+                        Toast.makeText(content, "字体文件错误或已损坏, 请您检查后导入", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+                settingState.fontFamilyUriUserData.set(font.toUri())
+            }
+        }
+        SettingsMenuEntry(
+            modifier = Modifier.animateItem(),
+            iconRes = R.drawable.text_fields_24px,
+            title = "文本字体",
+            description = "使用应用内置的字体或自定义字体文件",
+            options = MenuOptions.SelectText,
+            selectedOptionKey = if (settingState.fontFamilyUri.toString()
+                    .isEmpty()
+            ) MenuOptions.SelectText.Default else MenuOptions.SelectText.Customize,
+            onOptionChange = {
+                when (it) {
+                    MenuOptions.SelectText.Default -> settingState.fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
+                    MenuOptions.SelectText.Customize -> selectDataFile(launcher, "*/*")
+                }
+            }
+        )
+    }
+    item {
         SettingsSwitchEntry(
             iconRes = R.drawable.lightbulb_24px,
             title = stringResource(R.string.settings_reader_keep_screen_on),
@@ -496,20 +560,18 @@ fun LazyListScope.AppearancePage(
                     }
                     settingState.backgroundImageUriUserData.set(image.toUri())
                 }
-                content.dataDir
-                settingState.backgroundImageUriUserData::asynchronousSet
             }
             SettingsMenuEntry(
                 modifier = Modifier.animateItem(),
                 iconRes = R.drawable.drive_file_move_24px,
                 title = "选择图片",
-                description = "使用应用内置的图片背景或自定义图片(.png)文件",
+                description = "使用应用内置的图片背景或自定义图片文件",
                 options = MenuOptions.SelectImage,
                 selectedOptionKey = if (settingState.backgroundImageUri.toString().isEmpty()) MenuOptions.SelectImage.Default else MenuOptions.SelectImage.Customize,
                 onOptionChange = {
                     when (it) {
                         MenuOptions.SelectImage.Default -> settingState.backgroundImageUriUserData.asynchronousSet(Uri.EMPTY)
-                        MenuOptions.SelectImage.Customize -> selectDataFile(launcher)
+                        MenuOptions.SelectImage.Customize -> selectDataFile(launcher, "image/*")
                     }
                 }
             )
@@ -711,11 +773,11 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
 }
 
 @Suppress("DuplicatedCode")
-fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
+fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>, mime: String) {
     val initUri = DocumentsContract.buildDocumentUri("com.android.externalstorage.pictures", "primary:Pictures")
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
-        type = "image/*"
+        type = mime
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }

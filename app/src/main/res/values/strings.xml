@@ -210,6 +210,8 @@
     <string name="key_letter_filter_desc">Filter by the first letter of the book\'s title (Pinyin).</string>
     <string name="key_customize_image">Customize Image</string>
     <string name="key_default_image">Default Image</string>
+    <string name="key_default_text">Default Font</string>
+    <string name="key_customize_text">Customize Image</string>
 
 
 </resources>

@@ -19,7 +19,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.Wenku8TagsEx
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.HomeBookExpandPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -139,7 +138,7 @@ object Wenku8Api: WebBookDataSource {
                 return@let list
             }
         }
-        return wenku8Api("action=book&do=text&aid=$bookId&cid=$chapterId&t=0").debugPrint("content")
+        return wenku8Api("action=book&do=text&aid=$bookId&cid=$chapterId&t=0")
             .let { document ->
                 document
                     ?.wholeText()
@@ -166,7 +165,7 @@ object Wenku8Api: WebBookDataSource {
                         ChapterContent(
                             id = chapterId,
                             title = title,
-                            content = content.debugPrint("content"),
+                            content = content,
                             lastChapter = allBookChapterListCache
                                 .indexOfFirst { it.id == chapterId }
                                 .let {

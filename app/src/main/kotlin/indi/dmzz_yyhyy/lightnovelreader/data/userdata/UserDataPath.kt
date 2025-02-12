@@ -36,6 +36,7 @@ sealed class UserDataPath(
         data object LeftPadding : UserDataPath("leftPadding", Reader)
         data object RightPadding : UserDataPath("rightPadding", Reader)
         data object TextColor : UserDataPath("textColor", Reader)
+        data object FontFamilyUri : UserDataPath("fontFamilyUri", Reader)
         data object BackgroundColor : UserDataPath("backgroundColor", Reader)
         data object BackgroundImageUri : UserDataPath("backgroundImageUri", Reader)
     }
