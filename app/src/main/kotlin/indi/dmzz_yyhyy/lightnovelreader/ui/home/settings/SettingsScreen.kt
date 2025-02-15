@@ -67,6 +67,7 @@ fun SettingsScreen(
     controller: NavController,
     selectedRoute: Any,
     settingState: SettingState?,
+    updatePhase: String,
     checkUpdate: () -> Unit,
     importData: (Uri) -> OneTimeWorkRequest,
     onClickChangeSource: () -> Unit,
@@ -107,6 +108,7 @@ fun SettingsScreen(
                         icon = ImageVector.vectorResource(R.drawable.deployed_code_update_24px)
                     ) {
                         UpdatesSettingsList(
+                            updatePhase = updatePhase,
                             settingState = settingState,
                             checkUpdate = checkUpdate,
                         )

@@ -22,8 +22,8 @@ android {
         applicationId = "indi.dmzz_yyhyy.lightnovelreader"
         minSdk = 24
         targetSdk = 35
-        // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*100+debug版本号(开发需要时迭代, 两位数)
-        versionCode = 1_01_00_002
+        // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*100+debug版本号(开发需要时迭代, 三位数)
+        versionCode = 1_01_00_003
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -89,10 +89,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     // compose
     implementation("androidx.activity:activity-compose:1.10.0")
-    implementation("androidx.compose.animation:animation-graphics-android:1.7.7")
-    implementation(platform("androidx.compose:compose-bom:2025.01.01"))
+    implementation("androidx.compose.animation:animation-graphics-android:1.7.8")
+    implementation(platform("androidx.compose:compose-bom:2025.02.00"))
     implementation("androidx.compose.material3:material3:1.3.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2025.01.01"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.02.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -114,7 +114,7 @@ dependencies {
     implementation("androidx.hilt:hilt-work:$androidXHilt")
     implementation("androidx.hilt:hilt-navigation-compose:$androidXHilt")
     // navigation
-    val navVersion = "2.8.6"
+    val navVersion = "2.8.7"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
     implementation("androidx.navigation:navigation-dynamic-features-fragment:$navVersion")
@@ -129,8 +129,7 @@ dependencies {
     // markdown
     implementation("com.github.jeziellago:compose-markdown:0.5.2")
     // Ketch
-    //noinspection GradleDependency
-    implementation("com.github.khushpanchal:Ketch:1.0.0")
+    implementation("com.github.khushpanchal:Ketch:2.0.2")
     // room
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")

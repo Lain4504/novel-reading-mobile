@@ -34,7 +34,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +55,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
@@ -66,9 +64,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository.Companion.proxyUrlRegex
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.ObjectOptions
 
 @Composable
 fun BaseDialog(
@@ -380,93 +375,6 @@ fun SourceChangeDialog(
             }
         }
     }
-}
-
-@Composable
-fun SettingsGitHubProxyDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: (String) -> Unit,
-    proxyUrlUserData: StringUserData,
-) {
-    val proxyUrl = proxyUrlUserData.getOrDefault("")
-    var selectedOption by remember {
-        mutableStateOf(
-            ObjectOptions.GitHubProxyUrlOptions.optionsList.find { it.url == proxyUrl }
-                ?: ObjectOptions.GitHubProxyUrlOptions.optionsList.first { it.key == "custom" }
-        )
-    }
-    var input by remember { mutableStateOf(if (selectedOption.url == null) proxyUrl else "") }
-    var isValid by remember { mutableStateOf(true) }
-
-    AlertDialog (
-        onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(R.string.settings_github_proxy)) },
-        text = {
-            Column {
-                ObjectOptions.GitHubProxyUrlOptions.optionsList.forEach { option ->
-                    RadioButtonListItem(
-                        title = stringResource(option.name),
-                        selected = selectedOption.key == option.key,
-                        supportingText = stringResource(option.description),
-                        onClick = { selectedOption = option },
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.dialog_github_proxy_notice))
-                if (selectedOption.key == "custom") {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    TextField(
-                        isError = !isValid,
-                        value = input,
-                        supportingText = {
-                            Text(
-                                stringResource(R.string.dialog_github_proxy_supporting_text),
-                                fontFamily = FontFamily.Monospace
-                            )
-                        },
-                        onValueChange = {
-                            isValid = (it.isEmpty() || proxyUrlRegex.matches(it))
-                            input = it
-                        },
-                        label = {
-                            Text(stringResource(R.string.dialog_github_proxy_custom_url))
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (!isValid) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(R.string.dialog_github_proxy_custom_url_hint) +
-                                    "https://example.com/\n" +
-                                    "https://nth.3rd.example.com/",
-                            fontFamily = FontFamily.Monospace,
-                        )
-                    }
-                }
-
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    when (selectedOption.key) {
-                        "custom" -> onConfirmation(input.ifBlank { "" })
-                        "disabled" -> onConfirmation("")
-                        else -> onConfirmation(selectedOption.url.toString().ifBlank { "" })
-                    }
-                }
-            ) {
-                Text(stringResource(R.string.apply))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest
-            ) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
 }
 
 @Composable

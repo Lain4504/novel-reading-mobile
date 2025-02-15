@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
@@ -408,7 +407,7 @@ fun SettingsClickableEntry(
         onClick = {
             openUrl.let { url ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(context, intent, null)
+                context.startActivity(intent, null)
             }
         }
     )

@@ -66,6 +66,9 @@
 -keepnames class indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.exploration.**{ *;}
 -keepclassmembernames class indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.exploration.**{ *;}
 -keep,allowobfuscation,allowshrinking class indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.**{ *;}
+-keepnames class indi.dmzz_yyhyy.lightnovelreader.data.update.**{ *;}
+-keepclassmembernames class indi.dmzz_yyhyy.lightnovelreader.data.update.**{ *;}
+-keep,allowobfuscation,allowshrinking class indi.dmzz_yyhyy.lightnovelreader.data.update.**{ *;}
 -keepattributes Signature
 -keepattributes *Annotation*
 -keep class com.google.gson.examples.android.model.** { <fields>; }
