@@ -212,6 +212,7 @@
     <string name="key_default_image">Default Image</string>
     <string name="key_default_text">Default Font</string>
     <string name="key_customize_text">Customize Image</string>
+    <string name="key_update_channel_ci">CI</string>
 
 
 </resources>
