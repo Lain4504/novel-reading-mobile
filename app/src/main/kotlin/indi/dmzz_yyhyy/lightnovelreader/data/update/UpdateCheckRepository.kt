@@ -10,6 +10,8 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ketch.Ketch
 import com.ketch.NotificationConfig
+import dagger.hilt.android.scopes.ActivityScoped
+import dagger.hilt.android.scopes.ViewModelScoped
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
@@ -92,7 +94,6 @@ class UpdateCheckRepository @Inject constructor(
         Log.i("UpdateChecker", "Checking for updates on $platform -> $channel")
 
         try {
-
             val response = Jsoup
                 .connect(url)
                 .ignoreContentType(true)

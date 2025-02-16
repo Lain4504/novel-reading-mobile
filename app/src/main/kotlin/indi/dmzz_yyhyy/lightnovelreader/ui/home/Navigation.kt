@@ -19,7 +19,7 @@ import androidx.navigation.compose.navigation
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.bookshelfNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.explorationNavigation
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.homeReadingDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.homeReadingNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.homeSettingDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
@@ -28,7 +28,7 @@ fun NavGraphBuilder.homeNavigation(navController: NavController, sharedTransitio
     navigation<Route.Main>(
         startDestination = Route.Main.Reading
     ) {
-        homeReadingDestination(navController, sharedTransitionScope)
+        homeReadingNavigation(navController, sharedTransitionScope)
         explorationNavigation(navController, sharedTransitionScope)
         bookshelfNavigation(navController, sharedTransitionScope)
         homeSettingDestination(navController, sharedTransitionScope)

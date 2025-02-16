@@ -4,8 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,11 +18,11 @@ import java.util.Collections
 import javax.inject.Inject
 
 @HiltViewModel
-class ReadingStatsViewModel @Inject constructor(
+class StatsOverviewViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
 ) : ViewModel() {
-    private val _uiState = MutableReadingStatisticsUiState()
-    val uiState: ReadingStatsUiState = _uiState
+    private val _uiState = MutableStatisticsOverviewUiState()
+    val uiState: StatsOverviewUiState = _uiState
 
     private val _startDate = MutableStateFlow(LocalDate.now().minusMonths(6))
     val startDate: StateFlow<LocalDate> = _startDate
@@ -35,19 +38,30 @@ class ReadingStatsViewModel @Inject constructor(
     }
 
     private fun refreshData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val time = System.currentTimeMillis()
             Log.d("AppReadingStats", "Refresh started")
 
             _uiState.isLoading = true
 
-            val startDate = _startDate.value
-            val endDate = _endDate.value
+            Log.d("AppReadingStats", "START generateLevelMap")
+            generateLevelMap(_startDate.value, _endDate.value)
+            Log.d("AppReadingStats", "FINISH generateLevelMap")
 
-            val levelMap = generateLevelMap(startDate, endDate)
 
-            _uiState.statisticsData = levelMap
             _uiState.isLoading = false
+
+            var totalStartedBooks = 0
+            var totalReadInSeconds = 0
+            var totalSessions = 0
+            _uiState.dateStatsEntityMap.forEach { (_, readingStatistics) ->
+                totalStartedBooks += readingStatistics.startedBooks.size
+                totalReadInSeconds += readingStatistics.bookRecords.values.sumOf { it.totalSeconds }
+                totalSessions += readingStatistics.bookRecords.values.sumOf { it.sessions }
+            }
+            _uiState.totalSessions = totalSessions
+            _uiState.totalStartedBooks = totalStartedBooks
+            _uiState.totalReadInSeconds = totalReadInSeconds
 
             val elapsed = (System.currentTimeMillis() - time) / 1000.0
             Log.d("AppReadingStats", "Refresh completed in $elapsed seconds")
@@ -57,11 +71,22 @@ class ReadingStatsViewModel @Inject constructor(
     private suspend fun generateLevelMap(
         startDate: LocalDate,
         endDate: LocalDate
-    ): Map<LocalDate, Level> = withContext(Dispatchers.Default) {
-        val bulkData = statsRepository.getReadingTimesBetweenDates(startDate, endDate)
+    ) {
+
+        val entities = statsRepository.getReadingEntitiesBetweenDates(startDate, endDate)
         val allDates = generateSequence(startDate) { it.plusDays(1) }
             .takeWhile { it <= endDate }
             .toList()
+
+        val entityMap = allDates.associateWith { date ->
+            (entities.find { it.date == date } ?: createDefaultEntity(date))
+        }
+
+        val bulkData = entityMap.mapValues { (_, entity) ->
+            entity.readingTimeCount.getTotalMinutes()
+        }
+
+        _uiState.dateReadingTimeMap = bulkData
 
         val readingTimes = allDates.map { bulkData[it] ?: 0 }
         val thresholds = readingTimes.filter { it > 0 }.run {
@@ -73,12 +98,12 @@ class ReadingStatsViewModel @Inject constructor(
         }
         _threshold.value = thresholds[2]
 
-        return@withContext allDates.associateWith { date ->
+        _uiState.dateStatsEntityMap = entityMap
+
+        val levelMap = allDates.associateWith { date ->
             val readingTime = bulkData[date] ?: 0
-            if (thresholds.all { it == 0 }) {
-                return@associateWith Level.Zero
-            }
             when {
+                thresholds.all { it == 0 } -> Level.Zero
                 readingTime >= thresholds[2] -> Level.Four
                 readingTime >= thresholds[1] -> Level.Three
                 readingTime >= thresholds[0] -> Level.Two
@@ -86,7 +111,18 @@ class ReadingStatsViewModel @Inject constructor(
                 else -> Level.Zero
             }
         }
+        _uiState.dateLevelMap = levelMap
     }
+
+    private fun createDefaultEntity(date: LocalDate) = ReadingStatisticsEntity(
+        date = date,
+        readingTimeCount = Count(),
+        bookRecords = emptyMap(),
+        avgSpeed = 0,
+        favoriteBooks = emptyList(),
+        startedBooks = emptyList(),
+        finishedBooks = emptyList()
+    )
 
     private fun quickSelect(list: List<Int>, percentile: Double): Int {
         val targetIndex = (list.size * percentile).toInt().coerceIn(list.indices)
@@ -118,7 +154,6 @@ class ReadingStatsViewModel @Inject constructor(
         Collections.swap(arr, i, right)
         return i
     }
-
 
     fun selectDate(date: LocalDate) {
         _uiState.selectedDate = date

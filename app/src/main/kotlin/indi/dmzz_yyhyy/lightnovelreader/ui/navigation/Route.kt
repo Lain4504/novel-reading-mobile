@@ -10,7 +10,12 @@ object Route {
             @Serializable
             object Home
             @Serializable
-            object Stats
+            object Stats {
+                @Serializable
+                object Overview
+                @Serializable
+                data class Detailed(val targetDate: Int)
+            }
         }
         @Serializable
         object Bookshelf {

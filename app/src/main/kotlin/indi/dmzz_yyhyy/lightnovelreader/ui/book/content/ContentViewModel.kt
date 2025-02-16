@@ -8,6 +8,8 @@ import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEvent
+import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEventHandler
 import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
@@ -28,20 +31,19 @@ import javax.inject.Inject
 class ContentViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
-    userDataRepository: UserDataRepository
+    userDataRepository: UserDataRepository,
+    private val readingEventHandler: ReadingEventHandler
 ) : ViewModel() {
     private val _uiState = MutableContentScreenUiState()
     private var _bookId: Int = -1
     private val readingBookListUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
-    private var sessionStartTime = 0L
 
     val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
     val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-
-    @Suppress("DuplicatedCode")
     fun init(bookId: Int, chapterId: Int) {
+        println("TRIGGERED FUN INIT")
         if (bookId != _bookId) {
             viewModelScope.launch {
                 val bookVolumes = bookRepository.getBookVolumes(bookId)
@@ -54,13 +56,22 @@ class ContentViewModel @Inject constructor(
                 }
             }
         }
-        _bookId = bookId
+
+        if (bookId != _bookId) { /* WORKING: only trigger ONCE on content screen */
+            viewModelScope.launch(Dispatchers.IO) {
+                println("NEW SESSION, id = $bookId, now sending session start event")
+                readingEventHandler.sendEvent(ReadingEvent.SessionStart(bookId))
+            }
+        }
+
         loadChapterContent(bookId, chapterId)
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.getUserReadingData(bookId).collect {
                 _uiState.userReadingData = it
+                if (it.lastReadTime.year < 0) readingEventHandler.sendEvent(ReadingEvent.BookStarted(bookId))
             }
         }
+        _bookId = bookId
     }
 
     private fun loadChapterContent(bookId: Int, chapterId: Int) {
@@ -176,50 +187,13 @@ class ContentViewModel @Inject constructor(
     }
 
     fun updateTotalReadingTime(bookId: Int, totalReadingTime: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             bookRepository.updateUserReadingData(bookId) {
                 it.copy(
                     lastReadTime = LocalDateTime.now(),
                     totalReadTime = it.totalReadTime + totalReadingTime
                 )
             }
-        }
-    }
-
-    fun startReadingSession(bookId: Int) {
-        sessionStartTime = System.currentTimeMillis()
-        viewModelScope.launch {
-            statsRepository.updateReadingStatistics(
-                ReadingStatsUpdate(
-                    bookId = bookId,
-                    isStart = true,
-                    startTime = sessionStartTime
-                )
-            )
-        }
-    }
-
-    fun updateReadingProgress(update: ReadingStatsUpdate) {
-        viewModelScope.launch {
-            statsRepository.updateReadingStatistics(
-                update.copy(
-                    endTime = System.currentTimeMillis(),
-                    seconds = update.seconds
-                )
-            )
-        }
-    }
-
-    fun finishReadingSession(bookId: Int) {
-        viewModelScope.launch {
-            statsRepository.updateReadingStatistics(
-                ReadingStatsUpdate(
-                    bookId = bookId,
-                    isFinish = true,
-                    endTime = System.currentTimeMillis()
-                )
-            )
-            sessionStartTime = 0
         }
     }
 
@@ -232,6 +206,18 @@ class ContentViewModel @Inject constructor(
                 newList.add(bookId)
                 return@update newList
             }
+        }
+    }
+
+    fun accumulateReadingTime(bookId: Int, seconds: Int) {
+        coroutineScope.launch(Dispatchers.IO) {
+            statsRepository.accumulateReadingTime(bookId, seconds)
+        }
+    }
+
+    fun forceFlushAll() {
+        coroutineScope.launch(Dispatchers.IO) {
+            statsRepository.forceFlushAll()
         }
     }
 }

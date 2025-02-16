@@ -7,11 +7,10 @@ import indi.dmzz_yyhyy.lightnovelreader.data.statistics.BookRecord
 
 class BookRecordConverter {
     private val gson = Gson()
-    private val mapType = object : TypeToken<Map<Int, BookRecord>>() {}.type
 
     @TypeConverter
     fun fromString(value: String): Map<Int, BookRecord> {
-        return gson.fromJson(value, mapType)
+        return gson.fromJson(value, object : TypeToken<Map<Int, BookRecord>>() {}.type)
     }
 
     @TypeConverter

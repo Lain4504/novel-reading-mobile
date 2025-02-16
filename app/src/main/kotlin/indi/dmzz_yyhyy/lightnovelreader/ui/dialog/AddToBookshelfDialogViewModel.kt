@@ -6,6 +6,9 @@ import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
+import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEvent
+import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEventHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -13,7 +16,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AddToBookshelfDialogViewModel @Inject constructor(
     private val bookshelfRepository: BookshelfRepository,
-    private val bookRepository: BookRepository
+    private val bookRepository: BookRepository,
+    private val readingEventHandler: ReadingEventHandler
+
 ) : ViewModel() {
     private val _addToBookshelfDialogUiState = MutableAddToBookshelfDialogUiState()
     var navController: NavController? = null
@@ -58,6 +63,8 @@ class AddToBookshelfDialogViewModel @Inject constructor(
                 bookRepository.getBookInformation(bookId).collect { bookInformation ->
                     if (bookInformation.isEmpty()) return@collect
                     _addToBookshelfDialogUiState.selectedBookshelfIds.forEach {
+                        println("FAV, id = $bookId, now sending book fav event")
+                        readingEventHandler.sendEvent(ReadingEvent.BookFavorite(bookId))
                         bookshelfRepository.addBookIntoBookShelf(it, bookInformation)
                     }
                 }

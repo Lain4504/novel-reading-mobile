@@ -112,7 +112,7 @@ fun DetailScreen(
                 },
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
     ) { paddingValues ->
         Box(Modifier.padding(paddingValues)) {
             Content(

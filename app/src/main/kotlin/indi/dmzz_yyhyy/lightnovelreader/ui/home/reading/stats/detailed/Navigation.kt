@@ -1,0 +1,33 @@
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed
+
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+
+
+fun NavController.navigateToReadingStatsDailyDetailedDestination(target: Int) {
+    navigate(Route.Main.Reading.Stats.Detailed(target))
+}
+
+
+fun NavGraphBuilder.readingStatsDetailedDestination(navController: NavController) {
+    composable<Route.Main.Reading.Stats.Detailed> {
+        val statsDetailedViewModel = hiltViewModel<StatsDetailedViewModel>()
+        val targetDate = it.toRoute<Route.Main.Reading.Stats.Detailed>()
+        val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+        val date = LocalDate.parse(targetDate.targetDate.toString(), formatter)
+        StatsDetailedScreen(
+            viewModel = statsDetailedViewModel,
+            initialize = statsDetailedViewModel::initialize,
+            targetDate = date,
+            onClickBack = navController::popBackStackIfResumed
+        )
+    }
+}

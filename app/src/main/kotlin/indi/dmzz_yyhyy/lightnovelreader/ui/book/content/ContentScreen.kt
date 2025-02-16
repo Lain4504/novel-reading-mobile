@@ -89,7 +89,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalTime
+import kotlin.concurrent.fixedRateTimer
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +106,8 @@ fun ContentScreen(
     addToReadingBook: (Int) -> Unit,
     init: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
-    updateReadingStats: (ReadingStatsUpdate) -> Unit,
+    accumulateReadingTime: (Int, Int) -> Unit,
+    forceFlushAll: () -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
@@ -149,7 +153,8 @@ fun ContentScreen(
                 addToReadingBook = addToReadingBook,
                 init = init,
                 updateTotalReadingTime = updateTotalReadingTime,
-                updateReadingStats = updateReadingStats,
+                accumulateReadingTime = accumulateReadingTime,
+                forceFlushAll = forceFlushAll,
                 onClickLastChapter = onClickLastChapter,
                 onClickNextChapter = onClickNextChapter,
                 onChapterReadingProgressChange = onChapterReadingProgressChange,
@@ -171,7 +176,8 @@ fun Content(
     addToReadingBook: (Int) -> Unit,
     init: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
-    updateReadingStats: (ReadingStatsUpdate) -> Unit,
+    accumulateReadingTime: (Int, Int) -> Unit,
+    forceFlushAll: () -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
@@ -189,6 +195,7 @@ fun Content(
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
     var totalReadingTime by remember { mutableIntStateOf(0) }
     var selectedVolumeId by remember { mutableIntStateOf(-1) }
+    var lastUpdate by remember { mutableStateOf(LocalTime.now()) }
 
 
     LaunchedEffect(isImmersive) {
@@ -239,22 +246,18 @@ fun Content(
     }
 
     LaunchedEffect(isRunning) {
-        var counter = 0
         while (isRunning) {
-            delay(10000)
-            counter += 10
-            if(counter >= 60) {
-                updateReadingStats(
-                    ReadingStatsUpdate(
-                        bookId = bookId,
-                        seconds = 60,
-                        isStart = false,
-                        isFinish = false,
-                        currentSpeed = null
-                    )
-                )
-                counter = 0
-            }
+            val now = LocalTime.now()
+            val elapsed = 1 /*Duration.between(lastUpdate, now).seconds.coerceAtLeast(1)*/
+            accumulateReadingTime(bookId, elapsed.toInt())
+            lastUpdate = now
+            delay(1000)
+        }
+    }
+
+    LifecycleResumeEffect(Unit) {
+        onPauseOrDispose {
+            forceFlushAll()
         }
     }
 

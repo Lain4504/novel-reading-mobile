@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailViewModel @Inject constructor(
     private val bookRepository: BookRepository,
-    private val bookshelfRepository: BookshelfRepository,
+    private val bookshelfRepository: BookshelfRepository
 ) : ViewModel() {
     private val _uiState = MutableDetailUiState()
     val uiState: DetailUiState = _uiState
