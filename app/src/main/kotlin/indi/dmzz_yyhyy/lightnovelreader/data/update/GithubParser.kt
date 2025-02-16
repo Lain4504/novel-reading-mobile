@@ -1,7 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.update
 
 import android.util.Log
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.md.HtmlToMdUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.jsoup.Jsoup
@@ -111,7 +110,7 @@ object GithubParser {
                     versionName.toString(),
                     releaseNotes,
                     downloadUrl
-                ).debugPrint()
+                )
             }
     }
 
@@ -221,7 +220,7 @@ object GithubParser {
                 .also {
                     if (host.startsWith("http://")) it?.header("Host", "github.com")
                 }
-                ?.get().debugPrint()
+                ?.get()
                 ?.select("#discussion_bucket > div > div.Layout-main > div > div.js-discussion.ml-0.pl-0.ml-md-6.pl-md-3 > div.TimelineItem.TimelineItem--condensed.pt-0.js-comment-container.js-socket-channel.js-updatable-content.js-command-palette-pull-body > div.timeline-comment-group.js-minimizable-comment-group.js-targetable-element.TimelineItem-body.my-0 > div > div:nth-child(2) > div > task-lists > div")
                 ?.toString()
                 ?.let(HtmlToMdUtil::convertHtml)

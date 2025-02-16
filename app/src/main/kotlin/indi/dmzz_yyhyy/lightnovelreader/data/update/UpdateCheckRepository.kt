@@ -8,7 +8,7 @@ import com.ketch.Ketch
 import com.ketch.Status
 import dagger.hilt.android.qualifiers.ApplicationContext
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import kotlinx.coroutines.CoroutineScope
@@ -65,7 +65,6 @@ class UpdateCheckRepository @Inject constructor(
                         .getOptionWithValue(distributionPlatform).value
                         .getOptionWithValue(updateChannelKey).value
                         .parser(_updatePhase)
-                        .also { println(it?.downloadUrl) }
             } catch (e: Exception) {
                 Log.e("UpdateCheckRepository", "failed to get release")
                 e.printStackTrace()
