@@ -1,14 +1,10 @@
-package indi.dmzz_yyhyy.lightnovelreader.data
+package indi.dmzz_yyhyy.lightnovelreader.data.book
 
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.json.BookUserData

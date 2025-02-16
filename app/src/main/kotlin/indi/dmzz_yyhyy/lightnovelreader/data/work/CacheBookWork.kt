@@ -6,7 +6,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import kotlinx.coroutines.CoroutineScope

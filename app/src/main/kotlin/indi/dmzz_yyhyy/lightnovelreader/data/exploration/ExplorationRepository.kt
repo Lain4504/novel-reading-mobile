@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.data
+package indi.dmzz_yyhyy.lightnovelreader.data.exploration
 
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource

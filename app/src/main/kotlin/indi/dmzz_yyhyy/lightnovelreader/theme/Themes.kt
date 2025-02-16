@@ -11,6 +11,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -53,8 +54,10 @@ fun LightNovelReaderTheme(
 
             val controller = WindowCompat.getInsetsController(window, view)
             controller.isAppearanceLightStatusBars = !appDarkTheme
+            window.statusBarColor = Color.Transparent.toArgb()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                window.navigationBarColor = Color.Transparent.toArgb()
                 controller.isAppearanceLightNavigationBars = !appDarkTheme
             }
         }

@@ -3,8 +3,8 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.ExplorationRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import javax.inject.Inject

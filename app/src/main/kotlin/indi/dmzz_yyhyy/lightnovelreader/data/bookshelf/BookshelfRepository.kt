@@ -17,6 +17,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CacheBookWork
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
@@ -32,8 +33,8 @@ class BookshelfRepository @Inject constructor(
 ) {
     fun getAllBookshelfIds(): List<Int> = bookshelfDao.getAllBookshelfIds()
 
-    fun getAllBookshelvesFlow(): Flow<List<MutableBookshelf>> = bookshelfDao.getAllBookshelfFlow().map {
-        it.map { bookshelfEntity ->
+    fun getAllBookshelvesFlow(): Flow<List<MutableBookshelf>> = bookshelfDao.getAllBookshelfFlow().map { bookshelfEntities ->
+        bookshelfEntities.map { bookshelfEntity ->
             MutableBookshelf().apply {
                 this.id =   bookshelfEntity.id
                 this.name = bookshelfEntity.name
@@ -277,21 +278,35 @@ class BookshelfRepository @Inject constructor(
     fun importBookshelf(data: AppUserDataContent): Boolean {
         val bookshelfDataList = data.bookshelf ?: return false
         val bookshelfBookMetadataList = data.bookShelfBookMetadata ?: return false
-        val allBookshelfIds = getAllBookshelfIds()
         bookshelfDataList.forEach { bookshelf ->
-            if (allBookshelfIds.contains(bookshelf.id)) return@forEach
-            bookshelfDao.createBookshelf(
-                BookshelfEntity(
-                    id = bookshelf.id,
-                    name = bookshelf.name,
-                    sortType = bookshelf.sortType.key,
-                    autoCache = bookshelf.autoCache,
-                    systemUpdateReminder = bookshelf.systemUpdateReminder,
-                    allBookIds = bookshelf.allBookIds,
-                    pinnedBookIds = bookshelf.pinnedBookIds,
-                    updatedBookIds = bookshelf.updatedBookIds,
+            val oldBookshelf = bookshelfDao.getBookshelf(bookshelf.id).debugPrint()
+            if (oldBookshelf == null)
+                bookshelfDao.createBookshelf(
+                    BookshelfEntity(
+                        id = bookshelf.id,
+                        name = bookshelf.name,
+                        sortType = bookshelf.sortType.key,
+                        autoCache = bookshelf.autoCache,
+                        systemUpdateReminder = bookshelf.systemUpdateReminder,
+                        allBookIds = bookshelf.allBookIds,
+                        pinnedBookIds = bookshelf.pinnedBookIds,
+                        updatedBookIds = bookshelf.updatedBookIds,
+                    )
                 )
-            )
+            else {
+                bookshelfDao.updateBookshelfEntity(
+                    BookshelfEntity(
+                        id = bookshelf.id,
+                        name = bookshelf.name,
+                        sortType = bookshelf.sortType.key,
+                        autoCache = bookshelf.autoCache,
+                        systemUpdateReminder = bookshelf.systemUpdateReminder,
+                        allBookIds = (bookshelf.allBookIds.debugPrint() + oldBookshelf.allBookIds.debugPrint()).distinct(),
+                        pinnedBookIds = (bookshelf.pinnedBookIds + oldBookshelf.pinnedBookIds).distinct(),
+                        updatedBookIds = (bookshelf.updatedBookIds + oldBookshelf.updatedBookIds).distinct(),
+                    )
+                )
+            }
         }
         bookshelfBookMetadataList.forEach {
             bookshelfDao.addBookshelfMetadata(it.id, it.lastUpdate, it.bookShelfIds)

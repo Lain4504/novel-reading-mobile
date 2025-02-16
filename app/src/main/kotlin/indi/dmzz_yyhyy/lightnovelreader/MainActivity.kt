@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,11 +23,11 @@ import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import dagger.hilt.android.AndroidEntryPoint
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfSortType
 import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CheckUpdateWork
 import indi.dmzz_yyhyy.lightnovelreader.theme.LightNovelReaderTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.LightNovelReaderApp
@@ -51,7 +50,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         var appLocale by mutableStateOf("${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}")
         var darkMode by mutableStateOf("FollowSystem")
         var dynamicColor by mutableStateOf(false)

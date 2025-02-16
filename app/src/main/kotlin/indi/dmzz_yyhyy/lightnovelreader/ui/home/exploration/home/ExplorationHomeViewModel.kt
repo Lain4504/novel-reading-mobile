@@ -3,7 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.ExplorationRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationRepository
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

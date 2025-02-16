@@ -3,7 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.setting.AbstractSettingState
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions

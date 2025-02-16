@@ -1,15 +1,7 @@
-package indi.dmzz_yyhyy.lightnovelreader.data
+package indi.dmzz_yyhyy.lightnovelreader.data.userdata
 
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.ColorUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.IntListUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.IntUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringListUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UriUserData
 import javax.inject.Inject
 import javax.inject.Singleton
 
