@@ -29,4 +29,7 @@
     <!-- FlipAnime -->
     <string name="key_flip_animation_none">None</string>
     <string name="key_flip_animation_scroll">Scroll</string>
+    <!-- Reader Bg Image Display Mode -->
+    <string name="key_bg_image_display_mode_loop">Loop</string>
+    <string name="key_bg_image_display_mode_fixed">Fixed</string>
 </resources>

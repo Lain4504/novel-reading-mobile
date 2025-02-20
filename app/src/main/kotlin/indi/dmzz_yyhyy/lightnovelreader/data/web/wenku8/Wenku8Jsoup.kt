@@ -2,38 +2,29 @@ package indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8
 
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionPost
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
-import java.time.Instant
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.time.Instant
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 
 fun Connection.wenku8Cookie(): Connection =
-    this.cookie("__51uvsct__1xtyjOqSZ75DRXC0", "1")
-        .cookie(" __51vcke__1xtyjOqSZ75DRXC0", "5fd1e310-a176-5ee6-9144-ed977bccf14e")
-        .cookie(" __51vuft__1xtyjOqSZ75DRXC0", "1691164424380")
-        .cookie(
-            " Hm_lvt_d72896ddbf8d27c750e3b365ea2fc902",
-            "1695572903,1695666346,1696009387,1696966471"
-        )
-        .cookie(" Hm_lvt_acfbfe93830e0272a88e1cc73d4d6d0f", "1721130033,1721491724,1721570341")
-        .cookie(" PHPSESSID", "4d1c461c284bfa784985dc462d92188a")
+    this.cookie(" Hm_lvt_acfbfe93830e0272a88e1cc73d4d6d0f", "1737964211")
+        .cookie(" PHPSESSID", "261c62b5dae26868bba643433e859ce6")
         .cookie(
             " jieqiUserInfo",
-            "jieqiUserId%3D1125456%2CjieqiUserName%3Dyyhyy%2CjieqiUserGroup%3D3%2CjieqiUserVip%3D0%2CjieqiUserPassword%3Deb62861281462fd923fb99218735fef0%2CjieqiUserName_un%3Dyyhyy%2CjieqiUserHonor_un%3D%26%23x666E%3B%26%23x901A%3B%26%23x4F1A%3B%26%23x5458%3B%2CjieqiUserGroupName_un%3D%26%23x666E%3B%26%23x901A%3B%26%23x4F1A%3B%26%23x5458%3B%2CjieqiUserLogin%3D1721745838"
+            "jieqiUserId%3D1125456%2CjieqiUserName%3Dyyhyy%2CjieqiUserGroup%3D3%2CjieqiUserVip%3D0%2CjieqiUserPassword%3Deb62861281462fd923fb99218735fef0%2CjieqiUserName_un%3Dyyhyy%2CjieqiUserHonor_un%3D%26%23x4E2D%3B%26%23x7EA7%3B%26%23x4F1A%3B%26%23x5458%3B%2CjieqiUserGroupName_un%3D%26%23x666E%3B%26%23x901A%3B%26%23x4F1A%3B%26%23x5458%3B%2CjieqiUserLogin%3D1739294499"
         )
-        .cookie(" jieqiVisitInfo", "jieqiUserLogin%3D1721745838%2CjieqiUserId%3D1125456")
+        .cookie(" jieqiVisitInfo", "jieqiUserLogin%3D1739294499%2CjieqiUserId%3D1125456")
         .cookie(
             " cf_clearance",
-            "rAZBJvDmKV_DyAMY3k8n0_tMWW_lEz3ycWfYtjfTPcg-1721745844-1.0.1.1-mqt8uqswt6KtEdjtDq5m_yrRpR0x6QUhux3.J5B_OQMCso87cCu2psOEn0KVC1xOzmJinWcs7eeZTAi1ruNA_w"
+            "3zr0PrHC91IKoMSddax50XdS4Z_w10P.MHnUWfhwvuE-1739294164-1.2.1.1-KudGwf7eifsQWo9tIfX7Gg9Z_VwgSDRHr2erMBcjfHcOJqyg6zpM.XQYS54P0zx8bgSOrmvyRU5xcR9EuCA9aiNSec_tY.r82Lq6w3O_EEPgZuG1HdqjGCgMH11Mud34v5h3lMSGG3PBLCdXD5GXqDE1mPWDzIWyDbprUKg_YZ09DekRXkpyKwa.rt6Pz8LmBN5aVAkoF06sdPcLoUHqnyKe2584pWQ8nWrsM7frhohd8oAH0u12GPD_z8k_SHhflswjC7...cUz.5Hxonur_829PrCsjt.vJqAal0eqE5AmfBJ3FLWO1I3c0vKsVkSO3rrA8bH0v0yDHfatKKO3ww"
         )
-        .cookie(" HMACCOUNT", "10DAC0CE2BEFA41A")
-        .cookie(" _clck", "jvuxvk%7C2%7Cfnp%7C0%7C1658")
-        .cookie(" Hm_lvt_d72896ddbf8d27c750e3b365ea2fc902", "")
-        .cookie(" Hm_lpvt_d72896ddbf8d27c750e3b365ea2fc902", "1721745932")
-        .cookie(" _clsk", "1xyg0vc%7C1721745933282%7C2%7C1%7Co.clarity.ms%2Fcollect")
+        .cookie(" HMACCOUNT", "E7837B0FF79F0590")
+        .cookie(" Hm_lvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294365,1739294389,1739294442,1739294467")
+        .cookie(" Hm_lpvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294503")
 
 @OptIn(ExperimentalEncodingApi::class)
 fun wenku8Api(request: String): Document? =

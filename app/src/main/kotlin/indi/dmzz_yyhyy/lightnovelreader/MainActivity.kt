@@ -23,11 +23,11 @@ import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import dagger.hilt.android.AndroidEntryPoint
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfSortType
 import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CheckUpdateWork
 import indi.dmzz_yyhyy.lightnovelreader.theme.LightNovelReaderTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.LightNovelReaderApp
@@ -62,11 +62,9 @@ class MainActivity : ComponentActivity() {
                 .build()
         )
         coroutineScope.launch(Dispatchers.IO) {
-            updateCheckRepository.checkUpdate()
-        }
-        coroutineScope.launch(Dispatchers.IO) {
             if (bookshelfRepository.getAllBookshelfIds().isEmpty())
                 bookshelfRepository.createBookShelf(
+                    id = 1145140721,
                     name = "已收藏",
                     sortType = BookshelfSortType.Default,
                     autoCache = false,

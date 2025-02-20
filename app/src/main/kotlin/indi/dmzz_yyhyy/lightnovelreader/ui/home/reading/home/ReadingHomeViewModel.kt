@@ -9,8 +9,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath

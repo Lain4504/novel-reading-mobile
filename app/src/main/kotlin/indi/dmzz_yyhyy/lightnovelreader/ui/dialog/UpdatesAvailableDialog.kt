@@ -31,14 +31,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 fun NavGraphBuilder.updatesAvailableDialog(navController: NavController) {
     dialog<Route.UpdatesAvailableDialog> {
-        val context = LocalContext.current
         val viewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         UpdatesAvailableDialog(
             onDismissRequest = { navController.popBackStack() },
-            onConfirmation = { viewModel.downloadUpdate(
-                release = viewModel.release,
-                context = context
-            ) },
+            onConfirmation = { viewModel.downloadUpdate() },
             release = viewModel.release
         )
     }
@@ -61,10 +57,8 @@ fun UpdatesAvailableDialog(
         text = {
             Column {
                 release?.versionName?.let {
-                    val sizeInMB = ((release.downloadSize?.toFloat())?.div(1024))?.div(1024) ?: 0f
-                    val formatted = "%.2f".format(sizeInMB)
                     Text(
-                        text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE}) → ${release.versionName}(${release.version}), ${formatted}MB"
+                        text = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE}) → ${release.versionName}(${release.version})"
                     )
                 }
                 release?.releaseNotes?.let {

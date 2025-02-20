@@ -87,7 +87,8 @@ object Wenku8Api: WebBookDataSource {
     override fun getBookInformation(id: Int): BookInformation {
         if (isAppDataSourceOffLine()) return BookInformation.empty()
         return wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
-            val titleGroup = it.selectFirst("[name=Title]")?.text()
+            val titleGroup = it
+                .selectFirst("[name=Title]")?.text()
                 ?.let { it1 -> titleRegex.find(it1)?.groups }
             BookInformation(
                 id = id,
@@ -155,16 +156,16 @@ object Wenku8Api: WebBookDataSource {
                                 return@forEachIndexed
                             }
                         }
-                        val images = Regex("(<!--image-->)(.*?)(<!--image-->)")
+                        val imagesResult = Regex("(http.*?)(<!--image-->)")
                             .findAll(document.toString())
-                            .map { it.groups[2]?.value ?: "" }
                             .toList()
+                        imagesResult.forEach {
+                            content = content.replace(it.groups[1]?.value ?: it.value, "[image]${it.groups[1]?.value ?: ""}[image]")
+                        }
                         ChapterContent(
                             id = chapterId,
                             title = title,
-                            content =
-                                if (images.isEmpty()) content else images.joinToString { "[image]$it[image]" }.replace(", ", "")
-                            ,
+                            content = content,
                             lastChapter = allBookChapterListCache
                                 .indexOfFirst { it.id == chapterId }
                                 .let {

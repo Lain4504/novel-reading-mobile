@@ -53,8 +53,8 @@ fun LightNovelReaderTheme(
             )
 
             val controller = WindowCompat.getInsetsController(window, view)
-            window.statusBarColor = Color.Transparent.toArgb()
             controller.isAppearanceLightStatusBars = !appDarkTheme
+            window.statusBarColor = Color.Transparent.toArgb()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 window.navigationBarColor = Color.Transparent.toArgb()

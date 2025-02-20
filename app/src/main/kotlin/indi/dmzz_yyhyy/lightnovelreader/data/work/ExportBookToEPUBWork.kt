@@ -20,7 +20,6 @@ import io.nightfish.potatoepub.builder.EpubBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.FileInputStream
 import java.time.LocalDateTime
@@ -41,7 +40,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
             val channel = NotificationChannel(
                 "BookEpubExport",
                 "EPUB 导出进度",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_HIGH
             )
             notificationManager.createNotificationChannel(channel)
         }
@@ -74,6 +73,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
             .setContentTitle("导出『${inputData.getString("title")}』")
             .setContentText("导出失败")
             .setSmallIcon(R.drawable.file_export_24px)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setProgress(0, 0, false)
             .setAutoCancel(true)
             .build()
@@ -85,6 +85,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
         notification = NotificationCompat.Builder(applicationContext, "BookEpubExport")
             .setContentTitle("导出『${inputData.getString("title")}』")
             .setContentText("已成功完成")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setSmallIcon(R.drawable.file_export_24px)
             .setProgress(0, 0, false)
             .setAutoCancel(true)
@@ -125,7 +126,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                 updateProgressNotification(bookId, progressForVolume)
                 volume.chapters.forEach {
                     bookContentMap[it.id] = webBookDataSource.getChapterContent(it.id, bookId) ?: return Result.failure().also {
-                        updateFailureNotification(bookId, )
+                        updateFailureNotification(bookId)
                     }
                 }
             }
@@ -205,17 +206,16 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                         }
                     }
                     tempDir.delete()
-                    delay(500)
                     updateCompletionNotification(bookId)
                 }
             }
         )
-
         while (!imageDownloader.isDone) {
-            Thread.sleep(1000)
+            Thread.sleep(500)
         }
-
-        return Result.success()
+        return Result.success().also {
+            updateCompletionNotification(bookId)
+        }
     }
 
 

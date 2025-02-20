@@ -1,12 +1,16 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,7 +34,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -50,7 +55,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
@@ -60,9 +64,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository.Companion.proxyUrlRegex
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.ObjectOptions
 
 @Composable
 fun BaseDialog(
@@ -377,93 +378,6 @@ fun SourceChangeDialog(
 }
 
 @Composable
-fun SettingsGitHubProxyDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: (String) -> Unit,
-    proxyUrlUserData: StringUserData,
-) {
-    val proxyUrl = proxyUrlUserData.getOrDefault("")
-    var selectedOption by remember {
-        mutableStateOf(
-            ObjectOptions.GitHubProxyUrlOptions.optionsList.find { it.url == proxyUrl }
-                ?: ObjectOptions.GitHubProxyUrlOptions.optionsList.first { it.key == "custom" }
-        )
-    }
-    var input by remember { mutableStateOf(if (selectedOption.url == null) proxyUrl else "") }
-    var isValid by remember { mutableStateOf(true) }
-
-    AlertDialog (
-        onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(R.string.settings_github_proxy)) },
-        text = {
-            Column {
-                ObjectOptions.GitHubProxyUrlOptions.optionsList.forEach { option ->
-                    RadioButtonListItem(
-                        title = stringResource(option.name),
-                        selected = selectedOption.key == option.key,
-                        supportingText = stringResource(option.description),
-                        onClick = { selectedOption = option },
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.dialog_github_proxy_notice))
-                if (selectedOption.key == "custom") {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    TextField(
-                        isError = !isValid,
-                        value = input,
-                        supportingText = {
-                            Text(
-                                stringResource(R.string.dialog_github_proxy_supporting_text),
-                                fontFamily = FontFamily.Monospace
-                            )
-                        },
-                        onValueChange = {
-                            isValid = (it.isEmpty() || proxyUrlRegex.matches(it))
-                            input = it
-                        },
-                        label = {
-                            Text(stringResource(R.string.dialog_github_proxy_custom_url))
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (!isValid) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(R.string.dialog_github_proxy_custom_url_hint) +
-                                    "https://example.com/\n" +
-                                    "https://nth.3rd.example.com/",
-                            fontFamily = FontFamily.Monospace,
-                        )
-                    }
-                }
-
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    when (selectedOption.key) {
-                        "custom" -> onConfirmation(input.ifBlank { "" })
-                        "disabled" -> onConfirmation("")
-                        else -> onConfirmation(selectedOption.url.toString().ifBlank { "" })
-                    }
-                }
-            ) {
-                Text(stringResource(R.string.apply))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest
-            ) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-@Composable
 fun SettingsAboutInfoDialog(
     onDismissRequest: () -> Unit,
 ) {
@@ -600,4 +514,70 @@ fun ExportToEpubDialog(
             }
         }
     )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ColorPickerDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: (Color) -> Unit,
+    selectedColor: Color,
+    colors: List<Color>,
+) {
+    var currentColor by remember {
+        mutableStateOf(selectedColor)
+    }
+
+    BaseDialog (
+        icon = painterResource(R.drawable.palette_24px),
+        title = "调色盘",
+        description = "选择一个颜色用于阅读器背景。",
+        onDismissRequest = onDismissRequest,
+        onConfirmation = { onConfirmation(currentColor) },
+        dismissText = stringResource(R.string.cancel),
+        confirmationText = stringResource(R.string.apply),
+    ) {
+        FlowRow(
+            modifier = Modifier.padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            colors.forEachIndexed { index, color ->
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clickable {
+                            currentColor = color
+                        }
+                ) {
+                    val secondary = MaterialTheme.colorScheme.secondary
+                    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
+                    val blockIconId = painterResource(R.drawable.block_24px)
+                    Canvas(
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        if (color == currentColor)
+                            drawCircle(
+                                color = secondary,
+                                radius = 22.dp.toPx(),
+                            )
+                        drawCircle(
+                            color = surfaceContainer,
+                            radius = 20.dp.toPx(),
+                        )
+                        drawCircle(
+                            color = if (color.isUnspecified) surfaceContainer else color,
+                            radius = 20.dp.toPx(),
+                        )
+                    }
+                    if (index == 0)
+                        Icon(
+                            modifier = Modifier.align(Alignment.Center),
+                            painter = blockIconId,
+                            contentDescription = null
+                        )
+                }
+            }
+        }
+    }
 }

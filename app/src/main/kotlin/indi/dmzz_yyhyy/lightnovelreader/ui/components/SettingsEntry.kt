@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,7 +49,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
@@ -159,6 +160,7 @@ fun SettingsSliderEntry(
     unit: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
     floatUserData: FloatUserData
 ) {
     var tempValue by remember { mutableFloatStateOf(value) }
@@ -172,6 +174,7 @@ fun SettingsSliderEntry(
         unit = unit,
         value = tempValue,
         valueRange = valueRange,
+        valueFormat = valueFormat,
         onSlideChange = { tempValue = it },
         onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) }
     )
@@ -185,6 +188,7 @@ private fun SettingsSliderEntry(
     unit: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
     onSlideChange: (Float) -> Unit,
     onSliderChangeFinished: () -> Unit
 ) {
@@ -241,7 +245,7 @@ private fun SettingsSliderEntry(
                 modifier = Modifier.fillMaxWidth(),
                 value = value,
                 valueRange = valueRange,
-                onValueChange = { onSlideChange((it * 2).roundToInt().toFloat() / 2) },
+                onValueChange = { onSlideChange(valueFormat(it)) },
                 onValueChangeFinished = onSliderChangeFinished,
                 colors = SliderDefaults.colors(
                     inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
@@ -372,11 +376,13 @@ fun SettingsMenuEntry(
 
 @Composable
 fun SettingsClickableEntry(
+    modifier: Modifier = Modifier,
     iconRes: Int = -1,
     title: String,
     description: String
 ) {
     SettingsClickableEntry(
+        modifier = modifier,
         iconRes = iconRes,
         title = title,
         description = description,
@@ -386,6 +392,7 @@ fun SettingsClickableEntry(
 
 @Composable
 fun SettingsClickableEntry(
+    modifier: Modifier = Modifier,
     iconRes: Int = -1,
     title: String,
     description: String,
@@ -393,13 +400,14 @@ fun SettingsClickableEntry(
 ) {
     val context = LocalContext.current
     SettingsClickableEntry(
+        modifier = modifier,
         iconRes = iconRes,
         title = title,
         description = description,
         onClick = {
             openUrl.let { url ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(context, intent, null)
+                context.startActivity(intent, null)
             }
         }
     )
@@ -407,14 +415,16 @@ fun SettingsClickableEntry(
 
 @Composable
 fun SettingsClickableEntry(
+    modifier: Modifier = Modifier,
     iconRes: Int = -1,
     title: String,
     option: String? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
     description: String,
     onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -471,6 +481,15 @@ fun SettingsClickableEntry(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                 )
+            }
+        }
+        trailingContent?.let {
+            Box(
+                modifier = Modifier.wrapContentWidth(Alignment.End)
+            ) {
+                Box(Modifier.width(52.dp)) {
+                    it.invoke()
+                }
             }
         }
     }

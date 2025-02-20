@@ -8,6 +8,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -29,8 +30,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.debug.navigateToDebug
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewModel
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.launcher
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,9 +42,11 @@ fun NavGraphBuilder.homeSettingDestination(navController: NavController, sharedT
     composable<Route.Main.Settings> {
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
+        val updatePhase by updatesAvailableDialogViewModel.updatePhaseFlow.collectAsState("Not Checked")
         SettingsScreen(
             controller = navController,
             selectedRoute = Route.Main.Settings,
+            updatePhase = updatePhase,
             settingState = settingsViewModel.settingState,
             checkUpdate = updatesAvailableDialogViewModel::checkUpdate,
             importData = settingsViewModel::importFromFile,
@@ -96,7 +99,7 @@ private fun NavGraphBuilder.exportUserDataDialog(navController: NavController) {
         val workManager = WorkManager.getInstance(context)
         val viewModel = hiltViewModel<ExportUserDataDialogViewModel>()
         var exportContext: ExportContext by remember { mutableStateOf(MutableExportContext()) }
-        val saveDataToFileLauncher = launcher {
+        val saveDataToFileLauncher = uriLauncher {
             CoroutineScope(Dispatchers.Main).launch {
                 workManager.getWorkInfoByIdFlow(viewModel.exportToFile(it, exportContext).id).collect {
                     when (it?.state) {

@@ -1,17 +1,17 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.update
 
-data class Release(
-    val status: ReleaseStatus,
-    val version: Int? = null,
-    val versionName: String? = null,
-    val releaseNotes: String? = null,
-    val downloadUrl: String? = null,
-    val downloadSize: String? = null,
-    val checksum: String? = null
-)
+import java.io.File
 
-enum class ReleaseStatus {
-    LATEST,
-    AVAILABLE,
-    NULL
+interface Release {
+    val version: Int
+    val versionName: String
+    val releaseNotes: String
+    val downloadUrl: String
+
+    /***
+     * 第一个File是需要处理的文件
+     * 第二个File是处理好后应存储的位置
+     */
+    val downloadFileProgress: ((File, File) -> Unit)?
+        get() = null
 }

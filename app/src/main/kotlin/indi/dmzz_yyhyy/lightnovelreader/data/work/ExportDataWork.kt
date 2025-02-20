@@ -8,7 +8,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfBookMetadata

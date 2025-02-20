@@ -3,11 +3,11 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEvent
 import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEventHandler
 import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.LocalTime
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
@@ -31,13 +30,13 @@ import javax.inject.Inject
 class ContentViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
+    private val textProcessingRepository: TextProcessingRepository,
     userDataRepository: UserDataRepository,
     private val readingEventHandler: ReadingEventHandler
 ) : ViewModel() {
     private val _uiState = MutableContentScreenUiState()
     private var _bookId: Int = -1
     private val readingBookListUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
-
     val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
     val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -69,6 +68,11 @@ class ContentViewModel @Inject constructor(
             bookRepository.getUserReadingData(bookId).collect {
                 _uiState.userReadingData = it
                 if (it.lastReadTime.year < 0) readingEventHandler.sendEvent(ReadingEvent.BookStarted(bookId))
+            }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            textProcessingRepository.updateFlow.collect {
+                loadChapterContent(bookId, uiState.chapterContent.id)
             }
         }
         _bookId = bookId

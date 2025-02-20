@@ -1,16 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository.Companion.updatePhase
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsGitHubProxyDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
@@ -18,22 +11,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 
 @Composable
 fun UpdatesSettingsList(
+    updatePhase: String,
     settingState: SettingState,
     checkUpdate: () -> Unit,
 ) {
-    var showProxySettingsDialog by remember { mutableStateOf(false) }
-
-    if (showProxySettingsDialog) {
-        SettingsGitHubProxyDialog(
-            onDismissRequest = { showProxySettingsDialog = false },
-            proxyUrlUserData = settingState.proxyUrlUserData,
-            onConfirmation = {
-                settingState.proxyUrlUserData.asynchronousSet(it)
-                showProxySettingsDialog = false
-            },
-        )
-    }
-
     SettingsSwitchEntry(
         iconRes = R.drawable.cloud_download_24px,
         title = stringResource(R.string.settings_auto_check_updates),
@@ -45,7 +26,7 @@ fun UpdatesSettingsList(
         iconRes = R.drawable.alt_route_24px,
         title = stringResource(R.string.settings_update_channel),
         description = stringResource(R.string.settings_update_channel_desc),
-        options = MenuOptions.UpdateChannelOptions,
+        options = MenuOptions.UpdatePlatformOptions.getOptionWithValue(settingState.distributionPlatformKey).value,
         selectedOptionKey = settingState.updateChannelKey,
         onOptionChange = settingState.updateChannelKeyUserData::asynchronousSet
     )
@@ -54,23 +35,17 @@ fun UpdatesSettingsList(
         title = stringResource(R.string.settings_distribution_platform),
         options = MenuOptions.UpdatePlatformOptions,
         selectedOptionKey = settingState.distributionPlatformKey,
-        onOptionChange = settingState.distributionPlatformKeyUserData::asynchronousSet
+        onOptionChange = { option ->
+            settingState.distributionPlatformKeyUserData.asynchronousSet(option)
+            if (MenuOptions.UpdatePlatformOptions.optionList.firstOrNull{ settingState.updateChannelKey == it.key } == null)
+                settingState.updateChannelKeyUserData.asynchronousSet(MenuOptions.UpdateChannelOptions.Development)
+        }
     )
-    if (settingState.distributionPlatformKey == "GitHub") {
-        SettingsClickableEntry(
-            iconRes = R.drawable.vpn_lock_24px,
-            title = stringResource(R.string.settings_github_proxy),
-            description = stringResource(R.string.settings_github_proxy_desc),
-            option = settingState.proxyUrlKey.ifEmpty { stringResource(R.string.unspecified) },
-            onClick = { showProxySettingsDialog = true }
-        )
-    }
-    val updatePhase by updatePhase.collectAsState(initial = "")
     SettingsClickableEntry(
         iconRes = R.drawable.deployed_code_update_24px,
         title = stringResource(R.string.settings_get_updates),
         description = stringResource(R.string.settings_get_updates_desc),
         option = updatePhase,
-        onClick = { checkUpdate() }
+        onClick = checkUpdate
     )
 }

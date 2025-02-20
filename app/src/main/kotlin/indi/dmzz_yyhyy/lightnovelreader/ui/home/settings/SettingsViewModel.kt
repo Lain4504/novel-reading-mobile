@@ -12,7 +12,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ImportDataWork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -9,11 +9,11 @@ import androidx.work.WorkerParameters
 import com.google.gson.JsonSyntaxException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import indi.dmzz_yyhyy.lightnovelreader.data.BookRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataJson
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import java.io.FileInputStream
 import java.io.FileNotFoundException

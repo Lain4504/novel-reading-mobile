@@ -1,33 +1,79 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data
 
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.update.AppCenterParser
+import indi.dmzz_yyhyy.lightnovelreader.data.update.GithubParser
+import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateParser
 
-sealed class MenuOptions(vararg options: Option) {
-    private val _optionList: MutableList<Option> = options.toMutableList()
+@Suppress("PropertyName", "unused")
+sealed class MenuOptions {
+    protected val _optionList: MutableList<Option>
     val optionList: List<Option> get() = _optionList.toList()
+    constructor(vararg options: Option) {
+        _optionList = options.toMutableList()
+    }
+    constructor(options: List<Option>) {
+        _optionList = options.toMutableList()
+    }
     fun option(key: String, nameId: Int): String {
         _optionList.add(Option(key, nameId))
         return key
     }
-    class Option(
-        val key: String,
-        val nameId: Int
+
+    open class MenuOptionsWithValues<T>: MenuOptions {
+        private val optionWithValueList: MutableList<OptionWithValue<T>>
+        constructor(vararg options: OptionWithValue<T>) : super(options.toList()) {
+            optionWithValueList = options.toMutableList()
+        }
+        constructor(options: List<OptionWithValue<T>>): super(options) {
+            optionWithValueList = options.toMutableList()
+        }
+        fun option(key: String, nameId: Int, value: T): String {
+            _optionList.add(Option(key, nameId))
+            optionWithValueList.add(OptionWithValue(key, nameId, value))
+            return key
+        }
+        fun getOptionWithValue(key: String): OptionWithValue<T> = optionWithValueList.first { it.equals(key) }
+    }
+
+    open class Option(
+        open val key: String,
+        open val nameId: Int
     ) {
         override fun equals(other: Any?): Boolean = this.key == other
         override fun hashCode(): Int = key.hashCode()
     }
-    fun get(key: String): Option = _optionList.first { it.equals(key) }
 
-    data object UpdateChannelOptions: MenuOptions(
-        Option("Release", R.string.key_update_channel_release),
-        Option("Development", R.string.key_update_channel_development)
+    fun get(key: String): Option = optionList.first { it.equals(key) }
+
+    class OptionWithValue<T>(
+        override val key: String,
+        override val nameId: Int,
+        val value: T
+    ): Option(key, nameId)
+
+    open class UpdateChannelOptions(vararg options: OptionWithValue<UpdateParser>): MenuOptionsWithValues<UpdateParser>(options.toList()) {
+        companion object {
+            const val Release = "Release"
+            const val Development = "Development"
+        }
+    }
+
+    data object GitHubUpdateChannelOptions: UpdateChannelOptions(
+        OptionWithValue(Release, R.string.key_update_channel_release, GithubParser.ReleaseParser),
+        OptionWithValue(Development, R.string.key_update_channel_development, GithubParser.DevelopmentParser),
+        OptionWithValue("CI", R.string.key_update_channel_ci, GithubParser.CIParser)
     )
 
-    data object UpdatePlatformOptions: MenuOptions(
-        Option("GitHub", R.string.key_platform_github),
-        Option("AppCenter", R.string.key_platform_appcenter),
-        /*Options("LNR_API", R.string.key_platform_lnr_api)*/
+    data object AppCenterUpdateChannelOptions: UpdateChannelOptions(
+        OptionWithValue(Release, R.string.key_update_channel_release, AppCenterParser.ReleaseParser),
+        OptionWithValue(Development, R.string.key_update_channel_development, AppCenterParser.DevelopmentParser),
     )
+
+    data object UpdatePlatformOptions: MenuOptionsWithValues<UpdateChannelOptions>() {
+        val GitHub = option("GitHub", R.string.key_platform_github, GitHubUpdateChannelOptions)
+        val AppCenter = option("AppCenter", R.string.key_platform_appcenter, AppCenterUpdateChannelOptions)
+    }
 
     data object DarkModeOptions: MenuOptions(
         Option("FollowSystem", R.string.key_dark_mode_follow_system),
@@ -44,8 +90,23 @@ sealed class MenuOptions(vararg options: Option) {
         Option("ko-kp", R.string.key_locale_ko_kp)
     )
 
+    data object ReaderBgImageDisplayModeOptions: MenuOptions() {
+        val Fixed = option("fixed", R.string.key_bg_image_display_mode_fixed)
+        val Loop = option("loop", R.string.key_bg_image_display_mode_loop)
+    }
+
     data object FlipAnimationOptions: MenuOptions() {
         val None = option("none", R.string.key_flip_animation_none)
         val ScrollWithoutShadow = option("scroll", R.string.key_flip_animation_scroll)
+    }
+
+    data object SelectImage: MenuOptions() {
+        val Default = option("default", R.string.key_default_image)
+        val Customize = option("customize", R.string.key_customize_image)
+    }
+
+    data object SelectText: MenuOptions() {
+        val Default = option("default", R.string.key_default_text)
+        val Customize = option("customize", R.string.key_customize_text)
     }
 }
