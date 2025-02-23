@@ -36,7 +36,7 @@ fun NavGraphBuilder.bookContentDestination(navController: NavController) {
             ) },
             onClickChangeTextColor = { navController.navigateToColorPickerDialog(
                 UserDataPath.Reader.TextColor.path,
-                listOf(-1, 0xFF1D1B20, 17170584)
+                listOf(-1, 0xFF1D1B20, 0xFFE6E0E9)
             ) }
         )
     }
