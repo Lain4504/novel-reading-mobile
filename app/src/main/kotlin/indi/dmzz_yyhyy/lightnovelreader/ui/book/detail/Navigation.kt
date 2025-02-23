@@ -6,6 +6,7 @@ import android.provider.DocumentsContract
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,7 +32,12 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
         val viewModel = hiltViewModel<DetailViewModel>()
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
+        viewModel.navController = navController
+        LaunchedEffect(bookId) {
+            viewModel.init(bookId)
+        }
         DetailScreen(
+            uiState = viewModel.uiState,
             onClickExportToEpub = {
                 navController.navigateToExportToEpubDialog(bookId, viewModel.uiState.bookInformation.title)
             },
@@ -53,7 +59,6 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
                     navController.navigateToBookContentDestination(bookId, viewModel.uiState.userReadingData.lastReadChapterId)
                 }
             },
-            id = bookId,
             cacheBook = {
                 coroutineScope.launch {
                     viewModel.cacheBook(it).collect {
@@ -70,7 +75,8 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
                     }
                 }
             },
-            requestAddBookToBookshelf = navController::navigateToAddBookToBookshelfDialog
+            requestAddBookToBookshelf = navController::navigateToAddBookToBookshelfDialog,
+            onClickTag = viewModel::onClickTag
         )
     }
     exportToEpubDialog(navController)
