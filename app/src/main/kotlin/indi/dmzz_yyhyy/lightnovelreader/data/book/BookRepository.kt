@@ -12,6 +12,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CacheBookWork
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -81,7 +82,10 @@ class BookRepository @Inject constructor(
                 localBookDataSource.updateChapterContent(content)
                 localBookDataSource.getChapterContent(chapterId)?.let { newContent ->
                     chapterContent.update {
-                        newContent
+                        newContent.copy(
+                            lastChapter = if (newContent.lastChapter == -1) it.lastChapter else newContent.lastChapter,
+                            nextChapter = if (newContent.nextChapter == -1) it.nextChapter else newContent.nextChapter
+                        ).debugPrint()
                     }
                 }
             }
