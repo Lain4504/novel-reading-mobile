@@ -289,7 +289,7 @@ fun SimpleFlipPageTextComponent(
                 else
                     pagerState.scrollToPage(pagerState.currentPage - 1)
             }
-        else if (fastChapterChange) onClickLastChapter.invoke()
+        else if (fastChapterChange && slippedTextList.isNotEmpty()) onClickLastChapter.invoke()
     }
 
     fun nextPage() {
@@ -300,7 +300,7 @@ fun SimpleFlipPageTextComponent(
                 else
                     pagerState.scrollToPage(pagerState.currentPage + 1)
             }
-        else if (fastChapterChange) onClickNextChapter.invoke()
+        else if (fastChapterChange && slippedTextList.isNotEmpty()) onClickNextChapter.invoke()
     }
 
     LaunchedEffect(content, textStyle, fontLineHeight, fontSize, constraints?.maxHeight, constraints?.maxWidth) {
