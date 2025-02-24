@@ -3,10 +3,12 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -17,9 +19,11 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val bookshelfRepository: BookshelfRepository,
+    private val webBookDataSource: WebBookDataSource
 ) : ViewModel() {
     private val _uiState = MutableDetailUiState()
     private var cacheBookProgressCollectJob: Job? = null
+    var navController: NavController? = null
     val uiState: DetailUiState = _uiState
 
     fun init(bookId: Int) {
@@ -88,5 +92,10 @@ class DetailViewModel @Inject constructor(
             }
         }
         return isCachedFlow
+    }
+
+    fun onClickTag(tag: String) {
+        if (navController == null) return
+        webBookDataSource.progressBookTagClick(tag, navController!!)
     }
 }

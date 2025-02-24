@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.web
 
+import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * LightNovelReader 的网络数据提供源接口，可以通过实现此接口使软件支持新的数据源
- * 版本: 0.2
+ * 版本: 0.3
  */
 interface WebBookDataSource {
     val id: Int
@@ -112,4 +113,9 @@ interface WebBookDataSource {
      *
      */
     fun stopAllSearch()
+
+    /**
+     * 用于处理书本tag的点击跳转事件
+     */
+    fun progressBookTagClick(tag: String, navController: NavController) {  }
 }

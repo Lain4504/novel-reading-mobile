@@ -49,7 +49,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -77,7 +76,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
@@ -93,14 +91,15 @@ import java.text.NumberFormat
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
+    uiState: DetailUiState,
     onClickExportToEpub: () -> Unit,
     onClickBackButton: () -> Unit,
     onClickChapter: (Int) -> Unit,
     onClickReadFromStart: () -> Unit,
     onClickContinueReading: () -> Unit,
-    id: Int,
     cacheBook: (Int) -> Unit,
-    requestAddBookToBookshelf: (Int) -> Unit
+    requestAddBookToBookshelf: (Int) -> Unit,
+    onClickTag: (String) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
@@ -117,12 +116,13 @@ fun DetailScreen(
     ) { paddingValues ->
         Box(Modifier.padding(paddingValues)) {
             Content(
+                uiState = uiState,
                 onClickChapter = onClickChapter,
                 onClickReadFromStart = onClickReadFromStart,
                 onClickContinueReading = onClickContinueReading,
-                id = id,
                 cacheBook = cacheBook,
-                requestAddBookToBookshelf = requestAddBookToBookshelf
+                requestAddBookToBookshelf = requestAddBookToBookshelf,
+                onClickTag = onClickTag
             )
         }
     }
@@ -134,26 +134,14 @@ private val itemVerticalPadding = 8.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    viewModel: DetailViewModel = hiltViewModel(),
+    uiState: DetailUiState,
     onClickChapter: (Int) -> Unit,
-    onClickReadFromStart: () -> Unit = {
-        viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-            onClickChapter(it)
-        }
-    },
-    onClickContinueReading: () -> Unit = {
-        if (viewModel.uiState.userReadingData.lastReadChapterId == -1)
-            viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-                onClickChapter(it)
-            }
-        else
-            onClickChapter(viewModel.uiState.userReadingData.lastReadChapterId)
-    },
-    id: Int,
+    onClickReadFromStart: () -> Unit,
+    onClickContinueReading: () -> Unit,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
+    onClickTag: (String) -> Unit
 ) {
-    val uiState = viewModel.uiState
     val infoBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     var showInfoBottomSheet by remember { mutableStateOf(false) }
@@ -163,18 +151,15 @@ private fun Content(
     var scrolledY by remember { mutableFloatStateOf(0f) }
     var previousOffset by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(id) {
-        viewModel.init(id)
-    }
     AnimatedVisibility(
-        visible = viewModel.uiState.bookInformation.isEmpty(),
+        visible = uiState.bookInformation.isEmpty(),
         enter = fadeIn(),
         exit = fadeOut()
     ) {
         Loading()
     }
     AnimatedVisibility(
-        visible = !viewModel.uiState.bookInformation.isEmpty(),
+        visible = !uiState.bookInformation.isEmpty(),
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -195,7 +180,10 @@ private fun Content(
                 )
             }
             item {
-                TagsBlock(bookInformation = uiState.bookInformation)
+                TagsBlock(
+                    bookInformation = uiState.bookInformation,
+                    onClickTag = onClickTag
+                )
             }
             item {
                 QuickOperationsBlock(
@@ -449,8 +437,9 @@ private fun BookCardBlock(
 }
 
 @Composable
-private fun TagsBlock(
-    bookInformation: BookInformation
+    private fun TagsBlock(
+    bookInformation: BookInformation,
+    onClickTag: (String) -> Unit
 ) {
     LazyRow(
         modifier = Modifier
@@ -484,7 +473,7 @@ private fun TagsBlock(
                 label = {
                     Text(tag)
                 },
-                onClick = {}
+                onClick = { onClickTag(tag) }
             )
         }
         item {
@@ -739,7 +728,12 @@ private fun VolumeItem(
                                     .clickable { onClickChapter(it.id) }
                                     .wrapContentHeight()
                                     .fillMaxWidth()
-                                    .padding(start = 32.dp, end = 32.dp, top = 12.dp, bottom = if (it.id == lastReadingChapterId) 6.dp else 12.dp)
+                                    .padding(
+                                        start = 32.dp,
+                                        end = 32.dp,
+                                        top = 12.dp,
+                                        bottom = if (it.id == lastReadingChapterId) 6.dp else 12.dp
+                                    )
                             ) {
                                 Text(
                                     text = it.title,
