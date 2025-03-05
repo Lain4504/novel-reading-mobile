@@ -1,7 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.statistics
 
 import com.google.gson.annotations.SerializedName
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
 import kotlinx.coroutines.CoroutineScope
@@ -26,15 +28,16 @@ data class ReadingStatsUpdate(
 )
 
 data class BookRecord(
-    @SerializedName("s") val sessions: Int,
-    @SerializedName("t") val totalSeconds: Int,
-    @SerializedName("f") val firstSeen: LocalTime,
-    @SerializedName("l") val lastSeen: LocalTime,
+    val sessions: Int,
+    val totalSeconds: Int,
+    val firstSeen: LocalTime,
+    val lastSeen: LocalTime,
 )
 
 @Singleton
 class StatsRepository @Inject constructor(
-    private val readingStatisticsDao: ReadingStatisticsDao
+    private val readingStatisticsDao: ReadingStatisticsDao,
+    private val bookRecordDao: BookRecordDao
 ) {
     private val buffer = mutableMapOf<Int, Pair<LocalTime, Int>>()
     private val bufferMutex = Mutex()
@@ -96,7 +99,6 @@ class StatsRepository @Inject constructor(
         }
     }
 
-
     private suspend fun getOrCreateDailyStats(date: LocalDate) =
         readingStatisticsDao.getReadingStatisticsForDate(date) ?: createDefaultEntity(date)
 
@@ -107,7 +109,6 @@ class StatsRepository @Inject constructor(
     private fun createDefaultEntity(date: LocalDate) = ReadingStatisticsEntity(
         date = date,
         readingTimeCount = Count(),
-        bookRecords = emptyMap(),
         avgSpeed = 0,
         favoriteBooks = emptyList(),
         startedBooks = emptyList(),
@@ -116,18 +117,29 @@ class StatsRepository @Inject constructor(
 
     suspend fun updateReadingStatistics(update: ReadingStatsUpdate) {
         val date = LocalDate.now()
-        val existing = getOrCreateDailyStats(date)
-        val updatedEntity = existing.copy(
-            readingTimeCount = updateCount(existing.readingTimeCount, update),
-            bookRecords = updateBookRecord(
-                original = existing.bookRecords,
-                update = update.copy(secondDelta = update.secondDelta)
-            ),
-            avgSpeed = update.currentSpeed ?: existing.avgSpeed
-        )
-        println("Triggered updateReadingStats records ${updatedEntity.bookRecords}")
+        val existingStats = getOrCreateDailyStats(date)
 
-        readingStatisticsDao.insertReadingStatistics(updatedEntity)
+        val updatedStats = existingStats.copy(
+            readingTimeCount = updateCount(existingStats.readingTimeCount, update),
+            avgSpeed = update.currentSpeed ?: existingStats.avgSpeed
+        )
+        readingStatisticsDao.insertReadingStatistics(updatedStats)
+
+        val existingBookRecord = bookRecordDao.getBookRecordByIdAndDate(update.bookId, date)
+        val newBookRecord = existingBookRecord?.copy(
+            totalSeconds = existingBookRecord.totalSeconds + update.secondDelta,
+            sessions = existingBookRecord.sessions + update.sessionDelta,
+            lastSeen = update.localTime
+        ) ?: BookRecordEntity(
+            bookId = update.bookId,
+            date = date,
+            totalSeconds = update.secondDelta,
+            sessions = update.sessionDelta,
+            firstSeen = update.localTime,
+            lastSeen = update.localTime,
+        )
+
+        bookRecordDao.insertBookRecord(newBookRecord)
     }
 
     suspend fun updateBookStatus(

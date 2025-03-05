@@ -7,16 +7,15 @@ import androidx.room.TypeConverters
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.BookRecordConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.CountConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateConverter
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.BookRecord
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
 import java.time.LocalDate
 
 @TypeConverters(
-    LocalDateConverter::class,
+    LocalDateTimeConverter::class,
     CountConverter::class,
-    ListConverter::class,
-    BookRecordConverter::class
+    ListConverter::class
 )
 @Entity(tableName = "reading_statistics")
 data class ReadingStatisticsEntity(
@@ -24,8 +23,6 @@ data class ReadingStatisticsEntity(
     val date: LocalDate,
     @ColumnInfo(name = "reading_time_count")
     val readingTimeCount: Count,
-    @ColumnInfo(name = "book_records")
-    val bookRecords: Map<Int, BookRecord>,
     @ColumnInfo(name = "avg_speed")
     val avgSpeed: Int,
     @ColumnInfo(name = "favorite_books")

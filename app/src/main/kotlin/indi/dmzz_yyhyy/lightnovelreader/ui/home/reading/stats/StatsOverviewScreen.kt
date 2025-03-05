@@ -53,6 +53,7 @@ import com.patrykandpatrick.vico.core.common.Position
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
@@ -81,6 +82,7 @@ fun StatsOverviewScreen(
     val endDate by viewModel.endDate.collectAsState()
     val levelMap = uiState.dateLevelMap
     val statsEntityMap = uiState.dateStatsEntityMap
+    val statsBookRecordMap = uiState.bookRecordsByDate
     val selectedDate = uiState.selectedDate
     val isLoading = uiState.isLoading
 
@@ -153,9 +155,9 @@ fun StatsOverviewScreen(
                 val hmFormatter = DateTimeFormatter.ofPattern("HH:mm")
                 item {
                     val todayStats = statsEntityMap[selectedDate]
-                    val bookRecords = todayStats?.bookRecords ?: emptyMap()
+                    val todayRecords = statsBookRecordMap[selectedDate] ?: emptyList()
 
-                    val totalSeconds = bookRecords.values.sumOf { it.totalSeconds }
+                    val totalSeconds = todayRecords.sumOf { it.totalSeconds }
                     val totalDuration = Duration.ofSeconds(totalSeconds.toLong())
                     val formattedTotalTime = String.format(
                         Locale.getDefault(),
@@ -165,8 +167,8 @@ fun StatsOverviewScreen(
                         totalDuration.toSecondsPart()
                     )
 
-                    val firstSeenBook = bookRecords.minByOrNull { it.value.firstSeen }
-                    val lastSeenBook = bookRecords.maxByOrNull { it.value.lastSeen }
+                    val firstSeenBook = todayRecords.minByOrNull { it.firstSeen }
+                    val lastSeenBook = todayRecords.maxByOrNull { it.lastSeen }
 
                     Column(
                         modifier = Modifier
@@ -180,21 +182,21 @@ fun StatsOverviewScreen(
                         )
                         Spacer(Modifier.height(6.dp))
 
-                        val bookEntries = bookRecords.entries.toList()
                         val maxVisibleBooks = 4
-                        val hiddenCount = bookEntries.size - maxVisibleBooks
+                        val hiddenCount = todayRecords.size - maxVisibleBooks
 
-                        val readingTimeDetails = bookEntries.take(maxVisibleBooks).map { (id, record) ->
-                            val bookDuration = Duration.ofSeconds(record.totalSeconds.toLong())
-                            val formattedBookTime = String.format(
-                                Locale.getDefault(),
-                                "%02d:%02d:%02d",
-                                bookDuration.toHours(),
-                                bookDuration.toMinutesPart(),
-                                bookDuration.toSecondsPart()
-                            )
-                            "id=$id" to formattedBookTime
-                        }.toMutableList()
+                        val readingTimeDetails =
+                            todayRecords.take(maxVisibleBooks).map { it ->
+                                val bookDuration = Duration.ofSeconds(it.totalSeconds.toLong())
+                                val formattedBookTime = String.format(
+                                    Locale.getDefault(),
+                                    "%02d:%02d:%02d",
+                                    bookDuration.toHours(),
+                                    bookDuration.toMinutesPart(),
+                                    bookDuration.toSecondsPart()
+                                )
+                                "id=${it.bookId}" to formattedBookTime
+                            }.toMutableList()
                         if (hiddenCount > 0) readingTimeDetails.add("...剩下 $hiddenCount 本书" to "")
 
 
@@ -213,16 +215,14 @@ fun StatsOverviewScreen(
                                 title = "时间",
                                 titleValue = ""
                             ) {
-                                if (todayStats?.bookRecords?.isNotEmpty() == true) {
+                                if (todayRecords.isNotEmpty()) {
                                     DataItem(
-                                        leftText = "最早: id=${firstSeenBook?.key}",
-                                        rightText = hmFormatter.format(firstSeenBook?.value?.firstSeen)
-                                            ?: ""
+                                        leftText = "最早: id=${firstSeenBook?.bookId}",
+                                        rightText = hmFormatter.format(firstSeenBook?.firstSeen)
                                     )
                                     DataItem(
-                                        leftText = "最后: id=${lastSeenBook?.key ?: "无"}",
-                                        rightText = hmFormatter.format(lastSeenBook?.value?.lastSeen)
-                                            ?: ""
+                                        leftText = "最后: id=${lastSeenBook?.bookId}",
+                                        rightText = hmFormatter.format(lastSeenBook?.lastSeen)
                                     )
                                 }
                             },
@@ -281,8 +281,8 @@ fun StatsOverviewScreen(
                                 modifier = Modifier.weight(1f),
                                 icon = painterResource(R.drawable.outline_book_24px),
                                 title = "阅读会话",
-                                value = "${statsEntityMap.values.sumOf { day ->
-                                    day.bookRecords.values.sumOf { it.sessions }
+                                value = "${statsBookRecordMap.values.sumOf { day ->
+                                    day.sumOf { it.sessions }
                                 }} 次"
                             )
                             Spacer(Modifier.width(16.dp))
@@ -317,8 +317,8 @@ fun StatsOverviewScreen(
                 }
 
                 items(timelineDates) { date ->
-                    statsEntityMap[date]?.takeIf { it.bookRecords.isNotEmpty() }?.let { statsEntity ->
-                        TimelineDailyStats(date, statsEntity)
+                    statsBookRecordMap[date]?.takeIf { it.isNotEmpty() }?.let { records ->
+                        statsEntityMap[date]?.let { TimelineDailyStats(date, statsEntity = it, statsBookRecords = records) }
                     }
                 }
             }
@@ -327,8 +327,8 @@ fun StatsOverviewScreen(
 }
 
 @Composable
-fun TimelineDailyStats(date: LocalDate, statsEntity: ReadingStatisticsEntity) {
-    if (statsEntity.bookRecords.isEmpty()) return
+fun TimelineDailyStats(date: LocalDate, statsEntity: ReadingStatisticsEntity, statsBookRecords: List<BookRecordEntity>) {
+    if (statsBookRecords.isEmpty()) return
 
     Column(
         modifier = Modifier
@@ -351,7 +351,7 @@ fun TimelineDailyStats(date: LocalDate, statsEntity: ReadingStatisticsEntity) {
         }
         Spacer(Modifier.height(12.dp))
 
-        val totalSeconds = statsEntity.bookRecords.values.sumOf { it.totalSeconds }
+        val totalSeconds = statsBookRecords.sumOf { it.totalSeconds }
         val duration = Duration.ofSeconds(totalSeconds.toLong())
         Text(
             text = buildAnnotatedString {
@@ -364,7 +364,7 @@ fun TimelineDailyStats(date: LocalDate, statsEntity: ReadingStatisticsEntity) {
         )
 
         Spacer(Modifier.height(8.dp))
-        val displayedBooks = statsEntity.bookRecords.keys.take(3)
+        val displayedBooks = statsBookRecords.take(3)
         Text(
             text = buildAnnotatedString {
                 append("读了 ")
@@ -374,10 +374,10 @@ fun TimelineDailyStats(date: LocalDate, statsEntity: ReadingStatisticsEntity) {
                     }
                     if (index != displayedBooks.lastIndex) append(", ")
                 }
-                if (statsEntity.bookRecords.keys.size > 3) {
+                if (statsBookRecords.size > 3) {
                     append(" 等共 ")
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
-                        append("${statsEntity.bookRecords.keys.size}")
+                        append("${statsBookRecords.size}")
                     }
                     append(" 本书")
                 }

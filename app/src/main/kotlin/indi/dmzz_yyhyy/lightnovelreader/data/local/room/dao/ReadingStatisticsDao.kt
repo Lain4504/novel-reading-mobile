@@ -9,7 +9,7 @@ import androidx.room.TypeConverters
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.BookRecordConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.CountConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateConverter
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.BookRecord
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
@@ -18,10 +18,9 @@ import java.time.LocalDate
 
 @Dao
 @TypeConverters(
-    LocalDateConverter::class,
+    LocalDateTimeConverter::class,
     CountConverter::class,
-    ListConverter::class,
-    BookRecordConverter::class
+    ListConverter::class
 )
 interface ReadingStatisticsDao {
 
@@ -45,10 +44,6 @@ interface ReadingStatisticsDao {
     suspend fun getReadingStatisticsBetweenDates(start: LocalDate, end: LocalDate): List<ReadingStatisticsEntity>
 
     @Query("SELECT * FROM reading_statistics WHERE date = :date LIMIT 1")
-    suspend fun getBookRecordsForDate(date: LocalDate): Map<Int, BookRecord>? =
-        getReadingStatisticsForDate(date)?.bookRecords
-
-    @Query("SELECT * FROM reading_statistics WHERE date = :date LIMIT 1")
     suspend fun getFavoriteBooksForDate(date: LocalDate): List<Int>? =
         getReadingStatisticsForDate(date)?.favoriteBooks
 
@@ -58,7 +53,7 @@ interface ReadingStatisticsDao {
 
     @Query("SELECT * FROM reading_statistics WHERE date = :date LIMIT 1")
     suspend fun getFinishedBooksForDate(date: LocalDate): List<Int>? =
-        getReadingStatisticsForDate(date)?.startedBooks
+        getReadingStatisticsForDate(date)?.finishedBooks
 
     @Query("SELECT * FROM reading_statistics WHERE date = :date LIMIT 1")
     suspend fun getAverageSpeedForDate(date: LocalDate): Int? =

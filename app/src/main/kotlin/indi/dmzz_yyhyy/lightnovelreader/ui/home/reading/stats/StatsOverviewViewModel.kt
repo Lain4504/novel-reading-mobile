@@ -56,8 +56,10 @@ class StatsOverviewViewModel @Inject constructor(
             var totalSessions = 0
             _uiState.dateStatsEntityMap.forEach { (_, readingStatistics) ->
                 totalStartedBooks += readingStatistics.startedBooks.size
-                totalReadInSeconds += readingStatistics.bookRecords.values.sumOf { it.totalSeconds }
-                totalSessions += readingStatistics.bookRecords.values.sumOf { it.sessions }
+            }
+            _uiState.bookRecordsByDate.forEach { (_, record) ->
+                totalReadInSeconds += record.sumOf { it.totalSeconds }
+                totalSessions += record.sumOf { it.sessions }
             }
             _uiState.totalSessions = totalSessions
             _uiState.totalStartedBooks = totalStartedBooks
@@ -117,7 +119,6 @@ class StatsOverviewViewModel @Inject constructor(
     private fun createDefaultEntity(date: LocalDate) = ReadingStatisticsEntity(
         date = date,
         readingTimeCount = Count(),
-        bookRecords = emptyMap(),
         avgSpeed = 0,
         favoriteBooks = emptyList(),
         startedBooks = emptyList(),

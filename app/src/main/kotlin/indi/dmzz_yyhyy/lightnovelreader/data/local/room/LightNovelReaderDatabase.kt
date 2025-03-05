@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookshelfDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
@@ -14,6 +15,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserReadingDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookInformationEntity
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfBookMetadataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ChapterContentEntity
@@ -33,7 +35,8 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
         UserDataEntity::class,
         BookshelfEntity::class,
         BookshelfBookMetadataEntity::class,
-        ReadingStatisticsEntity::class
+        ReadingStatisticsEntity::class,
+        BookRecordEntity::class
     ],
     version = 12,
     exportSchema = false
@@ -46,6 +49,7 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
     abstract fun userDataDao(): UserDataDao
     abstract fun bookshelfDao(): BookshelfDao
     abstract fun readingStatisticsDao(): ReadingStatisticsDao
+    abstract fun bookRecordDao(): BookRecordDao
 
     companion object {
         @Volatile
@@ -154,11 +158,23 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
             CREATE TABLE reading_statistics (
                 date INTEGER NOT NULL PRIMARY KEY,
                 count BLOB NOT NULL,
-                book_records TEXT NOT NULL,
                 avg_speed INTEGER NOT NULL DEFAULT 0,
                 favorite_books TEXT NOT NULL,
                 started_books TEXT NOT NULL,
                 finished_books TEXT NOT NULL)
+                """)
+
+                db.execSQL("""
+           CREATE TABLE book_records (
+                date INTEGER NOT NULL,
+                book_id INTEGER NOT NULL,
+                sessions INTEGER NOT NULL,
+                total_seconds INTEGER NOT NULL,
+                first_seen TEXT NOT NULL,
+                last_seen TEXT NOT NULL,
+                PRIMARY KEY(date, book_id),
+                FOREIGN KEY(date) REFERENCES reading_statistics(date) ON DELETE CASCADE
+            )
                 """)
             }
         }

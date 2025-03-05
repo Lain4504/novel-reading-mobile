@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.LightNovelReaderDatabase
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookshelfDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
@@ -50,13 +51,19 @@ object DaoModule {
 
     @Provides
     @Singleton
-    fun provideReadingStatisticsDao(database: LightNovelReaderDatabase): ReadingStatisticsDao {
-        return database.readingStatisticsDao()
+    fun provideReadingStatisticsDao(db: LightNovelReaderDatabase): ReadingStatisticsDao {
+        return db.readingStatisticsDao()
     }
 
     @Provides
     @Singleton
-    fun provideStatisticsRepository(readingStatisticsDao: ReadingStatisticsDao): StatsRepository {
-        return StatsRepository(readingStatisticsDao)
+    fun provideBookRecordsDao(db: LightNovelReaderDatabase): BookRecordDao {
+        return db.bookRecordDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideStatisticsRepository(readingStatisticsDao: ReadingStatisticsDao, bookRecordDao: BookRecordDao): StatsRepository {
+        return StatsRepository(readingStatisticsDao, bookRecordDao)
     }
 }
