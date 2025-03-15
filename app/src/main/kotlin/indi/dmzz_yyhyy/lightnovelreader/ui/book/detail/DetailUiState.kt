@@ -1,13 +1,13 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.google.android.material.bottomsheet.BottomSheetBehavior.State
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
+import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadItem
 
 @State
 interface DetailUiState {
@@ -15,7 +15,7 @@ interface DetailUiState {
     val bookVolumes: BookVolumes
     val userReadingData: UserReadingData
     val isCached: Boolean
-    val cacheProgress: Int
+    val downloadItem: DownloadItem?
     val isInBookshelf: Boolean
 }
 
@@ -24,7 +24,7 @@ class MutableDetailUiState: DetailUiState {
     override var bookVolumes: BookVolumes by mutableStateOf(BookVolumes.empty())
     override var userReadingData: UserReadingData by mutableStateOf(UserReadingData.empty())
     override var isCached: Boolean by mutableStateOf(false)
-    override var cacheProgress: Int by mutableIntStateOf(-1)
+    override var downloadItem: DownloadItem? by mutableStateOf(null)
     override var isInBookshelf: Boolean by mutableStateOf(false)
 }
 

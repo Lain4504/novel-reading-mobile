@@ -21,13 +21,13 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
-    composable<Route.Home.Exploration.Expanded>(
+    composable<Route.Main.Exploration.Expanded>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
         popEnterTransition = { expandPopEnter() },
         popExitTransition = { expandPopExit() }
     ) { entry ->
-        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Home) }
+        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val explorationViewModel = hiltViewModel<ExplorationViewModel>(parentEntry)
         val explorationExpandedPageHomeViewModel = hiltViewModel<ExpandedPageViewModel>()
         var dialog : @Composable () -> Unit by remember { mutableStateOf(@Composable {}) }
@@ -36,7 +36,7 @@ fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
             explorationExpandedPageUiState = explorationExpandedPageHomeViewModel.uiState,
             refresh = explorationViewModel::refresh,
             dialog = { newDialog -> dialog = newDialog },
-            expandedPageDataSourceId = entry.toRoute<Route.Home.Exploration.Expanded>().expandedPageDataSourceId,
+            expandedPageDataSourceId = entry.toRoute<Route.Main.Exploration.Expanded>().expandedPageDataSourceId,
             init = explorationExpandedPageHomeViewModel::init,
             loadMore = explorationExpandedPageHomeViewModel::loadMore,
             requestAddBookToBookshelf = {
@@ -55,5 +55,5 @@ fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
 }
 
 fun NavController.navigateToExplorationExpandDestination(expandedPageDataSourceId: String) {
-    navigate(Route.Home.Exploration.Expanded(expandedPageDataSourceId))
+    navigate(Route.Main.Exploration.Expanded(expandedPageDataSourceId))
 }

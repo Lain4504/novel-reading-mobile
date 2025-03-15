@@ -8,9 +8,11 @@ import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadProgressRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadType
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,10 +21,10 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val bookshelfRepository: BookshelfRepository,
-    private val webBookDataSource: WebBookDataSource
+    private val webBookDataSource: WebBookDataSource,
+    private val downloadProgressRepository: DownloadProgressRepository
 ) : ViewModel() {
     private val _uiState = MutableDetailUiState()
-    private var cacheBookProgressCollectJob: Job? = null
     var navController: NavController? = null
     val uiState: DetailUiState = _uiState
 
@@ -52,18 +54,15 @@ class DetailViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.isCached = bookRepository.getIsBookCached(bookId)
         }
-        bookRepository.getCacheBookProgressFlow(bookId)?.let { flow ->
-            cacheBookProgressCollectJob?.cancel()
-            cacheBookProgressCollectJob =
-                viewModelScope.launch(Dispatchers.IO) {
-                flow.collect {
-                    _uiState.cacheProgress = it
-                }
-            }
-        }
         viewModelScope.launch(Dispatchers.IO) {
             bookshelfRepository.getBookshelfBookMetadataFlow(bookId).collect {
                 _uiState.isInBookshelf = it != null
+            }
+        }
+        viewModelScope.launch {
+            downloadProgressRepository.downloadItemIdListFlow.collect { downloadItemList ->
+                println(downloadItemList)
+                _uiState.downloadItem = downloadItemList.findLast { it.bookId == _uiState.bookInformation.id && it.type == DownloadType.CACHE }.debugPrint("exportItemIdListFlow")
             }
         }
     }
@@ -74,19 +73,7 @@ class DetailViewModel @Inject constructor(
         val isCachedFlow = bookRepository.isCacheBookWorkFlow(work.id)
         viewModelScope.launch(Dispatchers.IO) {
             isCachedFlow.collect { workInfo ->
-                if (workInfo?.state == WorkInfo.State.RUNNING) {
-                    bookRepository.getCacheBookProgressFlow(bookId)?.let { flow ->
-                        cacheBookProgressCollectJob?.cancel()
-                        cacheBookProgressCollectJob =
-                            viewModelScope.launch(Dispatchers.IO) {
-                                flow.collect {
-                                    _uiState.cacheProgress = it
-                                }
-                            }
-                    }
-                }
                 if (workInfo?.state == WorkInfo.State.SUCCEEDED) {
-                    _uiState.cacheProgress = -1
                     _uiState.isCached = bookRepository.getIsBookCached(bookId)
                 }
             }

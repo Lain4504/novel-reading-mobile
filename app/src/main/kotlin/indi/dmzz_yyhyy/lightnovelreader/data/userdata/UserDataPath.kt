@@ -67,5 +67,6 @@ sealed class UserDataPath(
             data object KeepScreenOn : LinkUserData(Reader.KeepScreenOn)
         }*/
     }
+    data object CompletedDownloadBookList: UserDataPath("completedDownloadBookList")
 }
 

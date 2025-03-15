@@ -23,11 +23,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.bookshelfHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Home.Bookshelf.Home> {
+    composable<Route.Main.Bookshelf.Home> {
         val bookshelfHomeViewModel = hiltViewModel<BookshelfHomeViewModel>()
         BookshelfHomeScreen(
             controller = navController,
-            selectedRoute = Route.Home.Bookshelf,
+            selectedRoute = Route.Main.Bookshelf,
             init = bookshelfHomeViewModel::load,
             changePage = bookshelfHomeViewModel::changePage,
             changeBookSelectState = bookshelfHomeViewModel::changeBookSelectState,
@@ -65,14 +65,14 @@ fun NavGraphBuilder.bookshelfHomeDestination(navController: NavController, share
 
 @Suppress("unused")
 fun NavController.navigateToBookshelfHomeDestination() {
-    navigate(Route.Home.Bookshelf.Home)
+    navigate(Route.Main.Bookshelf.Home)
 }
 
 private fun NavGraphBuilder.addBookToBookshelfDialog(navController: NavController) {
-    dialog<Route.Home.Bookshelf.AddBookToBookshelfDialog> { entry ->
+    dialog<Route.Main.Bookshelf.AddBookToBookshelfDialog> { entry ->
         val viewModel = hiltViewModel<AddBookToBookshelfDialogViewModel>()
         val dialogSelectedBookshelves = remember { mutableStateListOf<Int>() }
-        val route = entry.toRoute<Route.Home.Bookshelf.AddBookToBookshelfDialog>()
+        val route = entry.toRoute<Route.Main.Bookshelf.AddBookToBookshelfDialog>()
         val allBookshelves by viewModel.allBookshelfFlow.collectAsState(emptyList<Bookshelf>())
         AddBookToBookshelfDialog(
             onDismissRequest = { navController.popBackStack() },
@@ -91,5 +91,5 @@ private fun NavGraphBuilder.addBookToBookshelfDialog(navController: NavControlle
 }
 
 private fun NavController.navigateToAddBookToBookshelfDialog(selectedBookIds: List<Int>) {
-    navigate(Route.Home.Bookshelf.AddBookToBookshelfDialog(selectedBookIds))
+    navigate(Route.Main.Bookshelf.AddBookToBookshelfDialog(selectedBookIds))
 }
