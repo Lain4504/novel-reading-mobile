@@ -11,8 +11,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.bookshelfNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    navigation<Route.Home.Bookshelf>(
-        startDestination = Route.Home.Bookshelf.Home
+    navigation<Route.Main.Bookshelf>(
+        startDestination = Route.Main.Bookshelf.Home
     ) {
         bookshelfHomeDestination(navController, sharedTransitionScope)
         bookshelfEditDestination(navController)
@@ -21,5 +21,5 @@ fun NavGraphBuilder.bookshelfNavigation(navController: NavController, sharedTran
 
 @Suppress("unused")
 fun NavController.navigateToBookshelfNavigation() {
-    navigate(Route.Home.Bookshelf)
+    navigate(Route.Main.Bookshelf)
 }

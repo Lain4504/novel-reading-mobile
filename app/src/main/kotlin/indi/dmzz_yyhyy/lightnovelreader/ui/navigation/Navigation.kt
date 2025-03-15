@@ -11,6 +11,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.bookNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.debug.debugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.addBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.updatesAvailableDialog
+import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.downloadManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.homeNavigation
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -21,7 +22,7 @@ fun LightNovelReaderNavHost(
     SharedTransitionLayout {
         NavHost(
             navController = navController,
-            startDestination = Route.Home,
+            startDestination = Route.Main,
             enterTransition = { fadeIn() },
             exitTransition = { fadeOut() }
         ) {
@@ -30,6 +31,7 @@ fun LightNovelReaderNavHost(
             debugDestination(navController)
             updatesAvailableDialog(navController)
             addBookToBookshelfDialog(navController)
+            downloadManager(navController)
         }
     }
 }

@@ -22,14 +22,14 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
-    composable<Route.Home.Bookshelf.Edit>(
+    composable<Route.Main.Bookshelf.Edit>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
         popEnterTransition = { expandPopEnter() },
         popExitTransition = { expandPopExit() }
     ) {
         val editBookshelfViewModel = hiltViewModel<EditBookshelfViewModel>()
-        val edit = it.toRoute<Route.Home.Bookshelf.Edit>()
+        val edit = it.toRoute<Route.Main.Bookshelf.Edit>()
         EditBookshelfScreen(
             title = edit.title,
             bookshelfId = edit.id,
@@ -50,16 +50,16 @@ fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
 }
 
 fun NavController.navigateToBookshelfEditDestination(id: Int, title: String) {
-    navigate(Route.Home.Bookshelf.Edit(id, title))
+    navigate(Route.Main.Bookshelf.Edit(id, title))
 }
 
 private fun NavGraphBuilder.deleteBookshelfDialog(navController: NavController) {
-    dialog<Route.Home.Bookshelf.DeleteBookshelfDialog> {
+    dialog<Route.Main.Bookshelf.DeleteBookshelfDialog> {
         val viewModel = hiltViewModel<DeleteBookshelfDialogViewModel>()
         DeleteBookshelfDialog(
             onDismissRequest = { navController.popBackStack() },
             onConfirmation = {
-                viewModel.deleteBookshelf(it.toRoute<Route.Home.Bookshelf.DeleteBookshelfDialog>().bookshelfId)
+                viewModel.deleteBookshelf(it.toRoute<Route.Main.Bookshelf.DeleteBookshelfDialog>().bookshelfId)
                 navController.popBackStack()
                 navController.popBackStackIfResumed()
             }
@@ -68,7 +68,7 @@ private fun NavGraphBuilder.deleteBookshelfDialog(navController: NavController) 
 }
 
 private fun NavController.navigateToDeleteBookshelfDialog(bookId: Int) {
-    navigate(Route.Home.Bookshelf.DeleteBookshelfDialog(bookId))
+    navigate(Route.Main.Bookshelf.DeleteBookshelfDialog(bookId))
 }
 
 @Composable

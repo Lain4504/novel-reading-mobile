@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -66,6 +67,7 @@ fun ReadingScreen(
     recentReadingBookInformationMap: Map<Int, BookInformation>,
     recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
     recentReadingBookIds: List<Int>,
+    onClickDownloadManager: () -> Unit,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
@@ -78,7 +80,10 @@ fun ReadingScreen(
     with(sharedTransitionScope) {
         Scaffold(
             topBar = {
-                TopBar(TopAppBarDefaults.pinnedScrollBehavior())
+                TopBar(
+                    onClickDownloadManager = onClickDownloadManager,
+                    scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+                )
             },
             bottomBar = {
                 HomeNavigateBar(
@@ -211,6 +216,7 @@ private fun ReadingContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
+    onClickDownloadManager: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     TopAppBar(
@@ -224,14 +230,14 @@ private fun TopBar(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        /*actions = {
-            IconButton(onClick = { }) {
+        actions = {
+            IconButton(onClick = onClickDownloadManager) {
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
+                        painter = painterResource(R.drawable.download_24px),
                         contentDescription = stringResource(R.string.more)
                     )
                 }
-        },*/
+        },
         scrollBehavior = scrollBehavior
     )
 }

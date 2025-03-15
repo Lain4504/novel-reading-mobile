@@ -12,8 +12,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationSearchDestination(navController: NavController) {
-    composable<Route.Home.Exploration.Search> { entry ->
-        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Home) }
+    composable<Route.Main.Exploration.Search> { entry ->
+        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val explorationViewModel = hiltViewModel<ExplorationViewModel>(parentEntry)
         val explorationSearchViewModel = hiltViewModel<ExplorationSearchViewModel>()
         ExplorationSearchScreen(
@@ -37,5 +37,5 @@ fun NavGraphBuilder.explorationSearchDestination(navController: NavController) {
 }
 
 fun NavController.navigateToSearchDestination() {
-    navigate(Route.Home.Exploration.Search)
+    navigate(Route.Main.Exploration.Search)
 }

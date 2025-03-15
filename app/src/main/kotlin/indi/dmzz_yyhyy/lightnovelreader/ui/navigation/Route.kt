@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 object Route {
     @Serializable
-    object Home {
+    object Main {
         @Serializable
         object Reading
         @Serializable
@@ -91,4 +91,6 @@ object Route {
     data class AddBookToBookshelfDialog(
         val bookId: Int
     )
+    @Serializable
+    object DownloadManager
 }

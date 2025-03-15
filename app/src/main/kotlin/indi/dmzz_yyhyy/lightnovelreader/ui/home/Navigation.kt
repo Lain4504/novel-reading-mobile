@@ -25,8 +25,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.homeNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    navigation<Route.Home>(
-        startDestination = Route.Home.Reading
+    navigation<Route.Main>(
+        startDestination = Route.Main.Reading
     ) {
         homeReadingDestination(navController, sharedTransitionScope)
         explorationNavigation(navController, sharedTransitionScope)
@@ -37,7 +37,7 @@ fun NavGraphBuilder.homeNavigation(navController: NavController, sharedTransitio
 
 @Suppress("unused")
 fun NavController.navigateToHomeNavigation() {
-    navigate(Route.Home)
+    navigate(Route.Main)
 }
 
 @OptIn(ExperimentalAnimationGraphicsApi::class)
@@ -54,15 +54,15 @@ fun HomeNavigateBar(
 
     NavigationBar(modifier) {
         NavigationBarItem(
-            selected = selectedRoute is Route.Home.Reading,
+            selected = selectedRoute is Route.Main.Reading,
             onClick = {
-                if (selectedRoute !is Route.Home.Reading) coverNavigate(Route.Home.Reading)
+                if (selectedRoute !is Route.Main.Reading) coverNavigate(Route.Main.Reading)
             },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
                         AnimatedImageVector.animatedVectorResource(R.drawable.animated_book),
-                        selectedRoute is Route.Home.Reading
+                        selectedRoute is Route.Main.Reading
                     ),
                     contentDescription = null
                 )
@@ -75,15 +75,15 @@ fun HomeNavigateBar(
             }
         )
         NavigationBarItem(
-            selected = selectedRoute is Route.Home.Bookshelf,
+            selected = selectedRoute is Route.Main.Bookshelf,
             onClick = {
-                if (selectedRoute !is Route.Home.Bookshelf) coverNavigate(Route.Home.Bookshelf)
+                if (selectedRoute !is Route.Main.Bookshelf) coverNavigate(Route.Main.Bookshelf)
             },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
                         AnimatedImageVector.animatedVectorResource(R.drawable.animated_bookshelf),
-                        selectedRoute is Route.Home.Bookshelf
+                        selectedRoute is Route.Main.Bookshelf
                     ),
                     contentDescription = null
                 )
@@ -96,15 +96,15 @@ fun HomeNavigateBar(
             }
         )
         NavigationBarItem(
-            selected = selectedRoute is Route.Home.Exploration,
+            selected = selectedRoute is Route.Main.Exploration,
             onClick = {
-                if (selectedRoute !is Route.Home.Exploration) coverNavigate(Route.Home.Exploration)
+                if (selectedRoute !is Route.Main.Exploration) coverNavigate(Route.Main.Exploration)
             },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
                         AnimatedImageVector.animatedVectorResource(R.drawable.animated_exploration),
-                        selectedRoute is Route.Home.Exploration
+                        selectedRoute is Route.Main.Exploration
                     ),
                     contentDescription = null
                 )
@@ -117,15 +117,15 @@ fun HomeNavigateBar(
             }
         )
         NavigationBarItem(
-            selected = selectedRoute is Route.Home.Settings,
+            selected = selectedRoute is Route.Main.Settings,
             onClick = {
-                if (selectedRoute !is Route.Home.Settings) coverNavigate(Route.Home.Settings)
+                if (selectedRoute !is Route.Main.Settings) coverNavigate(Route.Main.Settings)
             },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
                         AnimatedImageVector.animatedVectorResource(R.drawable.animated_settings),
-                        selectedRoute is Route.Home.Settings
+                        selectedRoute is Route.Main.Settings
                     ),
                     contentDescription = null
                 )

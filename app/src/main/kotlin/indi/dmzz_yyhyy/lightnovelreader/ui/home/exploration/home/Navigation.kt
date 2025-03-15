@@ -15,8 +15,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.explorationHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Home.Exploration.Home> { entry ->
-        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Home) }
+    composable<Route.Main.Exploration.Home> { entry ->
+        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val explorationViewModel = hiltViewModel<ExplorationViewModel>(parentEntry)
         val explorationHomeViewModel = hiltViewModel<ExplorationHomeViewModel>()
         ExplorationHomeScreen(
@@ -28,7 +28,7 @@ fun NavGraphBuilder.explorationHomeDestination(navController: NavController, sha
             changePage = explorationHomeViewModel::changePage,
             onClickSearch = navController::navigateToSearchDestination,
             refresh = explorationHomeViewModel::refresh,
-            selectedRoute = Route.Home.Exploration,
+            selectedRoute = Route.Main.Exploration,
             controller = navController,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
@@ -37,5 +37,5 @@ fun NavGraphBuilder.explorationHomeDestination(navController: NavController, sha
 }
 
 fun NavController.navigateToExplorationHomeDestination() {
-    navigate(Route.Home.Exploration.Home)
+    navigate(Route.Main.Exploration.Home)
 }
