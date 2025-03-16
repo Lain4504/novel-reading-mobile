@@ -8,8 +8,8 @@ import com.ketch.Ketch
 import com.ketch.Status
 import dagger.hilt.android.qualifiers.ApplicationContext
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,12 +38,13 @@ class UpdateCheckRepository @Inject constructor(
         private set
     private val mutableAvailable: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val availableFlow: Flow<Boolean> = mutableAvailable
-    private val _updatePhase = MutableStateFlow("Not checked")
+    private val _updatePhase = MutableStateFlow("未检查")
     val updatePhase: Flow<String> = _updatePhase
 
     init {
         coroutineScope.launch {
-            check()
+            if (userDataRepository.booleanUserData(UserDataPath.Settings.App.AutoCheckUpdate.path).getOrDefault(true))
+                check()
         }
     }
 
