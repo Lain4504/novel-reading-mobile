@@ -257,7 +257,7 @@ fun Content(
         while (isRunning) {
             val now = LocalTime.now()
             val elapsed = 1 /*Duration.between(lastUpdate, now).seconds.coerceAtLeast(1)*/
-            accumulateReadingTime(bookId, elapsed.toInt())
+            accumulateReadingTime(bookId, elapsed)
             lastUpdate = now
             delay(1000)
         }

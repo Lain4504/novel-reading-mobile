@@ -165,16 +165,15 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                 """)
 
                 db.execSQL("""
-           CREATE TABLE book_records (
+            CREATE TABLE book_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 date INTEGER NOT NULL,
                 book_id INTEGER NOT NULL,
                 sessions INTEGER NOT NULL,
                 total_seconds INTEGER NOT NULL,
                 first_seen TEXT NOT NULL,
                 last_seen TEXT NOT NULL,
-                PRIMARY KEY(date, book_id),
-                FOREIGN KEY(date) REFERENCES reading_statistics(date) ON DELETE CASCADE
-            )
+                FOREIGN KEY(date) REFERENCES reading_statistics(date) ON DELETE CASCADE)
                 """)
             }
         }

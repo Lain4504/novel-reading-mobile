@@ -2,7 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.BookRecordConverter
@@ -15,24 +14,18 @@ import java.time.LocalTime
     LocalDateTimeConverter::class
 )
 
-@Entity(
-    tableName = "book_records",
-    foreignKeys = [ForeignKey(
-        entity = ReadingStatisticsEntity::class,
-        parentColumns = ["date"],
-        childColumns = ["date"],
-        onDelete = ForeignKey.CASCADE
-    )]
-)
+@Entity(tableName = "book_records")
 data class BookRecordEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = -1,
-    val bookId: Int,
+    val id: Int? = null,
+    @ColumnInfo(name = "date")
     val date: LocalDate,
-    @ColumnInfo(name = "total_seconds")
-    val totalSeconds: Int,
+    @ColumnInfo(name = "book_id")
+    val bookId: Int,
     @ColumnInfo(name = "sessions")
     val sessions: Int,
+    @ColumnInfo(name = "total_seconds")
+    val totalSeconds: Int,
     @ColumnInfo(name = "first_seen")
     val firstSeen: LocalTime,
     @ColumnInfo(name = "last_seen")

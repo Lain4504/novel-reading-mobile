@@ -21,10 +21,13 @@ interface BookRecordDao {
     @Query("SELECT * FROM book_records WHERE date = :date")
     suspend fun getBookRecordsForDate(date: LocalDate): List<BookRecordEntity>
 
-    @Query("SELECT * FROM book_records WHERE bookId = :bookId AND date = :date")
+    @Query("SELECT * FROM book_records WHERE date BETWEEN :start AND :end")
+    suspend fun getBookRecordsBetweenDates(start: LocalDate, end: LocalDate): List<BookRecordEntity>
+
+    @Query("SELECT * FROM book_records WHERE book_id = :bookId AND date = :date")
     suspend fun getBookRecordByIdAndDate(bookId: Int, date: LocalDate): BookRecordEntity?
 
-    @Query("SELECT * FROM book_records WHERE bookId = :bookId")
+    @Query("SELECT * FROM book_records WHERE book_id = :bookId")
     suspend fun getBookRecordsByBookId(bookId: Int): List<BookRecordEntity>
 
     @Delete

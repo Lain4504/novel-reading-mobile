@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter
 
+import android.annotation.SuppressLint
 import androidx.room.TypeConverter
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -21,7 +22,7 @@ object LocalDateTimeConverter {
         return date?.toString()
     }
 
-    /* FIXME: DO NOT MODIFY ABOVE - IT'S LEGACY */
+    /* DO NOT MODIFY ABOVE - IT'S LEGACY */
 
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
@@ -44,10 +45,12 @@ object LocalDateTimeConverter {
         return time?.format(timeFormatter)?.toInt()
     }
 
+    @SuppressLint("DefaultLocale")
     @TypeConverter
     fun intToLocalTime(timeInt: Int?): LocalTime? {
         return timeInt?.let {
-            LocalTime.parse(it.toString(), timeFormatter)
+            val timeString = String.format("%06d", it)
+            LocalTime.parse(timeString, timeFormatter)
         }
     }
 }

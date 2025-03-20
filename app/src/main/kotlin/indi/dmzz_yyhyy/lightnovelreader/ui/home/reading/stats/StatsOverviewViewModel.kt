@@ -4,15 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.util.Collections
 import javax.inject.Inject
@@ -20,18 +17,10 @@ import javax.inject.Inject
 @HiltViewModel
 class StatsOverviewViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
+    private val bookRepository: BookRepository
 ) : ViewModel() {
-    private val _uiState = MutableStatisticsOverviewUiState()
+    private var _uiState = MutableStatisticsOverviewUiState()
     val uiState: StatsOverviewUiState = _uiState
-
-    private val _startDate = MutableStateFlow(LocalDate.now().minusMonths(6))
-    val startDate: StateFlow<LocalDate> = _startDate
-
-    private val _endDate = MutableStateFlow(LocalDate.now())
-    val endDate: StateFlow<LocalDate> = _endDate
-
-    private val _threshold = MutableStateFlow(0)
-    val threshold: StateFlow<Int> = _threshold
 
     init {
         refreshData()
@@ -43,11 +32,42 @@ class StatsOverviewViewModel @Inject constructor(
             Log.d("AppReadingStats", "Refresh started")
 
             _uiState.isLoading = true
-
+            _uiState.datePair = _uiState.datePair.copy(
+                first = LocalDate.now().minusMonths(6)
+            )
+            val start = _uiState.datePair.first
+            val end = _uiState.datePair.second
             Log.d("AppReadingStats", "START generateLevelMap")
-            generateLevelMap(_startDate.value, _endDate.value)
+            generateLevelMap(start, end)
             Log.d("AppReadingStats", "FINISH generateLevelMap")
 
+
+            val dates = mutableListOf<LocalDate>()
+            var currentDate = start
+            while (!currentDate.isAfter(end)) {
+                dates.add(currentDate)
+                currentDate = currentDate.plusDays(1)
+            }
+
+            val allBookRecords = mutableListOf<BookRecordEntity>()
+            dates.forEach { date ->
+                val records = statsRepository.getBookRecordsForDate(date)
+                allBookRecords.addAll(records)
+            }
+
+            _uiState.bookRecordsByDate = allBookRecords.groupBy { it.date }
+            println("BY DATE = ${uiState.bookRecordsByDate}")
+            _uiState.bookRecordsByBookId = allBookRecords.groupBy { it.bookId }
+            println("BY BID = ${uiState.bookRecordsByBookId}")
+            val bookIds = _uiState.bookRecordsByBookId.keys.toSet()
+            bookIds.forEach {
+                viewModelScope.launch(Dispatchers.IO) {
+                    bookRepository.getBookInformation(it).collect {
+                        _uiState.bookInformationMap[it.id] = it
+                    }
+                }
+            }
+            println("POST fetch, map = ${_uiState.bookInformationMap}")
 
             _uiState.isLoading = false
 
@@ -57,9 +77,9 @@ class StatsOverviewViewModel @Inject constructor(
             _uiState.dateStatsEntityMap.forEach { (_, readingStatistics) ->
                 totalStartedBooks += readingStatistics.startedBooks.size
             }
-            _uiState.bookRecordsByDate.forEach { (_, record) ->
-                totalReadInSeconds += record.sumOf { it.totalSeconds }
-                totalSessions += record.sumOf { it.sessions }
+            _uiState.bookRecordsByDate.forEach { (_, records) ->
+                totalReadInSeconds += records.sumOf { it.totalSeconds }
+                totalSessions += records.sumOf { it.sessions }
             }
             _uiState.totalSessions = totalSessions
             _uiState.totalStartedBooks = totalStartedBooks
@@ -98,7 +118,7 @@ class StatsOverviewViewModel @Inject constructor(
                 quickSelect(this, 0.75)
             )
         }
-        _threshold.value = thresholds[2]
+        _uiState.thresholds = thresholds[2]
 
         _uiState.dateStatsEntityMap = entityMap
 

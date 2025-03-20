@@ -30,6 +30,5 @@ fun getYearIndex(startYear: Year, targetYear: Year): Int {
 }
 
 fun getYearIndicesCount(startYear: Year, endYear: Year): Int {
-    // Add one to include the start year itself!
     return getYearIndex(startYear, endYear) + 1
 }

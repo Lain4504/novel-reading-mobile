@@ -7,8 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
-import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEvent
-import indi.dmzz_yyhyy.lightnovelreader.utils.events.ReadingEventHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,10 +16,12 @@ import javax.inject.Inject
 class AddToBookshelfDialogViewModel @Inject constructor(
     private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository,
-    private val readingEventHandler: ReadingEventHandler
+    private val statsRepository: StatsRepository
 
 ) : ViewModel() {
     private val _addToBookshelfDialogUiState = MutableAddToBookshelfDialogUiState()
+    val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     var navController: NavController? = null
     var bookId: Int = -1
         set(value) {
@@ -64,7 +65,12 @@ class AddToBookshelfDialogViewModel @Inject constructor(
                     if (bookInformation.isEmpty()) return@collect
                     _addToBookshelfDialogUiState.selectedBookshelfIds.forEach {
                         println("FAV, id = $bookId, now sending book fav event")
-                        readingEventHandler.sendEvent(ReadingEvent.BookFavorite(bookId))
+                        coroutineScope.launch {
+                            statsRepository.updateBookStatus(
+                                bookId = bookId,
+                                isFavorite = true
+                            )
+                        }
                         bookshelfRepository.addBookIntoBookShelf(it, bookInformation)
                     }
                 }

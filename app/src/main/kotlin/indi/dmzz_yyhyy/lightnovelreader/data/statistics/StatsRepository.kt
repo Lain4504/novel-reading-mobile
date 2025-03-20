@@ -1,14 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.statistics
 
-import com.google.gson.annotations.SerializedName
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Duration
@@ -41,6 +37,7 @@ class StatsRepository @Inject constructor(
 ) {
     private val buffer = mutableMapOf<Int, Pair<LocalTime, Int>>()
     private val bufferMutex = Mutex()
+    private val dateNow = LocalDate.now()
 
 
     suspend fun accumulateReadingTime(bookId: Int, seconds: Int) = bufferMutex.withLock {
@@ -56,45 +53,22 @@ class StatsRepository @Inject constructor(
 
     private suspend fun flushBookBuffer(bookId: Int) {
         val (startTime, totalSeconds) = buffer[bookId] ?: return
-        val minutes = totalSeconds / 60
-        val remainingSeconds = totalSeconds % 60
 
-        if (minutes > 0) {
-            println("Triggered minuted > 0, updating")
-
-            updateReadingStatistics(
-                ReadingStatsUpdate(
-                    bookId = bookId,
-                    secondDelta = minutes * 60,
-                    localTime = startTime,
-                    sessionDelta = 0
-                )
+        updateReadingStatistics(
+            ReadingStatsUpdate(
+                bookId = bookId,
+                secondDelta = totalSeconds,
+                localTime = startTime,
+                sessionDelta = if (totalSeconds > 0) 1 else 0
             )
-        }
+        )
 
-        buffer[bookId] = if (remainingSeconds > 0) {
-            Pair(LocalTime.now(), remainingSeconds)
-        } else {
-            println("Triggered clear buffer to 0")
-            Pair(LocalTime.now(), 0)
-        }
-
+        buffer[bookId] = Pair(LocalTime.now(), 0)
     }
 
     suspend fun forceFlushAll() = bufferMutex.withLock {
         buffer.keys.toList().forEach { bookId ->
             flushBookBuffer(bookId)
-            buffer[bookId]?.let {
-                println("Triggered FlushAll, remain ${it.second} seconds")
-                updateReadingStatistics(
-                    ReadingStatsUpdate(
-                        bookId = bookId,
-                        secondDelta = it.second,
-                        localTime = it.first,
-                        sessionDelta = 0
-                    )
-                )
-            }
             buffer.remove(bookId)
         }
     }
@@ -106,6 +80,16 @@ class StatsRepository @Inject constructor(
         return readingStatisticsDao.getReadingStatisticsBetweenDates(start, end)
     }
 
+    suspend fun getBookRecordsForDate(date: LocalDate): List<BookRecordEntity> {
+        return bookRecordDao.getBookRecordsForDate(date)
+    }
+
+    suspend fun getBookRecordsBetweenDates(start: LocalDate, end: LocalDate): Map<LocalDate, List<BookRecordEntity>> {
+        return bookRecordDao.getBookRecordsBetweenDates(start, end)
+            .groupBy { it.date }
+    }
+
+
     private fun createDefaultEntity(date: LocalDate) = ReadingStatisticsEntity(
         date = date,
         readingTimeCount = Count(),
@@ -116,31 +100,40 @@ class StatsRepository @Inject constructor(
     )
 
     suspend fun updateReadingStatistics(update: ReadingStatsUpdate) {
-        val date = LocalDate.now()
-        val existingStats = getOrCreateDailyStats(date)
+        val existingStats = getOrCreateDailyStats(dateNow)
 
         val updatedStats = existingStats.copy(
             readingTimeCount = updateCount(existingStats.readingTimeCount, update),
             avgSpeed = update.currentSpeed ?: existingStats.avgSpeed
         )
-        readingStatisticsDao.insertReadingStatistics(updatedStats)
 
-        val existingBookRecord = bookRecordDao.getBookRecordByIdAndDate(update.bookId, date)
+        val existingBookRecord = bookRecordDao.getBookRecordByIdAndDate(update.bookId, dateNow)
+        println("existingBookRecord is $existingBookRecord")
+
         val newBookRecord = existingBookRecord?.copy(
             totalSeconds = existingBookRecord.totalSeconds + update.secondDelta,
             sessions = existingBookRecord.sessions + update.sessionDelta,
             lastSeen = update.localTime
         ) ?: BookRecordEntity(
             bookId = update.bookId,
-            date = date,
+            date = dateNow,
             totalSeconds = update.secondDelta,
             sessions = update.sessionDelta,
             firstSeen = update.localTime,
-            lastSeen = update.localTime,
+            lastSeen = update.localTime
         )
+        println("newBookRecord is $newBookRecord")
 
+        readingStatisticsDao.insertReadingStatistics(updatedStats)
         bookRecordDao.insertBookRecord(newBookRecord)
+
+        buffer[update.bookId]?.let {
+            if (it.second <= update.secondDelta) {
+                buffer.remove(update.bookId)
+            }
+        }
     }
+
 
     suspend fun updateBookStatus(
         bookId: Int,
@@ -170,30 +163,6 @@ class StatsRepository @Inject constructor(
             count.setMinute(hour, totalMinutes.coerceAtMost(60))
         }
         return count
-    }
-
-    private fun updateBookRecord(
-        original: Map<Int, BookRecord>,
-        update: ReadingStatsUpdate
-    ) = original.toMutableMap().apply {
-        val current = get(update.bookId) ?: BookRecord(
-            totalSeconds = 0,
-            firstSeen = update.localTime,
-            lastSeen = update.localTime,
-            sessions = 0
-        )
-
-        put(update.bookId, current.copy(
-            sessions = current.sessions + update.sessionDelta,
-            totalSeconds = current.totalSeconds + update.secondDelta,
-            lastSeen = maxOf(current.lastSeen, update.localTime)
-        ))
-        println("Triggered updateBookRecord ${put(update.bookId, current.copy(
-            sessions = current.sessions + update.sessionDelta,
-            totalSeconds = current.totalSeconds + update.secondDelta,
-            lastSeen = maxOf(current.lastSeen, update.localTime)
-        ))}")
-
     }
 
     private fun updateList(

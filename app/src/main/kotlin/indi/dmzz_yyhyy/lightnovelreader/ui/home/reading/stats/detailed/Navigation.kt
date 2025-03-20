@@ -20,9 +20,10 @@ fun NavController.navigateToReadingStatsDailyDetailedDestination(target: Int) {
 fun NavGraphBuilder.readingStatsDetailedDestination(navController: NavController) {
     composable<Route.Main.Reading.Stats.Detailed> {
         val statsDetailedViewModel = hiltViewModel<StatsDetailedViewModel>()
-        val targetDate = it.toRoute<Route.Main.Reading.Stats.Detailed>()
+        val targetDate = it.toRoute<Route.Main.Reading.Stats.Detailed>().targetDate
         val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-        val date = LocalDate.parse(targetDate.targetDate.toString(), formatter)
+        val date = LocalDate.parse(targetDate.toString(), formatter)
+        statsDetailedViewModel.uiState.selectedDate = date
         StatsDetailedScreen(
             viewModel = statsDetailedViewModel,
             initialize = statsDetailedViewModel::initialize,

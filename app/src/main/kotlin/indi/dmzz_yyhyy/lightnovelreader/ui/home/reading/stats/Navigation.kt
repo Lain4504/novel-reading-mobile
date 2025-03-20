@@ -33,7 +33,7 @@ fun NavGraphBuilder.readingStatsOverviewDestination(navController: NavController
         StatsOverviewScreen(
             onClickBack = navController::popBackStackIfResumed,
             viewModel = statsOverviewViewModel,
-            onClickDaily = navController::navigateToReadingStatsDailyDetailedDestination
+            onClickDetail = navController::navigateToReadingStatsDailyDetailedDestination
         )
     }
 }

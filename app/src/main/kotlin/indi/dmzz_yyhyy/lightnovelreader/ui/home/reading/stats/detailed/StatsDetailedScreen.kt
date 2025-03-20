@@ -1,13 +1,21 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -16,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -24,17 +33,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Last7DaysChart
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +60,8 @@ fun StatsDetailedScreen(
     onClickBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
+    println("OK DetailedScreen $targetDate")
+    uiState.selectedDate = targetDate
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val viewOptions = listOf("日", "周", "月")
 
@@ -115,48 +132,161 @@ private fun StatisticsContent(
     }
 }
 
-
-
-private fun LazyListScope.dailyStatistics(uiState: StatsDetailedUiState) {
-    item {
-        val data = uiState.dateStatsMap[uiState.targetDateRange.first]
-        DailyChart(data)
+@Composable
+fun StatsCard(
+    title: String,
+    subTitle: String? = null,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp, horizontal = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 2.dp
+    ) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            Column {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.W600
+                )
+                if (subTitle != null) {
+                    Text(
+                        text = subTitle,
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                content()
+            }
+        }
     }
 }
 
+
 @Composable
 fun DailyChart(
-    data: ReadingStatisticsEntity?
+    dateEntity: ReadingStatisticsEntity?,
+    records: List<BookRecordEntity>
 ) {
+    StatsCard("asdf") {
 
-}
-
-private fun LazyListScope.weeklyStatistics(uiState: StatsDetailedUiState) {
-    item {
-        val data = uiState.dateStatsMap[uiState.targetDateRange.first]
-        WeeklyItem(data)
     }
 }
 
 @Composable
 fun WeeklyItem(
-    data: ReadingStatisticsEntity?
+    uiState: StatsDetailedUiState,
 ) {
-
-}
-
-private fun LazyListScope.monthlyStatistics(uiState: StatsDetailedUiState) {
-    item {
-        MonthlySummaryChart(uiState.dateStatsMap)
+    val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
+    StatsCard(
+        title = "近 7 日阅读时长"
+    ) {
+        println("DEBUG CHART ${uiState.targetDateRangeStatsMap}")
+        val selectedDate = uiState.selectedDate
+        val selectedDateReadTimeMap = uiState.targetDateRangeStatsMap.mapValues { (_, entity) ->
+            entity.readingTimeCount.getTotalMinutes()
+        }
+        val selectedIndex = selectedDateReadTimeMap.keys.indexOf(selectedDate)
+        val convertedMap: Map<String, Int> = if (selectedIndex != -1) {
+            selectedDateReadTimeMap.entries
+                .sortedBy { it.key }
+                .take(selectedIndex + 1)
+                .takeLast(7)
+                .associate { it.key.format(dateFormatter) to it.value }
+        } else {
+            emptyMap()
+        }
+        println("refreshed $convertedMap")
+        Column {
+            Box(modifier = Modifier.heightIn(240.dp)) {
+                Last7DaysChart(
+                    modifier = Modifier
+                        .height(230.dp)
+                        .padding(horizontal = 14.dp),
+                    data = convertedMap
+                )
+            }
+        }
     }
 }
 
 @Composable
 fun MonthlySummaryChart(
-    data: Map<LocalDate, ReadingStatisticsEntity>
+    uiState: StatsDetailedUiState
 ) {
+    StatsCard(
+        title = "本月读过"
+    ) {
+        Row(
+            modifier = Modifier.height(80.dp),
+            horizontalArrangement = Arrangement.spacedBy((-35).dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .align(Alignment.Bottom)
+                    .padding(bottom = 8.dp)
+            ) {
+                Text(
+                    text = uiState.bookInformationMap.entries.size.toString(),
+                    fontSize = 32.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = "本",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.weight(1f))
+            uiState.bookInformationMap.entries
+                .sortedBy { it.key }
+                .take(5)
+                .forEach {
+                    Box(
+                        modifier = Modifier.background(
+                            MaterialTheme.colorScheme.background
+                        ).height(84.dp).width(60.dp).clip(RoundedCornerShape(4.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Cover(
+                            width = 56.dp,
+                            height = 80.dp,
+                            url = it.value.coverUrl,
+                            rounded = 4.dp
+                        )
+                    }
+                }
+        }
 
+    }
 }
+
+private fun LazyListScope.dailyStatistics(uiState: StatsDetailedUiState) {
+    item {
+        val stats = uiState.targetDateRangeStatsMap[LocalDate.now()]
+        val records = uiState.targetDateRangeRecordsMap[LocalDate.now()] ?: emptyList()
+        DailyChart(stats, records)
+    }
+}
+
+private fun LazyListScope.weeklyStatistics(uiState: StatsDetailedUiState) {
+    item {
+        WeeklyItem(uiState)
+    }
+}
+
+private fun LazyListScope.monthlyStatistics(uiState: StatsDetailedUiState) {
+    item {
+        MonthlySummaryChart(uiState)
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
