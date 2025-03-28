@@ -6,7 +6,6 @@ import java.util.Locale
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.serialization") version("2.0.21")
@@ -106,19 +105,17 @@ dependencies {
     // hilt
     val hilt = "2.55"
     implementation("com.google.dagger:hilt-android:$hilt")
-    kapt("com.google.dagger:hilt-android-compiler:$hilt")
+    ksp("com.google.dagger:hilt-android-compiler:$hilt")
     val androidXHilt = "1.2.0"
     implementation("androidx.hilt:hilt-common:$androidXHilt")
     implementation("androidx.hilt:hilt-compiler:$androidXHilt")
-    kapt("androidx.hilt:hilt-compiler:$androidXHilt")
+    ksp("androidx.hilt:hilt-compiler:$androidXHilt")
     implementation("androidx.hilt:hilt-work:$androidXHilt")
     implementation("androidx.hilt:hilt-navigation-compose:$androidXHilt")
     // navigation
     val navVersion = "2.8.7"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:$navVersion")
-    androidTestImplementation("androidx.navigation:navigation-testing:$navVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
     // coil
     implementation("io.coil-kt:coil-compose:2.6.0")
@@ -149,17 +146,12 @@ dependencies {
     val workVersion = "2.10.0"
     implementation("androidx.work:work-runtime-ktx:$workVersion")
     implementation("androidx.work:work-rxjava2:$workVersion")
-    implementation("androidx.work:work-gcm:$workVersion")
     androidTestImplementation("androidx.work:work-testing:$workVersion")
     implementation("androidx.work:work-multiprocess:$workVersion")
     implementation(project(":epub"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     // Swipe
     implementation("me.saket.swipe:swipe:1.3.0")
-}
-
-kapt {
-    correctErrorTypes = true
 }
 
 configurations.implementation{

@@ -27,7 +27,7 @@ fun DataSettingsList(
     onClickChangeSource: () -> Unit,
     onClickExportUserData: () -> Unit,
     onClickLogcat: () -> Unit,
-    @Suppress("UNUSED_PARAMETER") settingState: SettingState,
+    settingState: SettingState,
     importData: (Uri) -> OneTimeWorkRequest,
 ) {
     val context = LocalContext.current
