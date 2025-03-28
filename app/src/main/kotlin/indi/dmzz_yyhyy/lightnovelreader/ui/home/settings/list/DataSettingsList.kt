@@ -16,7 +16,9 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.launch
 
@@ -24,6 +26,7 @@ import kotlinx.coroutines.launch
 fun DataSettingsList(
     onClickChangeSource: () -> Unit,
     onClickExportUserData: () -> Unit,
+    onClickLogcat: () -> Unit,
     @Suppress("UNUSED_PARAMETER") settingState: SettingState,
     importData: (Uri) -> OneTimeWorkRequest,
 ) {
@@ -99,6 +102,21 @@ fun DataSettingsList(
         title = stringResource(R.string.settings_select_data_source),
         description = stringResource(R.string.settings_select_data_source_desc),
         onClick = onClickChangeSource
+    )
+    if (settingState.logLevelKey != "none")
+        SettingsClickableEntry(
+            iconRes = R.drawable.bug_report_24px,
+            title = "应用日志",
+            description = "显示应用日志",
+            onClick = onClickLogcat
+        )
+    SettingsMenuEntry(
+        iconRes = R.drawable.bug_report_24px,
+        title = "日志等级",
+        description = "设置日志过滤等级，重启应用后生效",
+        options = MenuOptions.LogLevelOptions,
+        selectedOptionKey = settingState.logLevelKey,
+        onOptionChange = settingState.logLevelKeyUserData::asynchronousSet
     )
 }
 

@@ -25,6 +25,7 @@ import com.microsoft.appcenter.crashes.Crashes
 import dagger.hilt.android.AndroidEntryPoint
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfSortType
+import indi.dmzz_yyhyy.lightnovelreader.data.logging.LoggerRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
@@ -41,6 +42,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var loggerRepository: LoggerRepository
     @Inject lateinit var bookshelfRepository: BookshelfRepository
     @Inject lateinit var userDataRepository: UserDataRepository
     @Inject lateinit var updateCheckRepository: UpdateCheckRepository
@@ -55,6 +57,8 @@ class MainActivity : ComponentActivity() {
         var dynamicColor by mutableStateOf(false)
         installSplashScreen()
         var statisticsEnabled by mutableStateOf(true)
+        loggerRepository.startLogging()
+
         workManager.enqueueUniquePeriodicWork(
             "checkUpdate",
             ExistingPeriodicWorkPolicy.KEEP,

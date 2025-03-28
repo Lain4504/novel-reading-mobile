@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

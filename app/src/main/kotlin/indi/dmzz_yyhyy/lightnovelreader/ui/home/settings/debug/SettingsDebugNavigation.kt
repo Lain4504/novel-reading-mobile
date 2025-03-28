@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.debug
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug
 
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -7,17 +7,17 @@ import androidx.navigation.compose.composable
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
-fun NavGraphBuilder.debugDestination(navController: NavController) {
-    composable<Route.Debug> {
+fun NavGraphBuilder.settingsDebugDestination(navController: NavController) {
+    composable<Route.Main.Settings.Debug> {
         val viewModel = hiltViewModel<DebugScreenViewModel>()
         DebugScreen(
-            onClickBack = { navController.popBackStackIfResumed() },
+            onClickBack = navController::popBackStackIfResumed,
             onClickQuery = viewModel::runSQLCommand,
             result = viewModel.result
         )
     }
 }
 
-fun NavController.navigateToDebug() {
-    navigate(Route.Debug)
+fun NavController.navigateToSettingsDebugDestination() {
+    navigate(Route.Main.Settings.Debug)
 }
