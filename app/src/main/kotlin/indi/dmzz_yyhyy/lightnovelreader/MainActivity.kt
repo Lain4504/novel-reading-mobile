@@ -19,9 +19,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.microsoft.appcenter.AppCenter
-import com.microsoft.appcenter.analytics.Analytics
-import com.microsoft.appcenter.crashes.Crashes
 import dagger.hilt.android.AndroidEntryPoint
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfSortType
@@ -56,7 +53,6 @@ class MainActivity : ComponentActivity() {
         var darkMode by mutableStateOf("FollowSystem")
         var dynamicColor by mutableStateOf(false)
         installSplashScreen()
-        var statisticsEnabled by mutableStateOf(true)
         loggerRepository.startLogging()
 
         workManager.enqueueUniquePeriodicWork(
@@ -85,17 +81,6 @@ class MainActivity : ComponentActivity() {
         coroutineScope.launch(Dispatchers.IO) {
             userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkMode.path).getFlow().collect {
                 darkMode = it ?: "FollowSystem"
-            }
-        }
-        coroutineScope.launch(Dispatchers.IO) {
-            statisticsEnabled = userDataRepository.booleanUserData(UserDataPath.Settings.App.Statistics.path).getOrDefault(true)
-            if (!BuildConfig.DEBUG && statisticsEnabled) {
-                AppCenter.start(
-                    application,
-                    update("eNpb85aBtYRBJc3c3MTYwshAN808JVnXxNIiTTfJ2DBFNzXZ1MDYKMkgxcwsBQAG3Aux").toString(),
-                    Analytics::class.java,
-                    Crashes::class.java
-                )
             }
         }
         coroutineScope.launch(Dispatchers.IO) {

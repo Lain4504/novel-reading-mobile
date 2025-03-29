@@ -105,23 +105,18 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
-    debugImplementation(libs.compose.ui.test.manifest)
     androidTestImplementation(libs.compose.ui.test.junit4)
     implementation(libs.kotlin.compose.compiler.plugin)
     // Junit
     testImplementation(libs.junit)
-    androidTestImplementation(libs.test.ext.junit)
-    androidTestImplementation(libs.test.espresso.core)
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.common)
-    implementation(libs.androidx.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.hilt.navigation.compose)
     // Navigation
-    implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
     implementation(libs.navigation.compose)
     // coil
@@ -139,28 +134,16 @@ dependencies {
     annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
-    implementation(libs.room.rxjava2)
-    implementation(libs.room.rxjava3)
-    implementation(libs.room.guava)
-    testImplementation(libs.room.testing)
-    implementation(libs.room.paging)
     // Splash API
     implementation(libs.core.splashscreen)
-    // AppCenter
-    implementation(libs.appcenter.analytics)
-    implementation(libs.appcenter.crashes)
     // WorkManager
     implementation(libs.work.runtime.ktx)
-    implementation(libs.work.rxjava2)
-    androidTestImplementation(libs.work.testing)
-    implementation(libs.work.multiprocess)
     // Potato EPUB
     implementation(project(":epub"))
     implementation(libs.serialization.json)
     // Swipe
     implementation(libs.swipe)
 }
-
 
 configurations.implementation{
     exclude(group = "com.intellij", module = "annotations")
