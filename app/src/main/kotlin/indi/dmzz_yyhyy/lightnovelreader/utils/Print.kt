@@ -1,3 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.utils
 
-fun <T> T.debugPrint(tag: String? = null): T = this.also { println("${tag?.let { "$it: " } ?: ""}${it.toString()}") }
+import android.util.Log
+
+fun <T> T.debugPrint(tag: String? = null): T = this.also { Log.d( tag ?: "DebugPrint", "${tag?.let { "$it: " } ?: ""}${it.toString()}")}
