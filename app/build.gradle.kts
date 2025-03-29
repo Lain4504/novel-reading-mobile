@@ -107,6 +107,7 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
     androidTestImplementation(libs.compose.ui.test.junit4)
+    implementation(libs.kotlin.compose.compiler.plugin)
     // Junit
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.ext.junit)
