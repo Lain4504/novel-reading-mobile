@@ -1,15 +1,16 @@
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import java.net.InetAddress
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.plugin.serialization") version("2.0.21")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.dagger.hilt)
+    alias(libs.plugins.google.ksp)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -75,84 +76,90 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    composeCompiler {
+        includeSourceInformation = true
+
+        featureFlags = setOf(
+            ComposeFeatureFlag.StrongSkipping.disabled(),
+            ComposeFeatureFlag.OptimizeNonSkippingGroups
+        )
+    }
 }
 
 dependencies {
-    // desugaring support
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
-    // android lib
-    implementation("androidx.core:core-ktx:1.15.0")
-    implementation ("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    // compose
-    implementation("androidx.activity:activity-compose:1.10.0")
-    implementation("androidx.compose.animation:animation-graphics-android:1.7.8")
-    implementation(platform("androidx.compose:compose-bom:2025.02.00"))
-    implementation("androidx.compose.material3:material3:1.3.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2025.02.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    // junit
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    // hilt
-    val hilt = "2.55"
-    implementation("com.google.dagger:hilt-android:$hilt")
-    ksp("com.google.dagger:hilt-android-compiler:$hilt")
-    val androidXHilt = "1.2.0"
-    implementation("androidx.hilt:hilt-common:$androidXHilt")
-    implementation("androidx.hilt:hilt-compiler:$androidXHilt")
-    ksp("androidx.hilt:hilt-compiler:$androidXHilt")
-    implementation("androidx.hilt:hilt-work:$androidXHilt")
-    implementation("androidx.hilt:hilt-navigation-compose:$androidXHilt")
-    // navigation
-    val navVersion = "2.8.7"
-    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
-    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
-    implementation("androidx.navigation:navigation-compose:$navVersion")
+    // Desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    // Android lib
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.core.splashscreen)
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
+    // Compose
+    implementation(libs.activity.compose)
+    implementation(libs.compose.animation.graphics)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.material3)
+    androidTestImplementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    // Junit
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.test.ext.junit)
+    androidTestImplementation(libs.test.espresso.core)
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.common)
+    implementation(libs.androidx.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.hilt.navigation.compose)
+    // Navigation
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
+    implementation(libs.navigation.compose)
     // coil
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation(libs.coil.compose)
     // jsoup
-    implementation("org.jsoup:jsoup:1.18.1")
+    implementation(libs.jsoup)
     // Gson
-    implementation("com.google.code.gson:gson:2.11.0")
-    // markdown
-    implementation("com.github.jeziellago:compose-markdown:0.5.2")
+    implementation(libs.gson)
+    // Markdown
+    implementation(libs.markdown)
     // Ketch
-    implementation("com.github.khushpanchal:Ketch:2.0.2")
-    // room
-    val roomVersion = "2.6.1"
-    implementation("androidx.room:room-runtime:$roomVersion")
-    annotationProcessor("androidx.room:room-compiler:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
-    implementation("androidx.room:room-rxjava2:$roomVersion")
-    implementation("androidx.room:room-rxjava3:$roomVersion")
-    implementation("androidx.room:room-guava:$roomVersion")
-    testImplementation("androidx.room:room-testing:$roomVersion")
-    implementation("androidx.room:room-paging:$roomVersion")
+    implementation(libs.ketch)
+    // Room
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.room.rxjava2)
+    implementation(libs.room.rxjava3)
+    implementation(libs.room.guava)
+    testImplementation(libs.room.testing)
+    implementation(libs.room.paging)
     // Splash API
-    implementation("androidx.core:core-splashscreen:1.0.1")
-    val appCenterSdkVersion = "5.0.6"
-    implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
-    implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
-    val workVersion = "2.10.0"
-    implementation("androidx.work:work-runtime-ktx:$workVersion")
-    implementation("androidx.work:work-rxjava2:$workVersion")
-    androidTestImplementation("androidx.work:work-testing:$workVersion")
-    implementation("androidx.work:work-multiprocess:$workVersion")
+    implementation(libs.core.splashscreen)
+    // AppCenter
+    implementation(libs.appcenter.analytics)
+    implementation(libs.appcenter.crashes)
+    // WorkManager
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.work.rxjava2)
+    androidTestImplementation(libs.work.testing)
+    implementation(libs.work.multiprocess)
+    // Potato EPUB
     implementation(project(":epub"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.serialization.json)
     // Swipe
-    implementation("me.saket.swipe:swipe:1.3.0")
+    implementation(libs.swipe)
 }
+
 
 configurations.implementation{
     exclude(group = "com.intellij", module = "annotations")
