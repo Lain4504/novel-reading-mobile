@@ -34,6 +34,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SourceChangeDialogViewM
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSettingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.navigateToSettingsLogcatDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +46,12 @@ import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.settingsHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Main.Settings.Home> {
+    composable<Route.Main.Settings.Home>(
+        enterTransition = { expandEnter() },
+        exitTransition = { expandExit() },
+        popEnterTransition = { expandPopEnter() },
+        popExitTransition = { expandPopExit() }
+    ) {
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         val updatePhase by updatesAvailableDialogViewModel.updatePhaseFlow.collectAsState("Not Checked")
