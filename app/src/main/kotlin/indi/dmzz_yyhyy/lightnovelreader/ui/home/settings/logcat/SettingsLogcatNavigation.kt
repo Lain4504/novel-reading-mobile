@@ -16,7 +16,7 @@ fun NavGraphBuilder.settingsLogcatDestination(navController: NavController) {
             viewModel.startLogging()
         }
         LogcatScreen(
-            uiState = viewModel.uiState,
+            logEntries = viewModel.logEntries,
             onClickBack = navController::popBackStackIfResumed,
             onClickClearLogs = viewModel::clearLogs,
             onClickShareLogs = viewModel::shareLogs,

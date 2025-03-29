@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Process
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
@@ -13,9 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
@@ -31,9 +29,8 @@ class LoggerRepository @Inject constructor(
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var logLevel: LogLevel = LogLevel.NONE
 
-    private val _logEntriesFlow = MutableStateFlow<List<LogEntry>>(emptyList())
-    val logEntriesFlow: StateFlow<List<LogEntry>> = _logEntriesFlow.asStateFlow()
-
+    private val _logEntries = mutableStateListOf<LogEntry>()
+    val logEntries: List<LogEntry> = _logEntries
     private var loggingJob: Job? = null
     private val currentPid: Int = Process.myPid()
 
@@ -62,9 +59,9 @@ class LoggerRepository @Inject constructor(
                     if (line.isBlank()) continue
 
                     parseLine(line)?.let {
-                        _logEntriesFlow.value += it
-                        if (_logEntriesFlow.value.size > 1000) {
-                            _logEntriesFlow.value = _logEntriesFlow.value.drop(1)
+                        _logEntries += it
+                        if (_logEntries.size > 1000) {
+                            _logEntries.removeAt(0)
                         }
                     }
                 }
@@ -98,7 +95,7 @@ class LoggerRepository @Inject constructor(
 
     fun refreshLogs() {
         stopLogging()
-        _logEntriesFlow.value = emptyList()
+        _logEntries.clear()
         startLogging()
     }
 
@@ -106,7 +103,7 @@ class LoggerRepository @Inject constructor(
         val logText = buildString {
             append(buildReportHeader())
             append("----- beginning of logs\n\n")
-            append(_logEntriesFlow.value.joinToString("\n") { it.text })
+            append(_logEntries.joinToString("\n") { it.text })
         }
 
         val file = File(context.cacheDir, "lnr_logs_${System.currentTimeMillis()}.txt").apply {
@@ -119,7 +116,7 @@ class LoggerRepository @Inject constructor(
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         intent.setType("*/*")
         intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
 
     }
@@ -130,27 +127,3 @@ class LoggerRepository @Inject constructor(
     }
 }
 
-data class LogEntry(
-    val text: String,
-    val logLevel: LogLevel
-)
-
-sealed class LogLevel(val level: Int) {
-    data object NONE : LogLevel(0)
-    data object ERROR : LogLevel(2)
-    data object WARNING : LogLevel(4)
-    data object INFO : LogLevel(6)
-    data object DEBUG : LogLevel(8)
-    data object VERBOSE : LogLevel(10)
-
-    companion object {
-        fun from(value: String): LogLevel = when (value.lowercase()) {
-            "verbose" -> VERBOSE
-            "debug" -> DEBUG
-            "info" -> INFO
-            "warning" -> WARNING
-            "error" -> ERROR
-            else -> NONE
-        }
-    }
-}

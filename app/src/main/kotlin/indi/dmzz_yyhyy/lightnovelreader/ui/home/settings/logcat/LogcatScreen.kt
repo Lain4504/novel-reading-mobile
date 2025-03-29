@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogcatScreen(
-    uiState: LogcatUiState,
+    logEntries: List<LogEntry>,
     onClickBack: () -> Unit,
     onClickClearLogs: () -> Unit,
     onClickShareLogs: () -> Unit,
@@ -53,13 +53,12 @@ fun LogcatScreen(
     val coroutineScope = rememberCoroutineScope()
     var unwrapLogsText by remember { mutableStateOf(false) }
     val onClickWarp = { unwrapLogsText = !unwrapLogsText }
-    val entries = uiState.logEntries
 
 
-    LaunchedEffect(entries.size) {
-        if (uiState.logEntries.size > 1) {
+    LaunchedEffect(logEntries.size) {
+        if (logEntries.size > 1) {
             coroutineScope.launch {
-                listState.animateScrollToItem(uiState.logEntries.size - 1)
+                listState.animateScrollToItem(logEntries.size - 1)
             }
         }
     }
@@ -77,7 +76,7 @@ fun LogcatScreen(
                     }
                 },
                 actions = {
-                    if (entries.isNotEmpty()){
+                    if (logEntries.isNotEmpty()){
                         IconButton(onClickClearLogs) {
                             Icon(
                                 painterResource(id = R.drawable.delete_forever_24px),
@@ -110,9 +109,9 @@ fun LogcatScreen(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            if (entries.isEmpty()) EmptyLogListContent() else {
-                if (unwrapLogsText) LogListContent(uiState.logEntries, listState)
-                else UnWrapLogListContent(uiState.logEntries, listState)
+            if (logEntries.isEmpty()) EmptyLogListContent() else {
+                if (unwrapLogsText) LogListContent(logEntries, listState)
+                else UnWrapLogListContent(logEntries, listState)
             }
         }
     }
