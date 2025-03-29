@@ -90,6 +90,15 @@ sealed class MenuOptions {
         Option("ko-kp", R.string.key_locale_ko_kp)
     )
 
+    data object LogLevelOptions: MenuOptions(
+        Option("none", R.string.key_log_level_none),
+        Option("error", R.string.key_log_level_error),
+        Option("warning", R.string.key_log_level_warning),
+        Option("info", R.string.key_log_level_info),
+        Option("debug", R.string.key_log_level_debug),
+        Option("verbose", R.string.key_log_level_verbose),
+    )
+
     data object ReaderBgImageDisplayModeOptions: MenuOptions() {
         val Fixed = option("fixed", R.string.key_bg_image_display_mode_fixed)
         val Loop = option("loop", R.string.key_bg_image_display_mode_loop)

@@ -37,7 +37,14 @@ object Route {
             )
         }
         @Serializable
-        object Settings
+        object Settings {
+            @Serializable
+            object Home
+            @Serializable
+            object Logcat
+            @Serializable
+            object Debug
+        }
         @Serializable
         object SourceChangeDialog
         @Serializable
@@ -83,8 +90,6 @@ object Route {
             }
         }
     }
-    @Serializable
-    object Debug
     @Serializable
     object UpdatesAvailableDialog
     @Serializable

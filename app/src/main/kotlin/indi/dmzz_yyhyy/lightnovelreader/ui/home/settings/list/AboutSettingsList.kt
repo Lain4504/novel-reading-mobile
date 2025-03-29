@@ -10,7 +10,6 @@ import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsAboutInfoDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 
 @Composable
@@ -48,13 +47,13 @@ fun AboutSettingsList(
         description = stringResource(R.string.settings_github_repo_desc),
         openUrl = "https://github.com/dmzz-yyhyy/LightNovelReader"
     )
-    SettingsSwitchEntry(
+    /* SettingsSwitchEntry(
         title = stringResource(R.string.settings_statistics),
         description = stringResource(R.string.settings_statistics_desc),
         checked = if (BuildConfig.DEBUG) false else settingState.statistics,
         booleanUserData = settingState.statisticsUserData,
         disabled = BuildConfig.DEBUG
-    )
+    ) */
     if (BuildConfig.DEBUG)
         SettingsClickableEntry(
             iconRes = R.drawable.adb_24px,

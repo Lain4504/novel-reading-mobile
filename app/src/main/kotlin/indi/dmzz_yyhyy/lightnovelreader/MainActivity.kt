@@ -19,19 +19,16 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.microsoft.appcenter.AppCenter
-import com.microsoft.appcenter.analytics.Analytics
-import com.microsoft.appcenter.crashes.Crashes
 import dagger.hilt.android.AndroidEntryPoint
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfSortType
+import indi.dmzz_yyhyy.lightnovelreader.data.logging.LoggerRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.update.UpdateCheckRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CheckUpdateWork
 import indi.dmzz_yyhyy.lightnovelreader.theme.LightNovelReaderTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.LightNovelReaderApp
-import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -41,6 +38,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var loggerRepository: LoggerRepository
     @Inject lateinit var bookshelfRepository: BookshelfRepository
     @Inject lateinit var userDataRepository: UserDataRepository
     @Inject lateinit var updateCheckRepository: UpdateCheckRepository
@@ -54,7 +52,8 @@ class MainActivity : ComponentActivity() {
         var darkMode by mutableStateOf("FollowSystem")
         var dynamicColor by mutableStateOf(false)
         installSplashScreen()
-        var statisticsEnabled by mutableStateOf(true)
+        loggerRepository.startLogging()
+
         workManager.enqueueUniquePeriodicWork(
             "checkUpdate",
             ExistingPeriodicWorkPolicy.KEEP,
@@ -81,17 +80,6 @@ class MainActivity : ComponentActivity() {
         coroutineScope.launch(Dispatchers.IO) {
             userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkMode.path).getFlow().collect {
                 darkMode = it ?: "FollowSystem"
-            }
-        }
-        coroutineScope.launch(Dispatchers.IO) {
-            statisticsEnabled = userDataRepository.booleanUserData(UserDataPath.Settings.App.Statistics.path).getOrDefault(true)
-            if (!BuildConfig.DEBUG && statisticsEnabled) {
-                AppCenter.start(
-                    application,
-                    update("eNpb85aBtYRBJc3c3MTYwshAN808JVnXxNIiTTfJ2DBFNzXZ1MDYKMkgxcwsBQAG3Aux").toString(),
-                    Analytics::class.java,
-                    Crashes::class.java
-                )
             }
         }
         coroutineScope.launch(Dispatchers.IO) {
