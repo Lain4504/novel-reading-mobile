@@ -102,13 +102,13 @@ class BookshelfHomeViewModel @Inject constructor(
         _uiState.selectedBookIds.addAll(_uiState.selectedBookshelf.allBookIds)
     }
 
-    fun pinSelectedBooks() {
+    fun pinSelectedBooks(bookId: Int?) {
         viewModelScope.launch(Dispatchers.IO) {
             val pinnedBookIds = _uiState.selectedBookshelf.pinnedBookIds
             val newPinnedBooksIds = _uiState.selectedBookIds
                 .filter { pinnedBookIds.contains(it) }
                 .let { removeList ->
-                    (pinnedBookIds + _uiState.selectedBookIds).toMutableList().apply {
+                    (pinnedBookIds + (if (bookId == null) _uiState.selectedBookIds else listOf(bookId))).toMutableList().apply {
                         removeAll { removeList.contains(it) }
                     }
                 }

@@ -93,6 +93,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
+import indi.dmzz_yyhyy.lightnovelreader.utils.pinAction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -112,7 +113,7 @@ fun BookshelfHomeScreen(
     onClickEnableSelectMode: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,
-    onClickPin: () -> Unit,
+    onClickPin: (Int?) -> Unit,
     onClickRemove: () -> Unit,
     onClickMarkSelectedBooks: () -> Unit,
     saveAllBookshelfJsonData: (Uri) -> Unit,
@@ -224,7 +225,9 @@ fun BookshelfHomeScreen(
             }
         ) { paddingValues ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(paddingValues)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
                 if (uiState.bookshelfList.size > 4) {
                     ScrollableTabRow(
@@ -373,6 +376,9 @@ fun BookshelfHomeScreen(
                         }
                     if (allBooksExpanded) {
                         items(uiState.selectedBookshelf.allBookIds.reversed()) { bookId ->
+                            val pin = pinAction.toSwipeAction {
+                                onClickPin(bookId)
+                            }
                             uiState.bookInformationMap[bookId]?.let {
                                 BookCardItem(
                                     bookInformation = it,
@@ -382,7 +388,8 @@ fun BookshelfHomeScreen(
                                             onClickBook(it.id)
                                         else changeBookSelectState(it.id)
                                     },
-                                    onLongPress = { onLongPress(it.id) }
+                                    onLongPress = { onLongPress(it.id) },
+                                    swipeToLeftActions = listOf(pin)
                                 )
                             }
                         }
@@ -445,7 +452,7 @@ fun TopBar(
     onClickEdit: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,
-    onClickPin: () -> Unit,
+    onClickPin: (Int?) -> Unit,
     onClickRemove: () -> Unit,
     onClickBookmark: () -> Unit,
     onClickShareBookshelf: () -> Unit,
@@ -617,7 +624,7 @@ fun TopBar(
                         contentDescription = "select all"
                     )
                 }
-                IconButton(onClickPin) {
+                IconButton({ onClickPin(null) }) {
                     Icon(
                         painter = painterResource(R.drawable.keep_24px),
                         contentDescription = "pin"
