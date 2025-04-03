@@ -91,6 +91,7 @@ class BookshelfHomeViewModel @Inject constructor(
         if (_uiState.selectedBookIds.contains(bookId))
             _uiState.selectedBookIds.remove(bookId)
         else _uiState.selectedBookIds.add(bookId)
+        if (_uiState.selectedBookIds.isEmpty()) disableSelectMode()
     }
 
     fun selectAllBooks() {
@@ -111,12 +112,13 @@ class BookshelfHomeViewModel @Inject constructor(
                     (pinnedBookIds + (if (bookId == null) _uiState.selectedBookIds else listOf(bookId))).toMutableList().apply {
                         removeAll { removeList.contains(it) }
                     }
-                }
+                }.distinct()
             bookshelfRepository.updateBookshelf(_uiState.selectedBookshelfId) {
                 it.apply {
                     this.pinnedBookIds = newPinnedBooksIds
                 }
             }
+            disableSelectMode()
         }
     }
 
