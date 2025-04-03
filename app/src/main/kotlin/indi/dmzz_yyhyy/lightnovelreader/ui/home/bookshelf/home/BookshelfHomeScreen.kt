@@ -16,15 +16,17 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -238,53 +240,61 @@ fun BookshelfHomeScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                if (uiState.bookshelfList.size > 4) {
-                    ScrollableTabRow(
-                        selectedTabIndex = uiState.selectedTabIndex,
-                        edgePadding = 16.dp,
-                        indicator = { tabPositions ->
-                            SecondaryIndicator(
-                                modifier = Modifier
-                                    .tabIndicatorOffset(tabPositions[uiState.selectedTabIndex])
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                                    .background(MaterialTheme.colorScheme.secondary),
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        },
-                    ) {
-                        uiState.bookshelfList.forEach { bookshelf ->
-                            Tab(
-                                selected = uiState.selectedBookshelfId == bookshelf.id,
-                                onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
-                                text = {
-                                    Text(
-                                        text = bookshelf.name,
-                                        maxLines = 1
-                                    )
-                                }
-                            )
+                AnimatedVisibility(
+                    visible = !uiState.selectMode,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    if (uiState.bookshelfList.size > 4) {
+                        ScrollableTabRow(
+                            selectedTabIndex = uiState.selectedTabIndex,
+                            edgePadding = 16.dp,
+                            indicator = { tabPositions ->
+                                SecondaryIndicator(
+                                    modifier = Modifier
+                                        .tabIndicatorOffset(tabPositions[uiState.selectedTabIndex])
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                                        .background(MaterialTheme.colorScheme.secondary),
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            },
+                        ) {
+                            uiState.bookshelfList.forEach { bookshelf ->
+                                Tab(
+                                    selected = uiState.selectedBookshelfId == bookshelf.id,
+                                    onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
+                                    text = {
+                                        Text(
+                                            text = bookshelf.name,
+                                            maxLines = 1
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
-                } else {
-                    PrimaryTabRow(
-                        selectedTabIndex = uiState.selectedTabIndex
-                    ) {
-                        uiState.bookshelfList.forEach { bookshelf ->
-                            Tab(
-                                selected = uiState.selectedBookshelfId == bookshelf.id,
-                                onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
-                                text = {
-                                    Text(
-                                        text = bookshelf.name,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                            )
+                    else {
+                        PrimaryTabRow(
+                            selectedTabIndex = uiState.selectedTabIndex
+                        ) {
+                            uiState.bookshelfList.forEach { bookshelf ->
+                                Tab(
+                                    selected = uiState.selectedBookshelfId == bookshelf.id,
+                                    onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
+                                    text = {
+                                        Text(
+                                            text = bookshelf.name,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                )
+                            }
                         }
                     }
                 }
+
 
                 AnimatedVisibility(
                     visible = uiState.selectedBookshelf.allBookIds.isEmpty(),
@@ -303,13 +313,10 @@ fun BookshelfHomeScreen(
                     changeBookSelectState(bookId)
                 }
 
-
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
-                    contentPadding = PaddingValues(vertical = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     state = listState
                 ) {
                     UpdatedBooks(uiState, onClickBook, changeBookSelectState)
@@ -329,10 +336,13 @@ fun LazyListScope.UpdatedBooks(
 ) {
     val updatedBookIds = uiState.selectedBookshelf.updatedBookIds.reversed()
     if (updatedBookIds.isEmpty()) return
+    item {
+        Spacer(Modifier.height(8.dp))
+    }
     stickyHeader {
         CollapseGroupTitle(
             modifier = Modifier.animateItem(),
-            icon = painterResource(R.drawable.keep_24px),
+            icon = painterResource(R.drawable.autorenew_24px),
             title = stringResource(
                 R.string.bookshelf_group_title_updated,
                 updatedBookIds.size
@@ -341,21 +351,28 @@ fun LazyListScope.UpdatedBooks(
             onClickExpand = { uiState.updatedExpanded = !uiState.updatedExpanded }
         )
     }
-    if (!uiState.updatedExpanded) return
     items(updatedBookIds) { updatedBookId ->
-        uiState.bookInformationMap[updatedBookId]?.let {
-            BookCardItem(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                bookInformation = it,
-                selected = uiState.selectedBookIds.contains(it.id),
-                latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
-                onClick = {
-                    if (!uiState.selectMode)
-                        onClickBook(it.id)
-                    else onSelectedChange(it.id) },
-                onLongPress = { }
-            )
+        AnimatedVisibility(
+            visible = uiState.updatedExpanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            uiState.bookInformationMap[updatedBookId]?.let {
+                BookCardItem(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    bookInformation = it,
+                    selected = uiState.selectedBookIds.contains(it.id),
+                    latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
+                    onClick = {
+                        if (!uiState.selectMode)
+                            onClickBook(it.id)
+                        else onSelectedChange(it.id) },
+                    onLongPress = { }
+                )
+
+            }
         }
+
     }
 }
 
@@ -380,19 +397,25 @@ fun LazyListScope.PinnedBooks(
             onClickExpand = { uiState.pinnedExpanded = !uiState.pinnedExpanded }
         )
     }
-    if (!uiState.pinnedExpanded) return
     items(pinnedBookIds) { pinnedBookId ->
-        uiState.bookInformationMap[pinnedBookId]?.let {
-            BookCardItem(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                bookInformation = it,
-                selected = uiState.selectedBookIds.contains(it.id),
-                onClick = {
-                    if (!uiState.selectMode)
-                        onClickBook(it.id)
-                    else onSelectedChange(it.id) },
-                onLongPress = { onLongPress(it.id) }
-            )
+        AnimatedVisibility(
+            visible = uiState.pinnedExpanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            uiState.bookInformationMap[pinnedBookId]?.let {
+                BookCardItem(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    bookInformation = it,
+                    selected = uiState.selectedBookIds.contains(it.id),
+                    onClick = {
+                        if (!uiState.selectMode)
+                            onClickBook(it.id)
+                        else onSelectedChange(it.id)
+                    },
+                    onLongPress = { onLongPress(it.id) }
+                )
+            }
         }
     }
 
@@ -420,22 +443,40 @@ fun LazyListScope.AllBooks(
             onClickExpand = { uiState.allExpanded = !uiState.allExpanded }
         )
     }
-    if (!uiState.allExpanded) return
     items(allBookIds) { bookId ->
         val pin = pinAction.toSwipeAction {
             onClickPin(bookId)
         }
-        uiState.bookInformationMap[bookId]?.let {
-            BookCardItem(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                bookInformation = it,
-                selected = uiState.selectedBookIds.contains(it.id),
-                onClick = {
-                    if (!uiState.selectMode)
-                        onClickBook(it.id)
-                    else onSelectedChange(it.id) },
-                onLongPress = { onLongPress(it.id) },
-                swipeToLeftActions = listOf(pin)
+        AnimatedVisibility(
+            visible = uiState.allExpanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            uiState.bookInformationMap[bookId]?.let {
+                BookCardItem(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    bookInformation = it,
+                    selected = uiState.selectedBookIds.contains(it.id),
+                    onClick = {
+                        if (!uiState.selectMode)
+                            onClickBook(it.id)
+                        else onSelectedChange(it.id)
+                    },
+                    onLongPress = { onLongPress(it.id) },
+                    swipeToLeftActions = if (uiState.selectMode) emptyList() else listOf(pin)
+                )
+            }
+        }
+    }
+    item {
+        Box(modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center) {
+            Text(
+                modifier = Modifier.padding(vertical = 18.dp),
+                text = "${allBookIds.size} 本书",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W600,
+                color = MaterialTheme.colorScheme.outline
             )
         }
     }
@@ -468,7 +509,7 @@ fun CollapseGroupTitle(
                 modifier = Modifier.weight(2f),
                 text = title,
                 style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.W700,
+                fontWeight = FontWeight.W600,
                 fontSize = 15.sp,
                 lineHeight = 16.sp,
                 letterSpacing = 0.5.sp,
