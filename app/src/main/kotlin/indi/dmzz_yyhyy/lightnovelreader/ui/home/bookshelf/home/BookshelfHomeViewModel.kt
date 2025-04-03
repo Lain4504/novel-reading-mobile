@@ -129,6 +129,7 @@ class BookshelfHomeViewModel @Inject constructor(
         }
     }
 
+    @Suppress("UNUSED")
     fun markSelectedBooks(bookshelfIds: List<Int>) {
         _uiState.selectedBookIds.forEach { bookId ->
             _uiState.bookInformationMap[bookId]?.let { bookInformation ->

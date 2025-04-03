@@ -88,6 +88,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import java.text.NumberFormat
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -893,6 +894,16 @@ fun BookInfoBottomSheet(
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
                     icon = painterResource(R.drawable.text_snippet_24px)
+                )
+
+                val dateFormat = "yyyy-MM-dd"
+                val formatter = DateTimeFormatter.ofPattern(dateFormat)
+                InfoItem(
+                    title = "更新",
+                    content = bookInformation.lastUpdated.format(formatter) + "\n" + if(bookInformation.isComplete) "完结" else "连载中",
+                    titleStyle = titleStyle,
+                    contentStyle = contentStyle,
+                    icon = painterResource(R.drawable.autorenew_24px)
                 )
 
                 InfoItem(
