@@ -84,7 +84,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import java.text.NumberFormat
@@ -553,7 +552,7 @@ private fun QuickOperationsBlock(
                 title =
                 if (uiState.isCached && (uiState.downloadItem == null || uiState.downloadItem!!.progress == 1f) )
                     "已缓存"
-                else if(uiState.downloadItem.debugPrint("ui") == null) "未缓存"
+                else if(uiState.downloadItem == null) "未缓存"
                 else "${(uiState.downloadItem!!.progress*100).toInt()}%",
                 onClick = if(uiState.downloadItem == null) onClickCache else {{}}
             )

@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import androidx.work.WorkInfo
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToBookContentDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
@@ -26,8 +27,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
+fun NavGraphBuilder.bookDetailDestination() {
     composable<Route.Book.Detail> { entry ->
+        val navController = LocalNavController.current
         val bookId = entry.toRoute<Route.Book.Detail>().bookId
         val viewModel = hiltViewModel<DetailViewModel>()
         val context = LocalContext.current
@@ -43,20 +45,20 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
             },
             onClickBackButton = navController::popBackStackIfResumed,
             onClickChapter = {
-                navController.navigateToBookContentDestination(bookId, it)
+                navController.navigateToBookContentDestination(bookId, it, context)
             },
             onClickReadFromStart = {
                 viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-                    navController.navigateToBookContentDestination(bookId, it)
+                    navController.navigateToBookContentDestination(bookId, it, context)
                 }
             },
             onClickContinueReading = {
                 if (viewModel.uiState.userReadingData.lastReadChapterId == -1)
                     viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-                        navController.navigateToBookContentDestination(bookId, it)
+                        navController.navigateToBookContentDestination(bookId, it, context)
                     }
                 else {
-                    navController.navigateToBookContentDestination(bookId, viewModel.uiState.userReadingData.lastReadChapterId)
+                    navController.navigateToBookContentDestination(bookId, viewModel.uiState.userReadingData.lastReadChapterId, context)
                 }
             },
             cacheBook = {
@@ -79,15 +81,16 @@ fun NavGraphBuilder.bookDetailDestination(navController: NavController) {
             onClickTag = viewModel::onClickTag
         )
     }
-    exportToEpubDialog(navController)
+    exportToEpubDialog()
 }
 
 fun NavController.navigateToBookDetailDestination(bookId: Int) {
     navigate(Route.Book.Detail(bookId))
 }
 
-fun NavGraphBuilder.exportToEpubDialog(navController: NavController) {
+fun NavGraphBuilder.exportToEpubDialog() {
     dialog<Route.Book.ExportUserDataDialog> { entry ->
+        val navController = LocalNavController.current
         val viewModel = hiltViewModel<ExportToEpubDialogViewModel>()
         val context = LocalContext.current
         val route = entry.toRoute<Route.Book.ExportUserDataDialog>()

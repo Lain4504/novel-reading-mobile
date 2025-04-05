@@ -22,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportContext
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportUserDataDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.MutableExportContext
@@ -45,13 +46,14 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.settingsHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Main.Settings.Home>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
         popEnterTransition = { expandPopEnter() },
         popExitTransition = { expandPopExit() }
     ) {
+        val navController = LocalNavController.current
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         val updatePhase by updatesAvailableDialogViewModel.updatePhaseFlow.collectAsState("Not Checked")
@@ -70,12 +72,13 @@ fun NavGraphBuilder.settingsHomeDestination(navController: NavController, shared
             sharedTransitionScope = sharedTransitionScope
         )
     }
-    sourceChangeDialog(navController)
-    exportUserDataDialog(navController)
+    sourceChangeDialog()
+    exportUserDataDialog()
 }
 
-private fun NavGraphBuilder.sourceChangeDialog(navController: NavController) {
+private fun NavGraphBuilder.sourceChangeDialog() {
     dialog<Route.Main.SourceChangeDialog> {
+        val navController = LocalNavController.current
         val viewModel = hiltViewModel<SourceChangeDialogViewModel>()
         var selectedWebDataSourceId by remember { mutableIntStateOf(viewModel.webBookDataSourceId) }
         val context = LocalContext.current
@@ -101,8 +104,9 @@ private fun NavController.navigateToSourceChangeDialog() {
     navigate(Route.Main.SourceChangeDialog)
 }
 
-private fun NavGraphBuilder.exportUserDataDialog(navController: NavController) {
+private fun NavGraphBuilder.exportUserDataDialog() {
     dialog<Route.Main.ExportUserDataDialog> {
+        val navController = LocalNavController.current
         val context = LocalContext.current
         val workManager = WorkManager.getInstance(context)
         val viewModel = hiltViewModel<ExportUserDataDialogViewModel>()

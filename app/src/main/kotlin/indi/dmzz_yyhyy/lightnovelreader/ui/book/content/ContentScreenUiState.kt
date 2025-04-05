@@ -2,6 +2,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
@@ -11,6 +12,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 @Stable
 interface ContentScreenUiState {
     val isLoading: Boolean
+    val bookId: Int
     val chapterContent: ChapterContent
     val userReadingData: UserReadingData
     val readingProgress: Float get() =
@@ -21,6 +23,7 @@ interface ContentScreenUiState {
 
 class MutableContentScreenUiState: ContentScreenUiState {
     override var isLoading by mutableStateOf(true)
+    override val bookId by mutableIntStateOf(-1)
     override var chapterContent by mutableStateOf(ChapterContent.empty())
     override var userReadingData by mutableStateOf(UserReadingData.empty())
     override var bookVolumes by mutableStateOf(BookVolumes.empty())

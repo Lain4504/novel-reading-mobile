@@ -6,7 +6,6 @@ import androidx.compose.runtime.snapshotFlow
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +29,7 @@ class DownloadProgressRepository @Inject constructor(
         }
 
         override fun get(): List<DownloadItem>? {
-            return userDataDao.get(path)?.debugPrint()?.split(",")?.mapNotNull {
+            return userDataDao.get(path)?.split(",")?.mapNotNull {
                 val values = it.split("|")
                 try {
                     return@mapNotNull MutableDownloadItem(

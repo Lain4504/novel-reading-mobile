@@ -11,7 +11,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadProgressRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadType
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -61,8 +60,7 @@ class DetailViewModel @Inject constructor(
         }
         viewModelScope.launch {
             downloadProgressRepository.downloadItemIdListFlow.collect { downloadItemList ->
-                println(downloadItemList)
-                _uiState.downloadItem = downloadItemList.findLast { it.bookId == _uiState.bookInformation.id && it.type == DownloadType.CACHE }.debugPrint("exportItemIdListFlow")
+                _uiState.downloadItem = downloadItemList.findLast { it.bookId == _uiState.bookInformation.id && it.type == DownloadType.CACHE }
             }
         }
     }

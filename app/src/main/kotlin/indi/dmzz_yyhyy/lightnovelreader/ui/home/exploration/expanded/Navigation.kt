@@ -10,6 +10,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
@@ -20,13 +21,14 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
-fun NavGraphBuilder.explorationExpandDestination(navController: NavController) {
+fun NavGraphBuilder.explorationExpandDestination() {
     composable<Route.Main.Exploration.Expanded>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
         popEnterTransition = { expandPopEnter() },
         popExitTransition = { expandPopExit() }
     ) { entry ->
+        val navController = LocalNavController.current
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val explorationViewModel = hiltViewModel<ExplorationViewModel>(parentEntry)
         val explorationExpandedPageHomeViewModel = hiltViewModel<ExpandedPageViewModel>()

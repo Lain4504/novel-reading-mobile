@@ -21,12 +21,14 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BaseDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.CheckBoxListItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
-fun NavGraphBuilder.addBookToBookshelfDialog(navController: NavController) {
+fun NavGraphBuilder.addBookToBookshelfDialog() {
     dialog<Route.AddBookToBookshelfDialog> {
+        val navController = LocalNavController.current
         val addToBookshelfDialogViewModel = hiltViewModel<AddToBookshelfDialogViewModel>()
         val route = it.toRoute<Route.AddBookToBookshelfDialog>()
         addToBookshelfDialogViewModel.bookId = route.bookId

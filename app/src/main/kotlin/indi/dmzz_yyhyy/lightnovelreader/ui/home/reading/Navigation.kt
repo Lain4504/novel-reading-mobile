@@ -3,10 +3,12 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToBookContentDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.navigateToDownloadManager
@@ -14,8 +16,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home.navigateToExplo
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.homeReadingDestination(sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Main.Reading> {
+        val navController = LocalNavController.current
+        val context = LocalContext.current
         val parentEntry = remember(it) { navController.getBackStackEntry(Route.Main) }
         val readingViewModel = hiltViewModel<ReadingViewModel>(parentEntry)
         ReadingScreen(
@@ -29,7 +33,7 @@ fun NavGraphBuilder.homeReadingDestination(navController: NavController, sharedT
             onClickBook = navController::navigateToBookDetailDestination,
             onClickContinueReading = { bookId, chapterId ->
                 navController.navigateToBookDetailDestination(bookId)
-                navController.navigateToBookContentDestination(bookId, chapterId)
+                navController.navigateToBookContentDestination(bookId, chapterId, context)
             },
             onClickJumpToExploration = navController::navigateToExplorationHomeDestination,
             sharedTransitionScope = sharedTransitionScope,

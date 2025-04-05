@@ -5,8 +5,10 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.bookNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.addBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.updatesAvailableDialog
@@ -18,18 +20,20 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.homeNavigation
 fun LightNovelReaderNavHost(
     navController: NavHostController
 ) {
-    SharedTransitionLayout {
-        NavHost(
-            navController = navController,
-            startDestination = Route.Main,
-            enterTransition = { fadeIn() },
-            exitTransition = { fadeOut() }
-        ) {
-            homeNavigation(navController, this@SharedTransitionLayout)
-            bookNavigation(navController)
-            updatesAvailableDialog(navController)
-            addBookToBookshelfDialog(navController)
-            downloadManager(navController)
+    CompositionLocalProvider(LocalNavController provides navController) {
+        SharedTransitionLayout {
+            NavHost(
+                navController = navController,
+                startDestination = Route.Main,
+                enterTransition = { fadeIn() },
+                exitTransition = { fadeOut() }
+            ) {
+                homeNavigation(this@SharedTransitionLayout)
+                bookNavigation()
+                updatesAvailableDialog()
+                addBookToBookshelfDialog()
+                downloadManager()
+            }
         }
     }
 }

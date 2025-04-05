@@ -11,13 +11,13 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.settingsLogcatDe
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.mainSettingsNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.mainSettingsNavigation(sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Main.Settings>(
         startDestination = Route.Main.Settings.Home
     ) {
-        settingsHomeDestination(navController, sharedTransitionScope)
-        settingsDebugDestination(navController)
-        settingsLogcatDestination(navController)
+        settingsHomeDestination(sharedTransitionScope)
+        settingsDebugDestination()
+        settingsLogcatDestination()
     }
 }
 

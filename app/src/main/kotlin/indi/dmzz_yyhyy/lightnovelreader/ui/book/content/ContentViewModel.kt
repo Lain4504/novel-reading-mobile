@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -7,6 +8,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,41 +33,40 @@ class ContentViewModel @Inject constructor(
     userDataRepository: UserDataRepository
 ) : ViewModel() {
     private val _uiState = MutableContentScreenUiState()
-    private var _bookId: Int = -1
     private val readingBookListUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
     private var loadChapterContentJob: Job? = null
+    var bookId = -1
     val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
     val coroutineScope = CoroutineScope(Dispatchers.IO)
 
 
     init {
+        println("viewmodel init")
         viewModelScope.launch(Dispatchers.IO) {
             textProcessingRepository.updateFlow.collect {
-                if (_bookId != -1 && uiState.chapterContent.id != -1)
-                    loadChapterContent(_bookId, uiState.chapterContent.id)
+                if (bookId != -1 && uiState.chapterContent.id != -1)
+                    loadChapterContent(bookId, uiState.chapterContent.id)
             }
         }
     }
 
     @Suppress("DuplicatedCode")
-    fun init(bookId: Int, chapterId: Int) {
-        println(bookId)
-        println(chapterId)
-        println(_bookId)
-        if (bookId != _bookId) {
-            viewModelScope.launch {
-                val bookVolumes = bookRepository.getBookVolumes(bookId)
-                _uiState.bookVolumes = bookVolumes.first()
-                viewModelScope.launch(Dispatchers.IO) {
-                    bookVolumes.collect {
-                        if (it.volumes.isEmpty()) return@collect
-                        _uiState.bookVolumes = it
-                    }
+    private fun loadChapter(chapterId: Int) {
+        chapterId.debugPrint("init")
+        if (bookId == -1) {
+            Log.e("ContentViewModel", "failed to load content, the book id is -1")
+        }
+        viewModelScope.launch {
+            val bookVolumes = bookRepository.getBookVolumes(bookId)
+            _uiState.bookVolumes = bookVolumes.first()
+            viewModelScope.launch(Dispatchers.IO) {
+                bookVolumes.collect {
+                    if (it.volumes.isEmpty()) return@collect
+                    _uiState.bookVolumes = it
                 }
             }
         }
-        _bookId = bookId
         loadChapterContent(bookId, chapterId)
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.getUserReadingData(bookId).collect {
@@ -82,9 +83,6 @@ class ContentViewModel @Inject constructor(
                 bookId = bookId
             )
             chapterContent.collect { content ->
-                println(content.id)
-                println(content.title)
-                println(chapterContent)
                 if (content.id == -1) return@collect
                 _uiState.chapterContent = content
                 _uiState.isLoading = _uiState.chapterContent.id == -1
@@ -110,8 +108,7 @@ class ContentViewModel @Inject constructor(
         if (!_uiState.chapterContent.hasLastChapter()) return
         _uiState.isLoading = true
         viewModelScope.launch {
-            init(
-                bookId = _bookId,
+            loadChapter(
                 chapterId = _uiState.chapterContent.lastChapter
             )
         }
@@ -121,8 +118,7 @@ class ContentViewModel @Inject constructor(
         if (!_uiState.chapterContent.hasNextChapter()) return
         _uiState.isLoading = true
         viewModelScope.launch {
-            init(
-                bookId = _bookId,
+            loadChapter(
                 chapterId = _uiState.chapterContent.nextChapter
             )
         }
@@ -131,10 +127,7 @@ class ContentViewModel @Inject constructor(
     fun changeChapter(chapterId: Int) {
         _uiState.isLoading = true
         viewModelScope.launch {
-            init(
-                bookId = _bookId,
-                chapterId = chapterId
-            )
+            loadChapter(chapterId = chapterId)
         }
     }
 
@@ -161,7 +154,7 @@ class ContentViewModel @Inject constructor(
         val chapterId = _uiState.chapterContent.id
         val currentTime = LocalDateTime.now()
 
-        bookRepository.updateUserReadingData(_bookId) { userReadingData ->
+        bookRepository.updateUserReadingData(bookId) { userReadingData ->
             val isChapterCompleted = progress > 0.945 &&
                     !userReadingData.readCompletedChapterIds.contains(chapterId)
 

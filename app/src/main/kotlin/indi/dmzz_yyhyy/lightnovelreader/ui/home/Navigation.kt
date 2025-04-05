@@ -24,14 +24,14 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.mainSettingsNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.homeNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.homeNavigation(sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Main>(
         startDestination = Route.Main.Reading
     ) {
-        homeReadingDestination(navController, sharedTransitionScope)
-        explorationNavigation(navController, sharedTransitionScope)
-        bookshelfNavigation(navController, sharedTransitionScope)
-        mainSettingsNavigation(navController, sharedTransitionScope)
+        homeReadingDestination(sharedTransitionScope)
+        explorationNavigation(sharedTransitionScope)
+        bookshelfNavigation(sharedTransitionScope)
+        mainSettingsNavigation(sharedTransitionScope)
     }
 }
 

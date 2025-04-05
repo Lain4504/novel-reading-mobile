@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
@@ -21,13 +22,14 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
-fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
+fun NavGraphBuilder.bookshelfEditDestination() {
     composable<Route.Main.Bookshelf.Edit>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
         popEnterTransition = { expandPopEnter() },
         popExitTransition = { expandPopExit() }
     ) {
+        val navController = LocalNavController.current
         val editBookshelfViewModel = hiltViewModel<EditBookshelfViewModel>()
         val edit = it.toRoute<Route.Main.Bookshelf.Edit>()
         EditBookshelfScreen(
@@ -46,15 +48,16 @@ fun NavGraphBuilder.bookshelfEditDestination(navController: NavController) {
             onSystemUpdateReminderChange = editBookshelfViewModel::onSystemUpdateReminderChange,
         )
     }
-    deleteBookshelfDialog(navController)
+    deleteBookshelfDialog()
 }
 
 fun NavController.navigateToBookshelfEditDestination(id: Int, title: String) {
     navigate(Route.Main.Bookshelf.Edit(id, title))
 }
 
-private fun NavGraphBuilder.deleteBookshelfDialog(navController: NavController) {
+private fun NavGraphBuilder.deleteBookshelfDialog() {
     dialog<Route.Main.Bookshelf.DeleteBookshelfDialog> {
+        val navController = LocalNavController.current
         val viewModel = hiltViewModel<DeleteBookshelfDialogViewModel>()
         DeleteBookshelfDialog(
             onDismissRequest = { navController.popBackStack() },

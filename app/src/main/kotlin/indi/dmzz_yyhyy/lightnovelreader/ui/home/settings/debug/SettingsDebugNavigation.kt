@@ -4,11 +4,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
-fun NavGraphBuilder.settingsDebugDestination(navController: NavController) {
+fun NavGraphBuilder.settingsDebugDestination() {
     composable<Route.Main.Settings.Debug> {
+        val navController = LocalNavController.current
         val viewModel = hiltViewModel<DebugScreenViewModel>()
         DebugScreen(
             onClickBack = navController::popBackStackIfResumed,

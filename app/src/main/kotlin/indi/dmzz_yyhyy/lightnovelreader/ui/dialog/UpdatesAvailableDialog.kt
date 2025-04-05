@@ -27,10 +27,12 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.update.Release
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
-fun NavGraphBuilder.updatesAvailableDialog(navController: NavController) {
+fun NavGraphBuilder.updatesAvailableDialog() {
     dialog<Route.UpdatesAvailableDialog> {
+        val navController = LocalNavController.current
         val viewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         UpdatesAvailableDialog(
             onDismissRequest = { navController.popBackStack() },

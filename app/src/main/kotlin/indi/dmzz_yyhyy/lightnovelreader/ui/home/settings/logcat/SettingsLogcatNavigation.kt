@@ -6,11 +6,13 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
-fun NavGraphBuilder.settingsLogcatDestination(navController: NavController) {
+fun NavGraphBuilder.settingsLogcatDestination() {
     composable<Route.Main.Settings.Logcat> {
+        val navController = LocalNavController.current
         val viewModel = hiltViewModel<LogcatViewModel>()
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
             viewModel.startLogging()

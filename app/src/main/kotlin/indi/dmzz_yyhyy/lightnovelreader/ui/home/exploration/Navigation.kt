@@ -11,13 +11,13 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.search.explorationSe
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.explorationNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.explorationNavigation(sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Main.Exploration>(
         startDestination = Route.Main.Exploration.Home,
     ) {
-        explorationHomeDestination(navController, sharedTransitionScope)
-        explorationExpandDestination(navController)
-        explorationSearchDestination(navController)
+        explorationHomeDestination(sharedTransitionScope)
+        explorationExpandDestination()
+        explorationSearchDestination()
     }
 }
 
