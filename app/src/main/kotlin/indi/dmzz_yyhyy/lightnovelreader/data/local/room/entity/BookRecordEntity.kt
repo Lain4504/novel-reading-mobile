@@ -4,13 +4,11 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.BookRecordConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
 import java.time.LocalDate
 import java.time.LocalTime
 
 @TypeConverters(
-    BookRecordConverter::class,
     LocalDateTimeConverter::class
 )
 
@@ -24,8 +22,8 @@ data class BookRecordEntity(
     val bookId: Int,
     @ColumnInfo(name = "sessions")
     val sessions: Int,
-    @ColumnInfo(name = "total_seconds")
-    val totalSeconds: Int,
+    @ColumnInfo(name = "total_time")
+    val totalTime: Int,
     @ColumnInfo(name = "first_seen")
     val firstSeen: LocalTime,
     @ColumnInfo(name = "last_seen")

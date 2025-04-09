@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -65,8 +65,8 @@ class StatsDetailedViewModel @Inject constructor(
     private suspend fun loadStatistics() {
         val end = uiState.selectedDate
         val start = end.minusMonths(1)
-        val records = statsRepository.getBookRecordsBetweenDates(start, end)
-        val entities = statsRepository.getReadingEntitiesBetweenDates(start, end)
+        val bookRecordsMap = statsRepository.getBookRecords(start, end)
+        val entities = statsRepository.getReadingStatistics(start, end)
         val bookIds = mutableSetOf<Int>()
 
         val allDates = generateSequence(start) { it.plusDays(1) }
@@ -74,11 +74,11 @@ class StatsDetailedViewModel @Inject constructor(
             .toList()
 
         _uiState.targetDateRangeStatsMap = allDates.associateWith { date ->
-            entities.find { it.date == date } ?: createDefaultEntity(date)
+            entities.values.find { it.date == date } ?: createDefaultEntity(date)
         }
-        _uiState.targetDateRangeRecordsMap = records
+        _uiState.targetDateRangeRecordsMap = bookRecordsMap
 
-        records.forEach { list ->
+        bookRecordsMap.forEach { list ->
             list.value.forEach { entity ->
                 bookIds.add(entity.bookId)
             }

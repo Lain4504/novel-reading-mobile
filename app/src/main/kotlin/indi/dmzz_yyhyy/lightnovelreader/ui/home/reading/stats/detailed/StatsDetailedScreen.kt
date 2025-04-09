@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -42,12 +42,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.himanshoe.charty.bar.model.BarData
+import com.himanshoe.charty.common.asSolidChartColor
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Last7DaysChart
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -79,11 +82,11 @@ fun StatsDetailedScreen(
         }
     ) { paddingValues ->
         StatisticsContent(
-                uiState = uiState,
-                modifier = Modifier.padding(paddingValues),
-                        viewOptions = viewOptions,
-                onViewSelected = viewModel::setSelectedView,
-            )
+            uiState = uiState,
+            modifier = Modifier.padding(paddingValues),
+            viewOptions = viewOptions,
+            onViewSelected = viewModel::setSelectedView
+        )
     }
 }
 
@@ -173,9 +176,7 @@ fun DailyChart(
     dateEntity: ReadingStatisticsEntity?,
     records: List<BookRecordEntity>
 ) {
-    StatsCard("asdf") {
 
-    }
 }
 
 @Composable
@@ -183,36 +184,64 @@ fun WeeklyItem(
     uiState: StatsDetailedUiState,
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
+    println("DEBUG CHART ${uiState.targetDateRangeStatsMap}")
+    val selectedDate = uiState.selectedDate
+    val selectedDateReadTimeMap = uiState.targetDateRangeStatsMap.mapValues { (_, entity) ->
+        entity.readingTimeCount.getTotalMinutes()
+    }
+    val selectedIndex = selectedDateReadTimeMap.keys.indexOf(selectedDate)
+    val convertedMap: Map<String, Int> = if (selectedIndex != -1) {
+        selectedDateReadTimeMap.entries
+            .sortedBy { it.key }
+            .take(selectedIndex + 1)
+            .takeLast(7)
+            .associate { it.key.format(dateFormatter) to it.value }
+    } else {
+        emptyMap()
+    }
+
     StatsCard(
         title = "近 7 日阅读时长"
     ) {
-        println("DEBUG CHART ${uiState.targetDateRangeStatsMap}")
-        val selectedDate = uiState.selectedDate
-        val selectedDateReadTimeMap = uiState.targetDateRangeStatsMap.mapValues { (_, entity) ->
-            entity.readingTimeCount.getTotalMinutes()
-        }
-        val selectedIndex = selectedDateReadTimeMap.keys.indexOf(selectedDate)
-        val convertedMap: Map<String, Int> = if (selectedIndex != -1) {
-            selectedDateReadTimeMap.entries
-                .sortedBy { it.key }
-                .take(selectedIndex + 1)
-                .takeLast(7)
-                .associate { it.key.format(dateFormatter) to it.value }
-        } else {
-            emptyMap()
-        }
-        println("refreshed $convertedMap")
         Column {
-            Box(modifier = Modifier.heightIn(240.dp)) {
+            if (convertedMap.values.sum() < 1) {
+                Box(
+                    modifier = Modifier.height(80.dp).fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("空记录")
+                }
+                return@StatsCard
+            }
+            Box {
                 Last7DaysChart(
-                    modifier = Modifier
-                        .height(230.dp)
-                        .padding(horizontal = 14.dp),
-                    data = convertedMap
+                    modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
+                    data = generateMockBarData(convertedMap.keys.toList(), convertedMap.values.toList()), target = null
                 )
             }
         }
     }
+    val countMap = uiState.targetDateRangeStatsMap.mapValues { (_, entity) ->
+        entity.readingTimeCount
+    }
+    println(countMap)
+    StatsCard("时间分布") {
+        WeeklyCountChart(countMap)
+    }
+}
+
+private fun generateMockBarData(
+    dates: List<String>,
+    values: List<Int>
+): List<BarData> {
+    println("DATES $dates, VALUES $values")
+    return List(7) {
+        BarData(
+            yValue = values[it].toFloat(),
+            xValue = dates[it],
+            barColor = Color.Unspecified.asSolidChartColor()
+        )
+    }.toMutableList()
 }
 
 @Composable
@@ -249,9 +278,13 @@ fun MonthlySummaryChart(
                 .take(5)
                 .forEach {
                     Box(
-                        modifier = Modifier.background(
-                            MaterialTheme.colorScheme.background
-                        ).height(84.dp).width(60.dp).clip(RoundedCornerShape(4.dp)),
+                        modifier = Modifier
+                            .background(
+                                MaterialTheme.colorScheme.background
+                            )
+                            .height(84.dp)
+                            .width(60.dp)
+                            .clip(RoundedCornerShape(4.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Cover(
@@ -268,9 +301,10 @@ fun MonthlySummaryChart(
 }
 
 private fun LazyListScope.dailyStatistics(uiState: StatsDetailedUiState) {
+    val date = uiState.selectedDate
     item {
-        val stats = uiState.targetDateRangeStatsMap[LocalDate.now()]
-        val records = uiState.targetDateRangeRecordsMap[LocalDate.now()] ?: emptyList()
+        val stats = uiState.targetDateRangeStatsMap[date]
+        val records = uiState.targetDateRangeRecordsMap[date] ?: emptyList()
         DailyChart(stats, records)
     }
 }

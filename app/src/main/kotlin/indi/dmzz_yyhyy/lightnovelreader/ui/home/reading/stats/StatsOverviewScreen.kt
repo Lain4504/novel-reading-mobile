@@ -131,7 +131,7 @@ private fun CalendarBlock(
 ) {
     var selection by remember { mutableStateOf(LocalDate.now()) }
     val uiState = viewModel.uiState
-    val datePair = uiState.datePair
+    val datePair = uiState.dateRange
     val state = rememberHeatMapCalendarState(
         startMonth = datePair.first.yearMonth,
         endMonth = datePair.second.yearMonth,
@@ -166,7 +166,6 @@ private fun CalendarBlock(
 
 @Composable
 private fun DailyStatsBlock(uiState: StatsOverviewUiState, selectedDate: LocalDate) {
-    val stats = uiState.dateStatsEntityMap[selectedDate]
     val records = uiState.bookRecordsByDate[selectedDate] ?: emptyList()
     val dateFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
@@ -222,17 +221,14 @@ fun TotalStatsBlock(
             state = lazyRowState,
             flingBehavior = rememberSnapFlingBehavior(lazyRowState)
         ) {
-            val totalSeconds = statsBookRecordMap.values.sumOf { day ->
-                day.sumOf { it.totalSeconds }
-            }
+            val totalSeconds = uiState.totalRecordEntity?.totalTime ?: 0
+            val totalSessions = uiState.totalRecordEntity?.sessions ?: 0
             item {
                 StatsCard(
                     modifier = Modifier.weight(1f),
                     icon = painterResource(R.drawable.outline_book_24px),
                     title = "阅读会话",
-                    value = statsBookRecordMap.values.sumOf { day ->
-                        day.sumOf { it.sessions }
-                    }.toString(),
+                    value = totalSessions.toString(),
                     unit = "次"
                 )
             }
@@ -346,15 +342,16 @@ private fun buildExpandableSections(
     records: List<BookRecordEntity> = emptyList(),
     dateFormatter: DateTimeFormatter
 ): List<ExpandableSection> {
+    println("CALL BES, list $records")
     if (records.isEmpty()) return emptyList()
-    val totalSeconds = records.sumOf { it.totalSeconds }
+    val totalSeconds = records.sumOf { it.totalTime }
     val totalDuration = totalSeconds.toDuration(DurationUnit.SECONDS)
 
     val formattedTotal = DurationFormat().format(totalDuration, smallestUnit = DurationFormat.Unit.SECOND)
 
     val timeDetails = records.take(4).map { record ->
         val book = uiState.bookInformationMap[record.bookId]?.title ?: "Unknown"
-        val duration = record.totalSeconds.toDuration(DurationUnit.SECONDS)
+        val duration = record.totalTime.toDuration(DurationUnit.SECONDS)
 
         val formattedTime = DurationFormat(Locale.ENGLISH).format(duration)
         book to formattedTime

@@ -4,12 +4,10 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.BookRecordConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.CountConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.BookRecord
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
 import java.time.LocalDate
 
 @TypeConverters(

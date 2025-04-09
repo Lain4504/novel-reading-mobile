@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
+package indi.dmzz_yyhyy.lightnovelreader.data.statistics
 
 import java.util.BitSet
 

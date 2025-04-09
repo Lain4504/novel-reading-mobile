@@ -1,7 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter
 
 import androidx.room.TypeConverter
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
 
 class CountConverter {
     @TypeConverter

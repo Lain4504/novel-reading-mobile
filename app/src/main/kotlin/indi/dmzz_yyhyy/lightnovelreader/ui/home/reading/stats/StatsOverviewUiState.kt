@@ -14,14 +14,12 @@ interface StatsOverviewUiState {
     var isLoading: Boolean
     var selected: Boolean
     var selectedDate: LocalDate
-    val datePair: Pair<LocalDate, LocalDate>
+    val dateRange: Pair<LocalDate, LocalDate>
     val thresholds: Int
     var dateLevelMap: Map<LocalDate, Level>
     var dateReadingTimeMap: Map<LocalDate, Int>
     var dateStatsEntityMap: Map<LocalDate, ReadingStatisticsEntity>
-    var totalStartedBooks: Int
-    var totalReadInSeconds: Int
-    var totalSessions: Int
+    var totalRecordEntity: BookRecordEntity?
     var bookRecordsByBookId: Map<Int, List<BookRecordEntity>>
     var bookRecordsByDate: Map<LocalDate, List<BookRecordEntity>>
     val bookInformationMap: Map<Int, BookInformation>
@@ -31,14 +29,12 @@ class MutableStatisticsOverviewUiState : StatsOverviewUiState {
     override var isLoading: Boolean by mutableStateOf(false)
     override var selected: Boolean by mutableStateOf(false)
     override var selectedDate: LocalDate by mutableStateOf(LocalDate.now())
-    override var datePair: Pair<LocalDate, LocalDate> by mutableStateOf(Pair(LocalDate.now(), LocalDate.now()))
+    override var dateRange: Pair<LocalDate, LocalDate> by mutableStateOf(Pair(LocalDate.now(), LocalDate.now()))
     override var thresholds: Int by mutableIntStateOf(0)
     override var dateLevelMap: Map<LocalDate, Level> by mutableStateOf(emptyMap())
     override var dateReadingTimeMap: Map<LocalDate, Int> by mutableStateOf(emptyMap())
     override var dateStatsEntityMap: Map<LocalDate, ReadingStatisticsEntity> by mutableStateOf(emptyMap())
-    override var totalStartedBooks: Int by mutableIntStateOf(0)
-    override var totalReadInSeconds: Int by mutableIntStateOf(0)
-    override var totalSessions: Int by mutableIntStateOf(0)
+    override var totalRecordEntity: BookRecordEntity? by mutableStateOf(null)
     override var bookRecordsByBookId: Map<Int, List<BookRecordEntity>> by mutableStateOf(emptyMap())
     override var bookRecordsByDate: Map<LocalDate, List<BookRecordEntity>> by mutableStateOf(emptyMap())
     override var bookInformationMap = mutableStateMapOf<Int, BookInformation>()

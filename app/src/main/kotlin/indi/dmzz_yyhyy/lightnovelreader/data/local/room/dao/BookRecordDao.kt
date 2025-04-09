@@ -32,4 +32,10 @@ interface BookRecordDao {
 
     @Delete
     suspend fun deleteBookRecord(record: BookRecordEntity)
+
+    @Query("SELECT * FROM book_records WHERE id = -721")
+    suspend fun getTotalRecord(): BookRecordEntity?
+
+    @Query("DELETE FROM book_records WHERE id = -721")
+    suspend fun deleteTotalRecord()
 }

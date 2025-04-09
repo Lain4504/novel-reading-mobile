@@ -6,13 +6,11 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.TypeConverters
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.BookRecordConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.CountConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.BookRecord
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Count
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 

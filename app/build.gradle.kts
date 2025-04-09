@@ -156,7 +156,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     // Swipe
     implementation("me.saket.swipe:swipe:1.3.0")
-    implementation("com.patrykandpatrick.vico:compose-m3:2.0.1")
+    // Chart
+    implementation("com.himanshoe:charty:2.1.0-beta03.2")
 }
 
 kapt {
