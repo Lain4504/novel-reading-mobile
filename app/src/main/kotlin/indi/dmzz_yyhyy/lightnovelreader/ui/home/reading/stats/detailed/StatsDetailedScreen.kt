@@ -203,29 +203,37 @@ fun WeeklyItem(
     StatsCard(
         title = "近 7 日阅读时长"
     ) {
-        Column {
-            if (convertedMap.values.sum() < 1) {
-                Box(
-                    modifier = Modifier.height(80.dp).fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("空记录")
-                }
-                return@StatsCard
+        if (convertedMap.values.sum() < 1) {
+            Box(
+                modifier = Modifier.height(80.dp).fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("没有记录")
             }
-            Box {
-                Last7DaysChart(
-                    modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
-                    data = generateMockBarData(convertedMap.keys.toList(), convertedMap.values.toList()), target = null
-                )
-            }
+            return@StatsCard
         }
+        Box {
+            Last7DaysChart(
+                modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
+                data = generateMockBarData(convertedMap.keys.toList(), convertedMap.values.toList()), target = null
+            )
+        }
+
     }
     val countMap = uiState.targetDateRangeStatsMap.mapValues { (_, entity) ->
         entity.readingTimeCount
     }
     println(countMap)
     StatsCard("时间分布") {
+        if (countMap.entries.sumOf { it.value.getTotalMinutes() } < 1) {
+            Box(
+                modifier = Modifier.height(80.dp).fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("没有记录")
+            }
+            return@StatsCard
+        }
         WeeklyCountChart(countMap)
     }
 }

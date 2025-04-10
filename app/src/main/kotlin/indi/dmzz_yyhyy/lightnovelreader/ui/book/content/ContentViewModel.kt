@@ -42,7 +42,6 @@ class ContentViewModel @Inject constructor(
     val settingState = SettingState(userDataRepository, viewModelScope)
     val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-
     init {
         viewModelScope.launch(Dispatchers.IO) {
             textProcessingRepository.updateFlow.collect {
@@ -54,12 +53,12 @@ class ContentViewModel @Inject constructor(
 
     @Suppress("DuplicatedCode")
     fun init(bookId: Int, chapterId: Int) {
-        println("TRIGGERED FUN INIT")
         println(bookId)
         println(chapterId)
         println(_bookId)
         if (bookId != _bookId) {
             viewModelScope.launch {
+                println("NEW SESSION, id = $bookId, now sending session start event")
                 val bookVolumes = bookRepository.getBookVolumes(bookId)
                 _uiState.bookVolumes = bookVolumes.first()
                 viewModelScope.launch(Dispatchers.IO) {
@@ -68,28 +67,24 @@ class ContentViewModel @Inject constructor(
                         _uiState.bookVolumes = it
                     }
                 }
-            }
-        }
-
-        if (bookId != _bookId) { /* WORKING: only trigger ONCE on content screen */
-            viewModelScope.launch(Dispatchers.IO) {
-                println("NEW SESSION, id = $bookId, now sending session start event")
-                statsRepository.updateReadingStatistics(
-                    ReadingStatsUpdate(
-                        bookId = bookId,
-                        sessionDelta = 1,
-                        localTime = LocalTime.now(),
+                viewModelScope.launch(Dispatchers.IO) {
+                    statsRepository.updateReadingStatistics(
+                        ReadingStatsUpdate(
+                            bookId = bookId,
+                            sessionDelta = 1,
+                            localTime = LocalTime.now(),
+                        )
                     )
-                )
+                }
             }
         }
-
+        _bookId = bookId
         loadChapterContent(bookId, chapterId)
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.getUserReadingData(bookId).collect {
                 _uiState.userReadingData = it
                 if (it.lastReadTime.year < 0)
-                    coroutineScope.launch {
+                    coroutineScope.launch(Dispatchers.IO) {
                         println("EVENT START book $bookId")
                         statsRepository.updateBookStatus(
                             bookId = bookId,
@@ -98,12 +93,6 @@ class ContentViewModel @Inject constructor(
                     }
             }
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            textProcessingRepository.updateFlow.collect {
-                loadChapterContent(bookId, uiState.chapterContent.id)
-            }
-        }
-        _bookId = bookId
     }
 
     private fun loadChapterContent(bookId: Int, chapterId: Int) {
@@ -247,13 +236,7 @@ class ContentViewModel @Inject constructor(
 
     fun accumulateReadingTime(bookId: Int, seconds: Int) {
         coroutineScope.launch(Dispatchers.IO) {
-            statsRepository.accumulateReadingTime(bookId, seconds)
-        }
-    }
-
-    fun forceFlushAll() {
-        coroutineScope.launch(Dispatchers.IO) {
-            statsRepository.forceFlushAll()
+            statsRepository.accumulateBookReadTime(bookId, seconds)
         }
     }
 }

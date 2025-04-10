@@ -103,9 +103,8 @@ fun ContentScreen(
     onClickBackButton: () -> Unit,
     addToReadingBook: (Int) -> Unit,
     init: (Int, Int) -> Unit,
-    updateTotalReadingTime: (Int, Int) -> Unit,
-    accumulateReadingTime: (Int, Int) -> Unit,
-    forceFlushAll: () -> Unit,
+    updateTotalReadTime: (Int, Int) -> Unit,
+    accumulateReadTime: (Int, Int) -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
@@ -155,9 +154,8 @@ fun ContentScreen(
             settingState = settingState,
             addToReadingBook = addToReadingBook,
             init = init,
-            updateTotalReadingTime = updateTotalReadingTime,
-            accumulateReadingTime = accumulateReadingTime,
-            forceFlushAll = forceFlushAll,
+            updateTotalReadingTime = updateTotalReadTime,
+            accumulateReadingTime = accumulateReadTime,
             onClickLastChapter = onClickLastChapter,
             onClickNextChapter = onClickNextChapter,
             onChapterReadingProgressChange = onChapterReadingProgressChange,
@@ -181,7 +179,6 @@ fun Content(
     init: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
     accumulateReadingTime: (Int, Int) -> Unit,
-    forceFlushAll: () -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChapterReadingProgressChange: (Float) -> Unit,
@@ -262,7 +259,7 @@ fun Content(
 
     LifecycleResumeEffect(Unit) {
         onPauseOrDispose {
-            forceFlushAll()
+            accumulateReadingTime(bookId, -1)
         }
     }
 

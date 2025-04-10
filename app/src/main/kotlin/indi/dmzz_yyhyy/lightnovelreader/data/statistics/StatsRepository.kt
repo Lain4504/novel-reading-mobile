@@ -34,18 +34,26 @@ class StatsRepository @Inject constructor(
     val bookRecordsMap = mutableMapOf<Int, List<BookRecordEntity>>()
     private val cacheMutex = Mutex()
 
-    suspend fun accumulateReadingTime(bookId: Int, seconds: Int) = bufferMutex.withLock {
+    suspend fun accumulateBookReadTime(bookId: Int, seconds: Int) = bufferMutex.withLock {
+        if (seconds < 0) {
+            println("seconds < 0 clearing")
+            buffer.keys.toList().forEach { bookId ->
+                clearBookReadTimeBuffer(bookId)
+                buffer.remove(bookId)
+            }
+            return@withLock
+        }
         val current = buffer[bookId] ?: Pair(LocalTime.now(), 0)
-        val newTotal = current.second + 60 /*FIXME*/
+        val newTotal = current.second + seconds
         buffer[bookId] = current.copy(second = newTotal)
         println("-> accumulate bookId=$bookId, sec=$newTotal")
 
         if (newTotal >= 60 || Duration.between(current.first, LocalTime.now()).seconds >= 60) {
-            flushBookBuffer(bookId)
+            clearBookReadTimeBuffer(bookId)
         }
     }
 
-    private suspend fun flushBookBuffer(bookId: Int) {
+    private suspend fun clearBookReadTimeBuffer(bookId: Int) {
         val (startTime, totalSeconds) = buffer[bookId] ?: return
 
         updateReadingStatistics(
@@ -58,13 +66,6 @@ class StatsRepository @Inject constructor(
         )
 
         buffer.clear()
-    }
-
-    suspend fun forceFlushAll() = bufferMutex.withLock {
-        buffer.keys.toList().forEach { bookId ->
-            flushBookBuffer(bookId)
-            buffer.remove(bookId)
-        }
     }
 
     private fun <K, V> MutableMap<K, V>.putWithLimit(key: K, value: V) {
