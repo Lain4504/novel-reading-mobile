@@ -10,7 +10,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import readingHomeDestination
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.homeReadingNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.readingNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Main.Reading>(
         startDestination = Route.Main.Reading.Home
     ) {

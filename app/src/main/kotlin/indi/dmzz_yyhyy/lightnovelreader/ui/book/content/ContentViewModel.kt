@@ -13,6 +13,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -31,17 +32,32 @@ class ContentViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
     private val textProcessingRepository: TextProcessingRepository,
-    userDataRepository: UserDataRepository,
+    userDataRepository: UserDataRepository
 ) : ViewModel() {
     private val _uiState = MutableContentScreenUiState()
     private var _bookId: Int = -1
     private val readingBookListUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
+    private var loadChapterContentJob: Job? = null
     val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
     val coroutineScope = CoroutineScope(Dispatchers.IO)
 
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            textProcessingRepository.updateFlow.collect {
+                if (_bookId != -1 && uiState.chapterContent.id != -1)
+                    loadChapterContent(_bookId, uiState.chapterContent.id)
+            }
+        }
+    }
+
+    @Suppress("DuplicatedCode")
     fun init(bookId: Int, chapterId: Int) {
         println("TRIGGERED FUN INIT")
+        println(bookId)
+        println(chapterId)
+        println(_bookId)
         if (bookId != _bookId) {
             viewModelScope.launch {
                 val bookVolumes = bookRepository.getBookVolumes(bookId)
@@ -91,12 +107,16 @@ class ContentViewModel @Inject constructor(
     }
 
     private fun loadChapterContent(bookId: Int, chapterId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+        loadChapterContentJob?.cancel()
+        loadChapterContentJob = viewModelScope.launch(Dispatchers.IO) {
             val chapterContent = bookRepository.getChapterContent(
                 chapterId = chapterId,
                 bookId = bookId
             )
             chapterContent.collect { content ->
+                println(content.id)
+                println(content.title)
+                println(chapterContent)
                 if (content.id == -1) return@collect
                 _uiState.chapterContent = content
                 _uiState.isLoading = _uiState.chapterContent.id == -1
@@ -203,7 +223,7 @@ class ContentViewModel @Inject constructor(
     }
 
     fun updateTotalReadingTime(bookId: Int, totalReadingTime: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             bookRepository.updateUserReadingData(bookId) {
                 it.copy(
                     lastReadTime = LocalDateTime.now(),

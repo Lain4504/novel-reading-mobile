@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.bookNavigation
-import indi.dmzz_yyhyy.lightnovelreader.ui.debug.debugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.addBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.updatesAvailableDialog
+import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.downloadManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.homeNavigation
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -27,9 +27,9 @@ fun LightNovelReaderNavHost(
         ) {
             homeNavigation(navController, this@SharedTransitionLayout)
             bookNavigation(navController)
-            debugDestination(navController)
             updatesAvailableDialog(navController)
             addBookToBookshelfDialog(navController)
+            downloadManager(navController)
         }
     }
 }

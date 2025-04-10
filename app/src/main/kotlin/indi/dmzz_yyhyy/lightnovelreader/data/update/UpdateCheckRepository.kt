@@ -8,8 +8,8 @@ import com.ketch.Ketch
 import com.ketch.Status
 import dagger.hilt.android.qualifiers.ApplicationContext
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,12 +38,13 @@ class UpdateCheckRepository @Inject constructor(
         private set
     private val mutableAvailable: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val availableFlow: Flow<Boolean> = mutableAvailable
-    private val _updatePhase = MutableStateFlow("Not checked")
+    private val _updatePhase = MutableStateFlow("未检查")
     val updatePhase: Flow<String> = _updatePhase
 
     init {
         coroutineScope.launch {
-            check()
+            if (userDataRepository.booleanUserData(UserDataPath.Settings.App.AutoCheckUpdate.path).getOrDefault(true))
+                check()
         }
     }
 
@@ -58,6 +59,7 @@ class UpdateCheckRepository @Inject constructor(
         checkJob = coroutineScope.launch {
             val updateChannelKey = userDataRepository.stringUserData(UserDataPath.Settings.App.UpdateChannel.path).get() ?: MenuOptions.UpdateChannelOptions.Development
             val distributionPlatform = userDataRepository.stringUserData(UserDataPath.Settings.App.DistributionPlatform.path).get() ?: MenuOptions.UpdatePlatformOptions.GitHub
+            Log.i("UpdateChecker", "Checking for updates from $distributionPlatform/$updateChannelKey")
             _updatePhase.update { "已请求更新，等待 $distributionPlatform 应答" }
             try {
                 release =
@@ -66,22 +68,25 @@ class UpdateCheckRepository @Inject constructor(
                         .getOptionWithValue(updateChannelKey).value
                         .parser(_updatePhase)
             } catch (e: Exception) {
-                Log.e("UpdateCheckRepository", "failed to get release")
+                Log.e("UpdateChecker", "failed to get release")
                 e.printStackTrace()
                 _updatePhase.emit("${dateFormat.format(Date())} | 失败: ${e.javaClass.simpleName}\n${e.message}")
             }
             if (release != null) {
-                if (release!!.version > BuildConfig.VERSION_CODE)
+                if (release!!.version > BuildConfig.VERSION_CODE) {
+                    Log.i("UpdateChecker", "Updates available: ${release!!.versionName}")
                     _updatePhase.emit("${dateFormat.format(Date())} | 有可用更新: ${release!!.versionName}")
-                else
+                } else {
+                    Log.i("UpdateChecker", "App is up to date (${release!!.versionName})")
                     _updatePhase.emit("${dateFormat.format(Date())} | 已是最新 (远程: ${release!!.versionName})")
+                }
             }
             mutableAvailable.emit(release != null && release!!.version > BuildConfig.VERSION_CODE)
         }
     }
 
     fun downloadUpdate() {
-        release ?: Log.e("UpdateCheckRepository", "Didn't find the release. UpdateCheckRepository.release is null!").also { return }
+        release ?: Log.e("UpdateChecker", "Didn't find the release because release is null!").also { return }
         val cacheDir = File(context.cacheDir, "updates").also {
             if (!it.exists()) it.mkdirs()
         }
@@ -96,10 +101,11 @@ class UpdateCheckRepository @Inject constructor(
                     when (it.status) {
                         Status.SUCCESS -> {
                             if (file.length() == 0L) return@collect
+                            Log.i("UpdateChecker", "Download success, installing")
                             installApk(file)
                         }
                         Status.FAILED -> Log.e(
-                            "UpdateCheckRepository",
+                            "UpdateChecker",
                             "Failed to download update apk"
                         )
                         else -> {}
@@ -123,7 +129,7 @@ class UpdateCheckRepository @Inject constructor(
                             }
                         }
                         Status.FAILED -> Log.e(
-                            "UpdateCheckRepository",
+                            "UpdateChecker",
                             "Failed to download update apk"
                         )
                         else -> {}

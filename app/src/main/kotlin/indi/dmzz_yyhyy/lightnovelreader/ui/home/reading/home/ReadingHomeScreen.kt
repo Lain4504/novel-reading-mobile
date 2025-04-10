@@ -60,7 +60,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun ReadingHomeScreen(
+fun ReadingScreen(
     controller: NavController,
     selectedRoute: Any,
     updateReadingBooks: () -> Unit,
@@ -70,6 +70,7 @@ fun ReadingHomeScreen(
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
+    onClickDownloadManager: () -> Unit,
     onClickStats: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
@@ -82,6 +83,7 @@ fun ReadingHomeScreen(
             topBar = {
                 TopBar(
                     scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
+                    onClickDownloadManager = onClickDownloadManager,
                     onClickStats = onClickStats
                 )
             },
@@ -217,6 +219,7 @@ private fun ReadingContent(
 @Composable
 private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior,
+    onClickDownloadManager: () -> Unit,
     onClickStats: () -> Unit
 ) {
     TopAppBar(
@@ -231,6 +234,12 @@ private fun TopBar(
             )
         },
         actions = {
+            IconButton(onClick = onClickDownloadManager) {
+                Icon(
+                    painter = painterResource(R.drawable.download_24px),
+                    contentDescription = stringResource(R.string.more)
+                )
+            }
             IconButton(
                 onClick = onClickStats
             ) {

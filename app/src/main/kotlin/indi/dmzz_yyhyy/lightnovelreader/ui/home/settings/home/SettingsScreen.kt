@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -56,6 +56,7 @@ import androidx.work.OneTimeWorkRequest
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.AboutSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DataSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DisplaySettingsList
@@ -70,6 +71,7 @@ fun SettingsScreen(
     updatePhase: String,
     checkUpdate: () -> Unit,
     importData: (Uri) -> OneTimeWorkRequest,
+    onClickLogcat: () -> Unit,
     onClickChangeSource: () -> Unit,
     onClickExportUserData: () -> Unit,
     onClickDebugMode: () -> Unit,
@@ -134,7 +136,8 @@ fun SettingsScreen(
                             onClickChangeSource = onClickChangeSource,
                             onClickExportUserData = onClickExportUserData,
                             settingState = settingState,
-                            importData = importData
+                            importData = importData,
+                            onClickLogcat = onClickLogcat
                         )
                     }
                     SettingsCategory(

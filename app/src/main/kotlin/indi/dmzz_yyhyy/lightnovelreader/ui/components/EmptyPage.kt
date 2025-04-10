@@ -26,6 +26,23 @@ fun EmptyPage(
     descriptionId: Int,
     button: @Composable () -> Unit = {},
 ) {
+    EmptyPage(
+        modifier = modifier,
+        icon = icon,
+        title = stringResource(titleId),
+        description = stringResource(descriptionId),
+        button = button
+    )
+}
+
+@Composable
+fun EmptyPage(
+    modifier: Modifier = Modifier,
+    icon: Painter,
+    title: String,
+    description: String,
+    button: @Composable () -> Unit = {},
+) {
     Box(modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.align(Alignment.Center),
@@ -39,14 +56,14 @@ fun EmptyPage(
             )
             Spacer(Modifier.height(42.dp))
             Text(
-                text = stringResource(titleId),
+                text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 modifier = Modifier.padding(horizontal = 24.dp),
-                text = stringResource(descriptionId),
+                text = description,
                 fontSize = 16.sp,
                 lineHeight = 20.sp,
                 color = MaterialTheme.colorScheme.secondary,

@@ -12,11 +12,11 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CacheBookWork
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,7 +33,6 @@ class BookRepository @Inject constructor(
     private val workManager: WorkManager
 ) {
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
-    private val bookCacheProgressFlowMap: MutableMap<Int, SharedFlow<Int>> = mutableMapOf()
 
     suspend fun getBookInformation(id: Int): Flow<BookInformation> {
         val bookInformation: MutableStateFlow<BookInformation> =
@@ -81,7 +80,10 @@ class BookRepository @Inject constructor(
                 localBookDataSource.updateChapterContent(content)
                 localBookDataSource.getChapterContent(chapterId)?.let { newContent ->
                     chapterContent.update {
-                        newContent
+                        newContent.copy(
+                            lastChapter = if (newContent.lastChapter == -1) it.lastChapter else newContent.lastChapter,
+                            nextChapter = if (newContent.nextChapter == -1) it.nextChapter else newContent.nextChapter
+                        ).debugPrint()
                     }
                 }
             }
@@ -147,8 +149,4 @@ class BookRepository @Inject constructor(
         } ?: return false
         return true
     }
-
-    fun addCacheBookProgressFlow(bookId: Int, progressFlow: SharedFlow<Int>) = bookCacheProgressFlowMap.put(bookId, progressFlow)
-    fun getCacheBookProgressFlow(bookId: Int) = bookCacheProgressFlowMap[bookId]
-    fun clearCacheBookProgressFlow(bookId: Int) = bookCacheProgressFlowMap.remove(bookId)
 }

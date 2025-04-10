@@ -28,8 +28,11 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.MutableExportContext
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SourceChangeDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
-import indi.dmzz_yyhyy.lightnovelreader.ui.debug.navigateToDebug
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewModel
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSettingsDebugDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsScreen
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsViewModel
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.navigateToSettingsLogcatDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
@@ -38,8 +41,8 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.homeSettingDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Main.Settings> {
+fun NavGraphBuilder.settingsHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+    composable<Route.Main.Settings.Home> {
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         val updatePhase by updatesAvailableDialogViewModel.updatePhaseFlow.collectAsState("Not Checked")
@@ -50,9 +53,10 @@ fun NavGraphBuilder.homeSettingDestination(navController: NavController, sharedT
             settingState = settingsViewModel.settingState,
             checkUpdate = updatesAvailableDialogViewModel::checkUpdate,
             importData = settingsViewModel::importFromFile,
-            onClickDebugMode = navController::navigateToDebug,
+            onClickDebugMode = navController::navigateToSettingsDebugDestination,
             onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
+            onClickLogcat = navController::navigateToSettingsLogcatDestination,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
         )

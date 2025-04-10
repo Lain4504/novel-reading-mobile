@@ -3,7 +3,6 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { setUrl("https://kotlin.bintray.com/kotlinx") }
     }
 }
 dependencyResolutionManagement {

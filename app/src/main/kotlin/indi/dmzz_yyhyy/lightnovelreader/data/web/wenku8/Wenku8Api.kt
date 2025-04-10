@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8
 
 
+import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
@@ -19,6 +20,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.Wenku8TagsEx
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.HomeBookExpandPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +39,16 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object Wenku8Api: WebBookDataSource {
+    private val tagList = listOf("校园", "青春", "恋爱", "治愈", "群像",
+        "竞技", "音乐", "美食", "旅行", "欢乐向",
+        "经营", "职场", "斗智", "脑洞", "宅文化",
+        "穿越", "奇幻", "魔法", "异能", "战斗",
+        "科幻", "机战", "战争", "冒险", "龙傲天",
+        "悬疑", "犯罪", "复仇", "黑暗", "猎奇",
+        "惊悚", "间谍", "末日", "游戏", "大逃杀",
+        "青梅竹马", "妹妹", "女儿", "JK", "JC",
+        "大小姐", "性转", "伪娘", "人外",
+        "后宫", "百合", "耽美", "NTR", "女性视角")
     private var allBookChapterListCacheId: Int = -1
     private var allBookChapterListCache: List<ChapterInformation> = emptyList()
     private val DATA_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -369,16 +381,7 @@ object Wenku8Api: WebBookDataSource {
                 )
             )
         }
-        listOf("校园", "青春", "恋爱", "治愈", "群像",
-                "竞技", "音乐", "美食", "旅行", "欢乐向",
-                "经营", "职场", "斗智", "脑洞", "宅文化",
-                "穿越", "奇幻", "魔法", "异能", "战斗",
-                "科幻", "机战", "战争", "冒险", "龙傲天",
-                "悬疑", "犯罪", "复仇", "黑暗", "猎奇",
-                "惊悚", "间谍", "末日", "游戏", "大逃杀",
-                "青梅竹马", "妹妹", "女儿", "JK", "JC",
-                "大小姐", "性转", "伪娘", "人外",
-                "后宫", "百合", "耽美", "NTR", "女性视角").forEach { tag ->
+        tagList.forEach { tag ->
             registerExplorationExpandedPageDataSource(
                 id = tag,
                 expandedPageDataSource = HomeBookExpandPageDataSource(
@@ -412,5 +415,10 @@ object Wenku8Api: WebBookDataSource {
                 )
             )
         }
+    }
+
+    override fun progressBookTagClick(tag: String, navController: NavController) {
+        if (tagList.contains(tag))
+            navController.navigateToExplorationExpandDestination(tag)
     }
 }
