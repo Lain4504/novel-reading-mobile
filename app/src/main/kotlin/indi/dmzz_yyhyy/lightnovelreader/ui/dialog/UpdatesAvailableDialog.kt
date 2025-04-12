@@ -84,7 +84,10 @@ fun UpdatesAvailableDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(
-                onClick = onConfirmation
+                onClick = {
+                    onConfirmation()
+                    onDismissRequest()
+                }
             ) {
                 Text(text = stringResource(R.string.install_update))
             }
@@ -105,6 +108,7 @@ fun UpdatesAvailableDialog(
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                             context.startActivity(intent, null)
                         }
+                        onDismissRequest()
                     }
                 ) {
                     Text(text = stringResource(R.string.manual_download))
