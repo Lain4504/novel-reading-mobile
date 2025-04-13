@@ -2,7 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,6 +27,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -67,6 +67,7 @@ fun LogcatScreen(
     onClickBack: () -> Unit,
     onClickClearLogs: () -> Unit,
     onClickShareLogs: () -> Unit,
+    onClickDeleteLogFile: (String) -> Unit,
     onSelectLogFile: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -146,7 +147,10 @@ fun LogcatScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                             colors = ExposedDropdownMenuDefaults.textFieldColors(),
                             modifier = Modifier
-                                .menuAnchor()
+                                .menuAnchor(
+                                    type = MenuAnchorType.PrimaryNotEditable,
+                                    enabled = true
+                                )
                                 .fillMaxWidth(),
                             maxLines = 1,
                         )
@@ -208,17 +212,34 @@ fun LogcatScreen(
                         }
 
                         DropdownMenu(
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
                             expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false }
+                            onDismissRequest = { menuExpanded = false },
                         ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Column {
+                                        Text("删除所有临时日志", style = MaterialTheme.typography.titleMedium)
+                                        Text(
+                                            text = "清除应用缓存，这些临时日志也将被删除",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onClickDeleteLogFile(":all")
+                                    menuExpanded = false
+                                }
+                            )
                             DropdownMenuItem(
                                 text = {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                        modifier = Modifier.fillMaxWidth()
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                                     ) {
-                                        Text("自动滚动")
+                                        Text("自动滚动", style = MaterialTheme.typography.titleMedium)
+                                        Spacer(Modifier.weight(1f))
                                         Switch(
                                             checked = autoScrollEnabled,
                                             onCheckedChange = {
@@ -228,18 +249,18 @@ fun LogcatScreen(
                                     }
 
                                 },
-                                onClick = {  }
+                                onClick = { }
                             )
                             DropdownMenuItem(
                                 text = {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                        modifier = Modifier.fillMaxWidth()
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                                     ) {
-                                        Text("自动换行")
+                                        Text("自动换行", style = MaterialTheme.typography.titleMedium)
+                                        Spacer(Modifier.weight(1f))
                                         Switch(
-                                            checked = !unwrapLogsText,
+                                            checked = unwrapLogsText,
                                             onCheckedChange = {
                                                 unwrapLogsText = !unwrapLogsText
                                             }
@@ -247,7 +268,7 @@ fun LogcatScreen(
                                     }
 
                                 },
-                                onClick = {  }
+                                onClick = { }
                             )
                         }
                     }

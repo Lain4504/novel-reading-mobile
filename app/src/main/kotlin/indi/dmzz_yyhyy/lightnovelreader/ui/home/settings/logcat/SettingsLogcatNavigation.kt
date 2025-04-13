@@ -16,7 +16,7 @@ fun NavGraphBuilder.settingsLogcatDestination(navController: NavController) {
     composable<Route.Main.Settings.Logcat> {
         val viewModel = hiltViewModel<LogcatViewModel>()
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
-            viewModel.startLogging()
+            if (!viewModel.uiState.isFileMode) viewModel.startLogging()
         }
         val logEntries by remember { derivedStateOf { viewModel.displayedLogEntries } }
         LogcatScreen(
@@ -26,6 +26,7 @@ fun NavGraphBuilder.settingsLogcatDestination(navController: NavController) {
             onClickBack = navController::popBackStackIfResumed,
             onClickClearLogs = viewModel::clearLogs,
             onClickShareLogs = viewModel::shareLogs,
+            onClickDeleteLogFile = viewModel::deleteLogFile,
             onSelectLogFile = viewModel::onSelectLogFile
         )
     }

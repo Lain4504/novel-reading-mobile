@@ -182,8 +182,20 @@ class LoggerRepository @Inject constructor(
         }
     }
 
+    fun deleteLogFile(fileName: String) {
+        if (fileName == ":all") {
+            logsDir.listFiles()?.forEach { it.delete() }
+            return
+        }
 
-    fun clearLoadedLogFile() {
+        val file = File(logsDir, fileName)
+        if (file.exists()) {
+            file.delete()
+        }
+    }
+
+
+    @Suppress("unused") fun clearLoadedLogFile() {
         currentSelectedLogFile = null
         fileLogEntries.clear()
     }
