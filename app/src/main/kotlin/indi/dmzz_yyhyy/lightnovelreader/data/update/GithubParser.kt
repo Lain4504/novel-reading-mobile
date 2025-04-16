@@ -1,8 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.update
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.ui.util.fastFilter
 import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.md.HtmlToMdUtil
@@ -162,7 +160,6 @@ object GithubParser {
     object CIParser: UpdateParser {
         private const val URL = "/dmzz-yyhyy/LightNovelReader/actions/workflows/marge.yml"
         private val prIdRegex = Regex("Merge pull request #([0-9]*)")
-        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun parser(updatePhase: MutableStateFlow<String>): Release? {
             System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
             host = updateHost()
