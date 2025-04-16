@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -15,14 +16,17 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +37,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +51,7 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -93,6 +99,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
+import indi.dmzz_yyhyy.lightnovelreader.utils.pinAction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -112,7 +119,7 @@ fun BookshelfHomeScreen(
     onClickEnableSelectMode: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,
-    onClickPin: () -> Unit,
+    onClickPin: (Int?) -> Unit,
     onClickRemove: () -> Unit,
     onClickMarkSelectedBooks: () -> Unit,
     saveAllBookshelfJsonData: (Uri) -> Unit,
@@ -122,7 +129,7 @@ fun BookshelfHomeScreen(
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope
 ) {
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val workManager = WorkManager.getInstance(context)
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -133,18 +140,23 @@ fun BookshelfHomeScreen(
     val saveAllBookshelfLauncher = launcher(saveAllBookshelfJsonData)
     val saveThisBookshelfLauncher = launcher(saveBookshelfJsonData)
     val importBookshelfLauncher = launcher(importBookshelf)
-    val lazyListState = rememberLazyListState()
-    var updatedBooksExpanded by remember { mutableStateOf(true) }
-    var pinnedBooksExpanded by remember { mutableStateOf(true) }
-    var allBooksExpanded by remember { mutableStateOf(true) }
-    LifecycleEventEffect(Lifecycle.Event.ON_START) {
-        init.invoke()
+
+    val listState = rememberLazyListState()
+
+    BackHandler(uiState.selectMode) {
+        onClickDisableSelectMode()
     }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        init()
+    }
+
     LaunchedEffect(uiState.toast) {
         if (uiState.toast.isEmpty()) return@LaunchedEffect
         Toast.makeText(context, uiState.toast, Toast.LENGTH_SHORT).show()
         clearToast()
     }
+
     with(sharedTransitionScope) {
         Scaffold(
             topBar = {
@@ -180,7 +192,7 @@ fun BookshelfHomeScreen(
                             ExistingWorkPolicy.KEEP,
                             workRequest
                         )
-                        scope.launch(Dispatchers.IO) {
+                        coroutineScope.launch(Dispatchers.IO) {
                             workManager.getWorkInfoByIdFlow(workRequest.id).collect {
                                 when (it?.state) {
                                     WorkInfo.State.SUCCEEDED -> {
@@ -224,55 +236,65 @@ fun BookshelfHomeScreen(
             }
         ) { paddingValues ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(paddingValues)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                if (uiState.bookshelfList.size > 4) {
-                    ScrollableTabRow(
-                        selectedTabIndex = uiState.selectedTabIndex,
-                        edgePadding = 16.dp,
-                        indicator = { tabPositions ->
-                            SecondaryIndicator(
-                                modifier = Modifier
-                                    .tabIndicatorOffset(tabPositions[uiState.selectedTabIndex])
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                                    .background(MaterialTheme.colorScheme.secondary),
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        },
-                    ) {
-                        uiState.bookshelfList.forEach { bookshelf ->
-                            Tab(
-                                selected = uiState.selectedBookshelfId == bookshelf.id,
-                                onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
-                                text = {
-                                    Text(
-                                        text = bookshelf.name,
-                                        maxLines = 1
-                                    )
-                                }
-                            )
+                AnimatedVisibility(
+                    visible = !uiState.selectMode,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    if (uiState.bookshelfList.size > 4) {
+                        ScrollableTabRow(
+                            selectedTabIndex = uiState.selectedTabIndex,
+                            edgePadding = 16.dp,
+                            indicator = { tabPositions ->
+                                SecondaryIndicator(
+                                    modifier = Modifier
+                                        .tabIndicatorOffset(tabPositions[uiState.selectedTabIndex])
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                                        .background(MaterialTheme.colorScheme.secondary),
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            },
+                        ) {
+                            uiState.bookshelfList.forEach { bookshelf ->
+                                Tab(
+                                    selected = uiState.selectedBookshelfId == bookshelf.id,
+                                    onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
+                                    text = {
+                                        Text(
+                                            text = bookshelf.name,
+                                            maxLines = 1
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
-                } else {
-                    PrimaryTabRow(
-                        selectedTabIndex = uiState.selectedTabIndex
-                    ) {
-                        uiState.bookshelfList.forEach { bookshelf ->
-                            Tab(
-                                selected = uiState.selectedBookshelfId == bookshelf.id,
-                                onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
-                                text = {
-                                    Text(
-                                        text = bookshelf.name,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                            )
+                    else {
+                        PrimaryTabRow(
+                            selectedTabIndex = uiState.selectedTabIndex
+                        ) {
+                            uiState.bookshelfList.forEach { bookshelf ->
+                                Tab(
+                                    selected = uiState.selectedBookshelfId == bookshelf.id,
+                                    onClick = { if (!uiState.selectMode) changePage(bookshelf.id) },
+                                    text = {
+                                        Text(
+                                            text = bookshelf.name,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                )
+                            }
                         }
                     }
                 }
+
 
                 AnimatedVisibility(
                     visible = uiState.selectedBookshelf.allBookIds.isEmpty(),
@@ -295,102 +317,170 @@ fun BookshelfHomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    state = lazyListState
+                    state = listState
                 ) {
-                    if (uiState.selectedBookshelf.updatedBookIds.isNotEmpty() && !uiState.selectMode)
-                        item {
-                            CollapseGroupTitle(
-                                modifier = Modifier.animateItem(),
-                                icon = painterResource(R.drawable.keep_24px),
-                                title = stringResource(
-                                    R.string.bookshelf_group_title_updated,
-                                    uiState.selectedBookshelf.updatedBookIds.size
-                                ),
-                                expanded = updatedBooksExpanded,
-                                onClickExpand = { updatedBooksExpanded = !updatedBooksExpanded }
-                            )
-                        }
-                    if (updatedBooksExpanded && !uiState.selectMode) {
-                        items(uiState.selectedBookshelf.updatedBookIds.reversed()) { updatedBookId ->
-                            uiState.bookInformationMap[updatedBookId]?.let {
-                                BookCardItem(
-                                    bookInformation = it,
-                                    selected = uiState.selectedBookIds.contains(it.id),
-                                    latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
-                                    onClick = {
-                                        if (!uiState.selectMode)
-                                            onClickBook(it.id)
-                                        else changeBookSelectState(it.id)
-                                    },
-                                    onLongPress = { }
-                                )
-                            }
-                        }
-                    }
-                    if (uiState.selectedBookshelf.pinnedBookIds.isNotEmpty())
-                        item {
-                            CollapseGroupTitle(
-                                modifier = Modifier.animateItem(),
-                                icon = painterResource(R.drawable.keep_24px),
-                                title = stringResource(
-                                    R.string.bookshelf_group_title_pinned,
-                                    uiState.selectedBookshelf.pinnedBookIds.size
-                                ),
-                                expanded = pinnedBooksExpanded,
-                                onClickExpand = { pinnedBooksExpanded = !pinnedBooksExpanded }
-                            )
-                        }
-                    if (pinnedBooksExpanded) {
-                        items(uiState.selectedBookshelf.pinnedBookIds.reversed()) { pinnedBookId ->
-                            uiState.bookInformationMap[pinnedBookId]?.let {
-                                BookCardItem(
-                                    bookInformation = it,
-                                    selected = uiState.selectedBookIds.contains(it.id),
-                                    onClick = {
-                                        if (!uiState.selectMode)
-                                            onClickBook(it.id)
-                                        else changeBookSelectState(it.id)
-                                    },
-                                    onLongPress = { onLongPress(it.id) }
-                                )
-                            }
-                        }
-                    }
-                    if (uiState.selectedBookshelf.allBookIds.isNotEmpty())
-                        item {
-                            CollapseGroupTitle(
-                                modifier = Modifier.animateItem(),
-                                icon = painterResource(R.drawable.outline_bookmark_24px),
-                                title = stringResource(
-                                    R.string.bookshelf_group_title_all,
-                                    uiState.selectedBookshelf.allBookIds.size
-                                ),
-                                expanded = allBooksExpanded,
-                                onClickExpand = { allBooksExpanded = !allBooksExpanded }
-                            )
-                        }
-                    if (allBooksExpanded) {
-                        items(uiState.selectedBookshelf.allBookIds.reversed()) { bookId ->
-                            uiState.bookInformationMap[bookId]?.let {
-                                BookCardItem(
-                                    bookInformation = it,
-                                    selected = uiState.selectedBookIds.contains(it.id),
-                                    onClick = {
-                                        if (!uiState.selectMode)
-                                            onClickBook(it.id)
-                                        else changeBookSelectState(it.id)
-                                    },
-                                    onLongPress = { onLongPress(it.id) }
-                                )
-                            }
-                        }
-                    }
+                    UpdatedBooks(uiState, onClickBook, changeBookSelectState)
+                    PinnedBooks(uiState, onClickBook, changeBookSelectState, onLongPress)
+                    AllBooks(uiState, onClickBook, changeBookSelectState, onClickPin, onLongPress)
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+fun LazyListScope.UpdatedBooks(
+    uiState: BookshelfHomeUiState,
+    onClickBook: (Int) -> Unit,
+    onSelectedChange: (Int) -> Unit,
+) {
+    val updatedBookIds = uiState.selectedBookshelf.updatedBookIds.reversed()
+    if (updatedBookIds.isEmpty()) return
+    item {
+        Spacer(Modifier.height(8.dp))
+    }
+    stickyHeader {
+        CollapseGroupTitle(
+            modifier = Modifier.animateItem(),
+            icon = painterResource(R.drawable.autorenew_24px),
+            title = stringResource(
+                R.string.bookshelf_group_title_updated,
+                updatedBookIds.size
+            ),
+            expanded = uiState.updatedExpanded,
+            onClickExpand = { uiState.updatedExpanded = !uiState.updatedExpanded }
+        )
+    }
+    items(updatedBookIds) { updatedBookId ->
+        AnimatedVisibility(
+            visible = uiState.updatedExpanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            uiState.bookInformationMap[updatedBookId]?.let {
+                BookCardItem(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    bookInformation = it,
+                    selected = uiState.selectedBookIds.contains(it.id),
+                    latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
+                    onClick = {
+                        if (!uiState.selectMode)
+                            onClickBook(it.id)
+                        else onSelectedChange(it.id) },
+                    onLongPress = { }
+                )
+
+            }
+        }
+
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+fun LazyListScope.PinnedBooks(
+    uiState: BookshelfHomeUiState,
+    onClickBook: (Int) -> Unit,
+    onSelectedChange: (Int) -> Unit,
+    onLongPress: (Int) -> Unit,
+) {
+    val pinnedBookIds = uiState.selectedBookshelf.pinnedBookIds.reversed()
+    if (pinnedBookIds.isEmpty()) return
+    stickyHeader {
+        CollapseGroupTitle(
+            modifier = Modifier.animateItem(),
+            icon = painterResource(R.drawable.keep_24px),
+            title = stringResource(
+                R.string.bookshelf_group_title_pinned,
+                pinnedBookIds.size
+            ),
+            expanded = uiState.pinnedExpanded,
+            onClickExpand = { uiState.pinnedExpanded = !uiState.pinnedExpanded }
+        )
+    }
+    items(pinnedBookIds) { pinnedBookId ->
+        AnimatedVisibility(
+            visible = uiState.pinnedExpanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            uiState.bookInformationMap[pinnedBookId]?.let {
+                BookCardItem(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    bookInformation = it,
+                    selected = uiState.selectedBookIds.contains(it.id),
+                    onClick = {
+                        if (!uiState.selectMode)
+                            onClickBook(it.id)
+                        else onSelectedChange(it.id)
+                    },
+                    onLongPress = { onLongPress(it.id) }
+                )
+            }
+        }
+    }
+
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+fun LazyListScope.AllBooks(
+    uiState: BookshelfHomeUiState,
+    onClickBook: (Int) -> Unit,
+    onSelectedChange: (Int) -> Unit,
+    onClickPin: (Int) -> Unit,
+    onLongPress: (Int) -> Unit
+) {
+    val allBookIds = uiState.selectedBookshelf.allBookIds.reversed()
+    if (allBookIds.isEmpty()) return
+    stickyHeader {
+        CollapseGroupTitle(
+            modifier = Modifier.animateItem(),
+            icon = painterResource(R.drawable.outline_bookmark_24px),
+            title = stringResource(
+                R.string.bookshelf_group_title_all,
+                allBookIds.size
+            ),
+            expanded = uiState.allExpanded,
+            onClickExpand = { uiState.allExpanded = !uiState.allExpanded }
+        )
+    }
+    items(allBookIds) { bookId ->
+        val pin = pinAction.toSwipeAction {
+            onClickPin(bookId)
+        }
+        AnimatedVisibility(
+            visible = uiState.allExpanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            uiState.bookInformationMap[bookId]?.let {
+                BookCardItem(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    bookInformation = it,
+                    selected = uiState.selectedBookIds.contains(it.id),
+                    onClick = {
+                        if (!uiState.selectMode)
+                            onClickBook(it.id)
+                        else onSelectedChange(it.id)
+                    },
+                    onLongPress = { onLongPress(it.id) },
+                    swipeToLeftActions = if (uiState.selectMode) emptyList() else listOf(pin)
+                )
+            }
+        }
+    }
+    item {
+        Box(modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center) {
+            Text(
+                modifier = Modifier.padding(vertical = 18.dp),
+                text = "${allBookIds.size} 本书",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.W600,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+    }
+
 }
 
 @Composable
@@ -401,34 +491,37 @@ fun CollapseGroupTitle(
     expanded: Boolean,
     onClickExpand: () -> Unit
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(32.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            modifier = Modifier.size(20.dp),
-            painter = icon,
-            contentDescription = null
-        )
-        AnimatedText(
-            modifier = Modifier.weight(2f),
-            text = title,
-            style = MaterialTheme.typography.displayLarge,
-            fontWeight = FontWeight.W700,
-            fontSize = 15.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        IconButton(onClickExpand) {
+    Surface {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(42.dp)
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
-                modifier = Modifier.rotate(if (expanded) 0f else 180f),
-                painter = painterResource(R.drawable.keyboard_arrow_up_24px),
-                contentDescription = "expand"
+                modifier = Modifier.size(20.dp),
+                painter = icon,
+                contentDescription = null
             )
+            AnimatedText(
+                modifier = Modifier.weight(2f),
+                text = title,
+                style = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.W600,
+                fontSize = 15.sp,
+                lineHeight = 16.sp,
+                letterSpacing = 0.5.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            IconButton(onClickExpand) {
+                Icon(
+                    modifier = Modifier.rotate(if (expanded) 0f else 180f),
+                    painter = painterResource(R.drawable.keyboard_arrow_up_24px),
+                    contentDescription = "expand"
+                )
+            }
         }
     }
 }
@@ -445,7 +538,7 @@ fun TopBar(
     onClickEdit: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,
-    onClickPin: () -> Unit,
+    onClickPin: (Int?) -> Unit,
     onClickRemove: () -> Unit,
     onClickBookmark: () -> Unit,
     onClickShareBookshelf: () -> Unit,
@@ -617,7 +710,7 @@ fun TopBar(
                         contentDescription = "select all"
                     )
                 }
-                IconButton(onClickPin) {
+                IconButton({ onClickPin(null) }) {
                     Icon(
                         painter = painterResource(R.drawable.keep_24px),
                         contentDescription = "pin"

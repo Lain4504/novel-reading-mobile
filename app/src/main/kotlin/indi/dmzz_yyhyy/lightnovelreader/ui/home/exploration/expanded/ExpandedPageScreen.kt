@@ -3,6 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,6 +47,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Component
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
+import indi.dmzz_yyhyy.lightnovelreader.utils.addToBookshelfAction
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 import kotlinx.coroutines.launch
 
@@ -58,7 +60,7 @@ fun ExpandedPageScreen(
     expandedPageDataSourceId: String,
     init: (String) -> Unit,
     loadMore: () -> Unit,
-    @Suppress("UNUSED_PARAMETER") requestAddBookToBookshelf: (Int) -> Unit,
+    requestAddBookToBookshelf: (Int) -> Unit,
     onClickBack: () -> Unit,
     onClickBook: (Int) -> Unit,
     refresh: () -> Unit,
@@ -106,8 +108,10 @@ fun ExpandedPageScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 3.dp),
+                        .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection)
+                        .background(MaterialTheme.colorScheme.surface)
+                    ,
+                    contentPadding = PaddingValues(vertical = 3.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     item {
@@ -122,13 +126,18 @@ fun ExpandedPageScreen(
                         Box(Modifier.height(3.dp))
                     }
                     itemsIndexed(explorationExpandedPageUiState.bookList) { index, bookInformation ->
+                        val addToBookshelf = addToBookshelfAction.toSwipeAction {
+                            requestAddBookToBookshelf(bookInformation.id)
+                        }
                         BookCardItem(
+                            modifier = Modifier.padding(horizontal = 16.dp),
                             bookInformation = bookInformation,
                             onClick = { onClickBook(bookInformation.id) },
                             onLongPress = withHaptic {},
                             collected = explorationExpandedPageUiState.allBookshelfBookIds.contains(
                                 bookInformation.id
-                            )
+                            ),
+                            swipeToRightActions = listOf(addToBookshelf)
                         )
                         LaunchedEffect(explorationExpandedPageUiState.bookList.size) {
                             if (explorationExpandedPageUiState.bookList.size - index == 3) {
