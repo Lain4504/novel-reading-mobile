@@ -1,9 +1,13 @@
 package indi.dmzz_yyhyy.lightnovelreader.utils
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
+import indi.dmzz_yyhyy.lightnovelreader.data.logging.LoggerRepository
 import java.io.BufferedReader
+import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -11,11 +15,62 @@ import java.util.Date
 import java.util.Locale
 import java.util.Properties
 import java.util.regex.Pattern
+import kotlin.system.exitProcess
+
+class LogUtils (
+    @ApplicationContext private val context: Context,
+    private val loggerRepository: LoggerRepository
+): Thread.UncaughtExceptionHandler {
+    private val logsDir = File(context.cacheDir, "logs")
+
+    override fun uncaughtException(thread: Thread, throwable: Throwable) {
+        Log.e("LogUtils", "uncaughtException", throwable)
+
+        val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+        val fileName = "lnr_panic_${sdf.format(Date())}.log"
+        val logFile = File(logsDir.also { it.mkdirs() }, fileName)
+
+
+        val logText = buildString {
+            append(buildReportHeader())
+            append("\n----- start of panic\n")
+            append("Thread: $thread\n\n")
+            append(formatThrowable(throwable) + "\n\n")
+            append("Logcat: \n\n")
+            append(loggerRepository.realTimeLogEntries.joinToString("\n") { it.text })
+            append("\n----- end of logcat")
+        }
+
+        logFile.writeText(logText)
+        exitProcess(1)
+    }
+
+    private fun formatThrowable(throwable: Throwable): String {
+        var format = throwable.javaClass.name
+        val message = throwable.message
+        if (!message.isNullOrBlank()) {
+            format += ": $message"
+        }
+        format += "\n"
+
+        format += throwable.stackTrace.joinToString("\n") {
+            "    at ${it.className}.${it.methodName}(${it.fileName}:${if (it.isNativeMethod) "native" else it.lineNumber})"
+        }
+
+        val cause = throwable.cause
+        if (cause != null) {
+            format += "\n\nCaused by: " + formatThrowable(cause)
+        }
+
+        return format
+    }
+}
 
 fun buildReportHeader(): String {
     val report = StringBuilder()
     report.append("LightNovelReader ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
-    if (BuildConfig.DEBUG) report.append(", DEBUG build\n")
+    if (BuildConfig.DEBUG) report.append(", DEBUG build")
+    report.append("\n")
 
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z", Locale.US)
     report.append("Date: ${sdf.format(Date())}\n\n")
@@ -61,7 +116,6 @@ fun buildReportHeader(): String {
 
     return report.toString()
 }
-
 
 private fun getSystemPropertyWithAndroidAPI(property: String): String? {
     return try {

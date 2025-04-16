@@ -1,11 +1,14 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,12 +17,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,33 +42,41 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogEntry
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogLevel
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogcatScreen(
+    uiState: LogcatUiState,
+    logFiles: List<String>,
     logEntries: List<LogEntry>,
     onClickBack: () -> Unit,
     onClickClearLogs: () -> Unit,
     onClickShareLogs: () -> Unit,
+    onClickDeleteLogFile: (String) -> Unit,
+    onSelectLogFile: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var unwrapLogsText by remember { mutableStateOf(false) }
-    val onClickWarp = { unwrapLogsText = !unwrapLogsText }
-
+    var autoScrollEnabled by remember { mutableStateOf(true) }
 
     LaunchedEffect(logEntries.size) {
-        if (logEntries.size > 1) {
+        if (logEntries.size > 1 && autoScrollEnabled) {
             coroutineScope.launch {
                 listState.animateScrollToItem(logEntries.size - 1)
             }
@@ -66,7 +86,12 @@ fun LogcatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("日志") },
+                title = {
+                    Column {
+                        Text("日志", style = MaterialTheme.typography.titleLarge)
+                        AnimatedTextLine(uiState.selectedLogFile, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary, overflow = TextOverflow.Ellipsis)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClickBack) {
                         Icon(
@@ -77,26 +102,14 @@ fun LogcatScreen(
                 },
                 actions = {
                     if (logEntries.isNotEmpty()){
-                        IconButton(onClickClearLogs) {
-                            Icon(
-                                painterResource(id = R.drawable.delete_forever_24px),
-                                contentDescription = "clear",
-                            )
+                        if (!uiState.isFileMode) {
+                            IconButton(onClickClearLogs) {
+                                Icon(
+                                    painterResource(id = R.drawable.delete_forever_24px),
+                                    contentDescription = "clear",
+                                )
+                            }
                         }
-                        if (!unwrapLogsText)
-                            IconButton(onClickWarp) {
-                                Icon(
-                                    painterResource(id = R.drawable.wrap_text_24px),
-                                    contentDescription = "wrap"
-                                )
-                            }
-                        else
-                            IconButton(onClickWarp) {
-                                Icon(
-                                    painterResource(id = R.drawable.menu_open_24px),
-                                    contentDescription = "unwrap",
-                                )
-                            }
                         IconButton(onClickShareLogs) {
                             Icon(
                                 painterResource(id = R.drawable.ios_share_24px),
@@ -106,6 +119,161 @@ fun LogcatScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            var menuExpanded by remember { mutableStateOf(false) }
+            BottomAppBar(
+                modifier = Modifier.height(100.dp),
+                tonalElevation = 4.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    var expanded by remember { mutableStateOf(false) }
+
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        TextField(
+                            value = uiState.selectedLogFile,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("日志来源") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                            modifier = Modifier
+                                .menuAnchor(
+                                    type = MenuAnchorType.PrimaryNotEditable,
+                                    enabled = true
+                                )
+                                .fillMaxWidth(),
+                            maxLines = 1,
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier.width(320.dp)
+                        ) {
+                            logFiles.forEach { fileName ->
+                                val (label, subText) = parseFileLabel(fileName)
+
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Spacer(Modifier.width(6.dp))
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(8.dp)
+                                                    .clip(CircleShape)
+                                                    .background(colorForFile(fileName))
+                                            )
+
+                                            Spacer(Modifier.width(16.dp))
+
+                                            Column {
+                                                Text(
+                                                    text = label,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                if (subText.isNotEmpty()) {
+                                                    Text(
+                                                        text = subText,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    },
+                                    onClick = {
+                                        onSelectLogFile(fileName)
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(painterResource(R.drawable.more_vert_24px), contentDescription = "more")
+                        }
+
+                        DropdownMenu(
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Column {
+                                        Text("删除所有临时日志", style = MaterialTheme.typography.titleMedium)
+                                        Text(
+                                            text = "清除应用缓存，这些临时日志也将被删除",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onClickDeleteLogFile(":all")
+                                    menuExpanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                                    ) {
+                                        Text("自动滚动", style = MaterialTheme.typography.titleMedium)
+                                        Spacer(Modifier.weight(1f))
+                                        Switch(
+                                            checked = autoScrollEnabled,
+                                            onCheckedChange = {
+                                                autoScrollEnabled = it
+                                            }
+                                        )
+                                    }
+
+                                },
+                                onClick = { }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                                    ) {
+                                        Text("自动换行", style = MaterialTheme.typography.titleMedium)
+                                        Spacer(Modifier.weight(1f))
+                                        Switch(
+                                            checked = unwrapLogsText,
+                                            onCheckedChange = {
+                                                unwrapLogsText = !unwrapLogsText
+                                            }
+                                        )
+                                    }
+
+                                },
+                                onClick = { }
+                            )
+                        }
+                    }
+                }
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -114,6 +282,41 @@ fun LogcatScreen(
                 else UnWrapLogListContent(logEntries, listState)
             }
         }
+    }
+}
+
+private fun parseFileLabel(fileName: String): Pair<String, String> {
+    val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+    val displayFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+
+    val (prefix, rawTimestamp) = when {
+        fileName.startsWith("lnr_export_") -> "分享的日志" to fileName.removePrefix("lnr_export_").removeSuffix(".log")
+        fileName.startsWith("lnr_panic_") -> "App 崩溃" to fileName.removePrefix("lnr_panic_").removeSuffix(".log")
+        else -> null to null
+    }
+
+    val timestamp = try {
+        rawTimestamp?.let {
+            val parsed = LocalDateTime.parse(it, formatter)
+            parsed.format(displayFormatter)
+        }
+    } catch (_: Exception) {
+        null
+    }
+
+    val label = fileName
+    val subLabel = if (prefix != null && timestamp != null) "$prefix - $timestamp" else ""
+
+    return label to subLabel
+}
+
+@Composable
+private fun colorForFile(fileName: String): Color {
+    return when {
+        fileName == "实时" -> Color(0xFF4CAF50)
+        fileName.startsWith("lnr_panic_") -> Color(0xFFF44336)
+        fileName.startsWith("lnr_export_") -> Color(0xFF2196F3)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 }
 
