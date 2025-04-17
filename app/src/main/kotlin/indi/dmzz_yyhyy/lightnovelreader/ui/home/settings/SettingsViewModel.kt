@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings
 
 import android.net.Uri
 import androidx.compose.runtime.getValue
@@ -14,7 +14,6 @@ import androidx.work.workDataOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ImportDataWork
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject

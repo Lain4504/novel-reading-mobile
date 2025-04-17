@@ -11,10 +11,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocaleUtil
@@ -27,40 +25,37 @@ fun LightNovelReaderTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val appDarkTheme = when (darkMode) {
-        "Enabled" -> true
+    val view = LocalView.current
+    val isDark = when (darkMode) {
         "Disabled" -> false
+        "Enabled" -> true
         "FollowSystem" -> isSystemInDarkTheme()
         else -> isSystemInDarkTheme()
     }
     val colorScheme =
         if (isDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            if (appDarkTheme) dynamicDarkColorScheme(context)
+            if (isDark) dynamicDarkColorScheme(context)
             else dynamicLightColorScheme(context)
         else
-            if (appDarkTheme) darkColorScheme()
+            if (isDark) darkColorScheme()
             else lightColorScheme()
 
-    if (!LocalInspectionMode.current) {
-        val view = LocalView.current
-        val (language, variant) = appLocale.split("-")
-        LocaleUtil.set(context, language = language, variant = variant)
-        LaunchedEffect(context, view) {
-            val window = (view.context as Activity).window
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            window.setBackgroundDrawable(
-                ColorDrawable(colorScheme.background.toArgb())
-            )
+    LaunchedEffect(context, view, isDark) {
+        val window = (view.context as Activity).window
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.setBackgroundDrawable(
+            ColorDrawable(colorScheme.background.toArgb())
+        )
 
-            val controller = WindowCompat.getInsetsController(window, view)
-            controller.isAppearanceLightStatusBars = !appDarkTheme
-            window.statusBarColor = Color.Transparent.toArgb()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                window.navigationBarColor = Color.Transparent.toArgb()
-                controller.isAppearanceLightNavigationBars = !appDarkTheme
-            }
-        }
+        val controller = WindowCompat.getInsetsController(window, view)
+        controller.isAppearanceLightStatusBars = !isDark
     }
-    MaterialTheme(colorScheme = colorScheme, content = content)
+
+    val (language, variant) = appLocale.split("-")
+    LocaleUtil.set(context, language = language, variant = variant)
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        content = content
+    )
 }

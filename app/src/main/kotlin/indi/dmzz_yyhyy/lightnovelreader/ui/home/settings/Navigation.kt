@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings
 
 import android.content.Intent
 import android.os.Build
@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
+import androidx.navigation.compose.navigation
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportContext
@@ -29,10 +30,12 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.SourceChangeDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewModel
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.ExportUserDataDialogViewModel
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SourceChangeDialogViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSettingsDebugDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.settingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.navigateToSettingsLogcatDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.settingsLogcatDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.settingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
@@ -45,7 +48,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.settingsHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.settingsDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Main.Settings.Home>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
@@ -66,12 +69,30 @@ fun NavGraphBuilder.settingsHomeDestination(navController: NavController, shared
             onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             onClickLogcat = navController::navigateToSettingsLogcatDestination,
+            onClickThemeSettings = navController::navigateToSettingsThemeDestination,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
         )
     }
     sourceChangeDialog(navController)
     exportUserDataDialog(navController)
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.mainSettingsNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+    navigation<Route.Main.Settings>(
+        startDestination = Route.Main.Settings.Home
+    ) {
+        settingsDestination(navController, sharedTransitionScope)
+        settingsDebugDestination(navController)
+        settingsLogcatDestination(navController)
+        settingsThemeDestination(navController)
+    }
+}
+
+@Suppress("unused")
+fun NavController.navigateToSettingsDestination() {
+    navigate(Route.Main.Settings)
 }
 
 private fun NavGraphBuilder.sourceChangeDialog(navController: NavController) {

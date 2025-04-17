@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,11 +38,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -85,7 +83,7 @@ fun SettingsSwitchEntry(
     description: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    disabled: Boolean = false
+    disabled: Boolean
 ) {
     Row(
         modifier = modifier
@@ -93,7 +91,7 @@ fun SettingsSwitchEntry(
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .wrapContentHeight()
-            .then(if (!disabled) Modifier.clickable { onCheckedChange(!checked) } else Modifier)
+            .then(if (!disabled) modifier.clickable { onCheckedChange(!checked) } else modifier)
             .padding(start = 18.dp, end = 14.dp)
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -276,7 +274,6 @@ fun SettingsMenuEntry(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsMenuEntry(
     modifier: Modifier = Modifier,
@@ -288,7 +285,7 @@ fun SettingsMenuEntry(
     onOptionChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
+    var selectedOption by remember { mutableStateOf(options.get(selectedOptionKey)) }
 
     Row(
         modifier = modifier
@@ -296,9 +293,7 @@ fun SettingsMenuEntry(
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .wrapContentHeight()
-            .pointerInteropFilter {
-                offset = Offset(it.x, it.y); false
-            }
+            .then(modifier)
             .clickable { expanded = !expanded }
             .padding(start = 18.dp, end = 14.dp)
             .padding(vertical = 8.dp),
@@ -345,14 +340,15 @@ fun SettingsMenuEntry(
                 )
             }
             AnimatedTextLine(
-                text = stringResource(options.get(selectedOptionKey).nameId),
+                text = stringResource(selectedOption.nameId),
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
                 color = MaterialTheme.colorScheme.primary
             )
+
             Box(
                 modifier = Modifier.offset {
-                    IntOffset(offset.x.toInt(), 0)
+                    IntOffset(0, 20)
                 }
             ) {
                 DropdownMenu(
@@ -361,11 +357,22 @@ fun SettingsMenuEntry(
                 ) {
                     options.optionList.forEach { option ->
                         DropdownMenuItem(
+                            modifier = if (option.key == selectedOptionKey)
+                                Modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                            else
+                                Modifier,
                             onClick = {
+                                selectedOption = option
                                 onOptionChange(option.key)
-                                expanded = false
-                            },
-                            text = { Text(stringResource(option.nameId), fontSize = 14.sp) },
+                                expanded = false },
+                            enabled = true,
+                            interactionSource = remember { MutableInteractionSource() },
+                            text = {
+                                Text(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    text = stringResource(option.nameId),
+                                    fontSize = 14.sp,)
+                            }
                         )
                     }
                 }
@@ -373,6 +380,7 @@ fun SettingsMenuEntry(
         }
     }
 }
+
 
 @Composable
 fun SettingsClickableEntry(
