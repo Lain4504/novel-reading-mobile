@@ -4,6 +4,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToColorPickerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
@@ -22,7 +24,13 @@ fun NavGraphBuilder.settingsThemeDestination(navController: NavController) {
         val themeSettingState = viewModel.settingState
         ThemeScreen(
             themeSettingState = themeSettingState,
-            onClickBack = navController::popBackStackIfResumed
+            onClickBack = navController::popBackStackIfResumed,
+            onClickChangeTextColor = {
+                navController.navigateToColorPickerDialog(
+                    UserDataPath.Reader.TextColor.path,
+                    listOf(-1, 0xFF1D1B20, 0xFFE6E0E9)
+                )
+            }
         )
     }
 }

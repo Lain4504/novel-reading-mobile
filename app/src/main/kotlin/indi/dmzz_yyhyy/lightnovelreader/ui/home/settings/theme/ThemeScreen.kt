@@ -3,10 +3,13 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,8 +41,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.isUnspecified
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,21 +53,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.selectDataFile
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
-import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
+import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncherWithFlag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.FileInputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ThemeScreen(
     themeSettingState: ThemeSettingState,
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    onClickChangeTextColor: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -78,7 +90,7 @@ fun ThemeScreen(
                 ThemeSettingsList(themeSettingState)
             }
             item {
-                ReaderThemeSettingsList(themeSettingState)
+                ReaderThemeSettingsList(themeSettingState, onClickChangeTextColor)
             }
         }
     }
@@ -89,17 +101,20 @@ fun DarkModeSettings(
     settingState: ThemeSettingState
 ) {
     Text(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         text = "深色主题",
         fontSize = 16.sp,
         fontWeight = FontWeight.W600
     )
     Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Column {
+        // 禁用暗色模式
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             LightThemeSettingsItem(settingState = settingState)
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -111,7 +126,12 @@ fun DarkModeSettings(
                 Text(stringResource(R.string.key_dark_mode_disabled), fontSize = 15.sp)
             }
         }
-        Column {
+
+        // 启用暗色模式
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             DarkThemeSettingsItem(settingState = settingState)
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -123,7 +143,12 @@ fun DarkModeSettings(
                 Text(stringResource(R.string.key_dark_mode_enabled), fontSize = 15.sp)
             }
         }
-        Column {
+
+        // 跟随系统
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Box(
                 modifier = Modifier
                     .height(170.dp)
@@ -159,10 +184,12 @@ fun DarkModeSettings(
                         shape = shapeBottom
                     }
 
-                LightThemeSettingsItem(modifierTop, settingState = settingState)
-                DarkThemeSettingsItem(modifierBottom, settingState = settingState)
+                LightThemeSettingsItem(modifier = modifierTop, settingState = settingState)
+                DarkThemeSettingsItem(modifier = modifierBottom, settingState = settingState)
             }
+
             Spacer(Modifier.height(12.dp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
                     modifier = Modifier.size(32.dp),
@@ -173,11 +200,12 @@ fun DarkModeSettings(
             }
         }
     }
+
 }
 
 @Composable
 fun ThemeSettingsList(
-    settingState: ThemeSettingState
+    settingState: ThemeSettingState,
 ) {
     Spacer(Modifier.height(14.dp))
     SettingsSwitchEntry(
@@ -189,6 +217,12 @@ fun ThemeSettingsList(
         booleanUserData = settingState.dynamicColorsKeyUserData,
         disabled = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
     )
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        text = "字形",
+        fontSize = 16.sp,
+        fontWeight = FontWeight.W600
+    )
     SettingsMenuEntry(
         modifier = Modifier.background(colorScheme.surface),
         iconRes = R.drawable.translate_24px,
@@ -197,12 +231,6 @@ fun ThemeSettingsList(
         options = MenuOptions.AppLocaleOptions,
         selectedOptionKey = settingState.appLocaleKey,
         onOptionChange = settingState.appLocaleKeyUserData::asynchronousSet
-    )
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        text = "字形预览",
-        fontSize = 16.sp,
-        fontWeight = FontWeight.W600
     )
     key(settingState.appLocaleKey) {
         Box(
@@ -215,8 +243,10 @@ fun ThemeSettingsList(
                 )
             ) {
                 Text(
-                    modifier = Modifier.padding(8.dp).align(Alignment.CenterHorizontally),
-                    text = "熊浅骨新全微苗省澳火刃忍家辨边\n勇哥恐径尖底立牙丰北直耳亦食周",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally),
+                    text = "预览文本\n熊浅骨新全微苗省澳火刃忍家辨边\n勇哥恐径尖底立牙丰北直耳亦食周",
                     fontWeight = FontWeight.W500
                 )
             }
@@ -226,246 +256,560 @@ fun ThemeSettingsList(
 
 @Composable
 fun ReaderThemeSettingsList(
-    settingState: ThemeSettingState
+    settingState: ThemeSettingState,
+    onClickChangeTextColor: () -> Unit
 ) {
-    Spacer(Modifier.height(8.dp))
+    val context = LocalContext.current
+    val customBgIsEmpty = (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty())
+
+    Spacer(Modifier.height(12.dp))
     Text(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        text = "阅读器设置",
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        text = "纸张",
         fontSize = 16.sp,
         fontWeight = FontWeight.W600
     )
-    SettingsSwitchEntry(
-        modifier = Modifier.background(colorScheme.surface),
-        iconRes = R.drawable.imagesearch_roller_24px,
-        title = "背景图片",
-        description = "自定义阅读器背景图片",
-        checked = settingState.enableBackgroundImage,
-        booleanUserData = settingState.enableBackgroundImageUserData
-    )
-    if (settingState.enableBackgroundImage) {
-            val content = LocalContext.current
-            val launcher = uriLauncher {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val image = content.filesDir.resolve("readerBackgroundImage")
-                        .also {
-                            if (it.exists()) {
-                                it.delete()
-                                it.createNewFile()
-                            }
-                            else it.createNewFile()
-                        }
-                    try {
-                        content.contentResolver.openFileDescriptor(it, "r")?.use { parcelFileDescriptor ->
-                            FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
-                                fileInputStream.readBytes()
-                            }.let(image::writeBytes)
-                        }
-                    } catch (e: Exception) {
-                        Log.e("ReaderBackground", "failed to load chosen file")
-                        e.printStackTrace()
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Column {
+            BackgroundImageSettingDefaultItem()
+            Spacer(Modifier.height(12.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    modifier = Modifier.size(32.dp),
+                    selected = !settingState.enableBackgroundImage,
+                    onClick = { settingState.enableBackgroundImageUserData.asynchronousSet(false) }
+                )
+                Text("无背景", fontSize = 15.sp)
+            }
+        }
+        Column {
+            BasePageItem() {
+
+                Box (
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(9.dp))
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        modifier = Modifier.size(102.dp, 162.dp),
+                        painter = rememberAsyncImagePainter(R.drawable.paper),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                    Text("Aa 文字", color = colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
+                }
+
+            }
+            Spacer(Modifier.height(12.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    modifier = Modifier.size(32.dp),
+                    selected = (customBgIsEmpty && settingState.enableBackgroundImage),
+                    onClick = {
+                        settingState.enableBackgroundImageUserData.asynchronousSet(true)
+                        settingState.backgroundImageUriUserData.asynchronousSet(Uri.EMPTY)
+                        settingState.backgroundDarkImageUriUserData.asynchronousSet(Uri.EMPTY)
                     }
-                    settingState.backgroundImageUriUserData.set(image.toUri())
+                )
+                Text("内置", fontSize = 15.sp)
+            }
+        }
+        Column {
+            Box(
+                modifier = Modifier
+                    .height(170.dp)
+                    .width(110.dp)
+            ) {
+                val shapeTop = GenericShape { size: Size, _ ->
+                    val tiltOffset = size.height * 0.05f
+                    moveTo(0f, 0f)
+                    lineTo(size.width, 0f)
+                    lineTo(size.width, size.height / 2 - tiltOffset)
+                    lineTo(0f, size.height / 2 + tiltOffset)
+                    close()
+                }
+
+                val shapeBottom = GenericShape { size: Size, _ ->
+                    val tiltOffset = size.height * 0.05f
+                    moveTo(0f, size.height / 2 + tiltOffset)
+                    lineTo(size.width, size.height / 2 - tiltOffset)
+                    lineTo(size.width, size.height)
+                    lineTo(0f, size.height)
+                    close()
+                }
+
+                val modifierTop = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        clip = true
+                        shape = shapeTop
+                    }
+
+                val modifierBottom = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        clip = true
+                        shape = shapeBottom
+                    }
+
+                val (launcher, setIsDarkFlag) = uriLauncherWithFlag { uri, isDark ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val time = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(
+                            Date()
+                        )
+                        val fileName = if (isDark) "readerBackgroundImage_dark_$time" else "readerBackgroundImage_light_$time"
+                        val image = context.filesDir.resolve(fileName).apply {
+                            if (exists()) delete()
+                            createNewFile()
+                        }
+
+
+                        try {
+                            context.contentResolver.openFileDescriptor(uri, "r")?.use { parcelFileDescriptor ->
+                                FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
+                                    fileInputStream.readBytes()
+                                }.let(image::writeBytes)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("ReaderBackground", "failed to load chosen file (${if (isDark) "dark" else "light"})")
+                            e.printStackTrace()
+                        }
+
+                        if (isDark) {
+                            settingState.backgroundDarkImageUriUserData.set(image.toUri())
+                        } else {
+                            settingState.backgroundImageUriUserData.set(image.toUri())
+                        }
+                    }
+                }
+
+
+                LightBackgroundSettingsItem(modifierTop, settingState = settingState) {
+                    setIsDarkFlag(false)
+                    selectDataFile(launcher, "image/*")
+                }
+
+                DarkBackgroundSettingsItem(modifierBottom, settingState = settingState) {
+                    setIsDarkFlag(true)
+                    selectDataFile(launcher, "image/*")
                 }
             }
-            SettingsMenuEntry(
-                modifier = Modifier.background(colorScheme.surface),
-                iconRes = R.drawable.drive_file_move_24px,
-                title = "选择图片",
-                description = "使用应用内置的图片背景或自定义图片文件",
-                options = MenuOptions.SelectImage,
-                selectedOptionKey = if (settingState.backgroundImageUri.toString().isEmpty()) MenuOptions.SelectImage.Default else MenuOptions.SelectImage.Customize,
-                onOptionChange = {
-                    when (it) {
-                        MenuOptions.SelectImage.Default -> settingState.backgroundImageUriUserData.asynchronousSet(
-                            Uri.EMPTY)
-                        MenuOptions.SelectImage.Customize -> selectDataFile(launcher, "image/*")
+
+            Spacer(Modifier.height(12.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    modifier = Modifier.size(32.dp),
+                    selected = !customBgIsEmpty && settingState.enableBackgroundImage,
+                    onClick = {
+                        settingState.enableBackgroundImageUserData.asynchronousSet(true)
+                        if (customBgIsEmpty) Toast.makeText(context, "选择一个自定义图片以启用", Toast.LENGTH_SHORT).show()
                     }
-                }
-            )
-            SettingsMenuEntry(
-                modifier = Modifier.background(colorScheme.surface),
-                title = "背景显示模式",
-                iconRes = R.drawable.insert_page_break_24px,
-                description = "指定自定义背景图片的显示模式",
-                options = MenuOptions.ReaderBgImageDisplayModeOptions,
-                selectedOptionKey = settingState.backgroundImageDisplayMode,
-                stringUserData = settingState.backgroundImageDisplayModeUserData
-            )
+                )
+                Text("自定义", fontSize = 15.sp)
+            }
+        }
     }
+    if (settingState.enableBackgroundImage) {
+        SettingsMenuEntry(
+            modifier = Modifier.background(colorScheme.surface),
+            title = "背景显示模式",
+            iconRes = R.drawable.insert_page_break_24px,
+            description = "指定自定义背景图片的显示模式",
+            options = MenuOptions.ReaderBgImageDisplayModeOptions,
+            selectedOptionKey = settingState.backgroundImageDisplayMode,
+            stringUserData = settingState.backgroundImageDisplayModeUserData
+        )
+    }
+    Spacer(Modifier.height(8.dp))
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        text = "文本",
+        fontSize = 16.sp,
+        fontWeight = FontWeight.W600
+    )
+    val onSecondaryContainer = colorScheme.onSecondaryContainer
+    val background = colorScheme.background
+    SettingsClickableEntry (
+        modifier = Modifier.background(colorScheme.surface),
+        iconRes = R.drawable.palette_24px,
+        title = "文本颜色",
+        description = "自定义阅读器文本颜色",
+        onClick = onClickChangeTextColor,
+        trailingContent = {
+            androidx.compose.foundation.Canvas(
+                modifier = Modifier.size(44.dp)
+            ) {
+                drawCircle(
+                    color = onSecondaryContainer,
+                    radius = 20.dp.toPx(),
+                )
+                drawCircle(
+                    color = background,
+                    radius = 17.5.dp.toPx(),
+                )
+                drawCircle(
+                    color = if (settingState.textColor.isUnspecified) background else settingState.textColor,
+                    radius = 17.5.dp.toPx(),
+                )
+            }
+        }
+    )
 }
 
 @Composable
-fun LightThemeSettingsItem(
+private fun LightThemeSettingsItem(
     modifier: Modifier = Modifier, settingState: ThemeSettingState
 ) {
     MaterialTheme (
         if (settingState.dynamicColorsKey && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
         dynamicLightColorScheme(context = LocalContext.current) else lightColorScheme()
     ) {
-        ThemeSettingItem(modifier)
+        DarkModeSettingItem(modifier)
     }
 }
 
 @Composable
-fun DarkThemeSettingsItem(
+private fun DarkThemeSettingsItem(
     modifier: Modifier = Modifier, settingState: ThemeSettingState
 ) {
     MaterialTheme (
         if (settingState.dynamicColorsKey && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             dynamicDarkColorScheme(context = LocalContext.current) else darkColorScheme()
     ) {
-        ThemeSettingItem(modifier)
+        DarkModeSettingItem(modifier)
     }
 }
 
 @Composable
-fun ThemeSettingItem(
-    modifier: Modifier
+private fun LightBackgroundSettingsItem(
+    modifier: Modifier = Modifier,
+    settingState: ThemeSettingState,
+    onClickSelectImage: () -> Unit
 ) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+    MaterialTheme (
+        if (settingState.dynamicColorsKey && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            dynamicLightColorScheme(context = LocalContext.current) else lightColorScheme()
     ) {
-        Box(
-            modifier = Modifier
-                .width(110.dp)
-                .height(170.dp)
-        ) {
-            Row(
+        BackgroundImageSettingItem(modifier, uri = settingState.backgroundImageUri, onClickSelectImage = { onClickSelectImage() })
+    }
+}
+
+@Composable
+private fun DarkBackgroundSettingsItem(
+    modifier: Modifier = Modifier,
+    settingState: ThemeSettingState,
+    onClickSelectImage: () -> Unit
+) {
+    MaterialTheme (
+        if (settingState.dynamicColorsKey && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            dynamicDarkColorScheme(context = LocalContext.current) else darkColorScheme()
+    ) {
+        BackgroundImageSettingItem(modifier, uri = settingState.backgroundDarkImageUri, onClickSelectImage = { onClickSelectImage() })
+    }
+}
+
+@Composable
+fun BackgroundImageSettingItem(
+    modifier: Modifier,
+    uri: Uri,
+    onClickSelectImage: () -> Unit?
+) {
+    BasePageItem(modifier) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box (
+                modifier = Modifier
+                    .clip(RoundedCornerShape(9.dp))
+                    .fillMaxSize()
+            ) {
+                println("THIS URI IS $uri")
+                Image(
+                    modifier = Modifier.size(102.dp, 162.dp),
+                    painter = rememberAsyncImagePainter(uri),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+
+                )
+            }
+            Text("Aa 文字", color = colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        color = colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(12.dp),
-                    )
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .align(Alignment.TopCenter)
             ) {
-                Column(
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            color = colorScheme.background,
-                            shape = RoundedCornerShape(9.dp)
-                        ),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Row {
-                            Box(
-                                modifier = Modifier
-                                    .height(46.dp)
-                                    .width(36.dp)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Column(
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(56.dp)
-                                        .height(8.dp)
-                                        .background(
-                                            color = colorScheme.primaryContainer,
-                                            shape = CircleShape
-                                        )
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .width(42.dp)
-                                        .height(8.dp)
-                                        .background(
-                                            color = colorScheme.secondaryContainer,
-                                            shape = CircleShape
-                                        )
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .width(32.dp)
-                                        .height(8.dp)
-                                        .background(
-                                            color = colorScheme.secondaryContainer,
-                                            shape = CircleShape
-                                        )
-                                )
-                            }
-                        }
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(26.dp)
-                                    .height(8.dp)
-                                    .background(
-                                        color = colorScheme.secondaryContainer,
-                                        shape = CircleShape
-                                    )
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .background(
-                                        color = colorScheme.secondaryContainer,
-                                        shape = CircleShape
-                                    )
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .width(40.dp)
-                                    .height(8.dp)
-                                    .background(
-                                        color = colorScheme.inversePrimary,
-                                        shape = CircleShape
-                                    )
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .width(72.dp)
-                                    .height(8.dp)
-                                    .background(
-                                        color = colorScheme.tertiaryContainer,
-                                        shape = CircleShape
-                                    )
-                            )
-                        }
+                    IconButton({ onClickSelectImage() }) {
+                        Icon(
+                            painter = painterResource(R.drawable.library_add_24px),
+                            tint = colorScheme.onSurface,
+                            contentDescription = "cancel"
+                        )
                     }
+                }
 
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 5.dp, vertical = 8.dp)
-                            .height(height = 26.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Spacer(Modifier.weight(1f))
-                        Box(
-                            modifier = Modifier
-                                .width(38.dp)
-                                .height(18.dp)
-                                .background(
-                                    color = colorScheme.primaryContainer,
-                                    shape = CircleShape
-                                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton({ onClickSelectImage() }) {
+                        Icon(
+                            painter = painterResource(R.drawable.library_add_24px),
+                            tint = colorScheme.onSurface,
+                            contentDescription = "cancel"
                         )
                     }
                 }
             }
+        }
+
+    }
+    return
+}
+
+@Composable
+private fun BackgroundImageSettingDefaultItem() {
+    BasePageItem {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .width(65.dp)
+                        .height(8.dp)
+                        .background(
+                            color = colorScheme.secondaryContainer,
+                            shape = CircleShape
+                        )
+                )
+                repeat(3) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .background(
+                                color = colorScheme.secondaryContainer,
+                                shape = CircleShape
+                            )
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .fillMaxWidth()
+                        .height(55.dp)
+                        .background(
+                            color = colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .width(65.dp)
+                        .height(8.dp)
+                        .background(
+                            color = colorScheme.secondaryContainer,
+                            shape = CircleShape
+                        )
+                )
+                repeat(2) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .background(
+                                color = colorScheme.secondaryContainer,
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BasePageItem(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .width(110.dp)
+            .height(170.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(12.dp),
+                )
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = colorScheme.background,
+                        shape = RoundedCornerShape(9.dp)
+                    ),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+private fun DarkModeSettingItem(
+    modifier: Modifier
+) {
+    BasePageItem(modifier) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row {
+                Box(
+                    modifier = Modifier
+                        .height(46.dp)
+                        .width(36.dp)
+                        .background(
+                            color = colorScheme.primary,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                )
+                Spacer(Modifier.width(8.dp))
+                Column(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(56.dp)
+                            .height(8.dp)
+                            .background(
+                                color = colorScheme.primaryContainer,
+                                shape = CircleShape
+                            )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .width(42.dp)
+                            .height(8.dp)
+                            .background(
+                                color = colorScheme.secondaryContainer,
+                                shape = CircleShape
+                            )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(8.dp)
+                            .background(
+                                color = colorScheme.secondaryContainer,
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(26.dp)
+                        .height(8.dp)
+                        .background(
+                            color = colorScheme.secondaryContainer,
+                            shape = CircleShape
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .background(
+                            color = colorScheme.secondaryContainer,
+                            shape = CircleShape
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(8.dp)
+                        .background(
+                            color = colorScheme.inversePrimary,
+                            shape = CircleShape
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(8.dp)
+                        .background(
+                            color = colorScheme.tertiaryContainer,
+                            shape = CircleShape
+                        )
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 5.dp, vertical = 8.dp)
+                .height(height = 26.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Spacer(Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .width(38.dp)
+                    .height(18.dp)
+                    .background(
+                        color = colorScheme.primaryContainer,
+                        shape = CircleShape
+                    )
+            )
         }
     }
 }
@@ -478,7 +822,7 @@ private fun TopBar(
     TopAppBar(
         title = {
             Column {
-                Text("主题与纸张")
+                Text(stringResource(R.string.settings_theme))
             }
         },
         navigationIcon = {

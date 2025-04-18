@@ -58,7 +58,7 @@ fun AboutSettingsList(
         SettingsClickableEntry(
             iconRes = R.drawable.adb_24px,
             title = "调试工具",
-            description = "debug用调试工具",
+            description = "Debug 用调试工具",
             onClick = onClickDebugMode
         )
 }

@@ -17,6 +17,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -139,7 +140,11 @@ fun ContentScreen(
                 modifier = Modifier.fillMaxSize(),
                 painter =
                 if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
-                else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                else
+                    if (isSystemInDarkTheme())
+                        rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                    else
+                        rememberAsyncImagePainter(settingState.backgroundImageUri),
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )

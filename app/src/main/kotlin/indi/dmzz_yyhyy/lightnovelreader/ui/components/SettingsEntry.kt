@@ -437,6 +437,7 @@ fun SettingsClickableEntry(
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .wrapContentHeight()
+            .then(modifier)
             .clickable { onClick.invoke() }
             .padding(start = 18.dp, end = 14.dp)
             .padding(vertical = 8.dp),

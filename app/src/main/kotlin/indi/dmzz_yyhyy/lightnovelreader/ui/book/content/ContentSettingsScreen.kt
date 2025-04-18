@@ -20,6 +20,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -181,7 +182,11 @@ fun SettingsBottomSheet(
                                     .height(200.dp),
                                 painter =
                                     if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
-                                    else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                                    else
+                                        if (isSystemInDarkTheme())
+                                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                                        else
+                                            rememberAsyncImagePainter(settingState.backgroundImageUri),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
@@ -436,8 +441,8 @@ fun LazyListScope.AppearancePage(
         SettingsClickableEntry (
             modifier = Modifier.animateItem(),
             iconRes = R.drawable.palette_24px,
-            title = "字体颜色",
-            description = "自定义阅读器字体色",
+            title = "文本颜色",
+            description = "自定义阅读器文本颜色",
             onClick = onClickChangeTextColor,
             trailingContent = {
                 androidx.compose.foundation.Canvas(

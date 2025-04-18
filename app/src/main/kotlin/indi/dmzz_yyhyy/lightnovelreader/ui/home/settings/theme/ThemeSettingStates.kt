@@ -17,14 +17,16 @@ class ThemeSettingState(
     val appLocaleKeyUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.AppLocale.path)
     val enableBackgroundImageUserData = userDataRepository.booleanUserData(UserDataPath.Reader.EnableBackgroundImage.path)
     val backgroundImageDisplayModeUserData = userDataRepository.stringUserData(UserDataPath.Reader.BackgroundImageDisplayMode.path)
-    val backgroundColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.BackgroundColor.path)
     val backgroundImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundImageUri.path)
+    val backgroundDarkImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundDarkImageUri.path)
+    val textColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.TextColor.path)
 
     val darkModeKey by darkModeKeyUserData.asState("FollowSystem")
     val dynamicColorsKey by dynamicColorsKeyUserData.asState(false)
     val appLocaleKey by appLocaleKeyUserData.asState("zh-CN")
     val enableBackgroundImage by enableBackgroundImageUserData.safeAsState(false)
     val backgroundImageDisplayMode by backgroundImageDisplayModeUserData.safeAsState("fixed")
-    val backgroundColor by backgroundColorUserData.safeAsState(Color.Unspecified)
     val backgroundImageUri by backgroundImageUriUserData.safeAsState(Uri.EMPTY)
+    val backgroundDarkImageUri by backgroundDarkImageUriUserData.safeAsState(Uri.EMPTY)
+    val textColor by textColorUserData.safeAsState(Color.Unspecified)
 }

@@ -12,9 +12,9 @@ fun DisplaySettingsList(
     onClickThemeSettings: () -> Unit
 ) {
     SettingsClickableEntry(
-        iconRes = R.drawable.dark_mode_24px,
-        title = stringResource(R.string.settings_dark_theme),
-        description = stringResource(R.string.settings_dark_theme_desc),
+        iconRes = R.drawable.format_paint_24px,
+        title = stringResource(R.string.settings_theme),
+        description = stringResource(R.string.settings_theme_desc),
         onClick = onClickThemeSettings
     )
 }
