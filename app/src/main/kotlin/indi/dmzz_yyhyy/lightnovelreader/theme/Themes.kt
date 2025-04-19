@@ -1,7 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.theme
 
 import android.app.Activity
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -10,12 +9,17 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowCompat
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocaleUtil
+
+val LocalIsDarkTheme = staticCompositionLocalOf { false }
 
 @Composable
 fun LightNovelReaderTheme(
@@ -32,6 +36,7 @@ fun LightNovelReaderTheme(
         "FollowSystem" -> isSystemInDarkTheme()
         else -> isSystemInDarkTheme()
     }
+
     val colorScheme =
         if (isDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             if (isDark) dynamicDarkColorScheme(context)
@@ -44,7 +49,7 @@ fun LightNovelReaderTheme(
         val window = (view.context as Activity).window
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setBackgroundDrawable(
-            ColorDrawable(colorScheme.background.toArgb())
+            colorScheme.background.toArgb().toDrawable()
         )
 
         val controller = WindowCompat.getInsetsController(window, view)
@@ -58,4 +63,11 @@ fun LightNovelReaderTheme(
         colorScheme = colorScheme,
         content = content
     )
+
+    CompositionLocalProvider(LocalIsDarkTheme provides isDark) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            content = content
+        )
+    }
 }

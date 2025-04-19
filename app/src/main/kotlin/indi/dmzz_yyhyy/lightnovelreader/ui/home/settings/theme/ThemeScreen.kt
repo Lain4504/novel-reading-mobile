@@ -50,11 +50,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.selectDataFile
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
@@ -107,7 +109,9 @@ fun DarkModeSettings(
         fontWeight = FontWeight.W600
     )
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         // 禁用暗色模式
@@ -288,7 +292,9 @@ fun ReaderThemeSettingsList(
             }
         }
         Column {
-            BasePageItem() {
+            BasePageItem(Modifier
+                .width(110.dp)
+                .height(170.dp)) {
 
                 Box (
                     modifier = Modifier
@@ -466,6 +472,41 @@ fun ReaderThemeSettingsList(
             }
         }
     )
+    BasePageItem(Modifier
+        .fillMaxWidth()
+        .height(260.dp)
+        .padding(horizontal = 16.dp)
+    ) {
+        Box (
+            modifier = Modifier
+                .clip(RoundedCornerShape(9.dp))
+                .fillMaxWidth()
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            val isDark = LocalIsDarkTheme.current
+
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter =
+                    if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
+                    else
+                        if (isDark)
+                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                        else
+                            rememberAsyncImagePainter(settingState.backgroundImageUri),
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                modifier = Modifier.padding(horizontal = 18.dp),
+                text = stringResource(R.string.settings_about_oss),
+                fontWeight = FontWeight.W500,
+                textAlign = TextAlign.Center,
+                color = settingState.textColor
+            )
+        }
+    }
 }
 
 @Composable
@@ -526,14 +567,15 @@ fun BackgroundImageSettingItem(
     uri: Uri,
     onClickSelectImage: () -> Unit?
 ) {
-    BasePageItem(modifier) {
+    BasePageItem(modifier
+        .width(110.dp)
+        .height(170.dp)) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Box (
                 modifier = Modifier
                     .clip(RoundedCornerShape(9.dp))
                     .fillMaxSize()
             ) {
-                println("THIS URI IS $uri")
                 Image(
                     modifier = Modifier.size(102.dp, 162.dp),
                     painter = rememberAsyncImagePainter(uri),
@@ -587,7 +629,9 @@ fun BackgroundImageSettingItem(
 
 @Composable
 private fun BackgroundImageSettingDefaultItem() {
-    BasePageItem {
+    BasePageItem(Modifier
+        .width(110.dp)
+        .height(170.dp)) {
         Column(
             modifier = Modifier
                 .padding(8.dp)
@@ -666,8 +710,6 @@ private fun BasePageItem(
 ) {
     Box(
         modifier = modifier
-            .width(110.dp)
-            .height(170.dp)
     ) {
         Row(
             modifier = Modifier
@@ -698,7 +740,9 @@ private fun BasePageItem(
 private fun DarkModeSettingItem(
     modifier: Modifier
 ) {
-    BasePageItem(modifier) {
+    BasePageItem(modifier
+        .width(110.dp)
+        .height(170.dp)) {
         Column(
             modifier = Modifier
                 .padding(8.dp)

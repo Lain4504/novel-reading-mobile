@@ -17,7 +17,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -86,6 +85,7 @@ import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import kotlinx.coroutines.delay
@@ -136,15 +136,17 @@ fun ContentScreen(
         containerColor = if (settingState.backgroundColor.isUnspecified) MaterialTheme.colorScheme.background else settingState.backgroundColor
     ) { _ ->
         if (settingState.enableBackgroundImage) {
+            val isDark = LocalIsDarkTheme.current
+            val isCustomEmpty = (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty())
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter =
-                if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
-                else
-                    if (isSystemInDarkTheme())
-                        rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                    if (isCustomEmpty) painterResource(id = R.drawable.paper)
                     else
-                        rememberAsyncImagePainter(settingState.backgroundImageUri),
+                        if (isDark)
+                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                        else
+                            rememberAsyncImagePainter(settingState.backgroundImageUri),
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )

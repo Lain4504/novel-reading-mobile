@@ -20,7 +20,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
@@ -175,21 +175,24 @@ fun SettingsBottomSheet(
                                 else settingState.backgroundColor
                             )
                     ) {
-                        if (settingState.enableBackgroundImage)
+                        if (settingState.enableBackgroundImage) {
+                            val isDark = LocalIsDarkTheme.current
+                            val isCustomEmpty = (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty())
                             Image(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp),
                                 painter =
-                                    if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
+                                    if (isCustomEmpty) painterResource(id = R.drawable.paper)
                                     else
-                                        if (isSystemInDarkTheme())
+                                        if (isDark)
                                             rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
                                         else
                                             rememberAsyncImagePainter(settingState.backgroundImageUri),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
