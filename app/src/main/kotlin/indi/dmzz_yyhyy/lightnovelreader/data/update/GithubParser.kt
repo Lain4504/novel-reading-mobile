@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
+import java.io.IOException
 import java.util.zip.ZipFile
 
 /***
@@ -74,7 +75,7 @@ object GithubParser {
             .get()
             .debugPrint("html")
             .let { releaseDocument ->
-                updatePhase.tryEmit("Github步骤: 获取apk下载链接")
+                updatePhase.tryEmit("GitHub步骤: 获取apk下载链接")
                 val downloadUrl = releaseDocument
                     .select("include-fragment")
                     .fastFilter { it.attr("src").contains("releases") }
@@ -89,7 +90,7 @@ object GithubParser {
                     .map { it.attr("href") }
                     .firstOrNull { it.endsWith("apk") }
                     ?.let { "https://gh-proxy.com/github.com$it" } ?: Log.e("GithubParser", "failed to get downloadUrl").let { return null }
-                updatePhase.tryEmit("Github步骤: 拉取远程分支版本号")
+                updatePhase.tryEmit("GitHub步骤: 拉取远程分支版本号")
                 val gradle = releaseDocument
                     .select("#repo-content-pjax-container > div > div > div > div.Box-body > div.mb-3.pb-md-4.border-md-bottom > div > div:nth-child(3) > a")
                     .attr("href")
@@ -106,7 +107,7 @@ object GithubParser {
                     .toString()
                 val versionCode = versionCodeRegex.find(gradle)?.groups?.get(1)?.value?.replace("_", "")?.toInt() ?: Log.e("GithubParser", "failed to get versionCode").also { return null }
                 val versionName = versionNameRegex.find(gradle)?.groups?.get(1)?.value ?: Log.e("GithubParser", "failed to get versionName").also { return null }
-                updatePhase.tryEmit("Github步骤: 解析更新日志")
+                updatePhase.tryEmit("GitHub步骤: 解析更新日志")
                 val releaseNotes = releaseDocument
                     .select("#repo-content-pjax-container > div > div > div > div.Box-body > div.markdown-body.my-3")
                     .toString()
@@ -134,7 +135,7 @@ object GithubParser {
                 .select("#repo-content-pjax-container > div > div > div > div.Layout-sidebar > div > div:nth-child(2) > div > a")
                 .attr("href")
                 .let { host+it }
-                .also { updatePhase.tryEmit("Github步骤: 获取最新Release") }
+                .also { updatePhase.tryEmit("GitHub步骤: 获取最新Release") }
                 .let { progressReleasePage(it, updatePhase) }
         }
     }
@@ -151,7 +152,7 @@ object GithubParser {
                 .get()
                 .select("#repo-content-pjax-container > div > div:nth-child(3) > section:nth-child(1) > div > div.col-md-9 > div > div.Box-body > div.d-flex.flex-md-row.flex-column > div.d-flex.flex-row.flex-1.mb-3.wb-break-word > div.flex-1 > span.f1.text-bold.d-inline.mr-3 > a")
                 .attr("href")
-                .also { updatePhase.tryEmit("Github步骤: 获取最新Release") }
+                .also { updatePhase.tryEmit("GitHub步骤: 获取最新Release") }
                 .let { host+it }
                 .let { progressReleasePage(it, updatePhase) }
         }
@@ -161,11 +162,10 @@ object GithubParser {
         private val prIdRegex = Regex("Merge pull request #([0-9]*)")
         override fun parser(updatePhase: MutableStateFlow<String>): Release? {
             System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-            host = updateHost().debugPrint("url")
-            updatePhase.tryEmit("Github步骤: 获取最新Release")
-            var downloadUrl: String? = null
-            var downloadFileProgress: ((File, File) -> Unit)? = null
-            updatePhase.tryEmit("Github步骤: 拉取远程分支版本号")
+            host = updateHost()
+            updatePhase.tryEmit("GitHub步骤: 获取最新Release")
+            val downloadUrl: String?
+            updatePhase.tryEmit("GitHub步骤: 拉取远程分支版本号")
             val gradle = Jsoup
                 .connect("https://gh-proxy.com/raw.githubusercontent.com/dmzz-yyhyy/LightNovelReader/refs/heads/refactoring/app/build.gradle.kts")
                 .ignoreContentType(true)
@@ -177,71 +177,80 @@ object GithubParser {
                 )
                 .toString()
             val versionCode = versionCodeRegex.find(gradle)?.groups?.get(1)?.value?.replace("_", "")?.toInt() ?: Log.e("GithubParser", "failed to get versionCode").also { return null }
-            val versionName = versionNameRegex.find(gradle)?.groups?.get(1)?.value ?: Log.e("GithubParser", "failed to get versionName").also { return null }
+            val versionName = versionNameRegex.find(gradle)?.groups?.get(1)?.value?.replace("\"", "") ?: Log.e("GithubParser", "failed to get versionName").also { return null }
+            val connection = Jsoup.connect(host + URL)
+            if (host.startsWith("http://")) {
+                connection.header("Host", "github.com")
+            }
+            val document = connection.get()
+            updatePhase.tryEmit("Github步骤: 获取apk下载链接")
+            val apkLinkElement = document.select(
+                "div[id^=check_suite_]:contains(ReleaseApkBuild) > div > div.d-table-cell.v-align-top.col-11.col-md-6.position-relative > a"
+            ).first()
+            val actionUrl = "https://nightly.link" + apkLinkElement?.attr("href")
+            val fileDocument = Jsoup.connect(actionUrl).get()
+            val apkDownloadHref = fileDocument
+                .select("body > article > table > tbody > tr > td > a")
+                .attr("href")
+            downloadUrl = apkDownloadHref
+            val downloadFileProgress: ((File, File) -> Unit) = { zipFile, targetApk ->
+                try {
 
-            val releaseNotes = Jsoup
-                .connect(host+ URL)
-                .also {
-                    if (host.startsWith("http://")) it.header("Host", "github.com")
-                }
-                .get()
-                .also { updatePhase.tryEmit("Github步骤: 获取apk下载链接") }
-                .select("#check_suite_34304367335 > div > div.d-table-cell.v-align-top.col-11.col-md-6.position-relative > a")
-                .also { action ->
-                    val url = "https://nightly.link" + action.attr("href")
-                    val fileDocument = Jsoup
-                        .connect(url)
-                        .get()
-                    downloadUrl = fileDocument.select("body > article > table > tbody > tr > td > a").attr("href")
-                    downloadFileProgress = { zip, apk ->
-                        if (apk.exists())
-                            apk.delete()
-                        else apk.createNewFile()
-                        try {
-                            val zipFile = ZipFile(zip)
-                            zipFile.getInputStream(zipFile.getEntry("apk/release/LightNovelReader-$versionCode-release-unsigned-signed.apk")).use { zipInputStream ->
-                                val buf = ByteArray(1024)
-                                var len: Int
-                                apk.outputStream().use { fileOutputStream ->
-                                    while ((zipInputStream.read(buf).also { len = it }) > 0) {
-                                        fileOutputStream.write(buf, 0, len)
-                                    }
-                                }
+                    ZipFile(zipFile).use { zip ->
+                        val apkEntry = zip.entries().asSequence()
+                            .filterNot { it.isDirectory }
+                            .find { entry ->
+                                entry.name.endsWith(".apk") &&
+                                        "release" in entry.name
                             }
-                        } catch (e: Exception) {
-                            Log.e("GithubParser", "failed to progress ci update file")
-                            e.printStackTrace()
+
+                            ?: throw IOException("failed to extract apk file from archive [${zipFile.name}]")
+
+                        targetApk.parentFile?.mkdirs()
+                        if (targetApk.exists()) targetApk.delete()
+
+                        zip.getInputStream(apkEntry).use { input ->
+                            targetApk.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    Log.e("Unzip", "failed to extract: ${e.message}")
+                    targetApk.delete()
+                    throw e
                 }
-                .also {  updatePhase.tryEmit("Github步骤: 获取更新日志")  }
-                .select("span")
-                .text()
-                .let(prIdRegex::find)
-                ?.groups
-                ?.get(1)
-                ?.value
-                ?.let { "$host/dmzz-yyhyy/LightNovelReader/pull/$it" }
-                ?.let(Jsoup::connect)
-                .also {
-                    if (host.startsWith("http://")) it?.header("Host", "github.com")
-                }
-                ?.get()
-                ?.select("#discussion_bucket > div > div.Layout-main > div > div.js-discussion.ml-0.pl-0.ml-md-6.pl-md-3 > div.TimelineItem.TimelineItem--condensed.pt-0.js-comment-container.js-socket-channel.js-updatable-content.js-command-palette-pull-body > div.timeline-comment-group.js-minimizable-comment-group.js-targetable-element.TimelineItem-body.my-0 > div > div:nth-child(2) > div > task-lists > div")
-                ?.toString()
+            }
+            updatePhase.tryEmit("GitHub步骤: 获取更新日志")
+
+            val spanText = document.select("span").text()
+            val prId = prIdRegex.find(spanText)?.groups?.get(1)?.value
+
+            val prUrl = prId?.let { "$host/dmzz-yyhyy/LightNovelReader/pull/$it" }
+            val prConnection = prUrl?.let { Jsoup.connect(it) }
+            if (host.startsWith("http://")) {
+                prConnection?.header("Host", "github.com")
+            }
+
+            val taskListElement = prConnection?.get()?.select(
+                "#discussion_bucket > div > div.Layout-main > div > div.js-discussion.ml-0.pl-0.ml-md-6.pl-md-3 > div.TimelineItem.TimelineItem--condensed.pt-0.js-comment-container.js-socket-channel.js-updatable-content.js-command-palette-pull-body > div.timeline-comment-group.js-minimizable-comment-group.js-targetable-element.TimelineItem-body.my-0 > div > div:nth-child(2) > div > task-lists > div"
+            )?.toString()
+
+            val releaseNotes = taskListElement
                 ?.let(HtmlToMdUtil::convertHtml)
-                .let { "$it\n**注意! 这是一个由gtihub action构建出来的版本, 此版本未经过严格测试**" }
-            updatePhase.tryEmit("Github步骤: 比对版本号")
+                ?.let { "**注意! 这是一个由 GitHub Actions 构建出来的版本, 此版本未经过严格测试**\n\n$it" }
+
+            updatePhase.tryEmit("GitHub步骤: 比对版本号")
             val lastReleaseRelease = ReleaseParser.parser(MutableStateFlow(""))
-            if (lastReleaseRelease == null || lastReleaseRelease.version < versionCode)
-                return GithubRelease(
+            return if (lastReleaseRelease == null || lastReleaseRelease.version < versionCode)
+                GithubRelease(
                     versionCode,
                     versionName.toString() ,
-                    releaseNotes,
-                    downloadUrl ?: return null,
+                    releaseNotes!!,
+                    downloadUrl,
                     downloadFileProgress
                 )
-            else return lastReleaseRelease
+            else lastReleaseRelease
         }
     }
 }
