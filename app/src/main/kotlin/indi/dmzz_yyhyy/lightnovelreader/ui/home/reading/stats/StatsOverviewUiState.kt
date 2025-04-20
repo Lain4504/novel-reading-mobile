@@ -14,29 +14,23 @@ interface StatsOverviewUiState {
     var isLoading: Boolean
     var selected: Boolean
     var selectedDate: LocalDate
-    val dateRange: Pair<LocalDate, LocalDate>
     val thresholds: Int
+    val startDate: LocalDate
     var dateLevelMap: Map<LocalDate, Level>
-    var dateReadingTimeMap: Map<LocalDate, Int>
-    var dateStatsEntityMap: Map<LocalDate, ReadingStatisticsEntity>
     var totalRecordEntity: BookRecordEntity?
-    var bookRecordsByBookId: Map<Int, List<BookRecordEntity>>
     var bookRecordsByDate: Map<LocalDate, List<BookRecordEntity>>
     val bookInformationMap: Map<Int, BookInformation>
     val selectedDateDetails: DailyDateDetails?
 }
 
 class MutableStatisticsOverviewUiState : StatsOverviewUiState {
-    override var isLoading: Boolean by mutableStateOf(false)
+    override var isLoading: Boolean by mutableStateOf(true)
     override var selected: Boolean by mutableStateOf(false)
     override var selectedDate: LocalDate by mutableStateOf(LocalDate.now())
-    override var dateRange: Pair<LocalDate, LocalDate> by mutableStateOf(Pair(LocalDate.now(), LocalDate.now()))
     override var thresholds: Int by mutableIntStateOf(0)
+    override val startDate: LocalDate by mutableStateOf(LocalDate.now().minusMonths(6))
     override var dateLevelMap: Map<LocalDate, Level> by mutableStateOf(emptyMap())
-    override var dateReadingTimeMap: Map<LocalDate, Int> by mutableStateOf(emptyMap())
-    override var dateStatsEntityMap: Map<LocalDate, ReadingStatisticsEntity> by mutableStateOf(emptyMap())
     override var totalRecordEntity: BookRecordEntity? by mutableStateOf(null)
-    override var bookRecordsByBookId: Map<Int, List<BookRecordEntity>> by mutableStateOf(emptyMap())
     override var bookRecordsByDate: Map<LocalDate, List<BookRecordEntity>> by mutableStateOf(emptyMap())
     override var bookInformationMap = mutableStateMapOf<Int, BookInformation>()
     override var selectedDateDetails: DailyDateDetails? by mutableStateOf(null)

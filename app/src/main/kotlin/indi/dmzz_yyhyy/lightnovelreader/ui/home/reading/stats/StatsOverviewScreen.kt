@@ -1,7 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
@@ -58,6 +58,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarDay
@@ -66,10 +68,13 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarWeek
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.displayText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.yearMonth
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.rememberHeatMapCalendarState
+import indi.dmzz_yyhyy.lightnovelreader.utils.DurationFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
 import java.time.format.DateTimeFormatter
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,11 +94,13 @@ fun StatsOverviewScreen(
             )
         }
     ) { paddingValues ->
-        val isLoading = uiState.isLoading
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.fillMaxSize()
-            )
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -102,7 +109,7 @@ fun StatsOverviewScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item { CalendarBlock(viewModel, onSelectedDate = {viewModel.selectDate(it)}) }
-                item { DailyStatsBlock(uiState, onClickDetailScreen) }
+                item { key(uiState.bookInformationMap) { DailyStatsBlock(uiState, onClickDetailScreen) } }
                 item { TotalStatsBlock(uiState) }
             }
         }
@@ -116,13 +123,15 @@ private fun CalendarBlock(
 ) {
     var selection by remember { mutableStateOf(LocalDate.now()) }
     val uiState = viewModel.uiState
-    val datePair = uiState.dateRange
+    val now = LocalDate.now()
+    val startDate = uiState.startDate
     val state = rememberHeatMapCalendarState(
-        startMonth = datePair.first.yearMonth,
-        endMonth = datePair.second.yearMonth,
+        startMonth = startDate.yearMonth,
+        endMonth = now.yearMonth,
         firstVisibleMonth = LocalDate.now().yearMonth,
         firstDayOfWeek = DayOfWeek.MONDAY
     )
+
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
         Text(
             text = "活动",
@@ -139,8 +148,8 @@ private fun CalendarBlock(
                 Day(
                     selected = isClicked,
                     day = day,
-                    startDate = datePair.first,
-                    endDate = datePair.second,
+                    startDate = startDate,
+                    endDate = now,
                     week = week,
                     level = level,
                 ) { date ->
@@ -152,7 +161,8 @@ private fun CalendarBlock(
             monthHeader = { MonthHeader(it, LocalDate.now()) },
         )
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
@@ -180,11 +190,12 @@ private fun DailyStatsBlock(
     onClickDetailScreen: (Int) -> Unit
 ) {
     val selectedDate = uiState.selectedDate
-    val details = uiState.selectedDateDetails
-    val sections = buildExpandableSections(details!!)
+    val records = uiState.bookRecordsByDate[selectedDate] ?: emptyList()
+    val bookInfoMap = uiState.bookInformationMap
+
+    val details = computeDailyDetails(records, bookInfoMap)
 
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
-
         Row(
             modifier = Modifier.height(46.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -195,122 +206,127 @@ private fun DailyStatsBlock(
                 fontWeight = FontWeight.W600
             )
             Spacer(Modifier.weight(1f))
-            if (sections.isNotEmpty()) {
-                TextButton({
-                    onClickDetailScreen(
-                        selectedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInt()
+            TextButton({
+                onClickDetailScreen(
+                    selectedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInt()
+                )
+            }) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        modifier = Modifier.padding(end = 10.dp),
+                        text = "详情"
                     )
-                }) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            modifier = Modifier.padding(end = 10.dp),
-                            text = "详情"
-                        )
-                        Icon(
-                            painter = painterResource(R.drawable.arrow_forward_24px), null
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.arrow_forward_24px), null
+                    )
                 }
             }
         }
         Spacer(modifier = Modifier.height(6.dp))
 
-        StatsColumn(
-            totalDuration = details.formattedTotal,
-            timeDetails = details.timeDetails,
-            firstBook = details.firstBook,
-            firstTime = details.firstSeenTime,
-            lastBook = details.lastBook,
-            lastTime = details.lastSeenTime
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                )
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatSection(
+                icon = painterResource(R.drawable.schedule_90dp),
+                title = "阅读时长",
+                value = details?.formattedTotalTime ?: "--"
+            ) {
+                Crossfade(targetState = details?.timeDetails.isNullOrEmpty()) { isEmpty ->
+                    if (isEmpty) {
+                        NoRecords()
+                    } else {
+                        Column {
+                            details?.timeDetails?.forEach {
+                                val duration = it?.second?.toDuration(DurationUnit.SECONDS)
+                                val formattedTime = duration?.let { dur ->
+                                    DurationFormat().format(dur, DurationFormat.Unit.SECOND)
+                                }
+                                if (formattedTime != null) {
+                                    DataItem(it.first.title, formattedTime)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+            StatSection(
+                icon = painterResource(R.drawable.schedule_90dp),
+                title = "时间范围",
+                value = ""
+            ) {
+                Crossfade(
+                    targetState = details?.firstBook == null && details?.lastBook == null
+                ) { isEmpty ->
+                    if (isEmpty) {
+                        NoRecords()
+                    } else {
+                        Column {
+                            details?.firstBook?.let {
+                                DataItem(it.title, "最早 (${details.firstSeenTime})")
+                            }
+                            details?.lastBook?.let {
+                                DataItem(it.title, "最晚 (${details.lastSeenTime})")
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
 @Composable
-private fun StatsColumn(
-    totalDuration: String,
-    timeDetails: List<Pair<String, String>>,
-    firstBook: String?,
-    firstTime: String?,
-    lastBook: String?,
-    lastTime: String?
-) {
-    val hasData = firstBook != null
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-            )
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-
-        StatSection(
-            icon = painterResource(R.drawable.schedule_90dp),
-            title = "阅读时长",
-            value = totalDuration
-        ) {
-            val items = if (hasData) timeDetails else emptyList()
-            AnimatedStatsList(items = items) { (book, time) ->
-                DataItem(book, time)
-            }
-
-            if (!hasData) {
-                NoRecordNotice()
-            }
-        }
-
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-
-        StatSection(
-            icon = painterResource(R.drawable.schedule_90dp),
-            title = "时间范围",
-            value = ""
-        ) {
-            val timeItems = if (hasData) buildList {
-                firstBook?.let {
-                    add("最早记录" to "$it ($firstTime)")
-                }
-                lastBook?.let {
-                    add("最晚记录" to "$it ($lastTime)")
-                }
-            } else emptyList()
-
-            AnimatedStatsList(items = timeItems) { (label, value) ->
-                DataItem(label, value)
-            }
-
-            if (!hasData) {
-                NoRecordNotice()
-            }
-        }
-    }
+private fun NoRecords() {
+    Text(
+        text = "没有记录",
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+        style = MaterialTheme.typography.bodyMedium
+    )
 }
 
-@Composable
-private fun NoRecordNotice() {
-    AnimatedVisibility(
-        visible = true,
-        enter = expandVertically(),
-        exit = shrinkVertically()
-    ) {
-        Text(
-            text = "没有记录",
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier
-                .padding(vertical = 4.dp, horizontal = 8.dp)
-                .fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
-    }
-}
+private fun computeDailyDetails(
+    records: List<BookRecordEntity>,
+    bookInfoMap: Map<Int, BookInformation>
+): DailyDateDetails? {
+    if (records.isEmpty()) return null
 
+    val dateFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+    val totalDuration = records.sumOf { it.totalTime }.toDuration(DurationUnit.SECONDS)
+    val formattedTotalTime = DurationFormat().format(totalDuration, DurationFormat.Unit.SECOND)
+
+    val timeDetails = records.map { record ->
+        val book = bookInfoMap[record.bookId] ?: BookInformation.empty()
+        book to record.totalTime
+    }
+
+    val firstRecord = records.minByOrNull { it.firstSeen }
+    val lastRecord = records.maxByOrNull { it.lastSeen }
+
+    return DailyDateDetails(
+        formattedTotalTime = formattedTotalTime,
+        timeDetails = timeDetails,
+        firstBook = firstRecord?.let { bookInfoMap[it.bookId] },
+        firstSeenTime = firstRecord?.firstSeen?.format(dateFormatter),
+        lastBook = lastRecord?.let { bookInfoMap[it.bookId] },
+        lastSeenTime = lastRecord?.lastSeen?.format(dateFormatter)
+    )
+}
 
 
 @Composable
@@ -434,19 +450,7 @@ fun TotalStatsBlock(
                     value = "${totalSeconds / 3600}",
                     unit = "时 ${(totalSeconds % 3600) / 60} 分"
                 )
-
             }
-
-            item {
-                StatsCard(
-                    modifier = Modifier.weight(1f),
-                    icon = painterResource(R.drawable.schedule_90dp),
-                    title = "读过",
-                    value = "${uiState.bookRecordsByBookId.size}",
-                    unit = "本"
-                )
-            }
-
         }
         Spacer(Modifier.height(20.dp))
     }
@@ -515,41 +519,6 @@ data class DailyDataSections(
     val titleValue: String,
     val content: @Composable () -> Unit
 )
-
-@Composable
-private fun buildExpandableSections(
-    details: DailyDateDetails
-): List<DailyDataSections> {
-    return listOf(
-        DailyDataSections(
-            icon = painterResource(R.drawable.schedule_90dp),
-            title = "阅读时长",
-            titleValue = details.formattedTotal
-        ) {
-            details.timeDetails.forEach { (book, time) ->
-                DataItem(leftText = book, rightText = time)
-            }
-        },
-        DailyDataSections(
-            icon = painterResource(R.drawable.schedule_90dp),
-            title = "时间",
-            titleValue = ""
-        ) {
-            details.firstBook?.let {
-                DataItem(
-                    leftText = it,
-                    rightText = "最早, ${details.firstSeenTime}"
-                )
-            }
-            details.lastBook?.let {
-                DataItem(
-                    leftText = it,
-                    rightText = "最晚, ${details.lastSeenTime}"
-                )
-            }
-        }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

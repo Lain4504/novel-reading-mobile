@@ -12,7 +12,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
-@ExperimentalTime
 data class DurationFormat(val locale: Locale = Locale.getDefault()) {
     enum class Unit {
         DAY, HOUR, MINUTE, SECOND, MILLISECOND
