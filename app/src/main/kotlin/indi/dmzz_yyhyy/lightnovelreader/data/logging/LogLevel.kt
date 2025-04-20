@@ -2,6 +2,7 @@ package indi.dmzz_yyhyy.lightnovelreader.data.logging
 
 sealed class LogLevel(val level: Int) {
     data object NONE : LogLevel(0)
+    data object SYSTEM : LogLevel(1)
     data object ERROR : LogLevel(2)
     data object WARNING : LogLevel(4)
     data object INFO : LogLevel(6)

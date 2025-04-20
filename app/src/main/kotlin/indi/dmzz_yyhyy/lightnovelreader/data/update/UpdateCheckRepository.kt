@@ -98,7 +98,7 @@ class UpdateCheckRepository @Inject constructor(
                 ketch.download(release!!.downloadUrl, cacheDir.path, "LightNovelReader-update.apk")
             coroutineScope.launch {
                 ketch.observeDownloadById(downloadWorkId).collect {
-                    when (it.status) {
+                    when (it?.status) {
                         Status.SUCCESS -> {
                             if (file.length() == 0L) return@collect
                             Log.i("UpdateChecker", "Download success, installing")
@@ -120,7 +120,7 @@ class UpdateCheckRepository @Inject constructor(
                 ketch.download(release!!.downloadUrl, cacheDir.path, "LightNovelReader-update-data")
             coroutineScope.launch {
                 ketch.observeDownloadById(downloadWorkId).collect {
-                    when (it.status) {
+                    when (it?.status) {
                         Status.SUCCESS -> {
                             if (cacheDir.resolve("LightNovelReader-update-data").length() == 0L) return@collect
                             coroutineScope.launch {

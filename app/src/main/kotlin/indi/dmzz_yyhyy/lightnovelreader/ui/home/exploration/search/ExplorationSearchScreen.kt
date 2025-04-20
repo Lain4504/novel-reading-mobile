@@ -59,6 +59,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
+import indi.dmzz_yyhyy.lightnovelreader.utils.addToBookshelfAction
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,7 +68,7 @@ fun ExplorationSearchScreen(
     explorationUiState: ExplorationUiState,
     explorationSearchUiState: ExplorationSearchUiState,
     refresh: () -> Unit,
-    @Suppress("UNUSED_PARAMETER") requestAddBookToBookshelf: (Int) -> Unit,
+    requestAddBookToBookshelf: (Int) -> Unit,
     onClickBack: () -> Unit,
     init: () -> Unit,
     onChangeSearchType: (String) -> Unit,
@@ -281,11 +282,11 @@ fun ExplorationSearchScreen(
             ) {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 3.dp)
+                    contentPadding = PaddingValues(vertical = 3.dp)
                 ) {
                     item {
                         AnimatedText(
-                            modifier = Modifier.padding(vertical = 12.dp),
+                            modifier = Modifier.padding(12.dp),
                             text = stringResource(
                                 R.string.search_results_title,
                                 searchKeyword,
@@ -301,11 +302,16 @@ fun ExplorationSearchScreen(
                         )
                     }
                     items(explorationSearchUiState.searchResult) {
+                        val addToBookshelf = addToBookshelfAction.toSwipeAction {
+                            requestAddBookToBookshelf(it.id)
+                        }
                         BookCardItem(
+                            modifier = Modifier.padding(horizontal = 16.dp),
                             bookInformation = it,
                             onClick = { onClickBook(it.id) },
                             onLongPress = withHaptic {},
-                            collected = explorationSearchUiState.allBookshelfBookIds.contains(it.id)
+                            collected = explorationSearchUiState.allBookshelfBookIds.contains(it.id),
+                            swipeToRightActions = listOf(addToBookshelf)
                         )
                     }
                     item {
