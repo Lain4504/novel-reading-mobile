@@ -1,11 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +12,7 @@ import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,47 +41,35 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.CalendarLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarDay
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarMonth
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarWeek
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.displayText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.yearMonth
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.rememberHeatMapCalendarState
-import indi.dmzz_yyhyy.lightnovelreader.utils.DurationFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.Locale
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.toDuration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +79,6 @@ fun StatsOverviewScreen(
     onClickDetailScreen: (Int) -> Unit
 ) {
     val uiState = viewModel.uiState
-    val selectedDate = uiState.selectedDate
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
@@ -114,7 +102,7 @@ fun StatsOverviewScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item { CalendarBlock(viewModel, onSelectedDate = {viewModel.selectDate(it)}) }
-                item { DailyStatsBlock(uiState, selectedDate, onClickDetailScreen) }
+                item { DailyStatsBlock(uiState, onClickDetailScreen) }
                 item { TotalStatsBlock(uiState) }
             }
         }
@@ -135,45 +123,67 @@ private fun CalendarBlock(
         firstVisibleMonth = LocalDate.now().yearMonth,
         firstDayOfWeek = DayOfWeek.MONDAY
     )
-
-    HeatMapCalendar(
-        modifier = Modifier.padding(vertical = 10.dp, horizontal = 16.dp),
-        state = state,
-        contentPadding = PaddingValues(end = 6.dp),
-        dayContent = { day, week ->
-            val isClicked = uiState.selectedDate == day.date
-            val level = uiState.dateLevelMap[day.date] ?: Level.Zero
-            Day(
-                selected = isClicked,
-                day = day,
-                startDate = datePair.first,
-                endDate = datePair.second,
-                week = week,
-                level = level,
-            ) { date ->
-                selection = date
-                onSelectedDate(date)
+    Column(modifier = Modifier.padding(horizontal = 18.dp)) {
+        Text(
+            text = "活动",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.W600
+        )
+        Spacer(Modifier.height(8.dp))
+        HeatMapCalendar(
+            state = state,
+            contentPadding = PaddingValues(end = 6.dp),
+            dayContent = { day, week ->
+                val isClicked = uiState.selectedDate == day.date
+                val level = uiState.dateLevelMap[day.date] ?: Level.Zero
+                Day(
+                    selected = isClicked,
+                    day = day,
+                    startDate = datePair.first,
+                    endDate = datePair.second,
+                    week = week,
+                    level = level,
+                ) { date ->
+                    selection = date
+                    onSelectedDate(date)
+                }
+            },
+            weekHeader = { WeekHeader(it) },
+            monthHeader = { MonthHeader(it, LocalDate.now()) },
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "少",
+                fontSize = 12.sp
+            )
+            Spacer(Modifier.width(6.dp))
+            Level.entries.forEach { level ->
+                LevelBox(level.color)
             }
-        },
-        weekHeader = { WeekHeader(it) },
-        monthHeader = { MonthHeader(it, LocalDate.now()) },
-    )
-    CalendarHint(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 12.dp), thresholds = uiState.thresholds)
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = "多 (${uiState.thresholds}+)",
+                fontSize = 12.sp
+            )
+        }
+    }
 }
 
 @Composable
 private fun DailyStatsBlock(
     uiState: StatsOverviewUiState,
-    selectedDate: LocalDate,
     onClickDetailScreen: (Int) -> Unit
 ) {
-    val records = uiState.bookRecordsByDate[selectedDate] ?: emptyList()
-    val dateFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val selectedDate = uiState.selectedDate
+    val details = uiState.selectedDateDetails
+    val sections = buildExpandableSections(details!!)
 
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
-        val sections = buildExpandableSections(uiState, records, dateFormatter)
 
         Row(
             modifier = Modifier.height(46.dp),
@@ -205,26 +215,179 @@ private fun DailyStatsBlock(
         }
         Spacer(modifier = Modifier.height(6.dp))
 
-        if (sections.isNotEmpty()) {
-            MultiExpandableCard(sections)
-        } else {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
+        StatsColumn(
+            totalDuration = details.formattedTotal,
+            timeDetails = details.timeDetails,
+            firstBook = details.firstBook,
+            firstTime = details.firstSeenTime,
+            lastBook = details.lastBook,
+            lastTime = details.lastSeenTime
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+    }
+}
+
+@Composable
+private fun StatsColumn(
+    totalDuration: String,
+    timeDetails: List<Pair<String, String>>,
+    firstBook: String?,
+    firstTime: String?,
+    lastBook: String?,
+    lastTime: String?
+) {
+    val hasData = firstBook != null
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "没有记录。",
-                    fontStyle = FontStyle.Italic,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            )
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        StatSection(
+            icon = painterResource(R.drawable.schedule_90dp),
+            title = "阅读时长",
+            value = totalDuration
+        ) {
+            val items = if (hasData) timeDetails else emptyList()
+            AnimatedStatsList(items = items) { (book, time) ->
+                DataItem(book, time)
+            }
+
+            if (!hasData) {
+                NoRecordNotice()
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+        StatSection(
+            icon = painterResource(R.drawable.schedule_90dp),
+            title = "时间范围",
+            value = ""
+        ) {
+            val timeItems = if (hasData) buildList {
+                firstBook?.let {
+                    add("最早记录" to "$it ($firstTime)")
+                }
+                lastBook?.let {
+                    add("最晚记录" to "$it ($lastTime)")
+                }
+            } else emptyList()
+
+            AnimatedStatsList(items = timeItems) { (label, value) ->
+                DataItem(label, value)
+            }
+
+            if (!hasData) {
+                NoRecordNotice()
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoRecordNotice() {
+    AnimatedVisibility(
+        visible = true,
+        enter = expandVertically(),
+        exit = shrinkVertically()
+    ) {
+        Text(
+            text = "没有记录",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier
+                .padding(vertical = 4.dp, horizontal = 8.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+
+
+@Composable
+private fun <T> AnimatedStatsList(
+    items: List<T>,
+    itemContent: @Composable (T) -> Unit
+) {
+    AnimatedContent(
+        targetState = items,
+        transitionSpec = {
+            (expandVertically()).togetherWith(shrinkVertically() )
+        },
+        label = "AnimatedStatsList"
+    ) { targetItems ->
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            targetItems.forEach { item ->
+                key(item.hashCode()) {
+                    itemContent(item)
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+private fun StatSection(
+    icon: Painter,
+    title: String,
+    value: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        content()
+    }
+}
+
+@Composable
+private fun DataItem(leftText: String, rightText: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = leftText,
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = rightText,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.outline
+        )
     }
 }
 
@@ -268,16 +431,17 @@ fun TotalStatsBlock(
                     modifier = Modifier.weight(1f),
                     icon = painterResource(R.drawable.schedule_90dp),
                     title = "阅读时长",
-                    value = if (totalSeconds < 3600) "< 1" else "${(totalSeconds / 3600)} +",
-                    unit = "小时"
+                    value = "${totalSeconds / 3600}",
+                    unit = "时 ${(totalSeconds % 3600) / 60} 分"
                 )
+
             }
 
             item {
                 StatsCard(
                     modifier = Modifier.weight(1f),
                     icon = painterResource(R.drawable.schedule_90dp),
-                    title = "读过的书本",
+                    title = "读过",
                     value = "${uiState.bookRecordsByBookId.size}",
                     unit = "本"
                 )
@@ -345,7 +509,7 @@ fun StatsCard(
     }
 }
 
-data class ExpandableSection(
+data class DailyDataSections(
     val icon: Painter,
     val title: String,
     val titleValue: String,
@@ -353,170 +517,38 @@ data class ExpandableSection(
 )
 
 @Composable
-fun DataItem(leftText: String, rightText: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = leftText,
-            fontSize = 14.sp,
-            modifier = Modifier.weight(1f),
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = rightText,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.align(Alignment.CenterVertically)
-        )
-    }
-}
-
-@OptIn(ExperimentalTime::class)
-@Composable
 private fun buildExpandableSections(
-    uiState: StatsOverviewUiState,
-    records: List<BookRecordEntity> = emptyList(),
-    dateFormatter: DateTimeFormatter
-): List<ExpandableSection> {
-    if (records.isEmpty()) return emptyList()
-    val totalSeconds = records.sumOf { it.totalTime }
-    val totalDuration = totalSeconds.toDuration(DurationUnit.SECONDS)
-
-    val formattedTotal = DurationFormat().format(totalDuration, smallestUnit = DurationFormat.Unit.SECOND)
-
-    val timeDetails = records.take(4).map { record ->
-        val book = uiState.bookInformationMap[record.bookId]?.title ?: "Unknown"
-        val duration = record.totalTime.toDuration(DurationUnit.SECONDS)
-
-        val formattedTime = DurationFormat(Locale.ENGLISH).format(duration)
-        book to formattedTime
-    }.toMutableList().apply {
-        if (records.size > 4) add("...${records.size - 4} more" to "")
-    }
-
-    val firstBook = records.minByOrNull { it.firstSeen }?.let {
-        uiState.bookInformationMap[it.bookId]?.title
-    }
-    val lastBook = records.maxByOrNull { it.lastSeen }?.let {
-        uiState.bookInformationMap[it.bookId]?.title
-    }
-
+    details: DailyDateDetails
+): List<DailyDataSections> {
     return listOf(
-        ExpandableSection(
+        DailyDataSections(
             icon = painterResource(R.drawable.schedule_90dp),
             title = "阅读时长",
-            titleValue = formattedTotal
+            titleValue = details.formattedTotal
         ) {
-            timeDetails.forEach { (book, time) ->
+            details.timeDetails.forEach { (book, time) ->
                 DataItem(leftText = book, rightText = time)
             }
         },
-        ExpandableSection(
+        DailyDataSections(
             icon = painterResource(R.drawable.schedule_90dp),
             title = "时间",
             titleValue = ""
         ) {
-            if (records.isNotEmpty()) {
+            details.firstBook?.let {
                 DataItem(
-                    leftText = firstBook ?: "unknown",
-                    rightText = "最早, " + dateFormatter.format(records.minByOrNull { it.firstSeen }!!.firstSeen)
+                    leftText = it,
+                    rightText = "最早, ${details.firstSeenTime}"
                 )
+            }
+            details.lastBook?.let {
                 DataItem(
-                    leftText = lastBook ?: "unknown",
-                    rightText = "最晚, " + dateFormatter.format(records.maxByOrNull { it.lastSeen }!!.lastSeen)
+                    leftText = it,
+                    rightText = "最晚, ${details.lastSeenTime}"
                 )
             }
         }
     )
-}
-
-@Composable
-fun MultiExpandableCard(
-    sections: List<ExpandableSection>
-) {
-    var expandedStates by remember { mutableStateOf(List(sections.size) { false }) }
-
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = 4.dp,
-    ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 12.dp)) {
-            sections.forEachIndexed { index, section ->
-                val isExpanded = expandedStates[index]
-
-                Column(modifier = Modifier.animateContentSize()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(6.dp))
-                            .clickable {
-                                expandedStates =
-                                    expandedStates.mapIndexed { u, v -> u == index != v }
-                            }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = section.icon,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Text(
-                                text = section.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = section.titleValue,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Icon(
-                                painter = painterResource(R.drawable.keyboard_arrow_up_24px),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .rotate(if (isExpanded) 0f else 180f),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(4.dp))
-
-                    AnimatedVisibility(
-                        visible = isExpanded,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp)) {
-                                section.content()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -546,32 +578,6 @@ private fun TopBar(
         },
         scrollBehavior = scrollBehavior,
     )
-}
-
-@Composable
-private fun CalendarHint(
-    modifier: Modifier = Modifier,
-    thresholds: Int
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            text = "少",
-            fontSize = 12.sp
-        )
-        Level.entries.forEach { level ->
-            LevelBox(level.color)
-        }
-        Text(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            text = "多 ($thresholds+)",
-            fontSize = 12.sp
-        )
-    }
 }
 
 @Composable
@@ -659,31 +665,6 @@ private fun MonthHeader(
                 .padding(horizontal = 4.dp),
         ) {
             Text(text = title, fontSize = 12.sp)
-        }
-    }
-}
-
-private fun getMonthWithYear(
-    layoutInfo: CalendarLayoutInfo,
-    daySize: Dp,
-    density: Density,
-): YearMonth? {
-    val visibleItemsInfo = layoutInfo.visibleMonthsInfo
-    return when {
-        visibleItemsInfo.isEmpty() -> null
-        visibleItemsInfo.count() == 1 -> visibleItemsInfo.first().month.yearMonth
-        else -> {
-            val firstItem = visibleItemsInfo.first()
-            val daySizePx = with(density) { daySize.toPx() }
-            if (
-                firstItem.size < daySizePx * 4 ||
-                firstItem.offset < layoutInfo.viewportStartOffset &&
-                (layoutInfo.viewportStartOffset - firstItem.offset > daySizePx)
-            ) {
-                visibleItemsInfo[1].month.yearMonth
-            } else {
-                firstItem.month.yearMonth
-            }
         }
     }
 }

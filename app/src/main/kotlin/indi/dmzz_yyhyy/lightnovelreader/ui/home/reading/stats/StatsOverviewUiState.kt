@@ -23,6 +23,7 @@ interface StatsOverviewUiState {
     var bookRecordsByBookId: Map<Int, List<BookRecordEntity>>
     var bookRecordsByDate: Map<LocalDate, List<BookRecordEntity>>
     val bookInformationMap: Map<Int, BookInformation>
+    val selectedDateDetails: DailyDateDetails?
 }
 
 class MutableStatisticsOverviewUiState : StatsOverviewUiState {
@@ -38,4 +39,5 @@ class MutableStatisticsOverviewUiState : StatsOverviewUiState {
     override var bookRecordsByBookId: Map<Int, List<BookRecordEntity>> by mutableStateOf(emptyMap())
     override var bookRecordsByDate: Map<LocalDate, List<BookRecordEntity>> by mutableStateOf(emptyMap())
     override var bookInformationMap = mutableStateMapOf<Int, BookInformation>()
+    override var selectedDateDetails: DailyDateDetails? by mutableStateOf(null)
 }
