@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
@@ -85,22 +87,17 @@ import kotlin.time.toDuration
 fun StatsOverviewScreen(
     onClickBack: () -> Unit,
     viewModel: StatsOverviewViewModel,
-    onClickDetail: (Int) -> Unit
+    onClickDetailScreen: (Int) -> Unit
 ) {
     val uiState = viewModel.uiState
     val selectedDate = uiState.selectedDate
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val showSettingsBottomSheet = remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopBar(
                 scrollBehavior = pinnedScrollBehavior,
                 onClickBack = onClickBack,
-                onClickSettings = { showSettingsBottomSheet.value = true },
-                onClickDetail = {
-                    onClickDetail(selectedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInt())
-                }
             )
         }
     ) { paddingValues ->
@@ -117,7 +114,7 @@ fun StatsOverviewScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item { CalendarBlock(viewModel, onSelectedDate = {viewModel.selectDate(it)}) }
-                item { DailyStatsBlock(uiState, selectedDate) }
+                item { DailyStatsBlock(uiState, selectedDate, onClickDetailScreen) }
                 item { TotalStatsBlock(uiState) }
             }
         }
@@ -161,19 +158,53 @@ private fun CalendarBlock(
         weekHeader = { WeekHeader(it) },
         monthHeader = { MonthHeader(it, LocalDate.now()) },
     )
-    CalendarHint(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp), thresholds = uiState.thresholds)
+    CalendarHint(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp), thresholds = uiState.thresholds)
 }
 
 @Composable
-private fun DailyStatsBlock(uiState: StatsOverviewUiState, selectedDate: LocalDate) {
+private fun DailyStatsBlock(
+    uiState: StatsOverviewUiState,
+    selectedDate: LocalDate,
+    onClickDetailScreen: (Int) -> Unit
+) {
     val records = uiState.bookRecordsByDate[selectedDate] ?: emptyList()
     val dateFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
-        AnimatedText(text = selectedDate.toString(), fontSize = 18.sp, fontWeight = FontWeight.W600)
+        val sections = buildExpandableSections(uiState, records, dateFormatter)
+
+        Row(
+            modifier = Modifier.height(46.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnimatedText(
+                text = selectedDate.toString(),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.W600
+            )
+            Spacer(Modifier.weight(1f))
+            if (sections.isNotEmpty()) {
+                TextButton({
+                    onClickDetailScreen(
+                        selectedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInt()
+                    )
+                }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            modifier = Modifier.padding(end = 10.dp),
+                            text = "详情"
+                        )
+                        Icon(
+                            painter = painterResource(R.drawable.arrow_forward_24px), null
+                        )
+                    }
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(6.dp))
 
-        val sections = buildExpandableSections(uiState, records, dateFormatter)
         if (sections.isNotEmpty()) {
             MultiExpandableCard(sections)
         } else {
@@ -201,7 +232,6 @@ private fun DailyStatsBlock(uiState: StatsOverviewUiState, selectedDate: LocalDa
 fun TotalStatsBlock(
     uiState: StatsOverviewUiState
 ) {
-    val statsBookRecordMap = uiState.bookRecordsByDate
     val lazyRowState = rememberLazyListState()
 
     Column(
@@ -240,6 +270,16 @@ fun TotalStatsBlock(
                     title = "阅读时长",
                     value = if (totalSeconds < 3600) "< 1" else "${(totalSeconds / 3600)} +",
                     unit = "小时"
+                )
+            }
+
+            item {
+                StatsCard(
+                    modifier = Modifier.weight(1f),
+                    icon = painterResource(R.drawable.schedule_90dp),
+                    title = "读过的书本",
+                    value = "${uiState.bookRecordsByBookId.size}",
+                    unit = "本"
                 )
             }
 
@@ -342,7 +382,6 @@ private fun buildExpandableSections(
     records: List<BookRecordEntity> = emptyList(),
     dateFormatter: DateTimeFormatter
 ): List<ExpandableSection> {
-    println("CALL BES, list $records")
     if (records.isEmpty()) return emptyList()
     val totalSeconds = records.sumOf { it.totalTime }
     val totalDuration = totalSeconds.toDuration(DurationUnit.SECONDS)
@@ -417,7 +456,10 @@ fun MultiExpandableCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(6.dp))
-                            .clickable { expandedStates = expandedStates.mapIndexed { u, v -> u == index != v } }
+                            .clickable {
+                                expandedStates =
+                                    expandedStates.mapIndexed { u, v -> u == index != v }
+                            }
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -482,8 +524,6 @@ fun MultiExpandableCard(
 private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onClickBack: () -> Unit,
-    onClickSettings: () -> Unit,
-    onClickDetail: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -501,23 +541,6 @@ private fun TopBar(
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_back_24px),
                     contentDescription = "back"
-                )
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = onClickSettings
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.outline_settings_24px),
-                    contentDescription = "settings")
-            }
-            IconButton(
-                onClick = onClickDetail
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.deployed_code_update_24px),
-                    contentDescription = "/*FIXME*/"
                 )
             }
         },

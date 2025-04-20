@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
+import indi.dmzz_yyhyy.lightnovelreader.utils.quickSelect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -15,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class StatsOverviewViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
+    private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository
 ) : ViewModel() {
     private var _uiState = MutableStatisticsOverviewUiState()
@@ -107,38 +110,6 @@ class StatsOverviewViewModel @Inject constructor(
             }
         }
         _uiState.dateLevelMap = dateLevelMap
-    }
-
-
-    private fun quickSelect(list: List<Int>, percentile: Double): Int {
-        val targetIndex = (list.size * percentile).toInt().coerceIn(list.indices)
-        val arr = list.toMutableList()
-
-        var left = 0
-        var right = arr.lastIndex
-
-        while (left < right) {
-            val pivotIndex = partition(arr, left, right)
-            when {
-                pivotIndex == targetIndex -> return arr[pivotIndex]
-                pivotIndex < targetIndex -> left = pivotIndex + 1
-                else -> right = pivotIndex - 1
-            }
-        }
-        return arr[left]
-    }
-
-    private fun partition(arr: MutableList<Int>, left: Int, right: Int): Int {
-        val pivot = arr[right]
-        var i = left
-        for (j in left until right) {
-            if (arr[j] <= pivot) {
-                Collections.swap(arr, i, j)
-                i++
-            }
-        }
-        Collections.swap(arr, i, right)
-        return i
     }
 
     fun selectDate(date: LocalDate) {
