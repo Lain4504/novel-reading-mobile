@@ -1,61 +1,257 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.himanshoe.charty.bar.BarChart
+import com.himanshoe.charty.bar.StackedBarChart
 import com.himanshoe.charty.bar.config.BarChartColorConfig
 import com.himanshoe.charty.bar.config.BarChartConfig
-import com.himanshoe.charty.bar.config.BarTooltip
 import com.himanshoe.charty.bar.model.BarData
+import com.himanshoe.charty.bar.model.StackBarData
 import com.himanshoe.charty.common.LabelConfig
 import com.himanshoe.charty.common.asSolidChartColor
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd")
+val predefinedColors = listOf(
+    Color(0xFF2196F3),
+    Color(0xFF4CAF50),
+    Color(0xFFFF9800),
+    Color(0xFFF44336),
+    Color(0xFF9C27B0),
+    Color(0xFF00BCD4),
+    Color(0xFF3F51B5),
+    Color(0xFFFF5722),
+)
+
 @Composable
-fun Last7DaysChart(
-    modifier: Modifier = Modifier,
-    target: Float?,
-    data: List<BarData>
+fun ReadTimeStackedBarChart(
+    bookInformationMap: Map<Int, BookInformation>,
+    dateRange: Pair<LocalDate, LocalDate>,
+    recordMap: Map<LocalDate, List<BookRecordEntity>>,
+    modifier: Modifier = Modifier
 ) {
+    var selectedIndex by remember { mutableIntStateOf(-1) }
+    val (startDate, endDate) = dateRange
+    println("STACK RANGE ($startDate, $endDate)")
+
+    val bookColors = recordMap
+        .filterKeys { it in startDate..endDate }
+        .flatMap { it.value }
+        .distinctBy { it.bookId }
+        .mapIndexed { index, bookRecord ->
+            val color = if (index < predefinedColors.size) {
+                predefinedColors[index]
+            } else Color.Gray
+            bookRecord.bookId to color.asSolidChartColor()
+        }.toMap()
+
+    val filteredRecordMap = recordMap
+        .filterKeys { it in startDate..endDate }
+        .toSortedMap()
+
+    val data = filteredRecordMap.map { (date, records) ->
+        val values = records.groupBy { it.bookId }
+            .map { entry ->
+                entry.value.sumOf { it.totalTime / 60 }.toFloat()
+            }
+        val colors = records.map { bookColors[it.bookId] ?: Color.Gray.asSolidChartColor() }
+
+        StackBarData(
+            label = date.format(dateFormatter),
+            values = values,
+            colors = colors
+        )
+    }
+
+    if (data.isEmpty()) return
+
+    Column {
+        StackedBarChart(
+            data = { data },
+            target = null,
+            modifier = modifier,
+            labelConfig = LabelConfig.default().copy(
+                showXLabel = data.size < 8,
+                xAxisCharCount = 5,
+                showYLabel = true,
+                labelTextStyle = TextStyle(
+                    color = colorScheme.secondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.W500,
+                )
+            ),
+            onBarClick = { index, _ -> selectedIndex = index }
+        )
+        Spacer(Modifier.height(10.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 4.dp)
+        ) {
+            val (coloredBooks, grayBooks) = bookColors.entries.partition { it.value.color != Color.Gray }
+            coloredBooks.forEach { (bookId, chartColor) ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 4.dp)
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(chartColor.color),
+                    )
+                    Text(
+                        text = bookInformationMap[bookId]?.title ?: "Unknown",
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            if (grayBooks.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 4.dp)
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(Color.Gray),
+                    )
+                    Text(
+                        text = "其他",
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+fun LastNDaysChart(
+    modifier: Modifier = Modifier,
+    dateRange: Pair<LocalDate, LocalDate>,
+    statsMap: Map<LocalDate, ReadingStatisticsEntity>
+) {
+    val readTimeMap = statsMap.mapValues { (_, entity) ->
+        entity.readingTimeCount.getTotalMinutes()
+    }
+
+    val (startDate, endDate) = dateRange
+    val filteredMap = readTimeMap.filterKeys { it in startDate..endDate }
+        .toSortedMap()
+    val convertedMap: Map<String, Int> = filteredMap
+        .map { (date, time) -> date.format(dateFormatter) to time }
+        .toMap()
+
+    if (convertedMap.values.sum() < 1) {
+        Box(
+            modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("没有记录")
+        }
+        return
+    }
+    val data = filteredMap.map { (date, value) ->
+        BarData(
+            xValue = date.format(dateFormatter),
+            yValue = value.toFloat()
+        )
+    }
     BarChart(
         modifier = modifier,
-        target = target,
-        barTooltip = BarTooltip.GraphTop,
         labelConfig = LabelConfig.default().copy(
-            showXLabel = true,
+            showXLabel = data.size < 8,
             xAxisCharCount = 5,
             showYLabel = true,
-            textColor = MaterialTheme.colorScheme.onPrimaryContainer.asSolidChartColor()
+            labelTextStyle = TextStyle(
+                color = colorScheme.secondary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.W500,
+            )
         ),
         barChartColorConfig = BarChartColorConfig.default().copy(
-            fillBarColor = MaterialTheme.colorScheme.onPrimaryContainer.asSolidChartColor()
+            fillBarColor = colorScheme.primary.copy(alpha = 0.75f).asSolidChartColor()
         ),
         data = { data },
         barChartConfig = BarChartConfig.default().copy(
-            cornerRadius = CornerRadius(40F, 40F),
+            cornerRadius = CornerRadius(10f),
         ),
         onBarClick = { index, barData -> println("click in bar with $index index and data $barData") })
 }
 
 @Composable
 fun WeeklyCountChart(
-    countList: Map<LocalDate, Count>
+    statsMap: Map<LocalDate, ReadingStatisticsEntity>,
+    dateRange: Pair<LocalDate, LocalDate>,
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
-    val data = countList.toList().takeLast(7).map { (date, count) ->
-        DayData(
-            dayLabel = date.format(dateFormatter),
-            hourValues = List(24) { hour -> count.getMinute(hour) }
-        )
+    val (startDate, endDate) = dateRange
+    val countMap = statsMap.mapValues { (_, entity) ->
+        entity.readingTimeCount
+    }
+    val data = countMap
+        .filterKeys { it in startDate..endDate }
+        .toSortedMap()
+        .map { (date, count) ->
+            DayData(
+                dayLabel = date.format(dateFormatter),
+                hourValues = List(24) { hour -> count.getMinute(hour) }
+            )
+        }
+
+    if (countMap.entries.sumOf { it.value.getTotalMinutes() } < 1) {
+        Box(
+            modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("没有记录")
+        }
+        return
     }
 
     CountChart(
@@ -65,7 +261,7 @@ fun WeeklyCountChart(
             .height(320.dp)
             .padding(16.dp),
         config = CountChartConfig(
-            barColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            barColor = colorScheme.onPrimaryContainer,
             daySpacing = 12.dp
         ),
         labelConfig = LabelConfig(

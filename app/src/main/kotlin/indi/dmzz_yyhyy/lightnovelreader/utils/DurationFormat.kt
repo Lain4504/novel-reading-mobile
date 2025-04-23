@@ -10,7 +10,6 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 data class DurationFormat(val locale: Locale = Locale.getDefault()) {
     enum class Unit {
@@ -18,7 +17,7 @@ data class DurationFormat(val locale: Locale = Locale.getDefault()) {
     }
 
     fun format(duration: Duration, smallestUnit: Unit = Unit.SECOND): String {
-        var formattedStringComponents = mutableListOf<String>()
+        val formattedStringComponents = mutableListOf<String>()
         var remainder = duration
 
         for (unit in Unit.entries) {

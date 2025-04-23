@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
 import android.util.Log
+import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -56,7 +57,7 @@ class StatsOverviewViewModel @Inject constructor(
             println("POST getBookRecordMap, length ${bookRecordsMap.size}")
             val allBookIds = bookRecordsMap.flatMap { it.value.map { record -> record.bookId } }
 
-            allBookIds.forEach { id ->
+            allBookIds.fastForEach { id ->
                 viewModelScope.launch(Dispatchers.IO) {
                     bookRepository.getBookInformation(id).collect {
                         _uiState.bookInformationMap[it.id] = it

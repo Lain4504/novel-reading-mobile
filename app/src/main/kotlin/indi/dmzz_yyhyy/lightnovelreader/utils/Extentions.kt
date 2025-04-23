@@ -108,3 +108,10 @@ private fun partition(arr: MutableList<Int>, left: Int, right: Int): Int {
     Collections.swap(arr, i, right)
     return i
 }
+
+fun <K, V> MutableMap<K, V>.putWithLimit(key: K, value: V) {
+    if (size >= 50) {
+        keys.firstOrNull()?.let { remove(it) }
+    }
+    this[key] = value
+}

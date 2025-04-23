@@ -4,6 +4,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
+import indi.dmzz_yyhyy.lightnovelreader.utils.putWithLimit
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Duration
@@ -29,9 +30,8 @@ class StatsRepository @Inject constructor(
 ) {
     private val buffer = mutableMapOf<Int, Pair<LocalTime, Int>>()
     private val bufferMutex = Mutex()
-    val dateStatsMap = mutableMapOf<LocalDate, ReadingStatisticsEntity>()
-    val dateRecordsMap = mutableMapOf<LocalDate, List<BookRecordEntity>>()
-    val bookRecordsMap = mutableMapOf<Int, List<BookRecordEntity>>()
+    private val dateStatsMap = mutableMapOf<LocalDate, ReadingStatisticsEntity>()
+    private val dateRecordsMap = mutableMapOf<LocalDate, List<BookRecordEntity>>()
     private val cacheMutex = Mutex()
 
     suspend fun accumulateBookReadTime(bookId: Int, seconds: Int) = bufferMutex.withLock {
@@ -66,13 +66,6 @@ class StatsRepository @Inject constructor(
         )
 
         buffer.clear()
-    }
-
-    private fun <K, V> MutableMap<K, V>.putWithLimit(key: K, value: V) {
-        if (size >= 50) {
-            keys.firstOrNull()?.let { remove(it) }
-        }
-        this[key] = value
     }
 
     suspend fun getReadingStatistics(start: LocalDate, end: LocalDate? = null): Map<LocalDate, ReadingStatisticsEntity> {
@@ -127,6 +120,9 @@ class StatsRepository @Inject constructor(
         return bookRecordsList
     }
 
+    /**
+     总阅读记录 Entity
+     */
     private fun createTotalRecordEntity(): BookRecordEntity = BookRecordEntity(
         id = -721,
         date = LocalDate.now(),
@@ -158,20 +154,16 @@ class StatsRepository @Inject constructor(
     )
 
     suspend fun getTotalBookRecord(): BookRecordEntity {
-        val a = bookRecordDao.getTotalRecord() ?: createTotalRecordEntity()
-        println("getTotalBookRecord -> $a (${bookRecordDao.getTotalRecord()})")
-        return a
+        return bookRecordDao.getTotalRecord() ?: createTotalRecordEntity()
     }
 
     private suspend fun updateTotalRecord(update: ReadingStatsUpdate) {
         val totalRecord = getTotalBookRecord()
-
         val updatedTotal = totalRecord.copy(
             sessions = totalRecord.sessions + update.sessionDelta,
             totalTime = totalRecord.totalTime + update.secondDelta,
             lastSeen = LocalTime.now()
         )
-        println("POST updateTotalRecord\n$updatedTotal")
 
         bookRecordDao.insertBookRecord(updatedTotal)
     }

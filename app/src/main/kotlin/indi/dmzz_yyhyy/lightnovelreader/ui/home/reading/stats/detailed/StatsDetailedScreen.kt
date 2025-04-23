@@ -33,7 +33,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -42,17 +41,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.himanshoe.charty.bar.model.BarData
-import com.himanshoe.charty.common.asSolidChartColor
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.Last7DaysChart
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,89 +168,61 @@ fun StatsCard(
 
 @Composable
 fun DailyChart(
-    dateEntity: ReadingStatisticsEntity?,
-    records: List<BookRecordEntity>
+    uiState: StatsDetailedUiState
 ) {
-
+    StatsCard(
+        title = "阅读时长"
+    ) {
+        Box {
+        //  StorageChart()
+        }
+    }
 }
 
 @Composable
 fun WeeklyItem(
     uiState: StatsDetailedUiState,
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
-    println("DEBUG CHART ${uiState.targetDateRangeStatsMap}")
-    val selectedDate = uiState.selectedDate
-    val selectedDateReadTimeMap = uiState.targetDateRangeStatsMap.mapValues { (_, entity) ->
-        entity.readingTimeCount.getTotalMinutes()
-    }
-    val selectedIndex = selectedDateReadTimeMap.keys.indexOf(selectedDate)
-    val convertedMap: Map<String, Int> = if (selectedIndex != -1) {
-        selectedDateReadTimeMap.entries
-            .sortedBy { it.key }
-            .take(selectedIndex + 1)
-            .takeLast(7)
-            .associate { it.key.format(dateFormatter) to it.value }
-    } else {
-        emptyMap()
-    }
-
     StatsCard(
-        title = "近 7 日阅读时长"
+        title = "近 7 日阅读详情"
     ) {
-        if (convertedMap.values.sum() < 1) {
-            Box(
-                modifier = Modifier.height(80.dp).fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("没有记录")
-            }
-            return@StatsCard
-        }
         Box {
-            Last7DaysChart(
+            ReadTimeStackedBarChart(
+                uiState.bookInformationMap,
+                dateRange = uiState.targetDateRange,
+                recordMap = uiState.targetDateRangeRecordsMap,
                 modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
-                data = generateMockBarData(convertedMap.keys.toList(), convertedMap.values.toList()), target = null
             )
         }
 
     }
-    val countMap = uiState.targetDateRangeStatsMap.mapValues { (_, entity) ->
-        entity.readingTimeCount
-    }
-    println(countMap)
-    StatsCard("时间分布") {
-        if (countMap.entries.sumOf { it.value.getTotalMinutes() } < 1) {
-            Box(
-                modifier = Modifier.height(80.dp).fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("没有记录")
-            }
-            return@StatsCard
-        }
-        WeeklyCountChart(countMap)
-    }
-}
 
-private fun generateMockBarData(
-    dates: List<String>,
-    values: List<Int>
-): List<BarData> {
-    println("DATES $dates, VALUES $values")
-    return List(7) {
-        BarData(
-            yValue = values[it].toFloat(),
-            xValue = dates[it],
-            barColor = Color.Unspecified.asSolidChartColor()
+
+    StatsCard("时间分布") {
+        WeeklyCountChart(
+            dateRange = uiState.targetDateRange,
+            statsMap = uiState.targetDateRangeStatsMap
         )
-    }.toMutableList()
+    }
 }
 
 @Composable
 fun MonthlySummaryChart(
     uiState: StatsDetailedUiState
 ) {
+    StatsCard(
+        title = "近 30 日阅读时长"
+    ) {
+        Box {
+            LastNDaysChart(
+                dateRange = uiState.targetDateRange,
+                modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
+                statsMap = uiState.targetDateRangeStatsMap
+            )
+        }
+
+    }
+
     StatsCard(
         title = "本月读过"
     ) {
@@ -309,11 +276,8 @@ fun MonthlySummaryChart(
 }
 
 private fun LazyListScope.dailyStatistics(uiState: StatsDetailedUiState) {
-    val date = uiState.selectedDate
     item {
-        val stats = uiState.targetDateRangeStatsMap[date]
-        val records = uiState.targetDateRangeRecordsMap[date] ?: emptyList()
-        DailyChart(stats, records)
+        DailyChart(uiState)
     }
 }
 
