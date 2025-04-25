@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEach
 import com.himanshoe.charty.bar.BarChart
 import com.himanshoe.charty.bar.StackedBarChart
 import com.himanshoe.charty.bar.config.BarChartColorConfig
@@ -64,7 +65,6 @@ fun ReadTimeStackedBarChart(
 ) {
     var selectedIndex by remember { mutableIntStateOf(-1) }
     val (startDate, endDate) = dateRange
-    println("STACK RANGE ($startDate, $endDate)")
 
     val bookColors = recordMap
         .filterKeys { it in startDate..endDate }
@@ -96,21 +96,35 @@ fun ReadTimeStackedBarChart(
     }
 
     if (data.isEmpty()) return
+    if (data.all { barData -> barData.values.all { it <= 0.0f } }) {
+        Box(
+            modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("没有记录")
+        }
+        return
+    }
 
     Column {
         StackedBarChart(
             data = { data },
             target = null,
             modifier = modifier,
-            labelConfig = LabelConfig.default().copy(
+            labelConfig = LabelConfig(
                 showXLabel = data.size < 8,
                 xAxisCharCount = 5,
                 showYLabel = true,
                 labelTextStyle = TextStyle(
-                    color = colorScheme.secondary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.W500,
-                )
+                ),
+                textColor = colorScheme.secondary.asSolidChartColor()
+            ),
+            barChartColorConfig = BarChartColorConfig.default().copy(
+                barBackgroundColor = Color.Transparent.asSolidChartColor()
             ),
             onBarClick = { index, _ -> selectedIndex = index }
         )
@@ -121,7 +135,7 @@ fun ReadTimeStackedBarChart(
                 .padding(vertical = 4.dp)
         ) {
             val (coloredBooks, grayBooks) = bookColors.entries.partition { it.value.color != Color.Gray }
-            coloredBooks.forEach { (bookId, chartColor) ->
+            coloredBooks.fastForEach { (bookId, chartColor) ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -134,7 +148,7 @@ fun ReadTimeStackedBarChart(
                             .background(chartColor.color),
                     )
                     Text(
-                        text = bookInformationMap[bookId]?.title ?: "Unknown",
+                        text = bookInformationMap[bookId]?.title ?: "...",
                         fontSize = 13.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -211,7 +225,7 @@ fun LastNDaysChart(
                 color = colorScheme.secondary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.W500,
-            )
+            ),
         ),
         barChartColorConfig = BarChartColorConfig.default().copy(
             fillBarColor = colorScheme.primary.copy(alpha = 0.75f).asSolidChartColor()

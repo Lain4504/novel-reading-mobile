@@ -44,8 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
 import java.time.LocalDate
 
@@ -58,7 +58,6 @@ fun StatsDetailedScreen(
     onClickBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
-    println("OK DetailedScreen $targetDate")
     uiState.selectedDate = targetDate
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val viewOptions = listOf("日", "周", "月")
@@ -188,15 +187,14 @@ fun WeeklyItem(
     ) {
         Box {
             ReadTimeStackedBarChart(
-                uiState.bookInformationMap,
-                dateRange = uiState.targetDateRange,
-                recordMap = uiState.targetDateRangeRecordsMap,
                 modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
+                bookInformationMap = uiState.bookInformationMap,
+                recordMap = uiState.targetDateRangeRecordsMap,
+                dateRange = uiState.targetDateRange,
             )
         }
 
     }
-
 
     StatsCard("时间分布") {
         WeeklyCountChart(
@@ -248,6 +246,7 @@ fun MonthlySummaryChart(
                 )
             }
             Spacer(Modifier.weight(1f))
+
             uiState.bookInformationMap.entries
                 .sortedBy { it.key }
                 .take(5)
@@ -271,7 +270,6 @@ fun MonthlySummaryChart(
                     }
                 }
         }
-
     }
 }
 

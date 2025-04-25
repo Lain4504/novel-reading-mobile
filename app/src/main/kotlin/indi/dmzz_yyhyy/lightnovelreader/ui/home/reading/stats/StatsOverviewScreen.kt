@@ -54,7 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
@@ -109,7 +109,7 @@ fun StatsOverviewScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item { CalendarBlock(viewModel, onSelectedDate = {viewModel.selectDate(it)}) }
-                item { key(uiState.bookInformationMap) { DailyStatsBlock(uiState, onClickDetailScreen) } }
+                item { DailyStatsBlock(uiState, onClickDetailScreen) }
                 item { TotalStatsBlock(uiState) }
             }
         }
@@ -239,7 +239,7 @@ private fun DailyStatsBlock(
                 title = "阅读时长",
                 value = details?.formattedTotalTime ?: "--"
             ) {
-                Crossfade(targetState = details?.timeDetails.isNullOrEmpty()) { isEmpty ->
+                Crossfade(targetState = details?.timeDetails.isNullOrEmpty(), label = "") { isEmpty ->
                     if (isEmpty) {
                         NoRecords()
                     } else {
@@ -266,7 +266,8 @@ private fun DailyStatsBlock(
                 value = ""
             ) {
                 Crossfade(
-                    targetState = details?.firstBook == null && details?.lastBook == null
+                    targetState = details?.firstBook == null && details?.lastBook == null,
+                    label = ""
                 ) { isEmpty ->
                     if (isEmpty) {
                         NoRecords()
@@ -391,18 +392,20 @@ private fun DataItem(leftText: String, rightText: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
+            modifier = Modifier.weight(1f),
             text = leftText,
             fontSize = 14.sp,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = Ellipsis
         )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = rightText,
             fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.outline
+            color = MaterialTheme.colorScheme.outline,
+            maxLines = 1
         )
     }
 }
@@ -534,7 +537,7 @@ private fun TopBar(
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = Ellipsis
             )
         },
         navigationIcon = {

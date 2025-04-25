@@ -25,8 +25,7 @@ class StatsDetailedViewModel @Inject constructor(
     val uiState: StatsDetailedUiState = _uiState
 
     fun initialize(targetDate: LocalDate) {
-        println("RECV init with date $targetDate")
-        _uiState.targetDateRange = Pair(uiState.selectedDate, uiState.selectedDate)
+        _uiState.targetDateRange = Pair(targetDate, targetDate)
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.isLoading = true
             loadStatistics()
