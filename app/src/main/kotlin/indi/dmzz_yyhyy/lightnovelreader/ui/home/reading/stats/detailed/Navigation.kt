@@ -10,12 +10,9 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
-
-fun NavController.navigateToReadingStatsDailyDetailedDestination(target: Int) {
+fun NavController.navigateToReadingStatsDetailedDestination(target: Int) {
     navigate(Route.Main.Reading.Stats.Detailed(target))
 }
-
 
 fun NavGraphBuilder.readingStatsDetailedDestination(navController: NavController) {
     composable<Route.Main.Reading.Stats.Detailed> {

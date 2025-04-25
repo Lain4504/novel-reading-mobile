@@ -28,24 +28,23 @@ class StatsRepository @Inject constructor(
     private val readingStatisticsDao: ReadingStatisticsDao,
     private val bookRecordDao: BookRecordDao
 ) {
-    private val buffer = mutableMapOf<Int, Pair<LocalTime, Int>>()
-    private val bufferMutex = Mutex()
+    private val bookReadTimeBuffer = mutableMapOf<Int, Pair<LocalTime, Int>>()
+    private val bookReadTimeBufferMutex = Mutex()
     private val dateStatsMap = mutableMapOf<LocalDate, ReadingStatisticsEntity>()
     private val dateRecordsMap = mutableMapOf<LocalDate, List<BookRecordEntity>>()
     private val cacheMutex = Mutex()
 
-    suspend fun accumulateBookReadTime(bookId: Int, seconds: Int) = bufferMutex.withLock {
+    suspend fun accumulateBookReadTime(bookId: Int, seconds: Int) = bookReadTimeBufferMutex.withLock {
         if (seconds < 0) {
-            println("seconds < 0 clearing")
-            buffer.keys.toList().forEach { bookId ->
+            bookReadTimeBuffer.keys.toList().forEach { bookId ->
                 clearBookReadTimeBuffer(bookId)
-                buffer.remove(bookId)
+                bookReadTimeBuffer.remove(bookId)
             }
             return@withLock
         }
-        val current = buffer[bookId] ?: Pair(LocalTime.now(), 0)
+        val current = bookReadTimeBuffer[bookId] ?: Pair(LocalTime.now(), 0)
         val newTotal = current.second + seconds
-        buffer[bookId] = current.copy(second = newTotal)
+        bookReadTimeBuffer[bookId] = current.copy(second = newTotal)
         println("-> accumulate bookId=$bookId, sec=$newTotal")
 
         if (newTotal >= 60 || Duration.between(current.first, LocalTime.now()).seconds >= 60) {
@@ -54,7 +53,7 @@ class StatsRepository @Inject constructor(
     }
 
     private suspend fun clearBookReadTimeBuffer(bookId: Int) {
-        val (startTime, totalSeconds) = buffer[bookId] ?: return
+        val (startTime, totalSeconds) = bookReadTimeBuffer[bookId] ?: return
 
         updateReadingStatistics(
             ReadingStatsUpdate(
@@ -65,7 +64,7 @@ class StatsRepository @Inject constructor(
             )
         )
 
-        buffer.clear()
+        bookReadTimeBuffer.clear()
     }
 
     suspend fun getReadingStatistics(start: LocalDate, end: LocalDate? = null): Map<LocalDate, ReadingStatisticsEntity> {
@@ -144,7 +143,7 @@ class StatsRepository @Inject constructor(
     )
 
 
-    private fun createStatsEntity(date: LocalDate) = ReadingStatisticsEntity(
+    fun createStatsEntity(date: LocalDate) = ReadingStatisticsEntity(
         date = date,
         readingTimeCount = Count(),
         avgSpeed = 0,
@@ -197,7 +196,7 @@ class StatsRepository @Inject constructor(
         readingStatisticsDao.insertReadingStatistics(updatedStats)
         bookRecordDao.insertBookRecord(newBookRecord)
 
-        buffer.clear()
+        bookReadTimeBuffer.clear()
     }
 
     suspend fun updateBookStatus(

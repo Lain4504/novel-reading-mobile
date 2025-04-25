@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,14 +64,14 @@ class StatsDetailedViewModel @Inject constructor(
         val bookRecordsMap = statsRepository.getBookRecords(start, end)
         val entities = statsRepository.getReadingStatistics(start, end)
 
-        val bookIds = mutableSetOf<Int>()
+        val bookIds = mutableListOf<Int>()
 
         val allDates = generateSequence(start) { it.plusDays(1) }
             .takeWhile { it <= end }
             .toList()
 
         _uiState.targetDateRangeStatsMap = allDates.associateWith { date ->
-            entities.values.find { it.date == date } ?: createDefaultEntity(date)
+            entities.values.find { it.date == date } ?: statsRepository.createStatsEntity(date)
         }.toSortedMap()
 
         _uiState.targetDateRangeRecordsMap = allDates.associateWith { date ->
@@ -86,7 +84,7 @@ class StatsDetailedViewModel @Inject constructor(
             }
         }
 
-        bookIds.forEach { id ->
+        bookIds.fastForEach { id ->
             viewModelScope.launch(Dispatchers.IO) {
                 bookRepository.getBookInformation(id).collect {
                     _uiState.bookInformationMap[id] = it
@@ -95,13 +93,4 @@ class StatsDetailedViewModel @Inject constructor(
         }
     }
 
-
-    private fun createDefaultEntity(date: LocalDate) = ReadingStatisticsEntity(
-        date = date,
-        readingTimeCount = Count(),
-        avgSpeed = 0,
-        favoriteBooks = emptyList(),
-        startedBooks = emptyList(),
-        finishedBooks = emptyList()
-    )
 }

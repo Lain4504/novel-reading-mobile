@@ -1,7 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -10,8 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -32,7 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -40,10 +41,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEachIndexed
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.DailyBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
@@ -58,6 +62,7 @@ fun StatsDetailedScreen(
     onClickBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
+    println("OK DetailedScreen $targetDate")
     uiState.selectedDate = targetDate
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val viewOptions = listOf("日", "周", "月")
@@ -141,7 +146,7 @@ fun StatsCard(
             .fillMaxWidth()
             .padding(vertical = 6.dp, horizontal = 12.dp),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = colorScheme.surfaceContainer,
         shadowElevation = 2.dp
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
@@ -155,7 +160,7 @@ fun StatsCard(
                     Text(
                         text = subTitle,
                         fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = colorScheme.secondary
                     )
                 }
                 content()
@@ -169,11 +174,54 @@ fun StatsCard(
 fun DailyChart(
     uiState: StatsDetailedUiState
 ) {
+    val books = uiState.targetDateRangeRecordsMap[uiState.selectedDate]
+            ?.map { it.bookId }
+            .orEmpty()
+
     StatsCard(
         title = "阅读时长"
     ) {
-        Box {
-        //  StorageChart()
+        Column {
+            Spacer(Modifier.height(12.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    books.take(8).fastForEachIndexed { index, bookId ->
+                        val scale = 1f - (index * 0.02f).coerceAtMost(0.3f)
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .zIndex((books.size - index).toFloat())
+                                .offset(x = index.dp * 20)
+                                .graphicsLayer(scaleX = scale, scaleY = scale)
+                                .align(Alignment.CenterEnd),
+                        ) {
+                            uiState.bookInformationMap[bookId]?.let {
+                                Cover(
+                                    width = 63.dp * scale,
+                                    height = 90.dp * scale,
+                                    url = it.coverUrl,
+                                    rounded = 6.dp
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.weight(1f))
+            }
+
+            Text("${books.size} 本书")
+            Spacer(Modifier.height(12.dp))
+            DailyBarChart(
+                recordList = uiState.targetDateRangeRecordsMap[uiState.selectedDate],
+                bookInformationMap = uiState.bookInformationMap
+            )
         }
     }
 }
@@ -214,7 +262,10 @@ fun MonthlySummaryChart(
         Box {
             LastNDaysChart(
                 dateRange = uiState.targetDateRange,
-                modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth()
+                    .height(230.dp),
                 statsMap = uiState.targetDateRangeStatsMap
             )
         }
@@ -224,51 +275,57 @@ fun MonthlySummaryChart(
     StatsCard(
         title = "本月读过"
     ) {
-        Row(
-            modifier = Modifier.height(80.dp),
-            horizontalArrangement = Arrangement.spacedBy((-35).dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .padding(bottom = 8.dp)
-            ) {
-                Text(
-                    text = uiState.bookInformationMap.entries.size.toString(),
-                    fontSize = 32.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "本",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.weight(1f))
+        val (startDate, endDate) = uiState.targetDateRange
 
-            uiState.bookInformationMap.entries
-                .sortedBy { it.key }
-                .take(5)
-                .forEach {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.background
-                            )
-                            .height(84.dp)
-                            .width(60.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
+        val books = uiState.targetDateRangeRecordsMap
+            .filterKeys { it in startDate..endDate }
+            .values
+            .flatten()
+            .map { it.bookId }
+
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text(
+                text = uiState.bookInformationMap.entries.size.toString(),
+                fontSize = 32.sp,
+                color = colorScheme.onSurface
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = "本",
+                color = colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.weight(1f))
+
+        Box(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            books.take(8).fastForEachIndexed { index, bookId ->
+                val scale = 1f - (index * 0.01f).coerceAtMost(0.3f)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .zIndex((books.size - index).toFloat())
+                        .offset(x = index.dp * 20)
+                        .graphicsLayer(scaleX = scale, scaleY = scale)
+                        .align(Alignment.CenterEnd),
+                ) {
+                    uiState.bookInformationMap[bookId]?.let {
                         Cover(
-                            width = 56.dp,
-                            height = 80.dp,
-                            url = it.value.coverUrl,
-                            rounded = 4.dp
+                            width = 63.dp * scale,
+                            height = 90.dp * scale,
+                            url = it.coverUrl,
+                            rounded = 6.dp
                         )
                     }
                 }
+            }
         }
     }
 }
@@ -306,7 +363,7 @@ private fun TopBar(
                     text = "详细统计",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.W600,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -314,7 +371,7 @@ private fun TopBar(
                     text = if (dateRange.first == dateRange.second) dateRange.second.toString()
                         else dateRange.first.toString() + " 至 " + dateRange.second,
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             }
         },

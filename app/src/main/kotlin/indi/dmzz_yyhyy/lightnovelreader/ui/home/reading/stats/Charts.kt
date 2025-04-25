@@ -32,10 +32,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import com.himanshoe.charty.bar.BarChart
 import com.himanshoe.charty.bar.StackedBarChart
+import com.himanshoe.charty.bar.StorageBar
 import com.himanshoe.charty.bar.config.BarChartColorConfig
 import com.himanshoe.charty.bar.config.BarChartConfig
 import com.himanshoe.charty.bar.model.BarData
 import com.himanshoe.charty.bar.model.StackBarData
+import com.himanshoe.charty.bar.model.StorageData
+import com.himanshoe.charty.common.ChartColor
 import com.himanshoe.charty.common.LabelConfig
 import com.himanshoe.charty.common.asSolidChartColor
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
@@ -56,6 +59,25 @@ val predefinedColors = listOf(
     Color(0xFFFF5722),
 )
 
+fun assignColors(
+    records: List<BookRecordEntity>
+): Map<Int, ChartColor> {
+    return records
+        .groupBy { it.bookId }
+        .mapValues { (_, list) -> list.sumOf { it.totalTime } }
+        .toList()
+        .sortedByDescending { it.second }
+        .mapIndexed { index, (bookId, _) ->
+            val color = if (index < predefinedColors.size) {
+                predefinedColors[index]
+            } else {
+                Color.Gray
+            }
+            bookId to color.asSolidChartColor()
+        }
+        .toMap()
+}
+
 @Composable
 fun ReadTimeStackedBarChart(
     bookInformationMap: Map<Int, BookInformation>,
@@ -66,27 +88,31 @@ fun ReadTimeStackedBarChart(
     var selectedIndex by remember { mutableIntStateOf(-1) }
     val (startDate, endDate) = dateRange
 
-    val bookColors = recordMap
+    val allRecords = recordMap
         .filterKeys { it in startDate..endDate }
-        .flatMap { it.value }
-        .distinctBy { it.bookId }
-        .mapIndexed { index, bookRecord ->
-            val color = if (index < predefinedColors.size) {
-                predefinedColors[index]
-            } else Color.Gray
-            bookRecord.bookId to color.asSolidChartColor()
-        }.toMap()
+        .values
+        .flatten()
+    val bookColors = assignColors(allRecords)
 
     val filteredRecordMap = recordMap
         .filterKeys { it in startDate..endDate }
         .toSortedMap()
 
     val data = filteredRecordMap.map { (date, records) ->
-        val values = records.groupBy { it.bookId }
+        val groupedRecords = records.groupBy { it.bookId }
+
+        val sortedBooks = groupedRecords.entries
             .map { entry ->
-                entry.value.sumOf { it.totalTime / 60 }.toFloat()
+                val bookTime = entry.value.sumOf { it.totalTime / 60 }.toFloat()
+                entry.key to bookTime
             }
-        val colors = records.map { bookColors[it.bookId] ?: Color.Gray.asSolidChartColor() }
+            .sortedByDescending { it.second }
+
+        val (coloredBooks, grayBooks) = sortedBooks.partition { bookColors[it.first]?.value?.first() != Color.Gray }
+        val sortedBooksWithColors = coloredBooks + grayBooks
+
+        val values = sortedBooksWithColors.map { it.second }
+        val colors = sortedBooksWithColors.map { bookColors[it.first] ?: Color.Gray.asSolidChartColor() }
 
         StackBarData(
             label = date.format(dateFormatter),
@@ -134,7 +160,7 @@ fun ReadTimeStackedBarChart(
                 .fillMaxSize()
                 .padding(vertical = 4.dp)
         ) {
-            val (coloredBooks, grayBooks) = bookColors.entries.partition { it.value.color != Color.Gray }
+            val (coloredBooks, grayBooks) = bookColors.entries.partition { it.value.value.first() != Color.Gray }
             coloredBooks.fastForEach { (bookId, chartColor) ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -145,7 +171,7 @@ fun ReadTimeStackedBarChart(
                             .padding(start = 4.dp)
                             .size(10.dp)
                             .clip(CircleShape)
-                            .background(chartColor.color),
+                            .background(chartColor.value.first())
                     )
                     Text(
                         text = bookInformationMap[bookId]?.title ?: "...",
@@ -166,7 +192,7 @@ fun ReadTimeStackedBarChart(
                             .padding(start = 4.dp)
                             .size(10.dp)
                             .clip(CircleShape)
-                            .background(Color.Gray),
+                            .background(Color.Gray)
                     )
                     Text(
                         text = "其他",
@@ -177,7 +203,6 @@ fun ReadTimeStackedBarChart(
                 }
             }
         }
-
     }
 }
 
@@ -225,7 +250,7 @@ fun LastNDaysChart(
                 color = colorScheme.secondary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.W500,
-            ),
+            )
         ),
         barChartColorConfig = BarChartColorConfig.default().copy(
             fillBarColor = colorScheme.primary.copy(alpha = 0.75f).asSolidChartColor()
@@ -233,8 +258,71 @@ fun LastNDaysChart(
         data = { data },
         barChartConfig = BarChartConfig.default().copy(
             cornerRadius = CornerRadius(10f),
-        ),
-        onBarClick = { index, barData -> println("click in bar with $index index and data $barData") })
+        )
+    )
+}
+
+@Composable
+fun DailyBarChart(
+    recordList: List<BookRecordEntity>?,
+    bookInformationMap: Map<Int, BookInformation>
+) {
+    if (recordList == null) {
+        Box(
+            modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("没有记录")
+        }
+        return
+    }
+
+    val bookColors = assignColors(recordList)
+    val totalTime = recordList.sumOf { it.totalTime }.toFloat()
+    val grouped = recordList.groupBy { it.bookId }
+
+    val data = grouped.map { (bookId, records) ->
+        val bookTime = records.sumOf { it.totalTime }.toFloat()
+        StorageData(
+            name = bookInformationMap[bookId]?.title ?: "Unknown",
+            value = if (totalTime > 0) bookTime / totalTime else 0f,
+            color = bookColors[bookId] ?: Color.Gray.asSolidChartColor()
+        )
+    }.sortedByDescending { it.value }
+
+    Column(modifier = Modifier.fillMaxWidth()
+        .padding(vertical = 4.dp)
+    ) {
+        StorageBar(
+            data = { data },
+            modifier = Modifier.fillMaxWidth().height(30.dp)
+        )
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+        ) {
+            data.fastForEach {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(it.color.value.first())
+                    )
+                    Text(
+                        text = it.name,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable

@@ -5,7 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.navigateToReadingStatsDailyDetailedDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.navigateToReadingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.readingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
@@ -33,7 +33,7 @@ fun NavGraphBuilder.readingStatsOverviewDestination(navController: NavController
         StatsOverviewScreen(
             onClickBack = navController::popBackStackIfResumed,
             viewModel = statsOverviewViewModel,
-            onClickDetailScreen = navController::navigateToReadingStatsDailyDetailedDestination
+            onClickDetailScreen = navController::navigateToReadingStatsDetailedDestination
         )
     }
 }
