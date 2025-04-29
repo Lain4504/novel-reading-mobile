@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -105,8 +106,8 @@ fun DarkModeSettings(
 ) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-        text = "深色主题",
-        fontSize = 16.sp,
+        text = "深色模式",
+        fontSize = 15.sp,
         fontWeight = FontWeight.W600
     )
     Row(
@@ -219,10 +220,30 @@ fun ThemeSettingsList(
         booleanUserData = settingState.dynamicColorsKeyUserData,
         disabled = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
     )
+    if (!settingState.dynamicColorsKey) {
+        SettingsMenuEntry(
+            modifier = Modifier.background(colorScheme.background),
+            iconRes = R.drawable.light_mode_24px,
+            title = "浅色主题",
+            description = if (LocalIsDarkTheme.current) "切换至浅色模式以预览主题" else "指定应用在浅色模式下的主题",
+            options = MenuOptions.LightThemeNameOptions,
+            selectedOptionKey = settingState.lightThemeName,
+            onOptionChange = settingState.lightThemeNameUserData::asynchronousSet
+        )
+        SettingsMenuEntry(
+            modifier = Modifier.background(colorScheme.background),
+            iconRes = R.drawable.dark_mode_24px,
+            title = "深色主题",
+            description = if (LocalIsDarkTheme.current) "指定应用在深色模式下的主题" else "切换至深色模式以预览主题",
+            options = MenuOptions.DarkThemeNameOptions,
+            selectedOptionKey = settingState.darkThemeName,
+            onOptionChange = settingState.darkThemeNameUserData::asynchronousSet
+        )
+    }
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         text = "字形",
-        fontSize = 16.sp,
+        fontSize = 15.sp,
         fontWeight = FontWeight.W600
     )
     SettingsMenuEntry(
@@ -268,7 +289,7 @@ fun ReaderThemeSettingsList(
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         text = "纸张",
-        fontSize = 16.sp,
+        fontSize = 15.sp,
         fontWeight = FontWeight.W600
     )
     Row(
@@ -440,7 +461,7 @@ fun ReaderThemeSettingsList(
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         text = "文本",
-        fontSize = 16.sp,
+        fontSize = 15.sp,
         fontWeight = FontWeight.W600
     )
     val onSecondaryContainer = colorScheme.onSecondaryContainer

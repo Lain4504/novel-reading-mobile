@@ -53,6 +53,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
+import androidx.core.net.toUri
 
 @Composable
 fun SettingsSwitchEntry(
@@ -152,8 +153,8 @@ fun SettingsSwitchEntry(
 
 @Composable
 fun SettingsSliderEntry(
-    iconRes: Int = -1,
     modifier: Modifier = Modifier,
+    iconRes: Int = -1,
     title: String,
     unit: String,
     value: Float,
@@ -371,7 +372,8 @@ fun SettingsMenuEntry(
                                 Text(
                                     modifier = Modifier.padding(vertical = 4.dp),
                                     text = stringResource(option.nameId),
-                                    fontSize = 14.sp,)
+                                    fontSize = 14.sp,
+                                )
                             }
                         )
                     }
@@ -414,7 +416,7 @@ fun SettingsClickableEntry(
         description = description,
         onClick = {
             openUrl.let { url ->
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                 context.startActivity(intent, null)
             }
         }

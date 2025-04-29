@@ -14,6 +14,11 @@
     <string name="key_dark_mode_follow_system">跟随系统</string>
     <string name="key_dark_mode_enabled">保持启用</string>
     <string name="key_dark_mode_disabled">保持禁用</string>
+    <!-- Light Theme Name -->
+    <string name="key_light_theme_default">默认</string>
+    <!-- Dark Theme Name -->
+    <string name="key_dark_theme_default">默认</string>
+    <string name="key_dark_theme_obsidian">黑曜石</string>
     <!-- FlipAnime -->
     <string name="key_flip_animation_none">无</string>
     <string name="key_flip_animation_scroll">滚动</string>

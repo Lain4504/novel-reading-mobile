@@ -138,7 +138,6 @@ fun SettingsScreen(
                         icon = ImageVector.vectorResource(R.drawable.info_24px)
                     ) {
                         AboutSettingsList(
-                            settingState = settingState,
                             onClickDebugMode = onClickDebugMode
                         )
                     }
