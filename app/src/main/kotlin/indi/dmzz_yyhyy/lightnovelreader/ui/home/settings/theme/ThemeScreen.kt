@@ -61,6 +61,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.selectDataFile
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncherWithFlag
 import kotlinx.coroutines.CoroutineScope
@@ -73,7 +74,7 @@ import java.util.Locale
 
 @Composable
 fun ThemeScreen(
-    themeSettingState: ThemeSettingState,
+    themeSettingState: SettingState,
     onClickBack: () -> Unit,
     onClickChangeTextColor: () -> Unit
 ) {
@@ -100,7 +101,7 @@ fun ThemeScreen(
 
 @Composable
 fun DarkModeSettings(
-    settingState: ThemeSettingState
+    settingState: SettingState
 ) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -114,7 +115,6 @@ fun DarkModeSettings(
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        // 禁用暗色模式
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -131,7 +131,6 @@ fun DarkModeSettings(
             }
         }
 
-        // 启用暗色模式
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -148,7 +147,6 @@ fun DarkModeSettings(
             }
         }
 
-        // 跟随系统
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -209,7 +207,7 @@ fun DarkModeSettings(
 
 @Composable
 fun ThemeSettingsList(
-    settingState: ThemeSettingState,
+    settingState: SettingState,
 ) {
     Spacer(Modifier.height(14.dp))
     SettingsSwitchEntry(
@@ -260,7 +258,7 @@ fun ThemeSettingsList(
 
 @Composable
 fun ReaderThemeSettingsList(
-    settingState: ThemeSettingState,
+    settingState: SettingState,
     onClickChangeTextColor: () -> Unit
 ) {
     val context = LocalContext.current
@@ -511,7 +509,7 @@ fun ReaderThemeSettingsList(
 
 @Composable
 private fun LightThemeSettingsItem(
-    modifier: Modifier = Modifier, settingState: ThemeSettingState
+    modifier: Modifier = Modifier, settingState: SettingState
 ) {
     MaterialTheme (
         if (settingState.dynamicColorsKey && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -523,7 +521,7 @@ private fun LightThemeSettingsItem(
 
 @Composable
 private fun DarkThemeSettingsItem(
-    modifier: Modifier = Modifier, settingState: ThemeSettingState
+    modifier: Modifier = Modifier, settingState: SettingState
 ) {
     MaterialTheme (
         if (settingState.dynamicColorsKey && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -536,7 +534,7 @@ private fun DarkThemeSettingsItem(
 @Composable
 private fun LightBackgroundSettingsItem(
     modifier: Modifier = Modifier,
-    settingState: ThemeSettingState,
+    settingState: SettingState,
     onClickSelectImage: () -> Unit
 ) {
     MaterialTheme (
@@ -550,7 +548,7 @@ private fun LightBackgroundSettingsItem(
 @Composable
 private fun DarkBackgroundSettingsItem(
     modifier: Modifier = Modifier,
-    settingState: ThemeSettingState,
+    settingState: SettingState,
     onClickSelectImage: () -> Unit
 ) {
     MaterialTheme (

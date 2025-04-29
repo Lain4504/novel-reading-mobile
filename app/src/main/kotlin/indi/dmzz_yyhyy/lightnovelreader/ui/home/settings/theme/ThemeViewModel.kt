@@ -4,15 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import javax.inject.Inject
 
 @HiltViewModel
 class ThemeViewModel @Inject constructor(
     userDataRepository: UserDataRepository,
 ) : ViewModel() {
-    var settingState = ThemeSettingState(
+    val settingState = SettingState(
         userDataRepository,
         viewModelScope
     )
-
 }
