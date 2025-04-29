@@ -70,10 +70,17 @@ class StatsDetailedViewModel @Inject constructor(
             .takeWhile { it <= end }
             .toList()
 
-        _uiState.targetDateRangeStatsMap = allDates.associateWith { date ->
+        val statsMap = allDates.associateWith { date ->
             entities.values.find { it.date == date } ?: statsRepository.createStatsEntity(date)
         }.toSortedMap()
 
+        statsMap.values.forEach { entity ->
+            bookIds.addAll(entity.favoriteBooks)
+            bookIds.addAll(entity.startedBooks)
+            bookIds.addAll(entity.finishedBooks)
+        }
+
+        _uiState.targetDateRangeStatsMap = statsMap
         _uiState.targetDateRangeRecordsMap = allDates.associateWith { date ->
             bookRecordsMap[date] ?: emptyList()
         }.toSortedMap()
@@ -84,7 +91,7 @@ class StatsDetailedViewModel @Inject constructor(
             }
         }
 
-        bookIds.fastForEach { id ->
+        bookIds.distinct().fastForEach { id ->
             viewModelScope.launch(Dispatchers.IO) {
                 bookRepository.getBookInformation(id).collect {
                     _uiState.bookInformationMap[id] = it

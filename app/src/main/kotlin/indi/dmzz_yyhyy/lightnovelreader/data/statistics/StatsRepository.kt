@@ -146,7 +146,7 @@ class StatsRepository @Inject constructor(
     fun createStatsEntity(date: LocalDate) = ReadingStatisticsEntity(
         date = date,
         readingTimeCount = Count(),
-        avgSpeed = 0,
+        foregroundTime = 0,
         favoriteBooks = emptyList(),
         startedBooks = emptyList(),
         finishedBooks = emptyList()

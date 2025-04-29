@@ -54,6 +54,6 @@ interface ReadingStatisticsDao {
         getReadingStatisticsForDate(date)?.finishedBooks
 
     @Query("SELECT * FROM reading_statistics WHERE date = :date LIMIT 1")
-    suspend fun getAverageSpeedForDate(date: LocalDate): Int? =
-        getReadingStatisticsForDate(date)?.avgSpeed
+    suspend fun getForegroundTimeForDate(date: LocalDate): Int? =
+        getReadingStatisticsForDate(date)?.foregroundTime
 }

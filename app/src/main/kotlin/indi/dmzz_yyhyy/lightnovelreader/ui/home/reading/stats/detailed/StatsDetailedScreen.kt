@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +35,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -52,6 +56,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
 import java.time.LocalDate
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,9 +141,9 @@ private fun StatisticsContent(
 
 @Composable
 fun StatsCard(
+    modifier: Modifier = Modifier,
     title: String,
     subTitle: String? = null,
-    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(
@@ -177,6 +182,101 @@ fun DailyChart(
     val books = uiState.targetDateRangeRecordsMap[uiState.selectedDate]
             ?.map { it.bookId }
             .orEmpty()
+    val stats = uiState.targetDateRangeStatsMap[uiState.selectedDate]
+    val isActivityVisible = stats?.startedBooks?.isNotEmpty() == true
+            || stats?.finishedBooks?.isNotEmpty() == true
+            || stats?.favoriteBooks?.isNotEmpty() == true
+
+    if (isActivityVisible) {
+        StatsCard(
+            title = "活动"
+        ) {
+            val startedBooks = stats?.startedBooks.orEmpty()
+            val favoriteBooks = stats?.favoriteBooks.orEmpty()
+            Column {
+                if (startedBooks.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clipToBounds(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(start = 24.dp).fillMaxWidth().weight(1f, fill = false)
+                        ) {
+                            Text(
+                                text = "第一次读",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W500
+                            )
+                            val displayedTitles = startedBooks.take(2).mapNotNull { bookId ->
+                                uiState.bookInformationMap[bookId]?.title?.let { title ->
+                                    if (title.length > 10) title.substring(0, 10) + "..." else title
+                                }
+                            }
+                            Text(
+                                text = if (displayedTitles.size == 1) displayedTitles[0]
+                                    else displayedTitles.joinToString("、\n") + " 等 ",
+                                fontSize = 13.sp,
+                                lineHeight = 16.sp,
+                                maxLines = 2,
+                                color = colorScheme.secondary,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Box(
+                            modifier = Modifier.rotate(4f).offset(y = 24.dp)
+                        ) {
+                            BookStack(
+                                uiState = uiState,
+                                books = startedBooks,
+                                count = 5
+                            )
+                        }
+                    }
+                    HorizontalDivider()
+                }
+                if (favoriteBooks.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clipToBounds(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(start = 24.dp).fillMaxWidth().weight(1f, fill = false)
+                        ) {
+                            Text(
+                                text = "已收藏",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W500
+                            )
+                            val displayedTitles = favoriteBooks.take(2).mapNotNull { bookId ->
+                                uiState.bookInformationMap[bookId]?.title?.let { title ->
+                                    if (title.length > 10) title.substring(0, 10) + "..." else title
+                                }
+                            }
+                            Text(
+                                text = if (displayedTitles.size == 1) displayedTitles[0]
+                                else displayedTitles.joinToString("、\n") + " 等 ",
+                                fontSize = 13.sp,
+                                lineHeight = 16.sp,
+                                maxLines = 2,
+                                color = colorScheme.secondary,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Box(
+                            modifier = Modifier.rotate(-3f).offset(y = 24.dp)
+                        ) {
+                            BookStack(
+                                uiState = uiState,
+                                books = favoriteBooks,
+                                count = 5
+                            )
+                        }
+                    }
+                    HorizontalDivider()
+                }
+            }
+        }
+    }
 
     StatsCard(
         title = "阅读时长"
@@ -186,36 +286,14 @@ fun DailyChart(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    books.take(8).fastForEachIndexed { index, bookId ->
-                        val scale = 1f - (index * 0.02f).coerceAtMost(0.3f)
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                                .zIndex((books.size - index).toFloat())
-                                .offset(x = index.dp * 20)
-                                .graphicsLayer(scaleX = scale, scaleY = scale)
-                                .align(Alignment.CenterEnd),
-                        ) {
-                            uiState.bookInformationMap[bookId]?.let {
-                                Cover(
-                                    width = 63.dp * scale,
-                                    height = 90.dp * scale,
-                                    url = it.coverUrl,
-                                    rounded = 6.dp
-                                )
-                            }
-                        }
-                    }
-                }
+                BookStack(
+                    uiState = uiState,
+                    books = books,
+                    count = 8
+                )
                 Spacer(Modifier.weight(1f))
             }
-
+            Spacer(Modifier.height(6.dp))
             Text("${books.size} 本书")
             Spacer(Modifier.height(12.dp))
             DailyBarChart(
@@ -235,7 +313,10 @@ fun WeeklyItem(
     ) {
         Box {
             ReadTimeStackedBarChart(
-                modifier = Modifier.padding(10.dp).fillMaxWidth().height(230.dp),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth()
+                    .height(230.dp),
                 bookInformationMap = uiState.bookInformationMap,
                 recordMap = uiState.targetDateRangeRecordsMap,
                 dateRange = uiState.targetDateRange,
@@ -244,7 +325,9 @@ fun WeeklyItem(
 
     }
 
-    StatsCard("时间分布") {
+    StatsCard(
+        title = "时间分布"
+    ) {
         WeeklyCountChart(
             dateRange = uiState.targetDateRange,
             statsMap = uiState.targetDateRangeStatsMap
@@ -269,7 +352,6 @@ fun MonthlySummaryChart(
                 statsMap = uiState.targetDateRangeStatsMap
             )
         }
-
     }
 
     StatsCard(
@@ -283,47 +365,43 @@ fun MonthlySummaryChart(
             .flatten()
             .map { it.bookId }
 
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier.padding(bottom = 8.dp)
-        ) {
-            Text(
-                text = uiState.bookInformationMap.entries.size.toString(),
-                fontSize = 32.sp,
-                color = colorScheme.onSurface
-            )
-            Spacer(Modifier.width(10.dp))
-            Text(
-                text = "本",
-                color = colorScheme.onSurfaceVariant
-            )
-        }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(10.dp))
+        BookStack(
+            uiState = uiState,
+            books = books,
+            count = 8
+        )
+        Spacer(Modifier.height(6.dp))
+        Text("${books.size} 本书")
+    }
+}
 
-        Box(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            books.take(8).fastForEachIndexed { index, bookId ->
-                val scale = 1f - (index * 0.01f).coerceAtMost(0.3f)
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .zIndex((books.size - index).toFloat())
-                        .offset(x = index.dp * 20)
-                        .graphicsLayer(scaleX = scale, scaleY = scale)
-                        .align(Alignment.CenterEnd),
-                ) {
-                    uiState.bookInformationMap[bookId]?.let {
-                        Cover(
-                            width = 63.dp * scale,
-                            height = 90.dp * scale,
-                            url = it.coverUrl,
-                            rounded = 6.dp
-                        )
-                    }
+@Composable
+fun BookStack(
+    uiState: StatsDetailedUiState,
+    books: List<Int>,
+    count: Int,
+) {
+    Box(
+        modifier = Modifier.wrapContentWidth().padding(end = min(books.size, count).dp * 20)
+    ) {
+        books.take(count).fastForEachIndexed { index, bookId ->
+            val scale = 1f - (index * 0.01f).coerceAtMost(0.3f)
+            Box(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .zIndex((books.size - index).toFloat())
+                    .offset(x = index.dp * 20)
+                    .graphicsLayer(scaleX = scale, scaleY = scale)
+                    .align(Alignment.CenterEnd),
+            ) {
+                uiState.bookInformationMap[bookId]?.let {
+                    Cover(
+                        width = 63.dp * scale,
+                        height = 90.dp * scale,
+                        url = it.coverUrl,
+                        rounded = 6.dp
+                    )
                 }
             }
         }
@@ -347,7 +425,6 @@ private fun LazyListScope.monthlyStatistics(uiState: StatsDetailedUiState) {
         MonthlySummaryChart(uiState)
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -21,8 +21,8 @@ data class ReadingStatisticsEntity(
     val date: LocalDate,
     @ColumnInfo(name = "reading_time_count")
     val readingTimeCount: Count,
-    @ColumnInfo(name = "avg_speed")
-    val avgSpeed: Int,
+    @ColumnInfo(name = "foreground_time")
+    val foregroundTime: Int,
     @ColumnInfo(name = "favorite_books")
     val favoriteBooks: List<Int>,
     @ColumnInfo(name = "started_books")

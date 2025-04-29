@@ -283,6 +283,32 @@ private fun DailyStatsBlock(
                     }
                 }
             }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+            StatSection(
+                icon = painterResource(R.drawable.schedule_90dp),
+                title = "第一次读",
+                value = ""
+            ) {
+                Crossfade(
+                    targetState = details?.firstBook == null && details?.lastBook == null,
+                    label = ""
+                ) { isEmpty ->
+                    if (isEmpty) {
+                        NoRecords()
+                    } else {
+                        Column {
+                            details?.firstBook?.let {
+                                DataItem(it.title, "最早 (${details.firstSeenTime})")
+                            }
+                            details?.lastBook?.let {
+                                DataItem(it.title, "最晚 (${details.lastSeenTime})")
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
