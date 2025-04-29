@@ -36,6 +36,7 @@ sealed class UserDataPath(
         data object LeftPadding : UserDataPath("leftPadding", Reader)
         data object RightPadding : UserDataPath("rightPadding", Reader)
         data object TextColor : UserDataPath("textColor", Reader)
+        data object TextColorDark : UserDataPath("textColorDark", Reader)
         data object FontFamilyUri : UserDataPath("fontFamilyUri", Reader)
         data object BackgroundColor : UserDataPath("backgroundColor", Reader)
         data object BackgroundImageUri : UserDataPath("backgroundImageUri", Reader)
@@ -58,6 +59,8 @@ sealed class UserDataPath(
             data object DarkMode : UserDataPath("dark_mode", Display)
             data object DynamicColors : UserDataPath("dynamic_color", Display)
             data object AppLocale : UserDataPath("app_locale", Display)
+            data object LightThemeName : UserDataPath("light_theme_name", Display)
+            data object DarkThemeName : UserDataPath("dark_theme_name", Display)
         }
         data object Data: UserDataPath("data", Settings) {
             data object WebDataSourceId : UserDataPath("web_data_source_id", Data)

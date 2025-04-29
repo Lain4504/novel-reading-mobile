@@ -211,7 +211,7 @@ fun ThemeSettingsList(
 ) {
     Spacer(Modifier.height(14.dp))
     SettingsSwitchEntry(
-        modifier = Modifier.background(colorScheme.surface),
+        modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.format_color_fill_24px,
         title = stringResource(R.string.settings_dynamic_colors),
         description = stringResource(R.string.settings_dynamic_colors_desc),
@@ -226,7 +226,7 @@ fun ThemeSettingsList(
         fontWeight = FontWeight.W600
     )
     SettingsMenuEntry(
-        modifier = Modifier.background(colorScheme.surface),
+        modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.translate_24px,
         title = stringResource(R.string.settings_characters_variant),
         description = stringResource(R.string.settings_characters_variant_desc),
@@ -427,7 +427,7 @@ fun ReaderThemeSettingsList(
     }
     if (settingState.enableBackgroundImage) {
         SettingsMenuEntry(
-            modifier = Modifier.background(colorScheme.surface),
+            modifier = Modifier.background(colorScheme.background),
             title = "背景显示模式",
             iconRes = R.drawable.insert_page_break_24px,
             description = "指定自定义背景图片的显示模式",
@@ -446,7 +446,7 @@ fun ReaderThemeSettingsList(
     val onSecondaryContainer = colorScheme.onSecondaryContainer
     val background = colorScheme.background
     SettingsClickableEntry (
-        modifier = Modifier.background(colorScheme.surface),
+        modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.palette_24px,
         title = "文本颜色",
         description = "自定义阅读器文本颜色",
@@ -484,18 +484,19 @@ fun ReaderThemeSettingsList(
         ) {
             val isDark = LocalIsDarkTheme.current
 
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                painter =
-                    if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
-                    else
-                        if (isDark)
-                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+            if (settingState.enableBackgroundImage)
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    painter =
+                        if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
                         else
-                            rememberAsyncImagePainter(settingState.backgroundImageUri),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
+                            if (isDark)
+                                rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                            else
+                                rememberAsyncImagePainter(settingState.backgroundImageUri),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
             Text(
                 modifier = Modifier.padding(horizontal = 18.dp),
                 text = stringResource(R.string.settings_about_oss),

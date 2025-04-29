@@ -53,6 +53,8 @@ class MainActivity : ComponentActivity() {
         var appLocale by mutableStateOf("${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}")
         var darkMode by mutableStateOf("FollowSystem")
         var dynamicColor by mutableStateOf(false)
+        var lightThemeName by mutableStateOf("light_default")
+        var darkThemeName by mutableStateOf("dark_default")
         installSplashScreen()
         loggerRepository.startLogging()
 
@@ -89,6 +91,16 @@ class MainActivity : ComponentActivity() {
                 it?.let { isUsingVolumeKeyFlip = it }
             }
         }
+        coroutineScope.launch(Dispatchers.IO) {
+            userDataRepository.stringUserData(UserDataPath.Settings.Display.LightThemeName.path).getFlow().collect {
+                it?.let { lightThemeName = it }
+            }
+        }
+        coroutineScope.launch(Dispatchers.IO) {
+            userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkThemeName.path).getFlow().collect {
+                it?.let { darkThemeName = it }
+            }
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { /* Android 13 + */
             if (ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
@@ -107,7 +119,9 @@ class MainActivity : ComponentActivity() {
             LightNovelReaderTheme(
                 darkMode = darkMode,
                 appLocale = appLocale,
-                isDynamicColor = dynamicColor
+                isDynamicColor = dynamicColor,
+                lightThemeName = lightThemeName,
+                darkThemeName = darkThemeName
             ) {
                 LightNovelReaderApp()
             }

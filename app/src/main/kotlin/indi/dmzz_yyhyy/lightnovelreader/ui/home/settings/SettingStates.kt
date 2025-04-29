@@ -27,6 +27,9 @@ class SettingState(
     val backgroundImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundImageUri.path)
     val backgroundDarkImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundDarkImageUri.path)
     val textColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.TextColor.path)
+    val textColorDarkUserData = userDataRepository.colorUserData(UserDataPath.Reader.TextColorDark.path)
+    val lightThemeNameUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.LightThemeName.path)
+    val darkThemeNameUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkThemeName.path)
 
     val checkUpdate by checkUpdateUserData.asState(true)
     val appLocaleKey by appLocaleKeyUserData.asState("zh-CN")
@@ -41,4 +44,7 @@ class SettingState(
     val backgroundImageUri by backgroundImageUriUserData.safeAsState(Uri.EMPTY)
     val backgroundDarkImageUri by backgroundDarkImageUriUserData.safeAsState(Uri.EMPTY)
     val textColor by textColorUserData.safeAsState(Color.Unspecified)
+    val textColorDark by textColorDarkUserData.safeAsState(Color.Unspecified)
+    val lightThemeName by lightThemeNameUserData.safeAsState("light_default")
+    val darkThemeName by darkThemeNameUserData.safeAsState("dark_default")
 }
