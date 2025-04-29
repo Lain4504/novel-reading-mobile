@@ -3,7 +3,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -47,13 +46,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
-import androidx.core.net.toUri
 
 @Composable
 fun SettingsSwitchEntry(

@@ -6,7 +6,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -745,7 +744,7 @@ private fun BasePageItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        color = colorScheme.background,
+                        color = colorScheme.background, // F1XME: incorrect colorScheme
                         shape = RoundedCornerShape(9.dp)
                     ),
                 verticalArrangement = Arrangement.SpaceBetween
@@ -760,12 +759,12 @@ private fun BasePageItem(
 private fun DarkModeSettingItem(
     modifier: Modifier
 ) {
-    BasePageItem(modifier
-        .width(110.dp)
-        .height(170.dp)) {
+    BasePageItem(
+        modifier = modifier.width(110.dp)
+            .height(170.dp)
+    ) {
         Column(
-            modifier = Modifier
-                .padding(8.dp)
+            modifier = Modifier.padding(8.dp)
                 .fillMaxWidth()
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -786,8 +785,7 @@ private fun DarkModeSettingItem(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Box(
-                        modifier = Modifier
-                            .width(56.dp)
+                        modifier = Modifier.width(56.dp)
                             .height(8.dp)
                             .background(
                                 color = colorScheme.primaryContainer,
