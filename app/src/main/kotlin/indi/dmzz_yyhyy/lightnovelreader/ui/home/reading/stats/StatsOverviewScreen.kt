@@ -1,10 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,7 +37,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -206,21 +201,22 @@ private fun DailyStatsBlock(
                 fontWeight = FontWeight.W600
             )
             Spacer(Modifier.weight(1f))
-            TextButton({
-                onClickDetailScreen(
-                    selectedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInt()
-                )
-            }) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        modifier = Modifier.padding(end = 10.dp),
-                        text = "详情"
+            if (details?.formattedTotalTime?.isNotBlank() == true)
+                TextButton({
+                    onClickDetailScreen(
+                        selectedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toInt()
                     )
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_forward_24px), null
-                    )
+                }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            modifier = Modifier.padding(end = 10.dp),
+                            text = "详情"
+                        )
+                        Icon(
+                            painter = painterResource(R.drawable.arrow_forward_24px), null
+                        )
+                    }
                 }
-            }
         }
         Spacer(modifier = Modifier.height(6.dp))
 
@@ -263,32 +259,6 @@ private fun DailyStatsBlock(
             StatSection(
                 icon = painterResource(R.drawable.schedule_90dp),
                 title = "时间范围",
-                value = ""
-            ) {
-                Crossfade(
-                    targetState = details?.firstBook == null && details?.lastBook == null,
-                    label = ""
-                ) { isEmpty ->
-                    if (isEmpty) {
-                        NoRecords()
-                    } else {
-                        Column {
-                            details?.firstBook?.let {
-                                DataItem(it.title, "最早 (${details.firstSeenTime})")
-                            }
-                            details?.lastBook?.let {
-                                DataItem(it.title, "最晚 (${details.lastSeenTime})")
-                            }
-                        }
-                    }
-                }
-            }
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-
-            StatSection(
-                icon = painterResource(R.drawable.schedule_90dp),
-                title = "第一次读",
                 value = ""
             ) {
                 Crossfade(
@@ -354,31 +324,6 @@ private fun computeDailyDetails(
         lastSeenTime = lastRecord?.lastSeen?.format(dateFormatter)
     )
 }
-
-
-@Composable
-private fun <T> AnimatedStatsList(
-    items: List<T>,
-    itemContent: @Composable (T) -> Unit
-) {
-    AnimatedContent(
-        targetState = items,
-        transitionSpec = {
-            (expandVertically()).togetherWith(shrinkVertically() )
-        },
-        label = "AnimatedStatsList"
-    ) { targetItems ->
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            targetItems.forEach { item ->
-                key(item.hashCode()) {
-                    itemContent(item)
-                }
-            }
-        }
-    }
-}
-
-
 
 @Composable
 private fun StatSection(
@@ -541,13 +486,6 @@ fun StatsCard(
         }
     }
 }
-
-data class DailyDataSections(
-    val icon: Painter,
-    val title: String,
-    val titleValue: String,
-    val content: @Composable () -> Unit
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
