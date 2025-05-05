@@ -64,7 +64,6 @@ class AddToBookshelfDialogViewModel @Inject constructor(
                 bookRepository.getBookInformation(bookId).collect { bookInformation ->
                     if (bookInformation.isEmpty()) return@collect
                     _addToBookshelfDialogUiState.selectedBookshelfIds.forEach {
-                        println("FAV, id = $bookId, now sending book fav event")
                         coroutineScope.launch {
                             statsRepository.updateBookStatus(
                                 bookId = bookId,

@@ -58,7 +58,6 @@ class ContentViewModel @Inject constructor(
         println(_bookId)
         if (bookId != _bookId) {
             viewModelScope.launch {
-                println("NEW SESSION, id = $bookId, now sending session start event")
                 val bookVolumes = bookRepository.getBookVolumes(bookId)
                 _uiState.bookVolumes = bookVolumes.first()
                 viewModelScope.launch(Dispatchers.IO) {
@@ -85,7 +84,7 @@ class ContentViewModel @Inject constructor(
                 _uiState.userReadingData = it
                 if (it.lastReadTime.year < 0)
                     coroutineScope.launch(Dispatchers.IO) {
-                        println("EVENT START book $bookId")
+                        // println("EVENT START book $bookId")
                         statsRepository.updateBookStatus(
                             bookId = bookId,
                             isFirstReading = true

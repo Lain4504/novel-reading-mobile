@@ -67,7 +67,6 @@ fun StatsDetailedScreen(
     onClickBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
-    println("OK DetailedScreen $targetDate")
     uiState.selectedDate = targetDate
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val viewOptions = listOf("日", "周", "月")

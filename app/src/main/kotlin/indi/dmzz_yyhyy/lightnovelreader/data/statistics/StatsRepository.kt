@@ -5,8 +5,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.utils.putWithLimit
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
@@ -17,7 +15,6 @@ data class ReadingStatsUpdate(
     val bookId: Int,
     val secondDelta: Int = 0,
     val sessionDelta: Int = 0,
-    val currentSpeed: Int? = 0,
     val localTime: LocalTime = LocalTime.now(),
     val startedBooks: List<Int> = emptyList(),
     val favoriteBooks: List<Int> = emptyList()
@@ -29,23 +26,20 @@ class StatsRepository @Inject constructor(
     private val bookRecordDao: BookRecordDao
 ) {
     private val bookReadTimeBuffer = mutableMapOf<Int, Pair<LocalTime, Int>>()
-    private val bookReadTimeBufferMutex = Mutex()
     private val dateStatsMap = mutableMapOf<LocalDate, ReadingStatisticsEntity>()
     private val dateRecordsMap = mutableMapOf<LocalDate, List<BookRecordEntity>>()
-    private val cacheMutex = Mutex()
 
-    suspend fun accumulateBookReadTime(bookId: Int, seconds: Int) = bookReadTimeBufferMutex.withLock {
+    suspend fun accumulateBookReadTime(bookId: Int, seconds: Int) {
         if (seconds < 0) {
-            bookReadTimeBuffer.keys.toList().forEach { bookId ->
+            bookReadTimeBuffer.keys.toList().forEach { _ ->
                 clearBookReadTimeBuffer(bookId)
                 bookReadTimeBuffer.remove(bookId)
             }
-            return@withLock
+            return
         }
         val current = bookReadTimeBuffer[bookId] ?: Pair(LocalTime.now(), 0)
         val newTotal = current.second + seconds
         bookReadTimeBuffer[bookId] = current.copy(second = newTotal)
-        println("-> accumulate bookId=$bookId, sec=$newTotal")
 
         if (newTotal >= 60 || Duration.between(current.first, LocalTime.now()).seconds >= 60) {
             clearBookReadTimeBuffer(bookId)
@@ -120,7 +114,7 @@ class StatsRepository @Inject constructor(
     }
 
     /**
-     总阅读记录 Entity
+     具有特殊 id 的总阅读记录 Entity，用于总体统计
      */
     private fun createTotalRecordEntity(): BookRecordEntity = BookRecordEntity(
         id = -721,
@@ -173,11 +167,9 @@ class StatsRepository @Inject constructor(
 
         val updatedStats = statsEntity.copy(
             readingTimeCount = updateCount(statsEntity.readingTimeCount, update)
-            // avgSpeed = update.currentSpeed ?: statsEntity.avgSpeed
         )
 
         val existingBookRecord = bookRecordDao.getBookRecordByIdAndDate(update.bookId, today) ?: createRecordEntity(update.bookId)
-        println("existingBookRecord is $existingBookRecord")
 
         val newBookRecord = existingBookRecord.copy(
             totalTime = existingBookRecord.totalTime + update.secondDelta,
@@ -185,13 +177,10 @@ class StatsRepository @Inject constructor(
             lastSeen = update.localTime
         )
 
-        println("newBookRecord is $newBookRecord")
         updateTotalRecord(update)
 
-        cacheMutex.withLock {
-            dateStatsMap.putWithLimit(today, updatedStats)
-            dateRecordsMap.putWithLimit(today, listOf(newBookRecord))
-        }
+        dateStatsMap.putWithLimit(today, updatedStats)
+        dateRecordsMap.putWithLimit(today, listOf(newBookRecord))
 
         readingStatisticsDao.insertReadingStatistics(updatedStats)
         bookRecordDao.insertBookRecord(newBookRecord)
@@ -214,12 +203,8 @@ class StatsRepository @Inject constructor(
             startedBooks = updateList(currentEntity.startedBooks, bookId, isFirstReading),
             finishedBooks = updateList(currentEntity.finishedBooks, bookId, isFinishedReading)
         )
-        println("Triggered updateBookStatus with Entity $updatedEntity")
 
-        cacheMutex.withLock {
-            dateStatsMap.putWithLimit(date, updatedEntity)
-        }
-
+        dateStatsMap.putWithLimit(date, updatedEntity)
         readingStatisticsDao.insertReadingStatistics(updatedEntity)
     }
 
@@ -228,7 +213,6 @@ class StatsRepository @Inject constructor(
         if (minutesDelta > 0) {
             val hour = update.localTime.hour
             val totalMinutes = count.getMinute(hour) + minutesDelta
-            println("Triggered updateCount, [$totalMinutes min] + -> $hour")
             count.setMinute(hour, totalMinutes.coerceAtMost(60))
         }
         return count

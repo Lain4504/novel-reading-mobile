@@ -54,7 +54,6 @@ class StatsOverviewViewModel @Inject constructor(
 
             val bookRecordsMap = statsRepository.getBookRecords(startDate, endDate)
             _uiState.bookRecordsByDate = bookRecordsMap
-            println("POST getBookRecordMap, length ${bookRecordsMap.size}")
             val allBookIds = bookRecordsMap.flatMap { it.value.map { record -> record.bookId } }
 
             allBookIds.fastForEach { id ->
@@ -73,10 +72,8 @@ class StatsOverviewViewModel @Inject constructor(
     }
 
     fun selectDate(date: LocalDate) {
-        println("SELECTED $date")
         _uiState.selectedDate = date
         getDateDetails(date)
-        println("POST selectDate")
     }
 
     private fun getDateDetails(selectedDate: LocalDate) {
@@ -100,7 +97,6 @@ class StatsOverviewViewModel @Inject constructor(
             lastBook = lastRecord?.let { _uiState.bookInformationMap[it.bookId] },
             lastSeenTime = lastRecord?.lastSeen?.format(dateFormatter)
         )
-        println("OK COMP ${_uiState.selectedDateDetails}")
     }
 
     private suspend fun generateLevelMap(
