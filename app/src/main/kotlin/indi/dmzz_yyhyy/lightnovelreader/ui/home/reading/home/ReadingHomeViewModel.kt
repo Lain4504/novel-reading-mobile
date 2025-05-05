@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ReadingViewModel @Inject constructor(
+class ReadingHomeViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {

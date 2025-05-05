@@ -96,6 +96,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -106,6 +107,7 @@ fun ReaderScreen(
     settingState: SettingState,
     onClickBackButton: () -> Unit,
     addToReadingBook: (Int) -> Unit,
+    accumulateReadTime: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
@@ -152,6 +154,7 @@ fun ReaderScreen(
             readingScreenUiState = readingScreenUiState,
             settingState = settingState,
             addToReadingBook = addToReadingBook,
+            accumulateReadingTime = accumulateReadTime,
             updateTotalReadingTime = updateTotalReadingTime,
             onClickLastChapter = onClickLastChapter,
             onClickNextChapter = onClickNextChapter,
@@ -171,6 +174,7 @@ fun Content(
     settingState: SettingState,
     addToReadingBook: (Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
+    accumulateReadingTime: (Int, Int) -> Unit,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChangeChapter: (Int) -> Unit,
@@ -190,6 +194,7 @@ fun Content(
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
     var totalReadingTime by remember { mutableIntStateOf(0) }
     var selectedVolumeId by remember { mutableIntStateOf(-1) }
+    var lastUpdate by remember { mutableStateOf(LocalTime.now()) }
 
 
     LaunchedEffect(isImmersive) {
@@ -237,6 +242,23 @@ fun Content(
             delay(1000)
         }
     }
+
+    LaunchedEffect(isRunning) {
+        while (isRunning) {
+            val now = LocalTime.now()
+            val elapsed = 180 //FIXME
+            accumulateReadingTime(readingScreenUiState.bookId, elapsed)
+            lastUpdate = now
+            delay(1000)
+        }
+    }
+
+    LifecycleResumeEffect(Unit) {
+        onPauseOrDispose {
+            accumulateReadingTime(readingScreenUiState.bookId, -1)
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -248,6 +270,7 @@ fun Content(
             }
         }
     }
+
     AnimatedVisibility(
         visible =  readingScreenUiState.isLoading,
         enter = fadeIn(),

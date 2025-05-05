@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentViewModel
@@ -29,6 +30,7 @@ import javax.inject.Inject
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
+    private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
@@ -169,6 +171,12 @@ class ReaderViewModel @Inject constructor(
                 newList.add(bookId)
                 return@update newList
             }
+        }
+    }
+
+    fun accumulateReadingTime(bookId: Int, seconds: Int) {
+        coroutineScope.launch(Dispatchers.IO) {
+            statsRepository.accumulateBookReadTime(bookId, seconds)
         }
     }
 }

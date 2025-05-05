@@ -133,6 +133,8 @@ dependencies {
     implementation(libs.serialization.json)
     // Swipe
     implementation(libs.swipe)
+    // Chart
+    implementation(libs.charty)
 }
 
 configurations.implementation{

@@ -1,5 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat
 
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -15,13 +18,18 @@ fun NavGraphBuilder.settingsLogcatDestination() {
         val navController = LocalNavController.current
         val viewModel = hiltViewModel<LogcatViewModel>()
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
-            viewModel.startLogging()
+            if (!viewModel.uiState.isFileMode) viewModel.startLogging()
         }
+        val logEntries by remember { derivedStateOf { viewModel.displayedLogEntries } }
         LogcatScreen(
-            logEntries = viewModel.logEntries,
+            uiState = viewModel.uiState,
+            logFiles = viewModel.logFilenameList,
+            logEntries = logEntries,
             onClickBack = navController::popBackStackIfResumed,
             onClickClearLogs = viewModel::clearLogs,
             onClickShareLogs = viewModel::shareLogs,
+            onClickDeleteLogFile = viewModel::deleteLogFile,
+            onSelectLogFile = viewModel::onSelectLogFile
         )
     }
 }

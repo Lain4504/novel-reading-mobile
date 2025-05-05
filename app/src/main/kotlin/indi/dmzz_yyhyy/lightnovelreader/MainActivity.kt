@@ -29,6 +29,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CheckUpdateWork
 import indi.dmzz_yyhyy.lightnovelreader.theme.LightNovelReaderTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.LightNovelReaderApp
+import indi.dmzz_yyhyy.lightnovelreader.utils.LogUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -48,6 +49,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread.setDefaultUncaughtExceptionHandler(LogUtils(applicationContext, loggerRepository))
         var appLocale by mutableStateOf("${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}")
         var darkMode by mutableStateOf("FollowSystem")
         var dynamicColor by mutableStateOf(false)
@@ -62,7 +64,7 @@ class MainActivity : ComponentActivity() {
         )
         coroutineScope.launch(Dispatchers.IO) {
             if (bookshelfRepository.getAllBookshelfIds().isEmpty())
-                bookshelfRepository.crateBookShelf(
+                bookshelfRepository.createBookShelf(
                     id = 1145140721,
                     name = "已收藏",
                     sortType = BookshelfSortType.Default,

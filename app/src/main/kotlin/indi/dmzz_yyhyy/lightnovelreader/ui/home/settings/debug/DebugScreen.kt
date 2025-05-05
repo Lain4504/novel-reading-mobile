@@ -101,6 +101,9 @@ fun DebugScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 text = result
             )
+            Button(onClick = {error("crashed")}) {
+                Text("Crash")
+            }
         }
     }
 }

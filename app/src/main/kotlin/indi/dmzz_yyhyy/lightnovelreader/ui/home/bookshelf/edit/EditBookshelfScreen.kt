@@ -42,7 +42,7 @@ fun EditBookshelfScreen(
     title: String,
     bookshelfId: Int,
     bookshelf: Bookshelf,
-    inti: (Int) -> Unit,
+    init: (Int) -> Unit,
     onClickBack: () -> Unit,
     onClickSave: () -> Unit,
     onClickDelete: (Int) -> Unit,
@@ -55,7 +55,7 @@ fun EditBookshelfScreen(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val isNameEmpty = bookshelf.name.isBlank()
     LaunchedEffect(bookshelfId) {
-        inti(bookshelfId)
+        init(bookshelfId)
     }
     Scaffold(
         topBar = {

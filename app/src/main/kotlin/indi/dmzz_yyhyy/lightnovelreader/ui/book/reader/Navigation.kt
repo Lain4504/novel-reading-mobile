@@ -28,6 +28,7 @@ fun NavGraphBuilder.bookReaderDestination() {
             onClickBackButton = navController::popBackStackIfResumed,
             addToReadingBook = viewModel::addToReadingBook,
             updateTotalReadingTime = viewModel::updateTotalReadingTime,
+            accumulateReadTime = viewModel::accumulateReadingTime,
             onClickLastChapter = viewModel::lastChapter,
             onClickNextChapter = viewModel::nextChapter,
             onChangeChapter = viewModel::changeChapter,

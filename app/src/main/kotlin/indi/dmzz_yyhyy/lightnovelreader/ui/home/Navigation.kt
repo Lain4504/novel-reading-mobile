@@ -19,8 +19,8 @@ import androidx.navigation.compose.navigation
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.bookshelfNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.explorationNavigation
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.homeReadingDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.mainSettingsNavigation
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.readingNavigation
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.settingsNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -28,10 +28,10 @@ fun NavGraphBuilder.homeNavigation(sharedTransitionScope: SharedTransitionScope)
     navigation<Route.Main>(
         startDestination = Route.Main.Reading
     ) {
-        homeReadingDestination(sharedTransitionScope)
+        readingNavigation(sharedTransitionScope)
         explorationNavigation(sharedTransitionScope)
         bookshelfNavigation(sharedTransitionScope)
-        mainSettingsNavigation(sharedTransitionScope)
+        settingsNavigation(sharedTransitionScope)
     }
 }
 

@@ -6,12 +6,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.navigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.settingsDebugDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.settingsHomeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.settingsLogcatDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.mainSettingsNavigation(sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.settingsNavigation(sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Main.Settings>(
         startDestination = Route.Main.Settings.Home
     ) {
