@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
+package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color

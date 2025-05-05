@@ -17,7 +17,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import androidx.work.WorkInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToBookContentDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
@@ -45,20 +45,20 @@ fun NavGraphBuilder.bookDetailDestination() {
             },
             onClickBackButton = navController::popBackStackIfResumed,
             onClickChapter = {
-                navController.navigateToBookContentDestination(bookId, it, context)
+                navController.navigateToBookReaderDestination(bookId, it, context)
             },
             onClickReadFromStart = {
                 viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-                    navController.navigateToBookContentDestination(bookId, it, context)
+                    navController.navigateToBookReaderDestination(bookId, it, context)
                 }
             },
             onClickContinueReading = {
                 if (viewModel.uiState.userReadingData.lastReadChapterId == -1)
                     viewModel.uiState.bookVolumes.volumes.firstOrNull()?.chapters?.firstOrNull()?.id?.let {
-                        navController.navigateToBookContentDestination(bookId, it, context)
+                        navController.navigateToBookReaderDestination(bookId, it, context)
                     }
                 else {
-                    navController.navigateToBookContentDestination(bookId, viewModel.uiState.userReadingData.lastReadChapterId, context)
+                    navController.navigateToBookReaderDestination(bookId, viewModel.uiState.userReadingData.lastReadChapterId, context)
                 }
             },
             cacheBook = {

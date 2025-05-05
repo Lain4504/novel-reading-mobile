@@ -1,24 +1,25 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
+package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
-import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentViewModel
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip.FlipPageContentViewModel
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentViewModel
 import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -27,116 +28,87 @@ import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
-class ContentViewModel @Inject constructor(
+class ReaderViewModel @Inject constructor(
     private val bookRepository: BookRepository,
-    private val textProcessingRepository: TextProcessingRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
-    private val _uiState = MutableContentScreenUiState()
-    private val readingBookListUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
-    private var loadChapterContentJob: Job? = null
-    var bookId = -1
-    val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
-    val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-
-    init {
-        println("viewmodel init")
-        viewModelScope.launch(Dispatchers.IO) {
-            textProcessingRepository.updateFlow.collect {
-                if (bookId != -1 && uiState.chapterContent.id != -1)
-                    loadChapterContent(bookId, uiState.chapterContent.id)
-            }
-        }
-    }
-
-    @Suppress("DuplicatedCode")
-    private fun loadChapter(chapterId: Int) {
-        chapterId.debugPrint("init")
-        if (bookId == -1) {
-            Log.e("ContentViewModel", "failed to load content, the book id is -1")
-        }
-        viewModelScope.launch {
-            val bookVolumes = bookRepository.getBookVolumes(bookId)
-            _uiState.bookVolumes = bookVolumes.first()
+    private var contentViewModel: ContentViewModel by mutableStateOf(
+        if (settingState.isUsingFlipPageUserData.get() == true) FlipPageContentViewModel(
+            bookRepository = bookRepository,
+            coroutineScope = viewModelScope,
+            updateReadingProgress = ::saveReadingProgress
+        )
+        else ScrollContentViewModel(
+            bookRepository = bookRepository,
+            coroutineScope = viewModelScope,
+            settingState = settingState,
+            updateReadingProgress = ::saveReadingProgress
+        )
+    )
+    private val _uiState = MutableReaderScreenUiState(contentViewModel.uiState)
+    val uiState: ReaderScreenUiState = _uiState
+    private val readingBookListUserData =
+        userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
+    var bookId = -1
+        set(value) {
+            field = value
+            contentViewModel.changeBookId(value)
             viewModelScope.launch(Dispatchers.IO) {
-                bookVolumes.collect {
-                    if (it.volumes.isEmpty()) return@collect
+                bookRepository.getBookVolumes(value).collect {
                     _uiState.bookVolumes = it
                 }
             }
         }
-        loadChapterContent(bookId, chapterId)
+    val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    init {
+        contentViewModel.changeBookId(bookId)
         viewModelScope.launch(Dispatchers.IO) {
-            bookRepository.getUserReadingData(bookId).collect {
-                _uiState.userReadingData = it
+            settingState.isUsingFlipPageUserData.getFlow().collect {
+                if (it == true) FlipPageContentViewModel(
+                    bookRepository = bookRepository,
+                    coroutineScope = viewModelScope,
+                    updateReadingProgress = ::saveReadingProgress
+                )
+                else ScrollContentViewModel(
+                    bookRepository = bookRepository,
+                    coroutineScope = viewModelScope,
+                    updateReadingProgress = ::saveReadingProgress,
+                    settingState = settingState
+                )
+                contentViewModel.changeBookId(bookId)
+            }
+        }
+        viewModelScope.launch {
+            settingState.isUsingFlipPageUserData.getFlow().collect {
+                if (it == true && contentViewModel !is FlipPageContentViewModel)
+                    contentViewModel = FlipPageContentViewModel(
+                        bookRepository = bookRepository,
+                        coroutineScope = viewModelScope,
+                        updateReadingProgress = ::saveReadingProgress
+                    )
+                else if (contentViewModel !is ScrollContentViewModel) ScrollContentViewModel(
+                    bookRepository = bookRepository,
+                    coroutineScope = viewModelScope,
+                    settingState = settingState,
+                    updateReadingProgress = ::saveReadingProgress
+                )
             }
         }
     }
 
-    private fun loadChapterContent(bookId: Int, chapterId: Int) {
-        loadChapterContentJob?.cancel()
-        loadChapterContentJob = viewModelScope.launch(Dispatchers.IO) {
-            val chapterContent = bookRepository.getChapterContent(
-                chapterId = chapterId,
-                bookId = bookId
-            )
-            chapterContent.collect { content ->
-                if (content.id == -1) return@collect
-                _uiState.chapterContent = content
-                _uiState.isLoading = _uiState.chapterContent.id == -1
-                bookRepository.updateUserReadingData(bookId) {
-                    it.copy(
-                        lastReadTime = LocalDateTime.now(),
-                        lastReadChapterId = chapterId,
-                        lastReadChapterTitle = _uiState.chapterContent.title,
-                        lastReadChapterProgress = if (it.lastReadChapterId == chapterId) it.lastReadChapterProgress else 0f,
-                    )
-                }
-                if (content.hasNextChapter()) {
-                    bookRepository.getChapterContent(
-                        chapterId = chapterId,
-                        bookId = bookId
-                    )
-                }
-            }
-        }
-    }
+    fun lastChapter() = contentViewModel.loadLastChapter()
 
-    fun lastChapter() {
-        if (!_uiState.chapterContent.hasLastChapter()) return
-        _uiState.isLoading = true
-        viewModelScope.launch {
-            loadChapter(
-                chapterId = _uiState.chapterContent.lastChapter
-            )
-        }
-    }
+    fun nextChapter() = contentViewModel.loadNextChapter()
 
-    fun nextChapter() {
-        if (!_uiState.chapterContent.hasNextChapter()) return
-        _uiState.isLoading = true
-        viewModelScope.launch {
-            loadChapter(
-                chapterId = _uiState.chapterContent.nextChapter
-            )
-        }
-    }
-
-    fun changeChapter(chapterId: Int) {
-        _uiState.isLoading = true
-        viewModelScope.launch {
-            loadChapter(chapterId = chapterId)
-        }
-    }
+    fun changeChapter(chapterId: Int) = contentViewModel.changeChapter(chapterId)
 
     private val _readingProgressChannel = Channel<Float>(Channel.CONFLATED)
 
     init {
         coroutineScope.launch(Dispatchers.IO) {
             val progressFlow = _readingProgressChannel.receiveAsFlow()
-
             merge(
                 progressFlow.throttleLatest(1000),
                 progressFlow.debounce(200)
@@ -150,8 +122,7 @@ class ContentViewModel @Inject constructor(
 
     private fun saveReadingProgress(progress: Float) {
         if (progress.isNaN()) return
-
-        val chapterId = _uiState.chapterContent.id
+        val chapterId = _uiState.contentUiState.readingChapterContent.id
         val currentTime = LocalDateTime.now()
 
         bookRepository.updateUserReadingData(bookId) { userReadingData ->
@@ -176,11 +147,6 @@ class ContentViewModel @Inject constructor(
                 }
             )
         }
-    }
-
-    fun changeChapterReadingProgress(progress: Float) {
-        if (progress.isNaN()) return
-        _readingProgressChannel.trySend(progress)
     }
 
     fun updateTotalReadingTime(bookId: Int, totalReadingTime: Int) {

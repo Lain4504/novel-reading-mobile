@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.navigateToBookContentDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.navigateToDownloadManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home.navigateToExplorationHomeDestination
@@ -33,7 +33,7 @@ fun NavGraphBuilder.homeReadingDestination(sharedTransitionScope: SharedTransiti
             onClickBook = navController::navigateToBookDetailDestination,
             onClickContinueReading = { bookId, chapterId ->
                 navController.navigateToBookDetailDestination(bookId)
-                navController.navigateToBookContentDestination(bookId, chapterId, context)
+                navController.navigateToBookReaderDestination(bookId, chapterId, context)
             },
             onClickJumpToExploration = navController::navigateToExplorationHomeDestination,
             sharedTransitionScope = sharedTransitionScope,

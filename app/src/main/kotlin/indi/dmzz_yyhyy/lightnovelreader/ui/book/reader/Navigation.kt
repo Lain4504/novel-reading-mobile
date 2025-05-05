@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
+package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.content.Context
 import androidx.compose.runtime.collectAsState
@@ -18,20 +18,19 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.ColorPickerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
-fun NavGraphBuilder.bookContentDestination() {
-    composable<Route.Book.Content> { navBackStackEntry ->
+fun NavGraphBuilder.bookReaderDestination() {
+    composable<Route.Book.Reader> { navBackStackEntry ->
         val navController = LocalNavController.current
-        val viewModel = hiltViewModel<ContentViewModel>(navBackStackEntry)
-        ContentScreen(
-            onClickBackButton = navController::popBackStackIfResumed,
-            uiState = viewModel.uiState,
+        val viewModel = hiltViewModel<ReaderViewModel>(navBackStackEntry)
+        ReaderScreen(
+            readingScreenUiState = viewModel.uiState,
             settingState = viewModel.settingState,
+            onClickBackButton = navController::popBackStackIfResumed,
             addToReadingBook = viewModel::addToReadingBook,
             updateTotalReadingTime = viewModel::updateTotalReadingTime,
             onClickLastChapter = viewModel::lastChapter,
             onClickNextChapter = viewModel::nextChapter,
             onChangeChapter = viewModel::changeChapter,
-            onChapterReadingProgressChange = viewModel::changeChapterReadingProgress,
             onClickChangeBackgroundColor = { navController.navigateToColorPickerDialog(
                 UserDataPath.Reader.BackgroundColor.path,
                 listOf(-1, 0x38E8CCA5, 0x38FF8080, 0x38d3b17d,0x3834C759, 0x3832ADE6, 0x38007AFF, 0x385856D6, 0x38AF52DE)
@@ -45,17 +44,18 @@ fun NavGraphBuilder.bookContentDestination() {
     colorPickerDialog()
 }
 
-fun NavController.navigateToBookContentDestination(bookId: Int, chapterId: Int, context: Context) {
-    this.navigate(Route.Book.Content)
-    val entry = this.getBackStackEntry<Route.Book.Content>()
+fun NavController.navigateToBookReaderDestination(bookId: Int, chapterId: Int, context: Context) {
+    this.navigate(Route.Book.Reader)
+    val entry = this.getBackStackEntry<Route.Book.Reader>()
     val viewModel = ViewModelProvider.create(
         entry,
         HiltViewModelFactory(
             context = context,
             delegateFactory = entry.defaultViewModelProviderFactory
         ),
-    )[ContentViewModel::class.java]
+    )[ReaderViewModel::class.java]
     viewModel.bookId = bookId
+    println("asdawdasdwa")
     viewModel.changeChapter(chapterId)
 }
 

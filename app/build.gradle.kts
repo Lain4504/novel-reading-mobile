@@ -1,8 +1,5 @@
+
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
-import java.net.InetAddress
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 plugins {
     alias(libs.plugins.android.application)
@@ -22,21 +19,14 @@ android {
         applicationId = "indi.dmzz_yyhyy.lightnovelreader"
         minSdk = 24
         targetSdk = 35
-        // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*100+debug版本号(开发需要时迭代, 三位数)
-        versionCode = 1_01_00_012
+        // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*1000+debug版本号(开发需要时迭代, 三位数)
+        versionCode = 1_01_00_018
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
-        val dateFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US)
-        val hostname = System.getenv("HOSTNAME") ?: System.getenv("COMPUTERNAME") ?: try {
-            InetAddress.getLocalHost().hostName
-        } catch (_: Exception) {}
-        resValue("string", "info_build_date", dateFormat.format(Date()))
-        resValue("string", "info_build_host", System.getProperty("user.name") + "@" + hostname )
-        resValue("string", "info_build_os", System.getProperty("os.name") + "/" + System.getProperty("os.arch"))
     }
 
     buildTypes {

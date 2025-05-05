@@ -57,7 +57,7 @@ object Route {
             val bookId: Int
         )
         @Serializable
-        data object Content
+        data object Reader
         @Serializable
         data class ExportUserDataDialog(
             val bookId: Int,

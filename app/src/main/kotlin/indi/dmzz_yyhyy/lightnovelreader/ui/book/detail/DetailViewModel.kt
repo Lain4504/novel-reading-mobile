@@ -46,7 +46,7 @@ class DetailViewModel @Inject constructor(
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-            bookRepository.getUserReadingData(bookId).collect {
+            bookRepository.getUserReadingDataFlow(bookId).collect {
                 _uiState.userReadingData = it
             }
         }

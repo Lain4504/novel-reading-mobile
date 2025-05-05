@@ -1,11 +1,11 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
+package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.setting.AbstractSettingState
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import kotlinx.coroutines.CoroutineScope
 
@@ -22,6 +22,7 @@ class SettingState(
     val backgroundImageDisplayModeUserData = userDataRepository.stringUserData(UserDataPath.Reader.BackgroundImageDisplayMode.path)
     val isUsingFlipPageUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingFlipPage.path)
     val isUsingClickFlipPageUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingClickFlipPage.path)
+    val isUsingContinuousScrollingUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingContinuousScrolling.path)
     val isUsingVolumeKeyFlipUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingVolumeKeyFlip.path)
     val flipAnimeUserData = userDataRepository.stringUserData(UserDataPath.Reader.FlipAnime.path)
     val fastChapterChangeUserData = userDataRepository.booleanUserData(UserDataPath.Reader.FastChapterChange.path)
@@ -51,6 +52,7 @@ class SettingState(
     val backgroundImageDisplayMode by backgroundImageDisplayModeUserData.safeAsState("fixed")
     val isUsingFlipPage by isUsingFlipPageUserData.safeAsState(false)
     val isUsingClickFlipPage by isUsingClickFlipPageUserData.safeAsState(false)
+    val isUsingContinuousScrolling by isUsingContinuousScrollingUserData.safeAsState(false)
     val isUsingVolumeKeyFlip by isUsingVolumeKeyFlipUserData.safeAsState(false)
     val flipAnime by flipAnimeUserData.safeAsState(MenuOptions.FlipAnimationOptions.ScrollWithoutShadow)
     val fastChapterChange by fastChapterChangeUserData.safeAsState(false)

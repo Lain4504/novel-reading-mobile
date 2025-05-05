@@ -44,7 +44,7 @@ class ReadingViewModel @Inject constructor(
                         }
                     }
                 }
-                bookRepository.getUserReadingData(id).let { flow ->
+                bookRepository.getUserReadingDataFlow(id).let { flow ->
                     viewModelScope.launch {
                         flow.collect {
                             _recentReadingUserReadingDataMap[id] = it
