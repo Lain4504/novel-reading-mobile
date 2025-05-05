@@ -246,7 +246,7 @@ fun Content(
     LaunchedEffect(isRunning) {
         while (isRunning) {
             val now = LocalTime.now()
-            val elapsed = 180 //FIXME
+            val elapsed = 1
             accumulateReadingTime(readingScreenUiState.bookId, elapsed)
             lastUpdate = now
             delay(1000)
