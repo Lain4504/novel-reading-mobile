@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -67,10 +67,11 @@ fun ReadingScreen(
     recentReadingBookInformationMap: Map<Int, BookInformation>,
     recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
     recentReadingBookIds: List<Int>,
-    onClickDownloadManager: () -> Unit,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
+    onClickDownloadManager: () -> Unit,
+    onClickStats: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
@@ -81,8 +82,9 @@ fun ReadingScreen(
         Scaffold(
             topBar = {
                 TopBar(
+                    scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
                     onClickDownloadManager = onClickDownloadManager,
-                    scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+                    onClickStats = onClickStats
                 )
             },
             bottomBar = {
@@ -216,8 +218,9 @@ private fun ReadingContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
+    scrollBehavior: TopAppBarScrollBehavior,
     onClickDownloadManager: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior
+    onClickStats: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -232,9 +235,17 @@ private fun TopBar(
         },
         actions = {
             IconButton(onClick = onClickDownloadManager) {
+                Icon(
+                    painter = painterResource(R.drawable.download_24px),
+                    contentDescription = stringResource(R.string.more)
+                )
+            }
+            IconButton(
+                onClick = onClickStats
+            ) {
                     Icon(
-                        painter = painterResource(R.drawable.download_24px),
-                        contentDescription = stringResource(R.string.more)
+                        painter = painterResource(R.drawable.analytics_24px),
+                        contentDescription = stringResource(R.string.nav_statistics)
                     )
                 }
         },

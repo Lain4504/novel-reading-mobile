@@ -6,7 +6,17 @@ object Route {
     @Serializable
     object Main {
         @Serializable
-        object Reading
+        object Reading {
+            @Serializable
+            object Home
+            @Serializable
+            object Stats {
+                @Serializable
+                object Overview
+                @Serializable
+                data class Detailed(val targetDate: Int)
+            }
+        }
         @Serializable
         object Bookshelf {
             @Serializable

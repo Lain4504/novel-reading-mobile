@@ -7,16 +7,20 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookshelfDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserReadingDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookInformationEntity
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfBookMetadataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ChapterContentEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ChapterInformationEntity
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserDataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserReadingDataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
@@ -31,8 +35,10 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
         UserDataEntity::class,
         BookshelfEntity::class,
         BookshelfBookMetadataEntity::class,
-               ],
-    version = 11,
+        ReadingStatisticsEntity::class,
+        BookRecordEntity::class
+    ],
+    version = 12,
     exportSchema = false
 )
 abstract class LightNovelReaderDatabase : RoomDatabase() {
@@ -42,6 +48,8 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
     abstract fun userReadingDataDao(): UserReadingDataDao
     abstract fun userDataDao(): UserDataDao
     abstract fun bookshelfDao(): BookshelfDao
+    abstract fun readingStatisticsDao(): ReadingStatisticsDao
+    abstract fun bookRecordDao(): BookRecordDao
 
     companion object {
         @Volatile
@@ -55,7 +63,7 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                         context.applicationContext,
                         LightNovelReaderDatabase::class.java,
                         "light_novel_reader_database")
-                        .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+                        .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                         .allowMainThreadQueries()
                         .build()
                     INSTANCE = instance
@@ -141,6 +149,32 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                         "chapter_id_list TEXT NOT NULL, " +
                         "volume_index INTEGER NOT NULL, " +
                         "PRIMARY KEY(volume_id))" )
+            }
+        }
+
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+            CREATE TABLE reading_statistics (
+                date INTEGER NOT NULL PRIMARY KEY,
+                count BLOB NOT NULL,
+                avg_speed INTEGER NOT NULL DEFAULT 0,
+                favorite_books TEXT NOT NULL,
+                started_books TEXT NOT NULL,
+                finished_books TEXT NOT NULL)
+                """)
+
+                db.execSQL("""
+            CREATE TABLE book_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date INTEGER NOT NULL,
+                book_id INTEGER NOT NULL,
+                sessions INTEGER NOT NULL,
+                total_seconds INTEGER NOT NULL,
+                first_seen TEXT NOT NULL,
+                last_seen TEXT NOT NULL,
+                FOREIGN KEY(date) REFERENCES reading_statistics(date) ON DELETE CASCADE)
+                """)
             }
         }
     }

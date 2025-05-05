@@ -23,7 +23,7 @@ android {
         minSdk = 24
         targetSdk = 35
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*100+debug版本号(开发需要时迭代, 三位数)
-        versionCode = 1_01_00_016
+        versionCode = 1_01_00_017
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -143,6 +143,8 @@ dependencies {
     implementation(libs.serialization.json)
     // Swipe
     implementation(libs.swipe)
+    // Chart
+    implementation(libs.charty)
 }
 
 configurations.implementation{

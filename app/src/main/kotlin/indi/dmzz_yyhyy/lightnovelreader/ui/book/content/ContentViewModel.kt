@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
@@ -21,11 +23,13 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class ContentViewModel @Inject constructor(
+    private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
     private val textProcessingRepository: TextProcessingRepository,
     userDataRepository: UserDataRepository
@@ -37,7 +41,6 @@ class ContentViewModel @Inject constructor(
     val uiState: ContentScreenUiState = _uiState
     val settingState = SettingState(userDataRepository, viewModelScope)
     val coroutineScope = CoroutineScope(Dispatchers.IO)
-
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -63,6 +66,15 @@ class ContentViewModel @Inject constructor(
                         _uiState.bookVolumes = it
                     }
                 }
+                viewModelScope.launch(Dispatchers.IO) {
+                    statsRepository.updateReadingStatistics(
+                        ReadingStatsUpdate(
+                            bookId = bookId,
+                            sessionDelta = 1,
+                            localTime = LocalTime.now(),
+                        )
+                    )
+                }
             }
         }
         _bookId = bookId
@@ -70,6 +82,14 @@ class ContentViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.getUserReadingData(bookId).collect {
                 _uiState.userReadingData = it
+                if (it.lastReadTime.year < 0)
+                    coroutineScope.launch(Dispatchers.IO) {
+                        // println("EVENT START book $bookId")
+                        statsRepository.updateBookStatus(
+                            bookId = bookId,
+                            isFirstReading = true
+                        )
+                    }
             }
         }
     }
@@ -210,6 +230,12 @@ class ContentViewModel @Inject constructor(
                 newList.add(bookId)
                 return@update newList
             }
+        }
+    }
+
+    fun accumulateReadingTime(bookId: Int, seconds: Int) {
+        coroutineScope.launch(Dispatchers.IO) {
+            statsRepository.accumulateBookReadTime(bookId, seconds)
         }
     }
 }

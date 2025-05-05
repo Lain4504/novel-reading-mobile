@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
         )
         coroutineScope.launch(Dispatchers.IO) {
             if (bookshelfRepository.getAllBookshelfIds().isEmpty())
-                bookshelfRepository.crateBookShelf(
+                bookshelfRepository.createBookShelf(
                     id = 1145140721,
                     name = "已收藏",
                     sortType = BookshelfSortType.Default,
