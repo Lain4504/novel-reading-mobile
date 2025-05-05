@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.navigateToReadingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.readingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
@@ -14,7 +15,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
-fun NavGraphBuilder.readingStatsNavigation(navController: NavController) {
+fun NavGraphBuilder.readingStatsNavigation() {
     navigation<Route.Main.Reading.Stats>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
@@ -22,13 +23,14 @@ fun NavGraphBuilder.readingStatsNavigation(navController: NavController) {
         popExitTransition = { expandPopExit() },
         startDestination = Route.Main.Reading.Stats.Overview
     ) {
-        readingStatsOverviewDestination(navController)
-        readingStatsDetailedDestination(navController)
+        readingStatsOverviewDestination()
+        readingStatsDetailedDestination()
     }
 }
 
-fun NavGraphBuilder.readingStatsOverviewDestination(navController: NavController) {
+fun NavGraphBuilder.readingStatsOverviewDestination() {
     composable<Route.Main.Reading.Stats.Overview> {
+        val navController = LocalNavController.current
         val statsOverviewViewModel = hiltViewModel<StatsOverviewViewModel>()
         StatsOverviewScreen(
             onClickBack = navController::popBackStackIfResumed,

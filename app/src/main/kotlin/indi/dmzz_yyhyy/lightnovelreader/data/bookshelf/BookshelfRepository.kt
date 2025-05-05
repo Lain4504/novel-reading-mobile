@@ -17,7 +17,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.work.CacheBookWork
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
@@ -279,7 +278,7 @@ class BookshelfRepository @Inject constructor(
         val bookshelfDataList = data.bookshelf ?: return false
         val bookshelfBookMetadataList = data.bookShelfBookMetadata ?: return false
         bookshelfDataList.forEach { bookshelf ->
-            val oldBookshelf = bookshelfDao.getBookshelf(bookshelf.id).debugPrint()
+            val oldBookshelf = bookshelfDao.getBookshelf(bookshelf.id)
             if (oldBookshelf == null)
                 bookshelfDao.createBookshelf(
                     BookshelfEntity(
@@ -301,7 +300,7 @@ class BookshelfRepository @Inject constructor(
                         sortType = bookshelf.sortType.key,
                         autoCache = bookshelf.autoCache,
                         systemUpdateReminder = bookshelf.systemUpdateReminder,
-                        allBookIds = (bookshelf.allBookIds.debugPrint() + oldBookshelf.allBookIds.debugPrint()).distinct(),
+                        allBookIds = (bookshelf.allBookIds + oldBookshelf.allBookIds).distinct(),
                         pinnedBookIds = (bookshelf.pinnedBookIds + oldBookshelf.pinnedBookIds).distinct(),
                         updatedBookIds = (bookshelf.updatedBookIds + oldBookshelf.updatedBookIds).distinct(),
                     )

@@ -1,0 +1,33 @@
+package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll
+
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.IntSize
+import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
+
+interface ScrollContentUiState: ContentUiState {
+    val lazyListState: LazyListState
+    val readingContentId: Int
+    val contentList: List<ChapterContent>
+    val setLazyColumnSize: (IntSize) -> Unit
+    override val readingChapterContent: ChapterContent
+        get() = contentList.firstOrNull { it.id == readingContentId } ?: ChapterContent.empty()
+}
+
+class MutableScrollContentUiSate(
+    override val loadNextChapter: () -> Unit,
+    override val loadLastChapter: () -> Unit,
+    override val changeChapter: (Int) -> Unit,
+    override val setLazyColumnSize: (IntSize) -> Unit,
+) : ScrollContentUiState {
+    override var bookId by mutableIntStateOf(-1)
+    override var readingProgress by mutableFloatStateOf(0f)
+    override val lazyListState: LazyListState = LazyListState()
+    override var readingContentId by mutableIntStateOf(0)
+    override val contentList = mutableStateListOf<ChapterContent>()
+}

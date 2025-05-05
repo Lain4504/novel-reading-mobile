@@ -102,19 +102,27 @@ object Wenku8Api: WebBookDataSource {
             val titleGroup = it
                 .selectFirst("[name=Title]")?.text()
                 ?.let { it1 -> titleRegex.find(it1)?.groups }
-            BookInformation(
-                id = id,
-                title = titleGroup?.get(1)?.value ?: it.selectFirst("[name=Title]")?.text() ?: "",
-                subtitle = titleGroup?.get(2)?.value ?: "",
-                coverUrl = "https://img.wenku8.com/image/${id/1000}/$id/${id}s.jpg",
-                author = it.selectFirst("[name=Author]")?.attr("value") ?: "",
-                description = wenku8Api("action=book&do=intro&aid=$id&t=0")?.text() ?: "",
-                tags = it.selectFirst("[name=Tags]")?.attr("value")?.split(" ") ?: emptyList(),
-                publishingHouse = it.selectFirst("[name=PressId]")?.attr("value") ?: "",
-                wordCount = it.selectFirst("[name=BookLength]")?.attr("value")?.toInt() ?: -1,
-                lastUpdated = LocalDate.parse(it.selectFirst("[name=LastUpdate]")?.attr("value"), DATA_TIME_FORMATTER).atStartOfDay(),
-                isComplete = it.selectFirst("[name=BookStatus]")?.attr("value") == "已完成"
-            )
+            try {
+                BookInformation(
+                    id = id,
+                    title = titleGroup?.get(1)?.value ?: it.selectFirst("[name=Title]")?.text()
+                    ?: "",
+                    subtitle = titleGroup?.get(2)?.value ?: "",
+                    coverUrl = "https://img.wenku8.com/image/${id / 1000}/$id/${id}s.jpg",
+                    author = it.selectFirst("[name=Author]")?.attr("value") ?: "",
+                    description = wenku8Api("action=book&do=intro&aid=$id&t=0")?.text() ?: "",
+                    tags = it.selectFirst("[name=Tags]")?.attr("value")?.split(" ") ?: emptyList(),
+                    publishingHouse = it.selectFirst("[name=PressId]")?.attr("value") ?: "",
+                    wordCount = it.selectFirst("[name=BookLength]")?.attr("value")?.toInt() ?: -1,
+                    lastUpdated = LocalDate.parse(
+                        it.selectFirst("[name=LastUpdate]")?.attr("value"), DATA_TIME_FORMATTER
+                    ).atStartOfDay(),
+                    isComplete = it.selectFirst("[name=BookStatus]")?.attr("value") == "已完成"
+                )
+            } catch (e: NullPointerException) {
+                e.printStackTrace()
+                BookInformation.empty()
+            }
         } ?: BookInformation.empty()
     }
 

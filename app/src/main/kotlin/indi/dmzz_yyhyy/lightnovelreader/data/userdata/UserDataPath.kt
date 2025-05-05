@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.userdata
 
+@Suppress("unused")
 sealed class UserDataPath(
     private val name: String,
     private val parent: UserDataPath? = null,
@@ -22,6 +23,7 @@ sealed class UserDataPath(
         data object BackgroundImageDisplayMode : UserDataPath("backgroundImageDisplayMode", Reader)
         data object IsUsingFlipPage : UserDataPath("isUsingFlipPage", Reader)
         data object IsUsingClickFlipPage : UserDataPath("isUsingClickFlipPage", Reader)
+        data object IsUsingContinuousScrolling : UserDataPath("isUsingContinuousScrolling", Reader)
         data object IsUsingVolumeKeyFlip : UserDataPath("isUsingVolumeKeyFlip", Reader)
         data object FlipAnime : UserDataPath("flipAnime", Reader)
         data object FastChapterChange : UserDataPath("fastChapterChange", Reader)

@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.AddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.edit.navigateToBookshelfEditDestination
@@ -22,8 +23,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.bookshelfHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.bookshelfHomeDestination(sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Main.Bookshelf.Home> {
+        val navController = LocalNavController.current
         val bookshelfHomeViewModel = hiltViewModel<BookshelfHomeViewModel>()
         BookshelfHomeScreen(
             controller = navController,
@@ -60,7 +62,7 @@ fun NavGraphBuilder.bookshelfHomeDestination(navController: NavController, share
             sharedTransitionScope = sharedTransitionScope
         )
     }
-    addBookToBookshelfDialog(navController)
+    addBookToBookshelfDialog()
 }
 
 @Suppress("unused")
@@ -68,8 +70,9 @@ fun NavController.navigateToBookshelfHomeDestination() {
     navigate(Route.Main.Bookshelf.Home)
 }
 
-private fun NavGraphBuilder.addBookToBookshelfDialog(navController: NavController) {
+private fun NavGraphBuilder.addBookToBookshelfDialog() {
     dialog<Route.Main.Bookshelf.AddBookToBookshelfDialog> { entry ->
+        val navController = LocalNavController.current
         val viewModel = hiltViewModel<AddBookToBookshelfDialogViewModel>()
         val dialogSelectedBookshelves = remember { mutableStateListOf<Int>() }
         val route = entry.toRoute<Route.Main.Bookshelf.AddBookToBookshelfDialog>()

@@ -41,7 +41,10 @@ interface UserReadingDataDao {
     }
 
     @Query("select * from user_reading_data where id = :id")
-    fun getEntity(id: Int): Flow<UserReadingDataEntity?>
+    fun getEntity(id: Int): UserReadingDataEntity?
+
+    @Query("select * from user_reading_data where id = :id")
+    fun getEntityFlow(id: Int): Flow<UserReadingDataEntity?>
 
     @Query("select * from user_reading_data")
     fun getAll(): List<UserReadingDataEntity>

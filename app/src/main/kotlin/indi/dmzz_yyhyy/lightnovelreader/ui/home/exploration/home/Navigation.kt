@@ -7,6 +7,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
@@ -14,8 +15,9 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.search.navigateToSea
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.explorationHomeDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.explorationHomeDestination(sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Main.Exploration.Home> { entry ->
+        val navController = LocalNavController.current
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val explorationViewModel = hiltViewModel<ExplorationViewModel>(parentEntry)
         val explorationHomeViewModel = hiltViewModel<ExplorationHomeViewModel>()

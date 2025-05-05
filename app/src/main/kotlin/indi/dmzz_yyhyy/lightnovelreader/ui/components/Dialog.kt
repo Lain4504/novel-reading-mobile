@@ -460,21 +460,6 @@ fun SettingsAboutInfoDialog(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        stringResource(R.string.dialog_about_build_time), color = titleColor
-                    )
-                    Text(
-                        stringResource(R.string.info_build_date), color = contentColor
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(stringResource(R.string.dialog_about_build_host), color = titleColor)
-                    Text(
-                        stringResource(R.string.info_build_host), color = contentColor
-                    )
-                    Text(
-                        stringResource(R.string.info_build_os), color = contentColor
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
                         stringResource(R.string.translators), color = titleColor
                     )
                     Text(

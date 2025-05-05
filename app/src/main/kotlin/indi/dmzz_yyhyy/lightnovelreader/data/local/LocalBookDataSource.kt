@@ -22,10 +22,28 @@ class LocalBookDataSource @Inject constructor(
     suspend fun getBookInformation(id: Int): BookInformation? = bookInformationDao.get(id)
     fun updateBookInformation(info: BookInformation) = bookInformationDao.update(info)
     suspend fun getBookVolumes(id: Int): BookVolumes? = bookVolumesDao.getBookVolumes(id)
-    fun updateBookVolumes(bookId: Int, bookVolumes: BookVolumes) = bookVolumesDao.update(bookId, bookVolumes)
+    fun updateBookVolumes(bookId: Int, bookVolumes: BookVolumes) =
+        bookVolumesDao.update(bookId, bookVolumes)
+
     suspend fun getChapterContent(id: Int) = chapterContentDao.get(id)
-    fun updateChapterContent(chapterContent: ChapterContent) = chapterContentDao.update(chapterContent)
-    fun getUserReadingData(id: Int) = userReadingDataDao.getEntity(id).map {
+    fun updateChapterContent(chapterContent: ChapterContent) =
+        chapterContentDao.update(chapterContent)
+
+    fun getUserReadingData(id: Int) = userReadingDataDao.getEntity(id).let {
+        it ?: return@let UserReadingData.empty().copy(id = id)
+        UserReadingData(
+            it.id,
+            it.lastReadTime,
+            it.totalReadTime,
+            it.readingProgress,
+            it.lastReadChapterId,
+            it.lastReadChapterTitle,
+            it.lastReadChapterProgress,
+            it.readCompletedChapterIds
+        )
+    }
+
+    fun getUserReadingDataFlow(id: Int) = userReadingDataDao.getEntityFlow(id).map {
         it ?: return@map UserReadingData.empty().copy(id = id)
         UserReadingData(
             it.id,

@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 import java.time.LocalDate
@@ -14,8 +15,9 @@ fun NavController.navigateToReadingStatsDetailedDestination(target: Int) {
     navigate(Route.Main.Reading.Stats.Detailed(target))
 }
 
-fun NavGraphBuilder.readingStatsDetailedDestination(navController: NavController) {
+fun NavGraphBuilder.readingStatsDetailedDestination() {
     composable<Route.Main.Reading.Stats.Detailed> {
+        val navController = LocalNavController.current
         val statsDetailedViewModel = hiltViewModel<StatsDetailedViewModel>()
         val targetDate = it.toRoute<Route.Main.Reading.Stats.Detailed>().targetDate
         val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")

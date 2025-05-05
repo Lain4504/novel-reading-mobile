@@ -108,7 +108,7 @@
 
     <string name="about_settings">About</string>
     <string name="settings_about_source_code"><![CDATA[View the source code at %1$s<br/>Report bugs & request features via %2$s]]></string>
-    <string name="settings_about_oss">LightNovelReader is open-source software.</string>
+    <string name="settings_about_oss">LightNovelReader is the gift for all the novel lovers in the world</string>
     <string name="settings_github_repo">GitHub Repository</string>
     <string name="settings_github_repo_desc">Star our repo to help us reach more users</string>
     <string name="settings_communication">Communication</string>

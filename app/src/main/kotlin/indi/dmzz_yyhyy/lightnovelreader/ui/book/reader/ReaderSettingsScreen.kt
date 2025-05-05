@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.book.content
+package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.content.Intent
 import android.net.Uri
@@ -74,10 +74,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
@@ -93,9 +94,9 @@ import java.io.FileInputStream
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBottomSheet(
+    contentUiState: ContentUiState,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
-    uiState: ContentScreenUiState,
     settingState: SettingState,
     onClickChangeBackgroundColor: () -> Unit,
     onClickChangeTextColor: () -> Unit
@@ -180,8 +181,10 @@ fun SettingsBottomSheet(
                                     .fillMaxWidth()
                                     .height(200.dp),
                                 painter =
-                                    if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
-                                    else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                                if (settingState.backgroundImageUri.toString()
+                                        .isEmpty()
+                                ) painterResource(id = R.drawable.paper)
+                                else rememberAsyncImagePainter(settingState.backgroundImageUri),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
@@ -209,24 +212,13 @@ fun SettingsBottomSheet(
                                 )
                         ) {
                             Box {
-                                ContentText(
-                                    content = uiState.chapterContent.content,
-                                    onClickLastChapter = { },
-                                    onClickNextChapter = { },
-                                    fontSize = settingState.fontSize.sp,
-                                    fontLineHeight = settingState.fontLineHeight.sp,
-                                    readingProgress = 0.2f,
-                                    isUsingFlipPage = settingState.isUsingFlipPage,
-                                    isUsingClickFlip = settingState.isUsingClickFlipPage,
-                                    isUsingVolumeKeyFlip = settingState.isUsingVolumeKeyFlip,
-                                    flipAnime = settingState.flipAnime,
-                                    onChapterReadingProgressChange = { },
+                                ContentComponent(
+                                    uiState = contentUiState,
+                                    settingState = settingState,
                                     paddingValues = PaddingValues(bottom = if (isEnableIndicator) 46.dp else 12.dp),
-                                    autoPadding = settingState.autoPadding,
-                                    fastChapterChange = settingState.fastChapterChange,
-                                    changeIsImmersive = {},
-                                    settingState = settingState
+                                    changeIsImmersive = {}
                                 )
+
                             }
                             Indicator(
                                 Modifier
@@ -246,7 +238,7 @@ fun SettingsBottomSheet(
                                 enableBatteryIndicator = settingState.enableBatteryIndicator,
                                 enableTimeIndicator = settingState.enableTimeIndicator,
                                 enableChapterTitle = settingState.enableChapterTitleIndicator,
-                                chapterTitle = uiState.chapterContent.title,
+                                chapterTitle = contentUiState.readingChapterContent.title,
                                 enableReadingChapterProgressIndicator = settingState.enableReadingChapterProgressIndicator,
                                 readingChapterProgress = 0.33f
                             )
@@ -278,7 +270,7 @@ fun SettingsBottomSheet(
     }
 }
 
-data class TabItem(val title:String, val iconRes: Int)
+data class TabItem(val title: String, val iconRes: Int)
 
 @Composable
 fun ContentSettings(
@@ -330,6 +322,7 @@ fun ContentSettings(
                         onClickChangeBackgroundColor,
                         onClickChangeTextColor
                     )
+
                     1 -> ActionPage(settingState)
                     2 -> PaddingPage(settingState)
                 }
@@ -433,7 +426,7 @@ fun LazyListScope.AppearancePage(
     item {
         val onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer
         val background = MaterialTheme.colorScheme.background
-        SettingsClickableEntry (
+        SettingsClickableEntry(
             modifier = Modifier.animateItem(),
             iconRes = R.drawable.palette_24px,
             title = "字体颜色",
@@ -493,7 +486,11 @@ fun LazyListScope.AppearancePage(
                         )
                 } catch (exception: Exception) {
                     coroutineScope.launch {
-                        Toast.makeText(content, "字体文件错误或已损坏, 请您检查后导入", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            content,
+                            "字体文件错误或已损坏, 请您检查后导入",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                     return@launch
                 }
@@ -511,7 +508,10 @@ fun LazyListScope.AppearancePage(
             ) MenuOptions.SelectText.Default else MenuOptions.SelectText.Customize,
             onOptionChange = {
                 when (it) {
-                    MenuOptions.SelectText.Default -> settingState.fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
+                    MenuOptions.SelectText.Default -> settingState.fontFamilyUriUserData.asynchronousSet(
+                        Uri.EMPTY
+                    )
+
                     MenuOptions.SelectText.Customize -> selectDataFile(launcher, "*/*")
                 }
             }
@@ -545,15 +545,15 @@ fun LazyListScope.AppearancePage(
                             if (it.exists()) {
                                 it.delete()
                                 it.createNewFile()
-                            }
-                            else it.createNewFile()
+                            } else it.createNewFile()
                         }
                     try {
-                        content.contentResolver.openFileDescriptor(it, "r")?.use { parcelFileDescriptor ->
-                            FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
-                                fileInputStream.readBytes()
-                            }.let(image::writeBytes)
-                        }
+                        content.contentResolver.openFileDescriptor(it, "r")
+                            ?.use { parcelFileDescriptor ->
+                                FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
+                                    fileInputStream.readBytes()
+                                }.let(image::writeBytes)
+                            }
                     } catch (e: Exception) {
                         Log.e("ReaderBackground", "failed to load chosen file")
                         e.printStackTrace()
@@ -567,10 +567,15 @@ fun LazyListScope.AppearancePage(
                 title = "选择图片",
                 description = "使用应用内置的图片背景或自定义图片文件",
                 options = MenuOptions.SelectImage,
-                selectedOptionKey = if (settingState.backgroundImageUri.toString().isEmpty()) MenuOptions.SelectImage.Default else MenuOptions.SelectImage.Customize,
+                selectedOptionKey = if (settingState.backgroundImageUri.toString()
+                        .isEmpty()
+                ) MenuOptions.SelectImage.Default else MenuOptions.SelectImage.Customize,
                 onOptionChange = {
                     when (it) {
-                        MenuOptions.SelectImage.Default -> settingState.backgroundImageUriUserData.asynchronousSet(Uri.EMPTY)
+                        MenuOptions.SelectImage.Default -> settingState.backgroundImageUriUserData.asynchronousSet(
+                            Uri.EMPTY
+                        )
+
                         MenuOptions.SelectImage.Customize -> selectDataFile(launcher, "image/*")
                     }
                 }
@@ -592,7 +597,7 @@ fun LazyListScope.AppearancePage(
         item {
             val onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer
             val background = MaterialTheme.colorScheme.background
-            SettingsClickableEntry (
+            SettingsClickableEntry(
                 modifier = Modifier.animateItem(),
                 iconRes = R.drawable.colorize_24px,
                 title = "背景颜色",
@@ -675,6 +680,18 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
                 description = stringResource(R.string.settings_reader_volume_key_control_desc),
                 checked = settingState.isUsingVolumeKeyFlip,
                 booleanUserData = settingState.isUsingVolumeKeyFlipUserData,
+            )
+        }
+    }
+    if (!settingState.isUsingFlipPage) {
+        item {
+            SettingsSwitchEntry(
+                modifier = Modifier.animateItem(),
+                iconRes = R.drawable.unfold_more_double_24px,
+                title = "无痕滚动",
+                description = "滚动翻页时的章节切换时无痕",
+                checked = settingState.isUsingContinuousScrolling,
+                booleanUserData = settingState.isUsingContinuousScrollingUserData,
             )
         }
     }
@@ -774,7 +791,10 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
 
 @Suppress("DuplicatedCode")
 fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>, mime: String) {
-    val initUri = DocumentsContract.buildDocumentUri("com.android.externalstorage.pictures", "primary:Pictures")
+    val initUri = DocumentsContract.buildDocumentUri(
+        "com.android.externalstorage.pictures",
+        "primary:Pictures"
+    )
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
         type = mime

@@ -10,12 +10,12 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.bookshelfHomeDest
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.bookshelfNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.bookshelfNavigation(sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Main.Bookshelf>(
         startDestination = Route.Main.Bookshelf.Home
     ) {
-        bookshelfHomeDestination(navController, sharedTransitionScope)
-        bookshelfEditDestination(navController)
+        bookshelfHomeDestination(sharedTransitionScope)
+        bookshelfEditDestination()
     }
 }
 

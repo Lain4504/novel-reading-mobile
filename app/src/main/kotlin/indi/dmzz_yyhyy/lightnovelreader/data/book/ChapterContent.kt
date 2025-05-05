@@ -9,6 +9,7 @@ data class ChapterContent(
 ) {
     fun hasLastChapter(): Boolean = lastChapter > -1
     fun hasNextChapter(): Boolean = nextChapter > -1
+    fun isEmpty() = this.id == -1
     companion object {
         fun empty(): ChapterContent = ChapterContent(-1, "", "")
     }

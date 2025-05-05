@@ -2,7 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.data.update
 
 import android.util.Log
 import androidx.compose.ui.util.fastFilter
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.md.HtmlToMdUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.jsoup.Jsoup
@@ -73,7 +72,6 @@ object GithubParser {
                 if (url.startsWith("http://")) it.header("Host", "github.com")
             }
             .get()
-            .debugPrint("html")
             .let { releaseDocument ->
                 updatePhase.tryEmit("GitHub步骤: 获取apk下载链接")
                 val downloadUrl = releaseDocument
@@ -81,7 +79,6 @@ object GithubParser {
                     .fastFilter { it.attr("src").contains("releases") }
                     .first()
                     .attr("src")
-                    .debugPrint("localUrl")
                     .replace("https://github.com", host)
                     .let(Jsoup::connect)
                     .header("Host", "github.com")
