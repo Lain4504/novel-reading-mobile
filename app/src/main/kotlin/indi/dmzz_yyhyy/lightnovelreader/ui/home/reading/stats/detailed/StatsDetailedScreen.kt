@@ -384,7 +384,7 @@ fun BookStack(
     Box(
         modifier = Modifier.wrapContentWidth().padding(end = min(books.size, count).dp * 20)
     ) {
-        books.take(count).fastForEachIndexed { index, bookId ->
+        books.distinct().take(count).fastForEachIndexed { index, bookId ->
             val scale = 1f - (index * 0.01f).coerceAtMost(0.3f)
             Box(
                 modifier = Modifier
