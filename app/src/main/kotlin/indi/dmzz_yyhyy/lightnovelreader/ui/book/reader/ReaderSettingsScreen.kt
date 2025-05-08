@@ -484,7 +484,7 @@ fun LazyListScope.AppearancePage(
                                 fontFamily = FontFamily(Font(font))
                             )
                         )
-                } catch (exception: Exception) {
+                } catch (_: Exception) {
                     coroutineScope.launch {
                         Toast.makeText(
                             content,

@@ -39,15 +39,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toFile
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.AppEvent
@@ -55,6 +52,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -88,7 +86,7 @@ private fun SimpleFlipPageTextComponent(
     val content = uiState.readingChapterContent.content
     val textMeasurer = rememberTextMeasurer()
     val scope = rememberCoroutineScope()
-    val current = LocalContext.current
+    val context = LocalContext.current
     var contentKey by remember { mutableIntStateOf(0) }
     var slipTextJob by remember { mutableStateOf<Job?>(null) }
     var constraints by remember { mutableStateOf<Constraints?>(null) }
@@ -156,7 +154,7 @@ private fun SimpleFlipPageTextComponent(
         settingState.flipAnime,
         settingState.fastChapterChange
     ) {
-        val localBroadcastManager = LocalBroadcastManager.getInstance(current)
+        val localBroadcastManager = LocalBroadcastManager.getInstance(context)
         val keycodeVolumeUpReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (settingState.isUsingVolumeKeyFlip)
@@ -224,9 +222,8 @@ private fun SimpleFlipPageTextComponent(
             ) {
                 detectTapGestures(
                     onTap = {
-                        println("wasda")
                         if (settingState.isUsingFlipPage)
-                            if (it.x <= current.resources.displayMetrics.widthPixels * 0.425) lastPage(
+                            if (it.x <= context.resources.displayMetrics.widthPixels * 0.425) lastPage(
                                 uiState.pagerState
                             )
                             else nextPage(uiState.pagerState)
@@ -249,6 +246,7 @@ private fun SimpleFlipPageTextComponent(
                     contentScale = ContentScale.Crop
                 )
             }
+
             BaseContentComponent(
                 modifier = modifier
                     .fillMaxSize()
@@ -257,11 +255,7 @@ private fun SimpleFlipPageTextComponent(
                 fontSize = settingState.fontSize.sp,
                 fontLineHeight = settingState.fontLineHeight.sp,
                 fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                fontFamily = if (settingState.fontFamilyUri.toString()
-                        .isEmpty()
-                ) MaterialTheme.typography.bodyMedium.fontFamily else FontFamily(
-                    Font(settingState.fontFamilyUri.toFile())
-                ),
+                fontFamily = rememberReaderFontFamily(settingState),
                 color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
             )
         }
