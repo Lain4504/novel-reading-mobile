@@ -85,46 +85,84 @@ class SourceChangeDialogViewModel @Inject constructor(
             val oldUri = File(fileDir, "${webBookDataSource.id}.data.lnr").toUri()
             val exportRequest = exportToFile(oldUri, MutableExportContext().apply { settings = false })
 
-            workManager.getWorkInfoByIdFlow(exportRequest.id).collect { workInfo ->
+            try {
+                workManager.getWorkInfoByIdFlow(exportRequest.id).collect { workInfo ->
+                    when (workInfo?.state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            performDataClearAndImport(webDataSourceId, fileDir, oldUri)
+                            cancel()
+                        }
+                        WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
+                            Log.e("SourceChange", "Export failed, aborting")
+                            cancel()
+                        }
+                        else -> {}
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("SourceChange", "Export failed", e)
+            }
+        }
+    }
+
+    private suspend fun performDataClearAndImport(
+        newSourceId: Int,
+        fileDir: File,
+        fallbackUri: Uri
+    ) {
+        val oldSourceId = webBookDataSourceId
+        try {
+            localBookDataSource.clear()
+            bookshelfRepository.clear()
+            userDataRepository.remove(UserDataPath.ReadingBooks.path)
+            userDataRepository.remove(UserDataPath.Search.History.path)
+            userDataRepository.intUserData(UserDataPath.Settings.Data.WebDataSourceId.path).set(newSourceId)
+            statsRepository.clear()
+
+            val newFile = File(fileDir, "$newSourceId.data.lnr")
+            if (!newFile.exists()) {
+                restartApp()
+                return
+            }
+
+            val importRequest = importFromFile(newFile.toUri())
+            workManager.getWorkInfoByIdFlow(importRequest.id).collect { workInfo ->
                 when (workInfo?.state) {
                     WorkInfo.State.SUCCEEDED -> {
-                        performDataClearAndImport(webDataSourceId, fileDir)
-                        cancel()
+                        Log.i("SourceChange", "All operations completed, restarting")
+                        restartApp()
                     }
                     WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
-                        Log.e("SourceChangeDialog", "Failed, cancelling")
-                        cancel()
+                        Log.e("SourceChange", "Import failed. Attempting rollback")
+                        restoreFallbackData(fallbackUri, oldSourceId)
                     }
                     else -> {}
                 }
             }
+        } catch (e: Exception) {
+            Log.e("SourceChange", "Error during import", e)
+            restoreFallbackData(fallbackUri, oldSourceId)
         }
     }
 
-    private suspend fun performDataClearAndImport(newSourceId: Int, fileDir: File) {
-        localBookDataSource.clear()
-        bookshelfRepository.clear()
-        userDataRepository.remove(UserDataPath.ReadingBooks.path)
-        userDataRepository.remove(UserDataPath.Search.History.path)
-        userDataRepository.intUserData(UserDataPath.Settings.Data.WebDataSourceId.path).set(newSourceId)
-        statsRepository.clear()
-
-        val newFile = File(fileDir, "$newSourceId.data.lnr")
-        if (!newFile.exists()) {
-            restartApp()
-            return
-        }
-
-        val importRequest = importFromFile(newFile.toUri())
-        workManager.getWorkInfoByIdFlow(importRequest.id).collect {
-            if (it?.state == WorkInfo.State.SUCCEEDED) {
-                restartApp()
+    private suspend fun restoreFallbackData(uri: Uri, fallbackSourceId: Int) {
+        try {
+            userDataRepository.intUserData(UserDataPath.Settings.Data.WebDataSourceId.path).set(fallbackSourceId)
+            val restoreRequest = importFromFile(uri)
+            workManager.getWorkInfoByIdFlow(restoreRequest.id).collect { workInfo ->
+                if (workInfo?.state == WorkInfo.State.SUCCEEDED) {
+                    Log.i("SourceChange", "Rollback succeeded, restarting")
+                    restartApp()
+                } else if (workInfo?.state == WorkInfo.State.FAILED) {
+                    Log.e("SourceChange", "Rollback failed.")
+                }
             }
+        } catch (e: Exception) {
+            Log.e("SourceChange", "Rollback import failed with exception", e)
         }
     }
 
     private fun restartApp() {
-        Log.i("SourceChangeDialog", "All operations completed, the app is exiting NOW!")
         exitProcess(0)
     }
 }
