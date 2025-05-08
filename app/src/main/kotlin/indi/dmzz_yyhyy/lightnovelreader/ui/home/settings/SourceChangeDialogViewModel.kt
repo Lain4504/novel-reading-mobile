@@ -13,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ExportDataWork
@@ -33,6 +34,7 @@ class   SourceChangeDialogViewModel @Inject constructor(
     private val webBookDataSource: WebBookDataSource,
     private val localBookDataSource: LocalBookDataSource,
     private val bookshelfRepository: BookshelfRepository,
+    private val statsRepository: StatsRepository
 ) : ViewModel() {
     val webBookDataSourceId = webBookDataSource.id
 
@@ -46,6 +48,7 @@ class   SourceChangeDialogViewModel @Inject constructor(
                     "exportReadingData" to exportContext.readingData,
                     "exportSetting" to exportContext.settings,
                     "exportBookmark" to exportContext.bookmark,
+                    "exportReadingStats" to exportContext.readingStats
                 )
             )
             .build()
@@ -86,6 +89,7 @@ class   SourceChangeDialogViewModel @Inject constructor(
                         userDataRepository.remove(UserDataPath.ReadingBooks.path)
                         userDataRepository.remove(UserDataPath.Search.History.path)
                         userDataRepository.intUserData(UserDataPath.Settings.Data.WebDataSourceId.path).set(webDataSourceId)
+                        statsRepository.clear()
                         val newFile = File(fileDir, "$webDataSourceId.data.lnr")
                         if (!newFile.exists()) {
                             restartApp()

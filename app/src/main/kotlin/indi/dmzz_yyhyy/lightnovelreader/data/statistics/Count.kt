@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.statistics
 
+import java.util.Base64
 import java.util.BitSet
 
 class Count {
@@ -24,6 +25,10 @@ class Count {
         return value
     }
 
+    fun toBase64String(): String {
+        return Base64.getEncoder().encodeToString(toByteArray())
+    }
+
     fun toByteArray(): ByteArray {
         val bytes = ByteArray(18)
         for (i in 0 until 144) {
@@ -35,6 +40,11 @@ class Count {
     }
 
     companion object {
+        fun fromBase64String(base64: String): Count {
+            val bytes = Base64.getDecoder().decode(base64)
+            return fromByteArray(bytes)
+        }
+
         fun fromByteArray(bytes: ByteArray): Count {
             require(bytes.size == 18) { "Invalid byte array size" }
             val count = Count()

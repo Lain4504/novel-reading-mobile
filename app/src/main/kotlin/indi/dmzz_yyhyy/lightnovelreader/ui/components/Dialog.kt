@@ -227,6 +227,7 @@ interface ExportContext {
     val readingData: Boolean
     val settings: Boolean
     val bookmark: Boolean
+    val readingStats: Boolean
 }
 
 class MutableExportContext: ExportContext {
@@ -234,6 +235,7 @@ class MutableExportContext: ExportContext {
     override var readingData by mutableStateOf(true)
     override var settings by mutableStateOf(true)
     override var bookmark by mutableStateOf(true)
+    override val readingStats by mutableStateOf(true)
 }
 
 @Composable

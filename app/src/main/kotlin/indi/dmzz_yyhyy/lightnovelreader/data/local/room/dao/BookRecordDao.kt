@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.TypeConverters
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
@@ -16,7 +17,10 @@ import java.time.LocalDate
 )
 interface BookRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBookRecord(record: BookRecordEntity)
+    fun insertBookRecord(record: BookRecordEntity)
+
+    @Query("SELECT * FROM book_records")
+    fun getAllBookRecords(): List<BookRecordEntity>
 
     @Query("SELECT * FROM book_records WHERE date = :date")
     suspend fun getBookRecordsForDate(date: LocalDate): List<BookRecordEntity>
@@ -38,4 +42,12 @@ interface BookRecordDao {
 
     @Query("DELETE FROM book_records WHERE id = -721")
     suspend fun deleteTotalRecord()
+
+    @Query("DELETE FROM book_records")
+    fun clearRecords()
+
+    @Transaction
+    fun clear() {
+        clearRecords()
+    }
 }

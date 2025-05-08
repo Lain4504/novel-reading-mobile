@@ -5,13 +5,13 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.TypeConverters
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.CountConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
-import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 @Dao
@@ -23,13 +23,13 @@ import java.time.LocalDate
 interface ReadingStatisticsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertReadingStatistics(statistics: ReadingStatisticsEntity)
+    fun insertReadingStatistics(statistics: ReadingStatisticsEntity)
 
     @Query("SELECT * FROM reading_statistics WHERE date = :date LIMIT 1")
     suspend fun getReadingStatisticsForDate(date: LocalDate): ReadingStatisticsEntity?
 
     @Query("SELECT * FROM reading_statistics")
-    fun getAllReadingStatistics(): Flow<List<ReadingStatisticsEntity>>
+    fun getAllReadingStatistics(): List<ReadingStatisticsEntity>
 
     @Delete
     suspend fun deleteReadingStatistics(statistics: ReadingStatisticsEntity)
@@ -56,4 +56,12 @@ interface ReadingStatisticsDao {
     @Query("SELECT * FROM reading_statistics WHERE date = :date LIMIT 1")
     suspend fun getForegroundTimeForDate(date: LocalDate): Int? =
         getReadingStatisticsForDate(date)?.foregroundTime
+
+    @Query("DELETE FROM reading_statistics")
+    fun clearStatistics()
+
+    @Transaction
+    fun clear() {
+        clearStatistics()
+    }
 }

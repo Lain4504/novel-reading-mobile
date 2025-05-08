@@ -17,6 +17,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataJsonBuilder
 import indi.dmzz_yyhyy.lightnovelreader.data.json.toJsonData
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserDataEntity
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import java.io.File
@@ -33,15 +34,15 @@ class ExportDataWork @AssistedInject constructor(
     private val webBookDataSource: WebBookDataSource,
     private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository,
+    private val statsRepository: StatsRepository,
     private val userDataDao: UserDataDao
 ) : Worker(appContext, workerParams) {
-    @Suppress("DuplicatedCode")
     override fun doWork(): Result {
         val fileUri = inputData.getString("uri")?.let(Uri::parse) ?: return Result.failure()
         val exportBookshelf = inputData.getBoolean("exportBookshelf", false)
         val exportReadingData = inputData.getBoolean("exportReadingData",false)
         val exportSetting = inputData.getBoolean("exportSetting", false)
-        val exportBookmark = inputData.getBoolean("exportBookmark", false)
+    //  val exportBookmark = inputData.getBoolean("exportBookmark", false)
         val json = AppUserDataJsonBuilder()
             .data {
                 webDataSourceId(webBookDataSource.id)
@@ -61,6 +62,8 @@ class ExportDataWork @AssistedInject constructor(
                     userDataDao.getEntity(UserDataPath.ReadingBooks.path)
                         ?.toJsonData()
                         ?.let(::userData)
+                    statsRepository.getAllReadingStats()
+                        .forEach(::dailyReadingData)
                 }
                 if (exportSetting) {
                     userDataDao.getGroupValues(UserDataPath.Reader.path)
