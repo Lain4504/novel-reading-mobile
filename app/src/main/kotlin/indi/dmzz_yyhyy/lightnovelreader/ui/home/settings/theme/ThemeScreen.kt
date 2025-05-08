@@ -57,7 +57,7 @@ import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.content.selectDataFile
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.selectDataFile
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry

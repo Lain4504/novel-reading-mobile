@@ -32,14 +32,16 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSettingsDebugDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsScreen
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.settingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.navigateToSettingsLogcatDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.settingsLogcatDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.settingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,16 +49,14 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Main.Settings.Home> {
-        val navController = LocalNavController.current
-fun NavGraphBuilder.settingsDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Main.Settings.Home>(
         enterTransition = { expandEnter() },
         exitTransition = { expandExit() },
         popEnterTransition = { expandPopEnter() },
         popExitTransition = { expandPopExit() }
     ) {
+        val navController = LocalNavController.current
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         val updatePhase by updatesAvailableDialogViewModel.updatePhaseFlow.collectAsState("Not Checked")
@@ -80,16 +80,15 @@ fun NavGraphBuilder.settingsDestination(navController: NavController, sharedTran
     exportUserDataDialog()
 }
 
-private fun NavGraphBuilder.sourceChangeDialog() {
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.mainSettingsNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+fun NavGraphBuilder.settingsNavigation(sharedTransitionScope: SharedTransitionScope) {
     navigation<Route.Main.Settings>(
         startDestination = Route.Main.Settings.Home
     ) {
-        settingsDestination(navController, sharedTransitionScope)
-        settingsDebugDestination(navController)
-        settingsLogcatDestination(navController)
-        settingsThemeDestination(navController)
+        settingsDestination(sharedTransitionScope)
+        settingsDebugDestination()
+        settingsLogcatDestination()
+        settingsThemeDestination()
     }
 }
 
@@ -98,7 +97,7 @@ fun NavController.navigateToSettingsDestination() {
     navigate(Route.Main.Settings)
 }
 
-private fun NavGraphBuilder.sourceChangeDialog(navController: NavController) {
+private fun NavGraphBuilder.sourceChangeDialog() {
     dialog<Route.Main.SourceChangeDialog> {
         val navController = LocalNavController.current
         val viewModel = hiltViewModel<SourceChangeDialogViewModel>()
