@@ -10,11 +10,9 @@ import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsAboutInfoDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 
 @Composable
 fun AboutSettingsList(
-    settingState: SettingState,
     onClickDebugMode: () -> Unit
 ) {
     val appInfo: String = buildString {
@@ -58,7 +56,7 @@ fun AboutSettingsList(
         SettingsClickableEntry(
             iconRes = R.drawable.adb_24px,
             title = "调试工具",
-            description = "debug用调试工具",
+            description = "Debug 用调试工具",
             onClick = onClickDebugMode
         )
 }

@@ -54,6 +54,8 @@ object Route {
             object Logcat
             @Serializable
             object Debug
+            @Serializable
+            object Theme
         }
         @Serializable
         object SourceChangeDialog

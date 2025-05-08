@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
+import androidx.navigation.compose.navigation
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
@@ -33,7 +34,11 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewMode
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSettingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsViewModel
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.settingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.navigateToSettingsLogcatDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.settingsLogcatDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.settingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +50,13 @@ import java.io.File
 fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransitionScope) {
     composable<Route.Main.Settings.Home> {
         val navController = LocalNavController.current
+fun NavGraphBuilder.settingsDestination(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+    composable<Route.Main.Settings.Home>(
+        enterTransition = { expandEnter() },
+        exitTransition = { expandExit() },
+        popEnterTransition = { expandPopEnter() },
+        popExitTransition = { expandPopExit() }
+    ) {
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
         val updatePhase by updatesAvailableDialogViewModel.updatePhaseFlow.collectAsState("Not Checked")
@@ -59,6 +71,7 @@ fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransit
             onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             onClickLogcat = navController::navigateToSettingsLogcatDestination,
+            onClickThemeSettings = navController::navigateToSettingsThemeDestination,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
         )
@@ -67,12 +80,25 @@ fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransit
     exportUserDataDialog()
 }
 
+private fun NavGraphBuilder.sourceChangeDialog() {
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.mainSettingsNavigation(navController: NavController, sharedTransitionScope: SharedTransitionScope) {
+    navigation<Route.Main.Settings>(
+        startDestination = Route.Main.Settings.Home
+    ) {
+        settingsDestination(navController, sharedTransitionScope)
+        settingsDebugDestination(navController)
+        settingsLogcatDestination(navController)
+        settingsThemeDestination(navController)
+    }
+}
+
 @Suppress("unused")
-fun NavController.navigateToHomeSettingDestination() {
+fun NavController.navigateToSettingsDestination() {
     navigate(Route.Main.Settings)
 }
 
-private fun NavGraphBuilder.sourceChangeDialog() {
+private fun NavGraphBuilder.sourceChangeDialog(navController: NavController) {
     dialog<Route.Main.SourceChangeDialog> {
         val navController = LocalNavController.current
         val viewModel = hiltViewModel<SourceChangeDialogViewModel>()
@@ -140,7 +166,6 @@ private fun NavGraphBuilder.exportUserDataDialog() {
 private fun NavController.navigateToExportUserDataDialog() {
     navigate(Route.Main.ExportUserDataDialog)
 }
-
 
 @Suppress("DuplicatedCode", "SameParameterValue")
 private fun createDataFile(fileName: String, launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {

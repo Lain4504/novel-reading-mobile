@@ -78,6 +78,6 @@ private fun NavGraphBuilder.colorPickerDialog() {
     }
 }
 
-private fun NavController.navigateToColorPickerDialog(colorUserDataPath: String, colors: List<Long>) {
+fun NavController.navigateToColorPickerDialog(colorUserDataPath: String, colors: List<Long>) {
     navigate(Route.Book.ColorPickerDialog(colorUserDataPath, colors.toLongArray()))
 }

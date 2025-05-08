@@ -90,6 +90,7 @@ import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
@@ -140,11 +141,17 @@ fun ReaderScreen(
         containerColor = if (settingState.backgroundColor.isUnspecified) MaterialTheme.colorScheme.background else settingState.backgroundColor
     ) { _ ->
         if (settingState.enableBackgroundImage) {
+            val isDark = LocalIsDarkTheme.current
+            val isCustomEmpty = (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty())
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter =
-                if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
-                else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                    if (isCustomEmpty) painterResource(id = R.drawable.paper)
+                    else
+                        if (isDark)
+                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                        else
+                            rememberAsyncImagePainter(settingState.backgroundImageUri),
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )

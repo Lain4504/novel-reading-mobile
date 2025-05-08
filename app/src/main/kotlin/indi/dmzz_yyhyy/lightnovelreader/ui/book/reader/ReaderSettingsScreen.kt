@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
@@ -175,19 +176,24 @@ fun SettingsBottomSheet(
                                 else settingState.backgroundColor
                             )
                     ) {
-                        if (settingState.enableBackgroundImage)
+                        if (settingState.enableBackgroundImage) {
+                            val isDark = LocalIsDarkTheme.current
+                            val isCustomEmpty = (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty())
                             Image(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp),
                                 painter =
-                                if (settingState.backgroundImageUri.toString()
-                                        .isEmpty()
-                                ) painterResource(id = R.drawable.paper)
-                                else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                                    if (isCustomEmpty) painterResource(id = R.drawable.paper)
+                                    else
+                                        if (isDark)
+                                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
+                                        else
+                                            rememberAsyncImagePainter(settingState.backgroundImageUri),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -429,8 +435,8 @@ fun LazyListScope.AppearancePage(
         SettingsClickableEntry(
             modifier = Modifier.animateItem(),
             iconRes = R.drawable.palette_24px,
-            title = "字体颜色",
-            description = "自定义阅读器字体色",
+            title = "文本颜色",
+            description = "自定义阅读器文本颜色",
             onClick = onClickChangeTextColor,
             trailingContent = {
                 androidx.compose.foundation.Canvas(
