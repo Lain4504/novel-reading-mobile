@@ -36,7 +36,7 @@ class ReaderViewModel @Inject constructor(
 ) : ViewModel() {
     val settingState = SettingState(userDataRepository, viewModelScope)
     private var contentViewModel: ContentViewModel by mutableStateOf(
-        if (settingState.isUsingFlipPageUserData.get() == true) FlipPageContentViewModel(
+        if (false) FlipPageContentViewModel(
             bookRepository = bookRepository,
             coroutineScope = viewModelScope,
             updateReadingProgress = ::saveReadingProgress
@@ -123,31 +123,33 @@ class ReaderViewModel @Inject constructor(
     }
 
     private fun saveReadingProgress(progress: Float) {
-        if (progress.isNaN()) return
-        val chapterId = _uiState.contentUiState.readingChapterContent.id
-        val currentTime = LocalDateTime.now()
+        coroutineScope.launch(Dispatchers.IO) {
+            if (progress.isNaN()) return@launch
+            val chapterId = _uiState.contentUiState.readingChapterContent.id
+            val currentTime = LocalDateTime.now()
 
-        bookRepository.updateUserReadingData(bookId) { userReadingData ->
-            val isChapterCompleted = progress > 0.945 &&
-                    !userReadingData.readCompletedChapterIds.contains(chapterId)
+            bookRepository.updateUserReadingData(bookId) { userReadingData ->
+                val isChapterCompleted = progress > 0.945 &&
+                        !userReadingData.readCompletedChapterIds.contains(chapterId)
 
-            userReadingData.copy(
-                lastReadTime = currentTime,
-                lastReadChapterId = chapterId,
-                lastReadChapterProgress = progress.coerceIn(0f..1f),
-                readingProgress = if (isChapterCompleted) {
-                    (userReadingData.readCompletedChapterIds.size + 1) /
-                            _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
-                } else {
-                    userReadingData.readCompletedChapterIds.size /
-                            _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
-                },
-                readCompletedChapterIds = if (isChapterCompleted) {
-                    userReadingData.readCompletedChapterIds + chapterId
-                } else {
-                    userReadingData.readCompletedChapterIds
-                }
-            )
+                userReadingData.copy(
+                    lastReadTime = currentTime,
+                    lastReadChapterId = chapterId,
+                    lastReadChapterProgress = progress.coerceIn(0f..1f),
+                    readingProgress = if (isChapterCompleted) {
+                        (userReadingData.readCompletedChapterIds.size + 1) /
+                                _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
+                    } else {
+                        userReadingData.readCompletedChapterIds.size /
+                                _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
+                    },
+                    readCompletedChapterIds = if (isChapterCompleted) {
+                        userReadingData.readCompletedChapterIds + chapterId
+                    } else {
+                        userReadingData.readCompletedChapterIds
+                    }
+                )
+            }
         }
     }
 

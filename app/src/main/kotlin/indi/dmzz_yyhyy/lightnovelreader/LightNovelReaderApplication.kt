@@ -4,15 +4,33 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
+import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogLevel
+import indi.dmzz_yyhyy.lightnovelreader.data.logging.LoggerRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
 class LightNovelReaderApplication : Application(), Configuration.Provider {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
     @Inject lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var loggerRepository: LoggerRepository
+    @Inject lateinit var userDataRepository: UserDataRepository
 
     override val workManagerConfiguration: Configuration
         get()  =
         Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+    override fun onCreate() {
+        super.onCreate()
+        coroutineScope.launch(Dispatchers.IO) {
+            loggerRepository.logLevel = LogLevel.from(userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path).getOrDefault("none"))
+            loggerRepository.startLogging()
+        }
+    }
 }

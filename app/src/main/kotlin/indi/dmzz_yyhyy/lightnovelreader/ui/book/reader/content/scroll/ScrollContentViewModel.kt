@@ -29,7 +29,7 @@ class ScrollContentViewModel(
     )
 
     init {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.IO) {
             if (!settingState.isUsingContinuousScrollingUserData.getOrDefault(false)) return@launch
             snapshotFlow { uiState.lazyListState.layoutInfo.visibleItemsInfo.getOrNull(0) }.collect { itemInfo ->
                 if (uiState.lazyListState.layoutInfo.visibleItemsInfo.size == 1 &&
@@ -174,16 +174,18 @@ class ScrollContentViewModel(
                             }
                     }
                 }
-                coroutineScope.launch {
+                coroutineScope.launch(Dispatchers.IO) {
                     val userReadingData = bookRepository.getUserReadingData(uiState.bookId)
-                    uiState.lazyListState.scrollToItem(uiState.contentList.indexOfFirst { it.id == id })
-                    uiState.lazyListState.scrollToItem(
-                        uiState.contentList.indexOfFirst { it.id == id },
-                        if (userReadingData.lastReadChapterId == uiState.readingChapterContent.id)
-                            (uiState.lazyListState.layoutInfo.visibleItemsInfo.first { it.key == id }.size * userReadingData.lastReadChapterProgress).toInt() - lazyColumnSize.height
-                        else
-                            0
-                    )
+                    coroutineScope.launch {
+                        uiState.lazyListState.scrollToItem(uiState.contentList.indexOfFirst { it.id == id })
+                        uiState.lazyListState.scrollToItem(
+                            uiState.contentList.indexOfFirst { it.id == id },
+                            if (userReadingData.lastReadChapterId == uiState.readingChapterContent.id)
+                                (uiState.lazyListState.layoutInfo.visibleItemsInfo.first { it.key == id }.size * userReadingData.lastReadChapterProgress).toInt() - lazyColumnSize.height
+                            else
+                                0
+                        )
+                    }
                 }
             }
         }

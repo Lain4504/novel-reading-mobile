@@ -18,7 +18,6 @@ object WebDataSourceModule {
     @Singleton
     @Provides
     fun provideWebDataSource(userDataRepository: UserDataRepository): WebBookDataSource {
-        val webDataSourcesId = userDataRepository.intUserData(UserDataPath.Settings.Data.WebDataSourceId.path).get()
-        return webDataSources.find { it.id == webDataSourcesId } ?: Wenku8Api
+        return Wenku8Api
     }
 }
