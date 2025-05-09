@@ -4,7 +4,10 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfSortType
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.Count
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 data class AppUserDataJson(
     @SerializedName("type")
@@ -13,12 +16,15 @@ data class AppUserDataJson(
     val id: Int? = null,
     @SerializedName("data")
     val data: List<AppUserDataContent>
-) {
+      ) {
     companion object {
         val gson: Gson = GsonBuilder()
             .serializeSpecialFloatingPointValues()
-            .registerTypeAdapter(LocalDateTime::class.java, LocalTimeDataTypeAdapter)
+            .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeTypeAdapter)
+            .registerTypeAdapter(LocalDate::class.java, LocalDateTypeAdapter)
+            .registerTypeAdapter(LocalTime::class.java, LocalTimeTypeAdapter)
             .registerTypeAdapter(BookshelfSortType::class.java, BookshelfSortTypeTypeAdapter)
+            .registerTypeAdapter(Count::class.java, CountBase64TypeAdapter)
             .create()
 
         fun fromJson(json: String): AppUserDataJson = gson.fromJson(json, AppUserDataJson::class.java)
@@ -38,6 +44,8 @@ data class AppUserDataContent(
     val bookShelfBookMetadata: List<BookShelfBookMetadataData>? = null,
     @SerializedName("user_data")
     val userData: List<UserDataData>? = null,
+    @SerializedName("reading_stats_data")
+    val readingStatsData: List<DailyReadingStats>? = null
 )
 
 class AppUserDataJsonBuilder {
@@ -70,6 +78,7 @@ class AppUserDataContentBuilder() {
     private var bookshelf: MutableList<BookshelfData> = mutableListOf()
     private var bookShelfBookMetadata: MutableList<BookShelfBookMetadataData> = mutableListOf()
     private var userData: MutableList<UserDataData> = mutableListOf()
+    private var readingStatsData: MutableList<DailyReadingStats> = mutableListOf()
 
     fun build(): AppUserDataContent {
         if (webDataSourceId == null) {
@@ -81,6 +90,7 @@ class AppUserDataContentBuilder() {
             bookshelf = bookshelf.ifEmpty { null },
             bookShelfBookMetadata = bookShelfBookMetadata.ifEmpty { null },
             userData = userData.ifEmpty { null },
+            readingStatsData = readingStatsData.ifEmpty { null }
         )
     }
 
@@ -108,5 +118,9 @@ class AppUserDataContentBuilder() {
         this.userData.add(userData)
         return this
     }
-}
 
+    fun dailyReadingData(dailyReadingStats: DailyReadingStats): AppUserDataContentBuilder {
+        this.readingStatsData.add(dailyReadingStats)
+        return this
+    }
+}

@@ -308,7 +308,7 @@ private fun computeDailyDetails(
     val formattedTotalTime = DurationFormat().format(totalDuration, DurationFormat.Unit.SECOND)
 
     val timeDetails = records.map { record ->
-        val book = bookInfoMap[record.bookId] ?: BookInformation.empty()
+        val book = bookInfoMap[record.bookId] ?: BookInformation.empty().copy(title = "...")
         book to record.totalTime
     }
 

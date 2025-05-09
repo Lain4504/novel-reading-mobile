@@ -13,6 +13,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataJson
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import java.io.FileInputStream
@@ -27,7 +28,8 @@ class ImportDataWork @AssistedInject constructor(
     private val webBookDataSource: WebBookDataSource,
     private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository,
-    private val userDataRepository: UserDataRepository
+    private val userDataRepository: UserDataRepository,
+    private val statsRepository: StatsRepository
 ) : Worker(appContext, workerParams) {
     override fun doWork(): Result {
         val fileUri = inputData.getString("uri")?.let(Uri::parse) ?: return Result.failure()
@@ -52,7 +54,7 @@ class ImportDataWork @AssistedInject constructor(
         }
         if (jsonText == null) return Result.failure()
         try {
-            val appUserDataJson = AppUserDataJson.fromJson(jsonText!!)
+            val appUserDataJson = AppUserDataJson.fromJson(jsonText)
             if (appUserDataJson.type == "light novel reader data file")
                 data = appUserDataJson.data.firstOrNull { it.webDataSourceId == webBookDataSource.id }
             if (data == null) {
@@ -73,6 +75,7 @@ class ImportDataWork @AssistedInject constructor(
         bookshelfRepository.importBookshelf(data)
         bookRepository.importUserReadingData(data)
         userDataRepository.importUserData(data)
+        statsRepository.importReadingStats(data)
         return Result.success()
     }
 }

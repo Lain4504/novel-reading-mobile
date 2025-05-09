@@ -25,18 +25,16 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toFile
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 
 @Composable
 fun ScrollContentComponent(
@@ -54,7 +52,6 @@ fun ScrollContentComponent(
         changeIsImmersive = changeIsImmersive
     )
 }
-
 
 @SuppressLint("FrequentlyChangedStateReadInComposition")
 @Composable
@@ -138,11 +135,7 @@ fun ScrollContentTextComponent(
                         fontSize = (settingState.fontSize + 10).sp,
                         lineHeight = (settingState.fontLineHeight + 15).sp,
                         fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
-                        fontFamily = if (settingState.fontFamilyUri.toString()
-                                .isEmpty()
-                        ) MaterialTheme.typography.bodyMedium.fontFamily else FontFamily(
-                            Font(settingState.fontFamilyUri.toFile())
-                        ),
+                        fontFamily = rememberReaderFontFamily(settingState),
                         color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
                     )
                 it.content
@@ -165,11 +158,7 @@ fun ScrollContentTextComponent(
                             fontSize = settingState.fontSize.sp,
                             fontLineHeight = settingState.fontLineHeight.sp,
                             fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                            fontFamily = if (settingState.fontFamilyUri.toString()
-                                    .isEmpty()
-                            ) MaterialTheme.typography.bodyMedium.fontFamily else FontFamily(
-                                Font(settingState.fontFamilyUri.toFile())
-                            ),
+                            fontFamily = rememberReaderFontFamily(settingState),
                             color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
                         )
                     }
