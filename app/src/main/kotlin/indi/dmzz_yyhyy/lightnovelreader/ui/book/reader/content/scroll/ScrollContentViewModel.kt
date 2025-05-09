@@ -39,12 +39,13 @@ class ScrollContentViewModel(
                     uiState.contentList.removeAt(uiState.contentList.size - 1)
                     uiState.readingContentId = uiState.readingChapterContent.lastChapter
                     bookRepository.updateUserReadingData(uiState.bookId) {
-                        it.copy(
-                            lastReadTime = LocalDateTime.now(),
-                            lastReadChapterId = uiState.readingChapterContent.id,
-                            lastReadChapterTitle = uiState.readingChapterContent.title,
-                            lastReadChapterProgress = if (it.lastReadChapterId == uiState.readingChapterContent.id) it.lastReadChapterProgress else 0f,
-                        )
+                        it.apply {
+                            lastReadTime = LocalDateTime.now()
+                            lastReadChapterId = uiState.readingChapterContent.id
+                            lastReadChapterTitle = uiState.readingChapterContent.title
+                            lastReadChapterProgress =
+                                if (it.lastReadChapterId == uiState.readingChapterContent.id) it.lastReadChapterProgress else 0f
+                        }
                     }
                     if (!uiState.readingChapterContent.hasLastChapter()) return@collect
                     coroutineScope.launch(Dispatchers.IO) {
@@ -131,12 +132,13 @@ class ScrollContentViewModel(
                 uiState.contentList.add(1.coerceAtMost(uiState.contentList.size), content)
                 uiState.readingProgress = 0f
                 bookRepository.updateUserReadingData(uiState.bookId) {
-                    it.copy(
-                        lastReadTime = LocalDateTime.now(),
-                        lastReadChapterId = id,
-                        lastReadChapterTitle = uiState.readingChapterContent.title,
-                        lastReadChapterProgress = if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f,
-                    )
+                    it.apply {
+                        lastReadTime = LocalDateTime.now()
+                        lastReadChapterId = id
+                        lastReadChapterTitle = uiState.readingChapterContent.title
+                        lastReadChapterProgress =
+                            if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f
+                    }
                 }
                 coroutineScope.launch(Dispatchers.IO) {
                     if (uiState.contentList.firstOrNull { it.id == id }

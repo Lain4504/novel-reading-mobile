@@ -132,23 +132,20 @@ class ReaderViewModel @Inject constructor(
                 val isChapterCompleted = progress > 0.945 &&
                         !userReadingData.readCompletedChapterIds.contains(chapterId)
 
-                userReadingData.copy(
-                    lastReadTime = currentTime,
-                    lastReadChapterId = chapterId,
-                    lastReadChapterProgress = progress.coerceIn(0f..1f),
+                userReadingData.apply {
+                    lastReadTime = currentTime
+                    lastReadChapterId = chapterId
+                    lastReadChapterProgress = progress.coerceIn(0f..1f)
                     readingProgress = if (isChapterCompleted) {
                         (userReadingData.readCompletedChapterIds.size + 1) /
                                 _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
                     } else {
                         userReadingData.readCompletedChapterIds.size /
                                 _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
-                    },
-                    readCompletedChapterIds = if (isChapterCompleted) {
-                        userReadingData.readCompletedChapterIds + chapterId
-                    } else {
-                        userReadingData.readCompletedChapterIds
                     }
-                )
+                    if (isChapterCompleted)
+                        readCompletedChapterIds.add(chapterId)
+                }
             }
         }
     }
@@ -156,10 +153,10 @@ class ReaderViewModel @Inject constructor(
     fun updateTotalReadingTime(bookId: Int, totalReadingTime: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.updateUserReadingData(bookId) {
-                it.copy(
-                    lastReadTime = LocalDateTime.now(),
+                it.apply {
+                    lastReadTime = LocalDateTime.now()
                     totalReadTime = it.totalReadTime + totalReadingTime
-                )
+                }
             }
         }
     }

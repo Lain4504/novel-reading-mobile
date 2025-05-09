@@ -117,6 +117,7 @@ fun buildReportHeader(): String {
     return report.toString()
 }
 
+@Suppress("SameParameterValue")
 private fun getSystemPropertyWithAndroidAPI(property: String): String? {
     return try {
         System.getProperty(property)

@@ -9,11 +9,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,21 +36,11 @@ class ReadingHomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             recentReadingBookIds = readingBooksUserData.getOrDefault(emptyList()).reversed()
                 .mapNotNull { if (it == -1) null else it  }
-            recentReadingBookIds.forEach { id ->
-                bookRepository.getBookInformation(id).let { flow ->
-                    viewModelScope.launch {
-                        flow.collect {
-                            _recentReadingBookInformationMap[id] = it
-                        }
-                    }
-                }
-                bookRepository.getUserReadingDataFlow(id).let { flow ->
-                    viewModelScope.launch {
-                        flow.collect {
-                            _recentReadingUserReadingDataMap[id] = it
-                        }
-                    }
-                }
+            recentReadingBookIds.forEach {
+                _recentReadingBookInformationMap[it] = bookRepository.getStateBookInformation(it)
+            }
+            recentReadingBookIds.forEach {
+                _recentReadingUserReadingDataMap[it] = bookRepository.getStateUserReadingData(it)
             }
         }
     }

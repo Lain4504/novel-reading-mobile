@@ -29,7 +29,7 @@ class DetailViewModel @Inject constructor(
 
     fun init(bookId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            bookRepository.getBookInformation(bookId).collect {
+            bookRepository.getBookInformationFlow(bookId).collect {
                 if (it.id == -1) return@collect
                 _uiState.bookInformation = it
                 val bookshelfBookMetadata = bookshelfRepository.getBookshelfBookMetadata(bookId) ?: return@collect

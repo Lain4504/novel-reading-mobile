@@ -30,9 +30,19 @@ class BookRepository @Inject constructor(
     private val textProcessingRepository: TextProcessingRepository,
     private val workManager: WorkManager
 ) {
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
-    suspend fun getBookInformation(id: Int): Flow<BookInformation> {
+    fun getStateBookInformation(id: Int): BookInformation {
+        val bookInformation = MutableBookInformation.empty()
+        bookInformation.id = id
+        coroutineScope.launch(Dispatchers.IO) {
+            localBookDataSource.getBookInformation(id)?.let(bookInformation::update)
+            webBookDataSource.getBookInformation(id)?.let(bookInformation::update)
+        }
+        return bookInformation
+    }
+
+    suspend fun getBookInformationFlow(id: Int): Flow<BookInformation> {
         val bookInformation: MutableStateFlow<BookInformation> =
             MutableStateFlow(localBookDataSource.getBookInformation(id) ?: BookInformation.empty())
         coroutineScope.launch {
@@ -89,6 +99,15 @@ class BookRepository @Inject constructor(
         return textProcessingRepository.processChapterContent(chapterContent)
     }
 
+    fun getStateUserReadingData(bookId: Int): UserReadingData {
+        val userReadingData = MutableUserReadingData.empty()
+        userReadingData.id = bookId
+        coroutineScope.launch(Dispatchers.IO) {
+            localBookDataSource.getUserReadingData(bookId)?.let(userReadingData::update)
+        }
+        return userReadingData
+    }
+
     fun getUserReadingData(bookId: Int): UserReadingData =
         localBookDataSource.getUserReadingData(bookId)
 
@@ -98,7 +117,7 @@ class BookRepository @Inject constructor(
     fun getAllUserReadingData(): List<UserReadingData> =
         localBookDataSource.getAllUserReadingData()
 
-    fun updateUserReadingData(id: Int, update: (UserReadingData) -> UserReadingData) {
+    fun updateUserReadingData(id: Int, update: (MutableUserReadingData) -> UserReadingData) {
         localBookDataSource.updateUserReadingData(id, update)
     }
 
@@ -108,7 +127,7 @@ class BookRepository @Inject constructor(
         val userReadingDataList: List<BookUserData> = data.bookUserData ?: return false
         userReadingDataList.forEach { bookUserData ->
             localBookDataSource.updateUserReadingData(bookUserData.id) {
-                UserReadingData(
+                MutableUserReadingData(
                     id = bookUserData.id,
                     lastReadTime = if (bookUserData.lastReadTime.isAfter(it.lastReadTime)) bookUserData.lastReadTime else it.lastReadTime,
                     totalReadTime = if (bookUserData.totalReadTime > it.totalReadTime) bookUserData.totalReadTime else it.totalReadTime,

@@ -7,6 +7,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
@@ -71,7 +72,7 @@ object Wenku8Api: WebBookDataSource {
         while(true) {
             offLine = isOffLine()
             emit(offLine)
-            delay(500)
+            delay(3000)
         }
     }
 
@@ -103,7 +104,7 @@ object Wenku8Api: WebBookDataSource {
                 .selectFirst("[name=Title]")?.text()
                 ?.let { it1 -> titleRegex.find(it1)?.groups }
             try {
-                BookInformation(
+                MutableBookInformation(
                     id = id,
                     title = titleGroup?.get(1)?.value ?: it.selectFirst("[name=Title]")?.text()
                     ?: "",
@@ -269,7 +270,7 @@ object Wenku8Api: WebBookDataSource {
                     val titleGroup = element.selectFirst("div > div:nth-child(1) > a")
                         ?.attr("title")
                         ?.let { it1 -> titleRegex.find(it1)?.groups }
-                    BookInformation(
+                    MutableBookInformation(
                         id = element.selectFirst("div > div:nth-child(1) > a")
                             ?.attr("href")
                             ?.replace("/book/", "")

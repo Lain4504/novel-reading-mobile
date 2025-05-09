@@ -5,8 +5,9 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.TypeConverters
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter.stringListToString
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookInformationEntity
 import java.time.LocalDateTime
 
@@ -50,7 +51,7 @@ interface BookInformationDao {
     @Transaction
     suspend fun get(id: Int): BookInformation? {
         val entity = getEntity(id) ?: return null
-        return BookInformation(
+        return MutableBookInformation(
             entity.id,
             entity.title,
             entity.subtitle,

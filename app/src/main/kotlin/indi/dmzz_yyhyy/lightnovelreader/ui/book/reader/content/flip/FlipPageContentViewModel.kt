@@ -10,11 +10,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-class FlipPageContentViewModel (
+class FlipPageContentViewModel(
     val bookRepository: BookRepository,
     val coroutineScope: CoroutineScope,
     val updateReadingProgress: (Float) -> Unit
-): ContentViewModel {
+) : ContentViewModel {
     private var notRecoveredProgress = 0f
     private var collectProgressJob: Job? = null
     override val uiState: MutableFlipPageContentUiState = MutableFlipPageContentUiState(
@@ -27,7 +27,7 @@ class FlipPageContentViewModel (
     init {
         coroutineScope.launch(Dispatchers.IO) {
             snapshotFlow { uiState.pagerState }.collect { pagerState ->
-                println(uiState.pagerState.pageCount    )
+                println(uiState.pagerState.pageCount)
                 collectProgressJob?.cancel()
                 collectProgressJob = coroutineScope.launch(Dispatchers.IO) {
                     snapshotFlow { pagerState.settledPage }.collect {
@@ -82,12 +82,13 @@ class FlipPageContentViewModel (
                 if (content.id == -1) return@collect
                 uiState.readingChapterContent = content
                 bookRepository.updateUserReadingData(uiState.bookId) {
-                    it.copy(
-                        lastReadTime = LocalDateTime.now(),
-                        lastReadChapterId = id,
-                        lastReadChapterTitle = uiState.readingChapterContent.title,
-                        lastReadChapterProgress = if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f,
-                    )
+                    it.apply {
+                        lastReadTime = LocalDateTime.now()
+                        lastReadChapterId = id
+                        lastReadChapterTitle = uiState.readingChapterContent.title
+                        lastReadChapterProgress =
+                            if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f
+                    }
                 }
                 if (content.hasNextChapter()) {
                     bookRepository.getChapterContent(
