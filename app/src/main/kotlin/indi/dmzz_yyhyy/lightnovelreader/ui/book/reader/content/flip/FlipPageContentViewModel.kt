@@ -76,7 +76,7 @@ class FlipPageContentViewModel(
         coroutineScope.launch(Dispatchers.IO) {
             uiState.readingChapterContent =
                 bookRepository.getStateChapterContent(id, uiState.bookId)
-            val content = bookRepository.getChapterContent(id, uiState.bookId)
+            val content = bookRepository.getStateChapterContent(id, uiState.bookId)
             if (content.id == -1) return@launch
             bookRepository.updateUserReadingData(uiState.bookId) {
                 it.apply {

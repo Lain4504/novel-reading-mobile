@@ -29,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
@@ -101,6 +103,9 @@ fun ScrollContentTextComponent(
             contentDescription = null,
             contentScale = ContentScale.Crop
         )
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        uiState.writeProgressRightNow()
     }
     LazyColumn(
         modifier = modifier

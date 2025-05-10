@@ -98,6 +98,8 @@ class ReaderViewModel @Inject constructor(
     private fun saveReadingProgress(progress: Float) {
         viewModelScope.launch(Dispatchers.IO) {
             if (progress.isNaN()) return@launch
+            if (_uiState.contentUiState.readingChapterContent.isEmpty()) return@launch
+            if (bookId == -1) return@launch
             val chapterId = _uiState.contentUiState.readingChapterContent.id
             val currentTime = LocalDateTime.now()
 

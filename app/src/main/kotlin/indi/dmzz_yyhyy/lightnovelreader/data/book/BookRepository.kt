@@ -37,7 +37,11 @@ class BookRepository @Inject constructor(
         bookInformation.id = id
         coroutineScope.launch(Dispatchers.IO) {
             localBookDataSource.getBookInformation(id)?.let(bookInformation::update)
-            webBookDataSource.getBookInformation(id)?.let(bookInformation::update)
+            webBookDataSource.getBookInformation(id)?.let {
+                if (it.isEmpty()) return@launch
+                bookInformation.update(it)
+                localBookDataSource.updateBookInformation(it)
+            }
         }
         return bookInformation
     }
@@ -86,7 +90,11 @@ class BookRepository @Inject constructor(
         chapterContent.id = chapterId
         coroutineScope.launch {
             localBookDataSource.getChapterContent(chapterId)?.let(chapterContent::update)
-            webBookDataSource.getChapterContent(chapterId, bookId)?.let(chapterContent::update)
+            webBookDataSource.getChapterContent(chapterId, bookId)?.let {
+                if (it.isEmpty()) return@launch
+                chapterContent.update(it)
+                localBookDataSource.updateChapterContent(it)
+            }
             chapterContent.content = textProcessingRepository.progressText(chapterContent.content)
         }
         return chapterContent
@@ -94,20 +102,26 @@ class BookRepository @Inject constructor(
 
     suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent {
         val webChapterContent = webBookDataSource.getChapterContent(chapterId, bookId)
-        if (webChapterContent != null) return webChapterContent
-        return localBookDataSource.getChapterContent(chapterId) ?: ChapterContent.empty()
+        if (webChapterContent != null && !webChapterContent.isEmpty()) {
+            coroutineScope.launch {
+                localBookDataSource.updateChapterContent(webChapterContent)
+            }
+            return webChapterContent
+        }
+        return localBookDataSource.getChapterContent(chapterId) ?: MutableChapterContent.empty().apply { id = chapterId }
     }
 
     suspend fun getChapterContentFlow(chapterId: Int, bookId: Int): Flow<ChapterContent> {
         val chapterContent: MutableStateFlow<ChapterContent> =
             MutableStateFlow(
-                localBookDataSource.getChapterContent(chapterId) ?: ChapterContent.empty()
+                localBookDataSource.getChapterContent(chapterId) ?: MutableChapterContent.empty().apply { id = chapterId }
             )
         coroutineScope.launch {
             webBookDataSource.getChapterContent(
                 chapterId = chapterId,
                 bookId = bookId
             )?.let { content ->
+                if (content.isEmpty()) return@launch
                 localBookDataSource.updateChapterContent(content)
                 localBookDataSource.getChapterContent(chapterId)?.let { newContent ->
                     chapterContent.update {

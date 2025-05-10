@@ -28,7 +28,8 @@ class ScrollContentViewModel(
         changeChapter = ::changeChapter,
         setLazyColumnSize = {
             lazyColumnSize = it
-        }
+        },
+        writeProgressRightNow = ::writeProgressRightNow
     )
 
     init {
@@ -49,7 +50,7 @@ class ScrollContentViewModel(
                 }
             }
         }
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.IO) {
             snapshotFlow { uiState.lazyListState.firstVisibleItemScrollOffset }.collect { _ ->
                 val item =
                     uiState.lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == uiState.readingChapterContent.id }
@@ -61,6 +62,10 @@ class ScrollContentViewModel(
                 updateReadingProgress(uiState.readingProgress)
             }
         }
+    }
+
+    private fun writeProgressRightNow() {
+        updateReadingProgress(uiState.readingProgress)
     }
 
     private fun progressScrollLoad() {
