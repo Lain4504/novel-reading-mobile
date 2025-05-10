@@ -8,6 +8,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
@@ -183,7 +184,7 @@ object Wenku8Api: WebBookDataSource {
                         imagesResult.forEach {
                             content = content.replace(it.groups[1]?.value ?: it.value, "[image]${it.groups[1]?.value ?: ""}[image]")
                         }
-                        ChapterContent(
+                        MutableChapterContent(
                             id = chapterId,
                             title = title,
                             content = content,

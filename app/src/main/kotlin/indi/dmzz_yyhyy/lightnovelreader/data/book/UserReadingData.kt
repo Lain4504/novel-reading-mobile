@@ -31,7 +31,11 @@ interface UserReadingData {
         )
     }
 
-    fun toMutable(): MutableUserReadingData = MutableUserReadingData(id, lastReadTime, totalReadTime, readingProgress, lastReadChapterId, lastReadChapterTitle, lastReadChapterProgress, readCompletedChapterIds)
+    fun toMutable(): MutableUserReadingData {
+        if (this is MutableUserReadingData)
+            return this
+        return MutableUserReadingData(id, lastReadTime, totalReadTime, readingProgress, lastReadChapterId, lastReadChapterTitle, lastReadChapterProgress, readCompletedChapterIds)
+    }
 }
 
 class MutableUserReadingData(

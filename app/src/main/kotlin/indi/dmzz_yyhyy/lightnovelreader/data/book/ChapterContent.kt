@@ -1,16 +1,54 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.book
 
-data class ChapterContent(
-    val id: Int,
-    val title: String,
-    val content: String,
-    val lastChapter: Int = -1,
-    val nextChapter: Int = -1
-) {
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
+interface ChapterContent {
+    val id: Int
+    val title: String
+    val content: String
+    val lastChapter: Int
+    val nextChapter: Int
+
     fun hasLastChapter(): Boolean = lastChapter > -1
     fun hasNextChapter(): Boolean = nextChapter > -1
     fun isEmpty() = this.id == -1
+
     companion object {
-        fun empty(): ChapterContent = ChapterContent(-1, "", "")
+        fun empty(): ChapterContent = MutableChapterContent(-1, "", "")
+    }
+
+    fun toMutable(): MutableChapterContent {
+        if (this is MutableChapterContent)
+            return this
+        return MutableChapterContent(id, title, content, lastChapter, nextChapter)
+    }
+}
+
+class MutableChapterContent(
+    id: Int,
+    title: String,
+    content: String,
+    lastChapter: Int = -1,
+    nextChapter: Int = -1
+) : ChapterContent {
+    override var id by mutableIntStateOf(id)
+    override var title by mutableStateOf(title)
+    override var content by mutableStateOf(content)
+    override var lastChapter by mutableIntStateOf(lastChapter)
+    override var nextChapter by mutableIntStateOf(nextChapter)
+
+    companion object {
+        fun empty(): MutableChapterContent = MutableChapterContent(-1, "", "")
+    }
+
+    fun update(chapterContent: ChapterContent) {
+        this.id = chapterContent.id
+        this.title = chapterContent.title
+        this.content = chapterContent.content
+        this.lastChapter = chapterContent.lastChapter
+        this.nextChapter = chapterContent.nextChapter
     }
 }

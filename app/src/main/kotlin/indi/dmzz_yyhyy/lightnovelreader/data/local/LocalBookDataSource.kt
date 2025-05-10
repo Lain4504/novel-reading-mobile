@@ -3,6 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader.data.local
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableUserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
@@ -26,7 +27,15 @@ class LocalBookDataSource @Inject constructor(
     fun updateBookVolumes(bookId: Int, bookVolumes: BookVolumes) =
         bookVolumesDao.update(bookId, bookVolumes)
 
-    suspend fun getChapterContent(id: Int) = chapterContentDao.get(id)
+    suspend fun getChapterContent(id: Int) = chapterContentDao.get(id)?.let {
+        MutableChapterContent(
+            it.id,
+            it.title,
+            it.content,
+            it.lastChapter,
+            it.nextChapter
+        )
+    }
     fun updateChapterContent(chapterContent: ChapterContent) =
         chapterContentDao.update(chapterContent)
 

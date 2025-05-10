@@ -7,19 +7,20 @@ import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
-import java.io.File
-import java.io.FileNotFoundException
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileNotFoundException
 
 fun loadReaderFontFamilySafe(uri: Uri): FontFamily? {
     return try {
+        if (uri == Uri.EMPTY) return null
         val fontFile = File(uri.path ?: return null)
         if (!fontFile.exists()) throw FileNotFoundException()
         FontFamily(Font(fontFile))

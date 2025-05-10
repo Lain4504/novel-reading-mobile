@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.Wenku8Api
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic
@@ -18,6 +18,7 @@ object WebDataSourceModule {
     @Singleton
     @Provides
     fun provideWebDataSource(userDataRepository: UserDataRepository): WebBookDataSource {
-        return Wenku8Api
+        val webDataSourcesId = userDataRepository.intUserData(UserDataPath.Settings.Data.WebDataSourceId.path).get()
+        return webDataSources.find { it.id == webDataSourcesId } ?: Wenku8Api
     }
 }

@@ -2,6 +2,7 @@ package indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json
 
 import com.google.gson.annotations.SerializedName
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableChapterContent
 
 data class ComicChapterComic(
     @SerializedName("chapter_id")
@@ -14,7 +15,7 @@ data class ComicChapterComic(
     val pageUrl: List<String>,
 ) {
     fun toChapterContent(lastChapterId: Int, nextChapterId: Int): ChapterContent =
-        ChapterContent(
+        MutableChapterContent(
             id = chapterId,
             title = title,
             lastChapter = lastChapterId,

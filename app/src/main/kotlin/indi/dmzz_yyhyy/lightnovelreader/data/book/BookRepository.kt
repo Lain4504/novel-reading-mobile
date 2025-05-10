@@ -50,13 +50,17 @@ class BookRepository @Inject constructor(
                 localBookDataSource.updateBookInformation(information)
                 localBookDataSource.getBookInformation(id)?.let { newInfo ->
                     bookInformation.update { newInfo }
-                    bookshelfRepository.getBookshelfBookMetadata(information.id)?.let { bookshelfBookMetadata ->
-                        if (bookshelfBookMetadata.lastUpdate.isBefore(information.lastUpdated))
-                            bookshelfBookMetadata.bookShelfIds.forEach {
-                                bookshelfRepository.updateBookshelfBookMetadataLastUpdateTime(information.id, information.lastUpdated)
-                                bookshelfRepository.addUpdatedBooksIntoBookShelf(it, id)
-                            }
-                    }
+                    bookshelfRepository.getBookshelfBookMetadata(information.id)
+                        ?.let { bookshelfBookMetadata ->
+                            if (bookshelfBookMetadata.lastUpdate.isBefore(information.lastUpdated))
+                                bookshelfBookMetadata.bookShelfIds.forEach {
+                                    bookshelfRepository.updateBookshelfBookMetadataLastUpdateTime(
+                                        information.id,
+                                        information.lastUpdated
+                                    )
+                                    bookshelfRepository.addUpdatedBooksIntoBookShelf(it, id)
+                                }
+                        }
                 }
             }
         }
@@ -77,9 +81,28 @@ class BookRepository @Inject constructor(
         return bookVolumes
     }
 
-    suspend fun getChapterContent(chapterId: Int, bookId: Int): Flow<ChapterContent> {
+    fun getStateChapterContent(chapterId: Int, bookId: Int): ChapterContent {
+        val chapterContent = MutableChapterContent.empty()
+        chapterContent.id = chapterId
+        coroutineScope.launch {
+            localBookDataSource.getChapterContent(chapterId)?.let(chapterContent::update)
+            webBookDataSource.getChapterContent(chapterId, bookId)?.let(chapterContent::update)
+            chapterContent.content = textProcessingRepository.progressText(chapterContent.content)
+        }
+        return chapterContent
+    }
+
+    suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent {
+        val webChapterContent = webBookDataSource.getChapterContent(chapterId, bookId)
+        if (webChapterContent != null) return webChapterContent
+        return localBookDataSource.getChapterContent(chapterId) ?: ChapterContent.empty()
+    }
+
+    suspend fun getChapterContentFlow(chapterId: Int, bookId: Int): Flow<ChapterContent> {
         val chapterContent: MutableStateFlow<ChapterContent> =
-            MutableStateFlow(localBookDataSource.getChapterContent(chapterId) ?: ChapterContent.empty())
+            MutableStateFlow(
+                localBookDataSource.getChapterContent(chapterId) ?: ChapterContent.empty()
+            )
         coroutineScope.launch {
             webBookDataSource.getChapterContent(
                 chapterId = chapterId,
@@ -88,10 +111,12 @@ class BookRepository @Inject constructor(
                 localBookDataSource.updateChapterContent(content)
                 localBookDataSource.getChapterContent(chapterId)?.let { newContent ->
                     chapterContent.update {
-                        newContent.copy(
-                            lastChapter = if (newContent.lastChapter == -1) it.lastChapter else newContent.lastChapter,
-                            nextChapter = if (newContent.nextChapter == -1) it.nextChapter else newContent.nextChapter
-                        )
+                        newContent.toMutable().apply {
+                            lastChapter =
+                                if (newContent.lastChapter == -1) it.lastChapter else newContent.lastChapter
+                            nextChapter =
+                                if (newContent.nextChapter == -1) it.nextChapter else newContent.nextChapter
+                        }
                     }
                 }
             }
@@ -103,7 +128,7 @@ class BookRepository @Inject constructor(
         val userReadingData = MutableUserReadingData.empty()
         userReadingData.id = bookId
         coroutineScope.launch(Dispatchers.IO) {
-            localBookDataSource.getUserReadingData(bookId)?.let(userReadingData::update)
+            localBookDataSource.getUserReadingData(bookId).let(userReadingData::update)
         }
         return userReadingData
     }
@@ -144,9 +169,11 @@ class BookRepository @Inject constructor(
 
     fun cacheBook(bookId: Int): OneTimeWorkRequest {
         val workRequest = OneTimeWorkRequestBuilder<CacheBookWork>()
-            .setInputData(workDataOf(
-                "bookId" to bookId
-            ))
+            .setInputData(
+                workDataOf(
+                    "bookId" to bookId
+                )
+            )
             .build()
         workManager.enqueueUniqueWork(
             bookId.toString(),

@@ -5,9 +5,9 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.navigation
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home.readingHomeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.readingStatsNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
-import readingHomeDestination
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.readingNavigation(sharedTransitionScope: SharedTransitionScope) {

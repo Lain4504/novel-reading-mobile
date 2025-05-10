@@ -133,7 +133,7 @@ fun ScrollContentTextComponent(
                         modifier = Modifier.padding(8.dp),
                         text = it.title,
                         fontSize = (settingState.fontSize + 10).sp,
-                        lineHeight = (settingState.fontLineHeight + 15).sp,
+                        lineHeight = (settingState.fontSize + settingState.fontLineHeight + 10).sp,
                         fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
                         fontFamily = rememberReaderFontFamily(settingState),
                         color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor

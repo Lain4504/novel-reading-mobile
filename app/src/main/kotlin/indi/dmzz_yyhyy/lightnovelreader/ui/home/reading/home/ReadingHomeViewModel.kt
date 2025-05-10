@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home
 
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +23,6 @@ class ReadingHomeViewModel @Inject constructor(
     userDataRepository: UserDataRepository
 ) : ViewModel() {
     private val readingBooksUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
-    @Stable
     var recentReadingBookIds: List<Int> by mutableStateOf(listOf())
         private set
     private val _recentReadingBookInformationMap: SnapshotStateMap<Int, BookInformation> = mutableStateMapOf()
