@@ -54,7 +54,6 @@ class MainActivity : ComponentActivity() {
         var darkMode by mutableStateOf("FollowSystem")
         var dynamicColor by mutableStateOf(false)
         installSplashScreen()
-        loggerRepository.startLogging()
 
         workManager.enqueueUniquePeriodicWork(
             "checkUpdate",

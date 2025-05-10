@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
@@ -308,7 +309,7 @@ private fun computeDailyDetails(
     val formattedTotalTime = DurationFormat().format(totalDuration, DurationFormat.Unit.SECOND)
 
     val timeDetails = records.map { record ->
-        val book = bookInfoMap[record.bookId] ?: BookInformation.empty().copy(title = "...")
+        val book = bookInfoMap[record.bookId] ?: MutableBookInformation.empty().apply { title = "..." }
         book to record.totalTime
     }
 

@@ -3,6 +3,8 @@ package indi.dmzz_yyhyy.lightnovelreader.data.local
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableUserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
@@ -25,13 +27,21 @@ class LocalBookDataSource @Inject constructor(
     fun updateBookVolumes(bookId: Int, bookVolumes: BookVolumes) =
         bookVolumesDao.update(bookId, bookVolumes)
 
-    suspend fun getChapterContent(id: Int) = chapterContentDao.get(id)
+    suspend fun getChapterContent(id: Int) = chapterContentDao.get(id)?.let {
+        MutableChapterContent(
+            it.id,
+            it.title,
+            it.content,
+            it.lastChapter,
+            it.nextChapter
+        )
+    }
     fun updateChapterContent(chapterContent: ChapterContent) =
         chapterContentDao.update(chapterContent)
 
     fun getUserReadingData(id: Int) = userReadingDataDao.getEntity(id).let {
-        it ?: return@let UserReadingData.empty().copy(id = id)
-        UserReadingData(
+        it ?: return@let MutableUserReadingData.empty().apply { this.id = id }
+        MutableUserReadingData(
             it.id,
             it.lastReadTime,
             it.totalReadTime,
@@ -44,8 +54,8 @@ class LocalBookDataSource @Inject constructor(
     }
 
     fun getUserReadingDataFlow(id: Int) = userReadingDataDao.getEntityFlow(id).map {
-        it ?: return@map UserReadingData.empty().copy(id = id)
-        UserReadingData(
+        it ?: return@map MutableUserReadingData.empty().apply { this.id = id }
+        MutableUserReadingData(
             it.id,
             it.lastReadTime,
             it.totalReadTime,
@@ -57,9 +67,9 @@ class LocalBookDataSource @Inject constructor(
         )
     }
 
-    fun updateUserReadingData(id: Int, update: (UserReadingData) -> UserReadingData) {
+    fun updateUserReadingData(id: Int, update: (MutableUserReadingData) -> UserReadingData) {
         val userReadingData = userReadingDataDao.getEntityWithoutFlow(id)?.let {
-            UserReadingData(
+            MutableUserReadingData(
                 it.id,
                 it.lastReadTime,
                 it.totalReadTime,
@@ -69,18 +79,19 @@ class LocalBookDataSource @Inject constructor(
                 it.lastReadChapterProgress,
                 it.readCompletedChapterIds
             )
-        } ?: UserReadingData.empty().copy(id = id)
-        userReadingDataDao.update(update(userReadingData.copy(id = id)).let {
-            var data = it
-            if (it.readingProgress.isNaN()) data = data.copy(readingProgress = 0.0f)
-            if (it.lastReadChapterProgress.isNaN()) data = data.copy(lastReadChapterProgress = 0.0f)
+        } ?: MutableUserReadingData.empty().apply { this.id = id }
+        userReadingDataDao.update(update(userReadingData.apply { this.id = id }).let {
+            var data = it.toMutable()
+            if (it.readingProgress.isNaN()) data = data.apply { this.readingProgress = 0.0f }
+            if (it.lastReadChapterProgress.isNaN()) data =
+                data.apply { this.lastReadChapterProgress = 0.0f }
             return@let data
         })
     }
 
     fun getAllUserReadingData(): List<UserReadingData> =
         userReadingDataDao.getAll().map {
-            UserReadingData(
+            MutableUserReadingData(
                 it.id,
                 it.lastReadTime,
                 it.totalReadTime,

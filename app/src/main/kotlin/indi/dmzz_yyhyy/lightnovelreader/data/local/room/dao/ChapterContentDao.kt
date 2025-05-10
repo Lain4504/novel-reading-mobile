@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ChapterContentEntity
 
 @Dao
 interface ChapterContentDao {
@@ -23,7 +24,7 @@ interface ChapterContentDao {
     }
 
     @Query("select * from chapter_content where id = :id")
-    suspend fun get(id: Int): ChapterContent?
+    suspend fun get(id: Int): ChapterContentEntity?
 
     @Query("select id from chapter_content where id = :id")
     suspend fun getId(id: Int): Int?

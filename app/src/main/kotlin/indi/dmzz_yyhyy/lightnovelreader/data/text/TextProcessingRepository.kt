@@ -1,8 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.text
 
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +20,6 @@ class TextProcessingRepository @Inject constructor(
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val processors = mutableSetOf<TextProcessor>()
     private val _updateFlow = MutableStateFlow(0)
-    val updateFlow: Flow<Int> = _updateFlow
 
     init {
         coroutineScope.launch {
@@ -40,9 +39,17 @@ class TextProcessingRepository @Inject constructor(
             processors.forEach {
                 text = it.processor(text)
             }
-            return@map chapterContent.copy(
+            return@map chapterContent.toMutable().apply {
                 content = text
-            )
+            }
         }
+    }
+
+    fun progressText(text: String): String {
+        var result = text
+        processors.forEach {
+            result = it.processor(text)
+        }
+        return result
     }
 }

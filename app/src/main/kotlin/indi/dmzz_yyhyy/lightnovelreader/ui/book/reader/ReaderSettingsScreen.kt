@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
@@ -213,12 +214,11 @@ fun SettingsBottomSheet(
                         ) {
                             Box {
                                 ContentComponent(
-                                    uiState = contentUiState,
+                                    uiState = PreviewContentUiState(contentUiState.bookId, contentUiState.readingChapterContent),
                                     settingState = settingState,
                                     paddingValues = PaddingValues(bottom = if (isEnableIndicator) 46.dp else 12.dp),
                                     changeIsImmersive = {}
                                 )
-
                             }
                             Indicator(
                                 Modifier
@@ -511,7 +511,6 @@ fun LazyListScope.AppearancePage(
                     MenuOptions.SelectText.Default -> settingState.fontFamilyUriUserData.asynchronousSet(
                         Uri.EMPTY
                     )
-
                     MenuOptions.SelectText.Customize -> selectDataFile(launcher, "*/*")
                 }
             }
@@ -575,7 +574,6 @@ fun LazyListScope.AppearancePage(
                         MenuOptions.SelectImage.Default -> settingState.backgroundImageUriUserData.asynchronousSet(
                             Uri.EMPTY
                         )
-
                         MenuOptions.SelectImage.Customize -> selectDataFile(launcher, "image/*")
                     }
                 }
@@ -802,4 +800,15 @@ fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResul
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
     launcher.launch(Intent.createChooser(intent, "选择背景图片"))
+}
+
+class PreviewContentUiState(
+    override val bookId: Int,
+    override val readingChapterContent: ChapterContent,
+    override val readingProgress: Float = 0f,
+): ContentUiState {
+    override val loadNextChapter: () -> Unit = {}
+    override val loadLastChapter: () -> Unit = {}
+    override val changeChapter: (Int) -> Unit = {}
+
 }

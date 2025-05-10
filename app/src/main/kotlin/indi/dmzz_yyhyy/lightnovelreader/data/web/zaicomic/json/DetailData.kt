@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import java.time.Instant
 import java.time.LocalDateTime
@@ -38,7 +39,7 @@ data class DetailData(
     val volumes: List<ComicVolume>,
 ) {
     fun toBookInformation(): BookInformation =
-        BookInformation(
+        MutableBookInformation(
             id = id,
             title = title,
             subtitle = "",

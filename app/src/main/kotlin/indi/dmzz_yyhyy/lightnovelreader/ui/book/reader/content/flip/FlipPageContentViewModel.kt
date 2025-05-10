@@ -10,11 +10,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-class FlipPageContentViewModel (
+class FlipPageContentViewModel(
     val bookRepository: BookRepository,
     val coroutineScope: CoroutineScope,
     val updateReadingProgress: (Float) -> Unit
-): ContentViewModel {
+) : ContentViewModel {
     private var notRecoveredProgress = 0f
     private var collectProgressJob: Job? = null
     override val uiState: MutableFlipPageContentUiState = MutableFlipPageContentUiState(
@@ -27,12 +27,15 @@ class FlipPageContentViewModel (
     init {
         coroutineScope.launch(Dispatchers.IO) {
             snapshotFlow { uiState.pagerState }.collect { pagerState ->
-                println(uiState.pagerState.pageCount    )
+                println(uiState.pagerState.pageCount)
                 collectProgressJob?.cancel()
                 collectProgressJob = coroutineScope.launch(Dispatchers.IO) {
                     snapshotFlow { pagerState.settledPage }.collect {
-                        uiState.readingProgress = (it + 1) / pagerState.pageCount.toFloat()
-                        updateReadingProgress(uiState.readingProgress)
+                        val readingProgress = (it + 1) / pagerState.pageCount.toFloat()
+                        if (readingProgress in 0.0..1.0) {
+                            uiState.readingProgress = (it + 1) / pagerState.pageCount.toFloat()
+                            updateReadingProgress(uiState.readingProgress)
+                        }
                     }
                 }
             }
@@ -55,46 +58,40 @@ class FlipPageContentViewModel (
 
     override fun loadNextChapter() {
         if (!uiState.readingChapterContent.hasNextChapter()) return
-        coroutineScope.launch {
-            changeChapter(
-                id = uiState.readingChapterContent.nextChapter
-            )
-        }
+        changeChapter(
+            id = uiState.readingChapterContent.nextChapter
+        )
     }
 
     override fun loadLastChapter() {
         if (!uiState.readingChapterContent.hasLastChapter()) return
-        coroutineScope.launch {
-            changeChapter(
-                id = uiState.readingChapterContent.lastChapter
-            )
-        }
+        changeChapter(
+            id = uiState.readingChapterContent.lastChapter
+        )
     }
 
     override fun changeChapter(id: Int) {
         notRecoveredProgress = 0f
+        uiState.readingProgress = 0f
         coroutineScope.launch(Dispatchers.IO) {
-            val chapterContent = bookRepository.getChapterContent(
-                chapterId = id,
-                bookId = uiState.bookId
-            )
-            chapterContent.collect { content ->
-                if (content.id == -1) return@collect
-                uiState.readingChapterContent = content
-                bookRepository.updateUserReadingData(uiState.bookId) {
-                    it.copy(
-                        lastReadTime = LocalDateTime.now(),
-                        lastReadChapterId = id,
-                        lastReadChapterTitle = uiState.readingChapterContent.title,
-                        lastReadChapterProgress = if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f,
-                    )
+            uiState.readingChapterContent =
+                bookRepository.getStateChapterContent(id, uiState.bookId)
+            val content = bookRepository.getStateChapterContent(id, uiState.bookId)
+            if (content.id == -1) return@launch
+            bookRepository.updateUserReadingData(uiState.bookId) {
+                it.apply {
+                    lastReadChapterProgress =
+                        if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f
+                    lastReadTime = LocalDateTime.now()
+                    lastReadChapterId = id
+                    lastReadChapterTitle = uiState.readingChapterContent.title
                 }
-                if (content.hasNextChapter()) {
-                    bookRepository.getChapterContent(
-                        chapterId = id,
-                        bookId = uiState.bookId
-                    )
-                }
+            }
+            if (content.hasNextChapter()) {
+                bookRepository.getChapterContentFlow(
+                    chapterId = id,
+                    bookId = uiState.bookId
+                )
             }
             bookRepository.getUserReadingDataFlow(uiState.bookId).collect {
                 if (it.lastReadChapterId == uiState.readingChapterContent.id)

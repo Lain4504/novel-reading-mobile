@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.work
 
 import android.content.Context
+import android.widget.Toast
 import androidx.hilt.work.HiltWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -38,12 +39,12 @@ class CacheBookWork @AssistedInject constructor(
             localBookDataSource.updateBookVolumes(bookId, bookVolumes)
             bookVolumes.volumes.forEach { volume ->
                 volume.chapters.map { it.id }.forEach { chapterId ->
-                    localBookDataSource.updateChapterContent(
-                        webBookDataSource.getChapterContent(
-                            chapterId = chapterId,
-                            bookId = bookId
-                        ) ?: return Result.failure()
-                    )
+                    val chapter = webBookDataSource.getChapterContent(
+                        chapterId = chapterId,
+                        bookId = bookId
+                    ) ?: return Result.failure()
+                    if (chapter.isEmpty()) return Result.failure().also { Toast.makeText(applicationContext, "缓存失败，请检查网络环境", Toast.LENGTH_SHORT).show() }
+                    localBookDataSource.updateChapterContent(chapter)
                     count ++
                     downloadItem.progress = count.toFloat()/total
                 }

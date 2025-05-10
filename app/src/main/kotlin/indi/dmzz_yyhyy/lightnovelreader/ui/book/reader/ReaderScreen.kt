@@ -106,7 +106,6 @@ fun ReaderScreen(
     readingScreenUiState: ReaderScreenUiState,
     settingState: SettingState,
     onClickBackButton: () -> Unit,
-    addToReadingBook: (Int) -> Unit,
     accumulateReadTime: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
     onClickLastChapter: () -> Unit,
@@ -153,7 +152,6 @@ fun ReaderScreen(
             isImmersive = isImmersive,
             readingScreenUiState = readingScreenUiState,
             settingState = settingState,
-            addToReadingBook = addToReadingBook,
             accumulateReadingTime = accumulateReadTime,
             updateTotalReadingTime = updateTotalReadingTime,
             onClickLastChapter = onClickLastChapter,
@@ -172,7 +170,6 @@ fun Content(
     isImmersive: Boolean,
     readingScreenUiState: ReaderScreenUiState,
     settingState: SettingState,
-    addToReadingBook: (Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
     accumulateReadingTime: (Int, Int) -> Unit,
     onClickLastChapter: () -> Unit,
@@ -206,9 +203,6 @@ fun Content(
         } else {
             controller.show(WindowInsetsCompat.Type.systemBars())
         }
-    }
-    LaunchedEffect(readingScreenUiState.bookId) {
-        addToReadingBook(readingScreenUiState.bookId)
     }
     LaunchedEffect(readingScreenUiState.bookVolumes) {
         selectedVolumeId = readingScreenUiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == readingScreenUiState.contentUiState.readingChapterContent.id } }?.volumeId ?: -1
