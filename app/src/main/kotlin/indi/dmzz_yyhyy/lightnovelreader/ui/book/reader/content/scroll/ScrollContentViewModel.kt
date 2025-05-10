@@ -56,7 +56,7 @@ class ScrollContentViewModel(
                 if (item == null) return@collect
                 uiState.readingProgress =
                     1f.coerceAtMost((-item.offset + lazyColumnSize.height).toFloat() / item.size)
-                if (System.currentTimeMillis() - lastWriteReadingProgress < 250 && uiState.readingProgress < 1f) return@collect
+                if (System.currentTimeMillis() - lastWriteReadingProgress < 2500 && uiState.readingProgress < 1f) return@collect
                 lastWriteReadingProgress = System.currentTimeMillis()
                 updateReadingProgress(uiState.readingProgress)
             }
