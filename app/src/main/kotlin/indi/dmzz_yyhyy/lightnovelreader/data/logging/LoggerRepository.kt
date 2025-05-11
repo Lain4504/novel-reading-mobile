@@ -31,8 +31,8 @@ class LoggerRepository @Inject constructor(
     private val userDataRepository: UserDataRepository
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var logLevel: LogLevel = LogLevel.NONE
     private val logsDir = File(context.cacheDir, "logs")
+    var logLevel: LogLevel = LogLevel.NONE
 
     val fileLogEntries = mutableStateListOf<LogEntry>()
     val realTimeLogEntries = mutableStateListOf<LogEntry>()
@@ -42,16 +42,8 @@ class LoggerRepository @Inject constructor(
     private var loggingJob: Job? = null
     private val currentPid = Process.myPid()
 
-    init {
-        startLogging()
-    }
-
     fun startLogging() {
         if (loggingJob?.isActive == true) return
-        logLevel = LogLevel.from(
-            userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path)
-                .getOrDefault("none")
-        )
         if (logLevel == LogLevel.NONE) return
 
         loggingJob = coroutineScope.launch(Dispatchers.IO) {

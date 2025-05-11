@@ -56,7 +56,6 @@ class MainActivity : ComponentActivity() {
         var lightThemeName by mutableStateOf("light_default")
         var darkThemeName by mutableStateOf("dark_default")
         installSplashScreen()
-        loggerRepository.startLogging()
 
         workManager.enqueueUniquePeriodicWork(
             "checkUpdate",

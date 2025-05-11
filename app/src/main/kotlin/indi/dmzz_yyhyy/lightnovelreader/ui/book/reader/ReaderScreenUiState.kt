@@ -19,9 +19,10 @@ interface ReaderScreenUiState {
 }
 
 class MutableReaderScreenUiState(
-    override var contentUiState: ContentUiState
+    contentUiState: ContentUiState
 ): ReaderScreenUiState {
-    override val bookId by mutableIntStateOf(-1)
+    override var bookId by mutableIntStateOf(-1)
     override var userReadingData by mutableStateOf(UserReadingData.empty())
     override var bookVolumes by mutableStateOf(BookVolumes.empty())
+    override var contentUiState by mutableStateOf(contentUiState)
 }

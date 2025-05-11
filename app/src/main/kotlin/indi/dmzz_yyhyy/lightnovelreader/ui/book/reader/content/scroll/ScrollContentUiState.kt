@@ -15,6 +15,7 @@ interface ScrollContentUiState: ContentUiState {
     val readingContentId: Int
     val contentList: List<ChapterContent>
     val setLazyColumnSize: (IntSize) -> Unit
+    val writeProgressRightNow: () -> Unit
     override val readingChapterContent: ChapterContent
         get() = contentList.firstOrNull { it.id == readingContentId } ?: ChapterContent.empty()
 }
@@ -24,6 +25,7 @@ class MutableScrollContentUiSate(
     override val loadLastChapter: () -> Unit,
     override val changeChapter: (Int) -> Unit,
     override val setLazyColumnSize: (IntSize) -> Unit,
+    override val writeProgressRightNow: () -> Unit
 ) : ScrollContentUiState {
     override var bookId by mutableIntStateOf(-1)
     override var readingProgress by mutableFloatStateOf(0f)

@@ -1,3 +1,4 @@
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -11,8 +12,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDesti
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.navigateToDownloadManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home.navigateToExplorationHomeDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home.ReadingHomeViewModel
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home.ReadingScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.navigateToReadingStatsDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
@@ -21,7 +20,7 @@ fun NavGraphBuilder.readingHomeDestination(sharedTransitionScope: SharedTransiti
     composable<Route.Main.Reading.Home> {
         val navController = LocalNavController.current
         val context = LocalContext.current
-        val parentEntry = remember(it) { navController.getBackStackEntry(Route.Main) }
+        val parentEntry = remember { navController.getBackStackEntry(Route.Main) }
         val readingViewModel = hiltViewModel<ReadingHomeViewModel>(parentEntry)
         ReadingScreen(
             controller = navController,

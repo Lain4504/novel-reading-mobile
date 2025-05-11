@@ -26,7 +26,6 @@ fun NavGraphBuilder.bookReaderDestination() {
             readingScreenUiState = viewModel.uiState,
             settingState = viewModel.settingState,
             onClickBackButton = navController::popBackStackIfResumed,
-            addToReadingBook = viewModel::addToReadingBook,
             updateTotalReadingTime = viewModel::updateTotalReadingTime,
             accumulateReadTime = viewModel::accumulateReadingTime,
             onClickLastChapter = viewModel::lastChapter,
@@ -56,7 +55,6 @@ fun NavController.navigateToBookReaderDestination(bookId: Int, chapterId: Int, c
         ),
     )[ReaderViewModel::class.java]
     viewModel.bookId = bookId
-    println("asdawdasdwa")
     viewModel.changeChapter(chapterId)
 }
 

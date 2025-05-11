@@ -10,6 +10,6 @@ class BookRepositoryTest @Inject constructor(
 ) {
     @Test
     @Throws(Exception::class)
-    fun getBookInformation() {
+    fun getStateBookInformationFlow() {
     }
 }
