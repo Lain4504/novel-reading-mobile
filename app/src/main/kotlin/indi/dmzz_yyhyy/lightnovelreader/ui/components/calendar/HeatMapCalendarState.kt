@@ -4,13 +4,14 @@ import android.util.Log
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,11 +21,19 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.VisibleItemS
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.checkRange
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.firstDayOfWeekFromLocale
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.data.DataStore
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.data.getMonthIndex
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.data.getHeatMapCalendarMonthData
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.data.getMonthIndex
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.data.getMonthIndicesCount
 import java.time.DayOfWeek
 import java.time.YearMonth
+
+@Immutable
+private data class CalendarInputs(
+    val startMonth: YearMonth,
+    val endMonth: YearMonth,
+    val firstVisibleMonth: YearMonth,
+    val firstDayOfWeek: DayOfWeek,
+)
 
 @Composable
 fun rememberHeatMapCalendarState(
@@ -33,24 +42,24 @@ fun rememberHeatMapCalendarState(
     firstVisibleMonth: YearMonth = startMonth,
     firstDayOfWeek: DayOfWeek = firstDayOfWeekFromLocale(),
 ): HeatMapCalState {
+    val inputs = remember(startMonth, endMonth, firstVisibleMonth, firstDayOfWeek) {
+        CalendarInputs(startMonth, endMonth, firstVisibleMonth, firstDayOfWeek)
+    }
+
     return rememberSaveable(
-        inputs = arrayOf(
-            startMonth,
-            endMonth,
-            firstVisibleMonth,
-            firstDayOfWeek,
-        ),
+        inputs = arrayOf(inputs),
         saver = HeatMapCalState.Saver,
     ) {
         HeatMapCalState(
-            startMonth = startMonth,
-            endMonth = endMonth,
-            firstDayOfWeek = firstDayOfWeek,
-            firstVisibleMonth = firstVisibleMonth,
+            startMonth = inputs.startMonth,
+            endMonth = inputs.endMonth,
+            firstVisibleMonth = inputs.firstVisibleMonth,
+            firstDayOfWeek = inputs.firstDayOfWeek,
             visibleItemState = null,
         )
     }
 }
+
 
 @Stable
 class HeatMapCalState internal constructor(
@@ -98,15 +107,10 @@ class HeatMapCalState internal constructor(
         store[listState.firstVisibleItemIndex]
     }
 
+    @Suppress("UNUSED")
     private val lastVisibleMonth: CalendarMonth by derivedStateOf {
         store[listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0]
     }
-
-    val layoutInfo: CalendarLayoutInfo
-        get() = CalendarLayoutInfo(listState.layoutInfo) { index -> store[index] }
-
-    val interactionSource: InteractionSource
-        get() = listState.interactionSource
 
     internal val listState = LazyListState(
         firstVisibleItemIndex = visibleItemState?.firstVisibleItemIndex
@@ -137,10 +141,7 @@ class HeatMapCalState internal constructor(
         )
     }
 
-    suspend fun scrollToMonth(month: YearMonth) {
-        listState.scrollToItem(getScrollIndex(month) ?: return)
-    }
-
+    @Suppress("UNUSED")
     suspend fun animateScrollToMonth(month: YearMonth) {
         listState.animateScrollToItem(getScrollIndex(month) ?: return)
     }

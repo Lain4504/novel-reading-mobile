@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
@@ -53,7 +52,6 @@ fun ScrollContentComponent(
     )
 }
 
-@SuppressLint("FrequentlyChangedStateReadInComposition")
 @Composable
 fun ScrollContentTextComponent(
     modifier: Modifier,

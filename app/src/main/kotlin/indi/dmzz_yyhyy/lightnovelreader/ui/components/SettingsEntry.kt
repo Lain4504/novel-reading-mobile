@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.content.Intent
@@ -380,23 +378,6 @@ fun SettingsMenuEntry(
             }
         }
     }
-}
-
-
-@Composable
-fun SettingsClickableEntry(
-    modifier: Modifier = Modifier,
-    iconRes: Int = -1,
-    title: String,
-    description: String
-) {
-    SettingsClickableEntry(
-        modifier = modifier,
-        iconRes = iconRes,
-        title = title,
-        description = description,
-        onClick = { }
-    )
 }
 
 @Composable

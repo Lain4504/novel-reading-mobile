@@ -34,7 +34,7 @@ fun loadReaderFontFamilySafe(uri: Uri): FontFamily? {
         if (!fontFile.exists()) throw FileNotFoundException()
         FontFamily(Font(fontFile))
     } catch (e: Exception) {
-        Log.e("FontLoad", "字体加载失败，使用默认字体", e)
+        Log.e("FontLoad", "Failed to load custom font", e)
         null
     }
 }
@@ -79,7 +79,6 @@ fun rememberReaderBackgroundPainter(settingState: SettingState): Painter {
         if (isDark) settingState.backgroundDarkImageUri
         else settingState.backgroundImageUri
     }
-    println("CALL bg, isDark = $isDark\nselected uri $backgroundUri")
 
     val imageRequest = remember(backgroundUri) {
         ImageRequest.Builder(context)

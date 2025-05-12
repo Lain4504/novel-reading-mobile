@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -159,7 +158,6 @@ fun BaseDialog(
     }
 }
 
-@SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun SliderDialog(
     onDismissRequest: () -> Unit,

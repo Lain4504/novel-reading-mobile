@@ -14,7 +14,6 @@ import java.io.File
 import java.time.LocalDateTime
 import java.util.Locale
 
-@Suppress("MemberVisibilityCanBePrivate")
 class EpubBuilder {
     var id: String? = null
     var title: String? = null

@@ -32,8 +32,6 @@ class LoggerRepository @Inject constructor(
 
     val fileLogEntries = mutableStateListOf<LogEntry>()
     val realTimeLogEntries = mutableStateListOf<LogEntry>()
-    var currentSelectedLogFile: String? = null
-        private set
 
     private var loggingJob: Job? = null
     private val currentPid = Process.myPid()
@@ -180,11 +178,5 @@ class LoggerRepository @Inject constructor(
         if (file.exists()) {
             file.delete()
         }
-    }
-
-
-    @Suppress("unused") fun clearLoadedLogFile() {
-        currentSelectedLogFile = null
-        fileLogEntries.clear()
     }
 }
