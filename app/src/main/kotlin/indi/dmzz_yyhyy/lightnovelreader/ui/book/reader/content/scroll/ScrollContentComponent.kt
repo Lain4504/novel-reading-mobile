@@ -24,18 +24,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import coil.compose.rememberAsyncImagePainter
-import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 
 @Composable
@@ -67,6 +65,7 @@ fun ScrollContentTextComponent(
     val density = LocalDensity.current
     val screenHeight = LocalContext.current.resources.displayMetrics.heightPixels
     if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
+        // FIXME: why twice?
         Image(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,11 +76,7 @@ fun ScrollContentTextComponent(
                     ((uiState.lazyListState.layoutInfo.visibleItemsInfo.getOrNull(0)?.offset
                         ?: 0) % screenHeight + screenHeight).toDp()
                 }),
-            painter =
-            if (settingState.backgroundImageUri.toString()
-                    .isEmpty()
-            ) painterResource(id = R.drawable.paper)
-            else rememberAsyncImagePainter(settingState.backgroundImageUri),
+            painter = rememberReaderBackgroundPainter(settingState),
             contentDescription = null,
             contentScale = ContentScale.Crop
         )
@@ -95,11 +90,7 @@ fun ScrollContentTextComponent(
                     ((uiState.lazyListState.layoutInfo.visibleItemsInfo.getOrNull(0)?.offset
                         ?: 0) % screenHeight).toDp()
                 }),
-            painter =
-                if (settingState.backgroundImageUri.toString()
-                        .isEmpty()
-                ) painterResource(id = R.drawable.paper)
-                else rememberAsyncImagePainter(settingState.backgroundImageUri),
+            painter = rememberReaderBackgroundPainter(settingState),
             contentDescription = null,
             contentScale = ContentScale.Crop
         )

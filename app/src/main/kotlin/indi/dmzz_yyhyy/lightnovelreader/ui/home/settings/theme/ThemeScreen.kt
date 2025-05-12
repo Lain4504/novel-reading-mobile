@@ -56,21 +56,18 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
+import indi.dmzz_yyhyy.lightnovelreader.theme.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.selectDataFile
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
-import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncherWithFlag
+import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.FileInputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun ThemeScreen(
@@ -224,7 +221,7 @@ fun ThemeSettingsList(
             modifier = Modifier.background(colorScheme.background),
             iconRes = R.drawable.light_mode_24px,
             title = "浅色主题",
-            description = if (LocalIsDarkTheme.current) "切换至浅色模式以预览主题" else "指定应用在浅色模式下的主题",
+            description = if (LocalAppTheme.current.isDark) "切换至浅色模式以预览主题" else "指定应用在浅色模式下的主题",
             options = MenuOptions.LightThemeNameOptions,
             selectedOptionKey = settingState.lightThemeName,
             onOptionChange = settingState.lightThemeNameUserData::asynchronousSet
@@ -233,7 +230,7 @@ fun ThemeSettingsList(
             modifier = Modifier.background(colorScheme.background),
             iconRes = R.drawable.dark_mode_24px,
             title = "深色主题",
-            description = if (LocalIsDarkTheme.current) "指定应用在深色模式下的主题" else "切换至深色模式以预览主题",
+            description = if (LocalAppTheme.current.isDark) "指定应用在深色模式下的主题" else "切换至深色模式以预览主题",
             options = MenuOptions.DarkThemeNameOptions,
             selectedOptionKey = settingState.darkThemeName,
             onOptionChange = settingState.darkThemeNameUserData::asynchronousSet
@@ -386,20 +383,16 @@ fun ReaderThemeSettingsList(
                         shape = shapeBottom
                     }
 
-                val (launcher, setIsDarkFlag) = uriLauncherWithFlag { uri, isDark ->
+                val isDark = LocalAppTheme.current.isDark
+                val launcher = uriLauncher {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val time = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(
-                            Date()
-                        )
-                        val fileName = if (isDark) "readerBackgroundImage_dark_$time" else "readerBackgroundImage_light_$time"
+                        val fileName = if (isDark) "readerDarkBackgroundImage" else "readerBackgroundImage"
                         val image = context.filesDir.resolve(fileName).apply {
                             if (exists()) delete()
                             createNewFile()
                         }
-
-
                         try {
-                            context.contentResolver.openFileDescriptor(uri, "r")?.use { parcelFileDescriptor ->
+                            context.contentResolver.openFileDescriptor(it, "r")?.use { parcelFileDescriptor ->
                                 FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
                                     fileInputStream.readBytes()
                                 }.let(image::writeBytes)
@@ -408,7 +401,6 @@ fun ReaderThemeSettingsList(
                             Log.e("ReaderBackground", "failed to load chosen file (${if (isDark) "dark" else "light"})")
                             e.printStackTrace()
                         }
-
                         if (isDark) {
                             settingState.backgroundDarkImageUriUserData.set(image.toUri())
                         } else {
@@ -417,14 +409,11 @@ fun ReaderThemeSettingsList(
                     }
                 }
 
-
                 LightBackgroundSettingsItem(modifierTop, settingState = settingState) {
-                    setIsDarkFlag(false)
                     selectDataFile(launcher, "image/*")
                 }
 
                 DarkBackgroundSettingsItem(modifierBottom, settingState = settingState) {
-                    setIsDarkFlag(true)
                     selectDataFile(launcher, "image/*")
                 }
             }
@@ -502,13 +491,13 @@ fun ReaderThemeSettingsList(
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            val isDark = LocalIsDarkTheme.current
+            val isDark = LocalAppTheme.current.isDark
 
             if (settingState.enableBackgroundImage)
                 Image(
                     modifier = Modifier.fillMaxSize(),
                     painter =
-                        if (settingState.backgroundImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
+                        if (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty()) painterResource(id = R.drawable.paper)
                         else
                             if (isDark)
                                 rememberAsyncImagePainter(settingState.backgroundDarkImageUri)

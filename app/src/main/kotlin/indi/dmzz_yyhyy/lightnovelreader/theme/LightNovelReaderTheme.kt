@@ -3,12 +3,14 @@ package indi.dmzz_yyhyy.lightnovelreader.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -17,7 +19,14 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowCompat
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocaleUtil
 
-val LocalIsDarkTheme = staticCompositionLocalOf { false }
+val LocalAppTheme = staticCompositionLocalOf<AppTheme> {
+    error("No AppThemeContext provided")
+}
+
+data class AppTheme(
+    val isDark: Boolean,
+    val colorScheme: ColorScheme
+)
 
 @Composable
 fun LightNovelReaderTheme(
@@ -52,6 +61,12 @@ fun LightNovelReaderTheme(
                 else            -> DefaultLightColorScheme
             }
     }
+    val appTheme = remember(isDark, colorScheme) {
+        AppTheme(
+            isDark = isDark,
+            colorScheme = colorScheme,
+        )
+    }
 
     LaunchedEffect(context, view, isDark) {
         val window = (view.context as Activity).window
@@ -65,7 +80,7 @@ fun LightNovelReaderTheme(
     val (language, variant) = appLocale.split("-")
     LocaleUtil.set(context, language = language, variant = variant)
 
-    CompositionLocalProvider(LocalIsDarkTheme provides isDark) {
+    CompositionLocalProvider(LocalAppTheme provides appTheme) {
         MaterialTheme(
             colorScheme = colorScheme,
             content = content

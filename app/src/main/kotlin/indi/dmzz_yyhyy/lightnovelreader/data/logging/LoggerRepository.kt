@@ -7,13 +7,10 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.utils.buildReportHeader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,9 +25,8 @@ import kotlin.coroutines.cancellation.CancellationException
 @Singleton
 class LoggerRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val userDataRepository: UserDataRepository
 ) {
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val logsDir = File(context.cacheDir, "logs")
     var logLevel: LogLevel = LogLevel.NONE
 

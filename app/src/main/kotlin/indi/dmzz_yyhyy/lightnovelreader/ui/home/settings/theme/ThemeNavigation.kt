@@ -23,9 +23,9 @@ fun NavGraphBuilder.settingsThemeDestination() {
     ) {
         val navController = LocalNavController.current
         val viewModel = hiltViewModel<ThemeViewModel>()
-        val themeSettingState = viewModel.settingState
+        val readerSettingState = viewModel.settingState
         ThemeScreen(
-            themeSettingState = themeSettingState,
+            themeSettingState = readerSettingState,
             onClickBack = navController::popBackStackIfResumed,
             onClickChangeTextColor = {
                 navController.navigateToColorPickerDialog(

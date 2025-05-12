@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.IntSize
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentViewModel
+import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,17 +51,23 @@ class ScrollContentViewModel(
                 }
             }
         }
-        coroutineScope.launch(Dispatchers.IO) {
-            snapshotFlow { uiState.lazyListState.firstVisibleItemScrollOffset }.collect { _ ->
-                val item =
-                    uiState.lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == uiState.readingChapterContent.id }
-                if (item == null) return@collect
-                uiState.readingProgress =
-                    1f.coerceAtMost((-item.offset + lazyColumnSize.height).toFloat() / item.size)
-                if (System.currentTimeMillis() - lastWriteReadingProgress < 2500 && uiState.readingProgress < 1f) return@collect
-                lastWriteReadingProgress = System.currentTimeMillis()
-                updateReadingProgress(uiState.readingProgress)
-            }
+        coroutineScope.launch(Dispatchers.Main) {
+            snapshotFlow { uiState.lazyListState.firstVisibleItemScrollOffset }
+                .throttleLatest(180L)
+                .collect { _ ->
+                    val item = uiState.lazyListState.layoutInfo.visibleItemsInfo.firstOrNull {
+                        it.key == uiState.readingChapterContent.id
+                    }
+                    if (item == null) return@collect
+                    val now = System.currentTimeMillis()
+                    uiState.readingProgress =
+                        1f.coerceAtMost((-item.offset + lazyColumnSize.height).toFloat() / item.size)
+                    if (now - lastWriteReadingProgress < 2500 && uiState.readingProgress < 1f) return@collect
+                    lastWriteReadingProgress = now
+                    coroutineScope.launch(Dispatchers.IO) {
+                        updateReadingProgress(uiState.readingProgress)
+                    }
+                }
         }
     }
 

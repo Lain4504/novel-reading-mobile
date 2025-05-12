@@ -86,19 +86,17 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
-
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,17 +138,9 @@ fun ReaderScreen(
         containerColor = if (settingState.backgroundColor.isUnspecified) MaterialTheme.colorScheme.background else settingState.backgroundColor
     ) { _ ->
         if (settingState.enableBackgroundImage) {
-            val isDark = LocalIsDarkTheme.current
-            val isCustomEmpty = (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty())
             Image(
                 modifier = Modifier.fillMaxSize(),
-                painter =
-                    if (isCustomEmpty) painterResource(id = R.drawable.paper)
-                    else
-                        if (isDark)
-                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
-                        else
-                            rememberAsyncImagePainter(settingState.backgroundImageUri),
+                painter = rememberReaderBackgroundPainter(settingState),
                 contentDescription = null,
                 contentScale = ContentScale.Crop
             )
@@ -199,7 +189,6 @@ fun Content(
     var totalReadingTime by remember { mutableIntStateOf(0) }
     var selectedVolumeId by remember { mutableIntStateOf(-1) }
     var lastUpdate by remember { mutableStateOf(LocalTime.now()) }
-
 
     LaunchedEffect(isImmersive) {
         val window = (context as ComponentActivity).window

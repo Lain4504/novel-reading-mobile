@@ -75,10 +75,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.theme.LocalIsDarkTheme
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.theme.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
@@ -86,6 +85,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -178,19 +178,11 @@ fun SettingsBottomSheet(
                             )
                     ) {
                         if (settingState.enableBackgroundImage) {
-                            val isDark = LocalIsDarkTheme.current
-                            val isCustomEmpty = (settingState.backgroundImageUri.toString().isEmpty() && settingState.backgroundDarkImageUri.toString().isEmpty())
                             Image(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp),
-                                painter =
-                                    if (isCustomEmpty) painterResource(id = R.drawable.paper)
-                                    else
-                                        if (isDark)
-                                            rememberAsyncImagePainter(settingState.backgroundDarkImageUri)
-                                        else
-                                            rememberAsyncImagePainter(settingState.backgroundImageUri),
+                                painter = rememberReaderBackgroundPainter(settingState),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
@@ -326,7 +318,7 @@ fun ContentSettings(
                     0 -> AppearancePage(
                         settingState,
                         onClickChangeBackgroundColor,
-                        onClickChangeTextColor
+                        onClickChangeTextColor,
                     )
 
                     1 -> ActionPage(settingState)
@@ -387,7 +379,7 @@ fun TabsRow(
 fun LazyListScope.AppearancePage(
     settingState: SettingState,
     onClickChangeBackgroundColor: () -> Unit,
-    onClickChangeTextColor: () -> Unit
+    onClickChangeTextColor: () -> Unit,
 ) {
     item {
         SettingsSliderEntry(
@@ -542,28 +534,30 @@ fun LazyListScope.AppearancePage(
     }
     if (settingState.enableBackgroundImage) {
         item {
-            val content = LocalContext.current
+            val isDark = LocalAppTheme.current.isDark
+            val context = LocalContext.current
             val launcher = uriLauncher {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val image = content.filesDir.resolve("readerBackgroundImage")
-                        .also {
-                            if (it.exists()) {
-                                it.delete()
-                                it.createNewFile()
-                            } else it.createNewFile()
-                        }
+                    val fileName = if (isDark) "readerDarkBackgroundImage" else "readerBackgroundImage"
+                    val image = context.filesDir.resolve(fileName).apply {
+                        if (exists()) delete()
+                        createNewFile()
+                    }
                     try {
-                        content.contentResolver.openFileDescriptor(it, "r")
-                            ?.use { parcelFileDescriptor ->
-                                FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
-                                    fileInputStream.readBytes()
-                                }.let(image::writeBytes)
-                            }
+                        context.contentResolver.openFileDescriptor(it, "r")?.use { parcelFileDescriptor ->
+                            FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
+                                fileInputStream.readBytes()
+                            }.let(image::writeBytes)
+                        }
                     } catch (e: Exception) {
-                        Log.e("ReaderBackground", "failed to load chosen file")
+                        Log.e("ReaderBackground", "failed to load chosen file (${if (isDark) "dark" else "light"})")
                         e.printStackTrace()
                     }
-                    settingState.backgroundImageUriUserData.set(image.toUri())
+                    if (isDark) {
+                        settingState.backgroundDarkImageUriUserData.set(image.toUri())
+                    } else {
+                        settingState.backgroundImageUriUserData.set(image.toUri())
+                    }
                 }
             }
             SettingsMenuEntry(

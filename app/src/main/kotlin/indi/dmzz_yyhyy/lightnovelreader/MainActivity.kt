@@ -110,10 +110,11 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             coroutineScope.launch(Dispatchers.IO) {
                 userDataRepository.booleanUserData(UserDataPath.Settings.Display.DynamicColors.path).getFlow().collect {
-                    dynamicColor = it ?: false
+                    dynamicColor = it == true
                 }
             }
         }
+
         setContent {
             LightNovelReaderTheme(
                 darkMode = darkMode,

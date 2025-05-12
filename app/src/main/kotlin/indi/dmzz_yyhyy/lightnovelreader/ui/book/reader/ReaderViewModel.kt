@@ -90,9 +90,6 @@ class ReaderViewModel @Inject constructor(
 
     fun changeChapter(chapterId: Int) {
         contentViewModel.changeChapter(chapterId)
-        viewModelScope.launch(Dispatchers.IO) {
-
-        }
     }
 
     private fun saveReadingProgress(progress: Float) {

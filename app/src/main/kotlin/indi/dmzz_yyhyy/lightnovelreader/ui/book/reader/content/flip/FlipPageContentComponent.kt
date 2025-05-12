@@ -52,6 +52,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -237,11 +238,7 @@ private fun SimpleFlipPageTextComponent(
             if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
                 Image(
                     modifier = Modifier.fillMaxSize(),
-                    painter =
-                    if (settingState.backgroundImageUri.toString()
-                            .isEmpty()
-                    ) painterResource(id = R.drawable.paper)
-                    else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                    painter = rememberReaderBackgroundPainter(settingState),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
