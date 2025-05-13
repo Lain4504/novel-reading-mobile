@@ -45,6 +45,10 @@ class SettingState(
     val backgroundColorUserData = userDataRepository.colorUserData(UserDataPath.Reader.BackgroundColor.path)
     val backgroundImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundImageUri.path)
     val backgroundDarkImageUriUserData = userDataRepository.uriUserData(UserDataPath.Reader.BackgroundDarkImageUri.path)
+    val darkModeKeyUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkMode.path)
+    val dynamicColorsKeyUserData = userDataRepository.booleanUserData(UserDataPath.Settings.Display.DynamicColors.path)
+    val lightThemeNameUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.LightThemeName.path)
+    val darkThemeNameUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkThemeName.path)
 
     val fontSize by fontSizeUserData.safeAsState(15f)
     val fontLineHeight by fontLineHeightUserData.safeAsState(7f)
@@ -74,4 +78,8 @@ class SettingState(
     val backgroundColor by backgroundColorUserData.safeAsState(Color.Unspecified)
     val backgroundImageUri by backgroundImageUriUserData.safeAsState(Uri.EMPTY)
     val backgroundDarkImageUri by backgroundDarkImageUriUserData.safeAsState(Uri.EMPTY)
+    val darkModeKey by darkModeKeyUserData.asState("FollowSystem")
+    val dynamicColorsKey by dynamicColorsKeyUserData.asState(false)
+    val lightThemeName by lightThemeNameUserData.safeAsState("light_default")
+    val darkThemeName by darkThemeNameUserData.safeAsState("dark_default")
 }

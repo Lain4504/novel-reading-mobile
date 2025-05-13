@@ -13,11 +13,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -34,6 +32,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentCompon
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
+import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 
 @Composable
 fun ScrollContentComponent(
@@ -130,7 +129,7 @@ fun ScrollContentTextComponent(
                         lineHeight = (settingState.fontSize + settingState.fontLineHeight + 10).sp,
                         fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
                         fontFamily = rememberReaderFontFamily(settingState),
-                        color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
+                        color = readerTextColor(settingState)
                     )
                 it.content
                     .split("[image]")
@@ -153,7 +152,7 @@ fun ScrollContentTextComponent(
                             fontLineHeight = settingState.fontLineHeight.sp,
                             fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                             fontFamily = rememberReaderFontFamily(settingState),
-                            color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
+                            color = readerTextColor(settingState)
                         )
                     }
             }

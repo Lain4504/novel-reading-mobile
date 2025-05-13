@@ -1,11 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.animation.AnimatedVisibility
@@ -55,7 +52,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,20 +60,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.theme.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
@@ -86,11 +75,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
-import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.FileInputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,8 +83,7 @@ fun SettingsBottomSheet(
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
     settingState: SettingState,
-    onClickChangeBackgroundColor: () -> Unit,
-    onClickChangeTextColor: () -> Unit
+    onClickThemeSettings: () -> Unit
 ) {
     val isEnableIndicator = (settingState.enableBatteryIndicator
             || settingState.enableTimeIndicator
@@ -260,8 +243,7 @@ fun SettingsBottomSheet(
                 settingState = settingState,
                 selectedTabIndex = selectedTabIndex,
                 onTabSelected = { index -> selectedTabIndex = index },
-                onClickChangeBackgroundColor = onClickChangeBackgroundColor,
-                onClickChangeTextColor = onClickChangeTextColor
+                onClickThemeSettings = onClickThemeSettings
             )
         }
     }
@@ -274,8 +256,7 @@ fun ContentSettings(
     settingState: SettingState,
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit,
-    onClickChangeBackgroundColor: () -> Unit,
-    onClickChangeTextColor: () -> Unit
+    onClickThemeSettings: () -> Unit
 ) {
     val tabs = listOf(
         TabItem("外观", R.drawable.filled_menu_book_24px),
@@ -314,12 +295,7 @@ fun ContentSettings(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 when (pageIndex) {
-                    0 -> AppearancePage(
-                        settingState,
-                        onClickChangeBackgroundColor,
-                        onClickChangeTextColor,
-                    )
-
+                    0 -> AppearancePage(settingState, onClickThemeSettings)
                     1 -> ActionPage(settingState)
                     2 -> PaddingPage(settingState)
                 }
@@ -374,143 +350,16 @@ fun TabsRow(
     }
 }
 
-
 fun LazyListScope.AppearancePage(
     settingState: SettingState,
-    onClickChangeBackgroundColor: () -> Unit,
-    onClickChangeTextColor: () -> Unit,
+    onClickThemeSettings: () -> Unit
 ) {
     item {
-        SettingsSliderEntry(
-            iconRes = R.drawable.format_size_24px,
-            title = stringResource(R.string.settings_reader_font_size),
-            unit = "sp",
-            valueRange = 8f..64f,
-            value = settingState.fontSize,
-            floatUserData = settingState.fontSizeUserData
-        )
-    }
-    item {
-        SettingsSliderEntry(
-            iconRes = R.drawable.format_line_spacing_24px,
-            title = stringResource(R.string.settings_reader_line_spacing),
-            unit = "sp",
-            valueRange = 0f..32f,
-            value = settingState.fontLineHeight,
-            floatUserData = settingState.fontLineHeightUserData
-        )
-    }
-    item {
-        SettingsSliderEntry(
-            iconRes = R.drawable.format_bold_24px,
-            title = "字重",
-            unit = "",
-            valueRange = 100f..900f,
-            value = settingState.fontWeigh,
-            valueFormat = { (it / 100).toInt() * 100f },
-            floatUserData = settingState.fontWeighUserData
-        )
-    }
-    item {
-        SettingsSwitchEntry(
-            iconRes = R.drawable.translate_24px,
-            title = "简繁转换",
-            description = "将内容从简体转换为繁体",
-            checked = settingState.enableSimplifiedTraditionalTransform,
-            booleanUserData = settingState.enableSimplifiedTraditionalTransformUserData,
-        )
-    }
-    item {
-        val onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer
-        val background = MaterialTheme.colorScheme.background
         SettingsClickableEntry(
-            modifier = Modifier.animateItem(),
-            iconRes = R.drawable.palette_24px,
-            title = "文本颜色",
-            description = "自定义阅读器文本颜色",
-            onClick = onClickChangeTextColor,
-            trailingContent = {
-                androidx.compose.foundation.Canvas(
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    drawCircle(
-                        color = onSecondaryContainer,
-                        radius = 20.dp.toPx(),
-                    )
-                    drawCircle(
-                        color = background,
-                        radius = 17.5.dp.toPx(),
-                    )
-                    drawCircle(
-                        color = if (settingState.textColor.isUnspecified) background else settingState.textColor,
-                        radius = 17.5.dp.toPx(),
-                    )
-                }
-            }
-        )
-    }
-    item {
-        val textMeasurer = rememberTextMeasurer()
-        val coroutineScope = rememberCoroutineScope()
-        val content = LocalContext.current
-        val launcher = uriLauncher {
-            CoroutineScope(Dispatchers.IO).launch {
-                val font = content.filesDir.resolve("readerTextFont")
-                    .also {
-                        if (it.exists()) {
-                            it.delete()
-                            it.createNewFile()
-                        } else it.createNewFile()
-                    }
-                try {
-                    content.contentResolver.openFileDescriptor(it, "r")
-                        ?.use { parcelFileDescriptor ->
-                            FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
-                                fileInputStream.readBytes()
-                            }.let(font::writeBytes)
-                        }
-                } catch (e: Exception) {
-                    Log.e("ReaderTextFont", "failed to load chosen file")
-                    e.printStackTrace()
-                }
-                try {
-                    textMeasurer
-                        .measure(
-                            text = "",
-                            style = TextStyle(
-                                fontFamily = FontFamily(Font(font))
-                            )
-                        )
-                } catch (_: Exception) {
-                    coroutineScope.launch {
-                        Toast.makeText(
-                            content,
-                            "字体文件错误或已损坏, 请您检查后导入",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return@launch
-                }
-                settingState.fontFamilyUriUserData.set(font.toUri())
-            }
-        }
-        SettingsMenuEntry(
-            modifier = Modifier.animateItem(),
-            iconRes = R.drawable.text_fields_24px,
-            title = "文本字体",
-            description = "使用应用内置的字体或自定义字体文件",
-            options = MenuOptions.SelectText,
-            selectedOptionKey = if (settingState.fontFamilyUri.toString()
-                    .isEmpty()
-            ) MenuOptions.SelectText.Default else MenuOptions.SelectText.Customize,
-            onOptionChange = {
-                when (it) {
-                    MenuOptions.SelectText.Default -> settingState.fontFamilyUriUserData.asynchronousSet(
-                        Uri.EMPTY
-                    )
-                    MenuOptions.SelectText.Customize -> selectDataFile(launcher, "*/*")
-                }
-            }
+            iconRes = R.drawable.format_paint_24px,
+            title = "主题设置……",
+            description = "调整阅读器和纸张选项",
+            onClick = onClickThemeSettings
         )
     }
     item {
@@ -524,102 +373,13 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
-            iconRes = R.drawable.imagesearch_roller_24px,
-            title = "背景图片",
-            description = "自定义阅读器背景图片",
-            checked = settingState.enableBackgroundImage,
-            booleanUserData = settingState.enableBackgroundImageUserData
+            iconRes = R.drawable.translate_24px,
+            title = "简繁转换",
+            description = "将内容从简体转换为繁体",
+            checked = settingState.enableSimplifiedTraditionalTransform,
+            booleanUserData = settingState.enableSimplifiedTraditionalTransformUserData,
         )
     }
-    if (settingState.enableBackgroundImage) {
-        item {
-            val isDark = LocalAppTheme.current.isDark
-            val context = LocalContext.current
-            val launcher = uriLauncher {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val fileName = if (isDark) "readerDarkBackgroundImage" else "readerBackgroundImage"
-                    val image = context.filesDir.resolve(fileName).apply {
-                        if (exists()) delete()
-                        createNewFile()
-                    }
-                    try {
-                        context.contentResolver.openFileDescriptor(it, "r")?.use { parcelFileDescriptor ->
-                            FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
-                                fileInputStream.readBytes()
-                            }.let(image::writeBytes)
-                        }
-                    } catch (e: Exception) {
-                        Log.e("ReaderBackground", "failed to load chosen file (${if (isDark) "dark" else "light"})")
-                        e.printStackTrace()
-                    }
-                    if (isDark) {
-                        settingState.backgroundDarkImageUriUserData.set(image.toUri())
-                    } else {
-                        settingState.backgroundImageUriUserData.set(image.toUri())
-                    }
-                }
-            }
-            SettingsMenuEntry(
-                modifier = Modifier.animateItem(),
-                iconRes = R.drawable.drive_file_move_24px,
-                title = "选择图片",
-                description = "使用应用内置的图片背景或自定义图片文件",
-                options = MenuOptions.SelectImage,
-                selectedOptionKey = if (settingState.backgroundImageUri.toString()
-                        .isEmpty()
-                ) MenuOptions.SelectImage.Default else MenuOptions.SelectImage.Customize,
-                onOptionChange = {
-                    when (it) {
-                        MenuOptions.SelectImage.Default -> settingState.backgroundImageUriUserData.asynchronousSet(
-                            Uri.EMPTY
-                        )
-                        MenuOptions.SelectImage.Customize -> selectDataFile(launcher, "image/*")
-                    }
-                }
-            )
-        }
-        item {
-            SettingsMenuEntry(
-                modifier = Modifier.animateItem(),
-                title = "背景显示模式",
-                iconRes = R.drawable.insert_page_break_24px,
-                description = "指定自定义背景图片的显示模式",
-                options = MenuOptions.ReaderBgImageDisplayModeOptions,
-                selectedOptionKey = settingState.backgroundImageDisplayMode,
-                stringUserData = settingState.backgroundImageDisplayModeUserData
-            )
-        }
-    }
-    if (!settingState.enableBackgroundImage)
-        item {
-            val onSecondaryContainer = MaterialTheme.colorScheme.onSecondaryContainer
-            val background = MaterialTheme.colorScheme.background
-            SettingsClickableEntry(
-                modifier = Modifier.animateItem(),
-                iconRes = R.drawable.colorize_24px,
-                title = "背景颜色",
-                description = "自定义阅读器背景色",
-                onClick = onClickChangeBackgroundColor,
-                trailingContent = {
-                    androidx.compose.foundation.Canvas(
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        drawCircle(
-                            color = onSecondaryContainer,
-                            radius = 20.dp.toPx(),
-                        )
-                        drawCircle(
-                            color = background,
-                            radius = 17.5.dp.toPx(),
-                        )
-                        drawCircle(
-                            color = if (settingState.backgroundColor.isUnspecified) background else settingState.backgroundColor,
-                            radius = 17.5.dp.toPx(),
-                        )
-                    }
-                }
-            )
-        }
     item {
         SettingsSwitchEntry(
             iconRes = R.drawable.battery_horiz_050_24px,

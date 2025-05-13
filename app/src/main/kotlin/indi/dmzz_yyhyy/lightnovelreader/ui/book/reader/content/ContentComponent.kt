@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
@@ -20,6 +18,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip.FlipPageCont
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
+import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 
 @Composable
 fun ContentComponent(
@@ -52,7 +51,7 @@ fun ContentComponent(
                             fontLineHeight = settingState.fontLineHeight.sp,
                             fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                             fontFamily = rememberReaderFontFamily(settingState),
-                            color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
+                            color = readerTextColor(settingState)
                         )
                     }
             }

@@ -12,6 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -106,4 +108,22 @@ fun rememberReaderBackgroundPainter(settingState: SettingState): Painter {
     }
 
     return painter
+}
+
+@Composable
+fun readerTextColor(settingState: SettingState): Color {
+    val localTheme = LocalAppTheme.current
+    val isDark = localTheme.isDark
+    val onSurface = localTheme.colorScheme.onSurface
+
+    val color = remember(isDark, settingState.textColor, settingState.textDarkColor, onSurface) {
+        when {
+            isDark && settingState.textDarkColor.isUnspecified -> onSurface
+            !isDark && settingState.textColor.isUnspecified -> onSurface
+            isDark -> settingState.textDarkColor
+            else -> settingState.textColor
+        }
+    }
+
+    return color
 }
