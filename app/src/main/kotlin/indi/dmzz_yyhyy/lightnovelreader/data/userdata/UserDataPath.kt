@@ -19,6 +19,7 @@ sealed class UserDataPath(
         data object FontLineHeight : UserDataPath("fontLineHeight", Reader)
         data object FontWeigh : UserDataPath("fontWeigh", Reader)
         data object KeepScreenOn : UserDataPath("keepScreenOn", Reader)
+        data object EnableHideStatusBar : UserDataPath("enableHideStatusBar", Reader)
         data object EnableBackgroundImage : UserDataPath("enableBackgroundImage", Reader)
         data object BackgroundImageDisplayMode : UserDataPath("backgroundImageDisplayMode", Reader)
         data object IsUsingFlipPage : UserDataPath("isUsingFlipPage", Reader)

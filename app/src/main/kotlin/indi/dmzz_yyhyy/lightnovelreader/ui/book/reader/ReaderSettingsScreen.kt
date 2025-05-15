@@ -5,22 +5,10 @@ import android.os.Build
 import android.provider.DocumentsContract
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,9 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue.Expanded
-import androidx.compose.material3.SheetValue.Hidden
-import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
@@ -56,38 +41,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
-import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBottomSheet(
-    contentUiState: ContentUiState,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
     settingState: SettingState,
     onClickThemeSettings: () -> Unit
 ) {
-    val isEnableIndicator = (settingState.enableBatteryIndicator
-            || settingState.enableTimeIndicator
-            || settingState.enableReadingChapterProgressIndicator)
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -107,138 +82,18 @@ fun SettingsBottomSheet(
     ) {
         var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-        val animatedProgress by rememberInfiniteTransition(label = "animatedProgress").animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1000),
-                repeatMode = RepeatMode.Reverse
-            ), label = "animatedProgressFloat"
-        )
-
-        val bgFlashColor by animateColorAsState(
-            targetValue = if (animatedProgress > 0.5f) MaterialTheme.colorScheme.primary else Color.Transparent,
-            animationSpec = tween(2000), label = "bgFlashColor"
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
                 .padding(top = 16.dp)
         ) {
-            AnimatedVisibility(
-                visible = sheetState.currentValue == Expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.outline_settings_24px),
-                            contentDescription = null
-                        )
-                        Text(
-                            modifier = Modifier.padding(start = 8.dp),
-                            text = stringResource(R.string.settings_preview),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.W600
-                        )
-                    }
-                    Box(
-                        Modifier
-                            .background(
-                                if (selectedTabIndex == 2) bgFlashColor
-                                else if (settingState.backgroundColor.isUnspecified) MaterialTheme.colorScheme.background
-                                else settingState.backgroundColor
-                            )
-                    ) {
-                        if (settingState.enableBackgroundImage) {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp),
-                                painter = rememberReaderBackgroundPainter(settingState),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .padding(
-                                    top = animateDpAsState(
-                                        targetValue = if (settingState.autoPadding) 12.dp else settingState.topPadding.dp,
-                                        animationSpec = tween(300)
-                                    ).value,
-                                    start = animateDpAsState(
-                                        targetValue = if (settingState.autoPadding) 16.dp else settingState.leftPadding.dp,
-                                        animationSpec = tween(300)
-                                    ).value,
-                                    end = animateDpAsState(
-                                        targetValue = if (settingState.autoPadding) 16.dp else settingState.rightPadding.dp,
-                                        animationSpec = tween(300)
-                                    ).value,
-                                    bottom = animateDpAsState(
-                                        targetValue = if (settingState.autoPadding) 16.dp else settingState.bottomPadding.dp,
-                                        animationSpec = tween(300)
-                                    ).value
-                                )
-                        ) {
-                            Box {
-                                ContentComponent(
-                                    uiState = PreviewContentUiState(contentUiState.bookId, contentUiState.readingChapterContent),
-                                    settingState = settingState,
-                                    paddingValues = PaddingValues(bottom = if (isEnableIndicator) 46.dp else 12.dp),
-                                    changeIsImmersive = {}
-                                )
-                            }
-                            Indicator(
-                                Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(
-                                        if (settingState.autoPadding)
-                                            PaddingValues(
-                                                bottom = 8.dp,
-                                                start = 16.dp,
-                                                end = 16.dp
-                                            )
-                                        else PaddingValues(
-                                            start = settingState.leftPadding.dp,
-                                            end = settingState.rightPadding.dp
-                                        )
-                                    ),
-                                enableBatteryIndicator = settingState.enableBatteryIndicator,
-                                enableTimeIndicator = settingState.enableTimeIndicator,
-                                enableChapterTitle = settingState.enableChapterTitleIndicator,
-                                chapterTitle = contentUiState.readingChapterContent.title,
-                                enableReadingChapterProgressIndicator = settingState.enableReadingChapterProgressIndicator,
-                                readingChapterProgress = 0.33f
-                            )
-
-                        }
-                    }
-                }
-            }
-            AnimatedVisibility(
-                visible = sheetState.currentValue == PartiallyExpanded || sheetState.currentValue == Hidden,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    style = MaterialTheme.typography.titleLarge,
-                    text = stringResource(R.string.reader_settings),
-                    fontWeight = FontWeight.W600
-                )
-            }
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                style = MaterialTheme.typography.titleLarge,
+                text = stringResource(R.string.reader_settings),
+                fontWeight = FontWeight.W600
+            )
             ContentSettings(
                 settingState = settingState,
                 selectedTabIndex = selectedTabIndex,
@@ -369,6 +224,15 @@ fun LazyListScope.AppearancePage(
             description = stringResource(R.string.settings_reader_keep_screen_on_desc),
             checked = settingState.keepScreenOn,
             booleanUserData = settingState.keepScreenOnUserData,
+        )
+    }
+    item {
+        SettingsSwitchEntry(
+            iconRes = R.drawable.toolbar_24px,
+            title = "隐藏状态栏",
+            description = "处于沉浸阅读模式时，允许隐藏系统状态栏和导航栏",
+            checked = settingState.enableHideStatusBar,
+            booleanUserData = settingState.enableHideStatusBarUserData,
         )
     }
     item {

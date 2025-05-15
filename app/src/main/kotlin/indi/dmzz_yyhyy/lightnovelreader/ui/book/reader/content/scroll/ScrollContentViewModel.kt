@@ -53,22 +53,29 @@ class ScrollContentViewModel(
         }
         coroutineScope.launch(Dispatchers.Main) {
             snapshotFlow { uiState.lazyListState.firstVisibleItemScrollOffset }
-                .throttleLatest(180L)
-                .collect { _ ->
-                    val item = uiState.lazyListState.layoutInfo.visibleItemsInfo.firstOrNull {
+                .throttleLatest(120L)
+                .collect {
+                    val layoutInfo = uiState.lazyListState.layoutInfo
+                    val item = layoutInfo.visibleItemsInfo.firstOrNull {
                         it.key == uiState.readingChapterContent.id
-                    }
-                    if (item == null) return@collect
+                    } ?: return@collect
+
+                    val newProgress = 1f.coerceAtMost((-item.offset + lazyColumnSize.height).toFloat() / item.size)
+                    if (newProgress == uiState.readingProgress) return@collect
+
+                    uiState.readingProgress = newProgress
+
                     val now = System.currentTimeMillis()
-                    uiState.readingProgress =
-                        1f.coerceAtMost((-item.offset + lazyColumnSize.height).toFloat() / item.size)
-                    if (now - lastWriteReadingProgress < 2500 && uiState.readingProgress < 1f) return@collect
+                    if (now - lastWriteReadingProgress < 2500 && newProgress < 1f) return@collect
+
                     lastWriteReadingProgress = now
+                    val currentProgress = newProgress
                     coroutineScope.launch(Dispatchers.IO) {
-                        updateReadingProgress(uiState.readingProgress)
+                        updateReadingProgress(currentProgress)
                     }
                 }
         }
+
     }
 
     private fun writeProgressRightNow() {

@@ -2,9 +2,8 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context.BATTERY_SERVICE
-import android.os.BatteryManager
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -33,7 +32,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -75,28 +73,29 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.RollingNumber
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.Locale
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -175,7 +174,6 @@ fun Content(
 ) {
     val activity = LocalActivity.current as Activity
     val coroutineScope = rememberCoroutineScope()
-    val view = LocalView.current
     val context = LocalContext.current
     val density = LocalDensity.current
     val settingsBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -188,14 +186,24 @@ fun Content(
     var lastUpdate by remember { mutableStateOf(LocalTime.now()) }
 
     LaunchedEffect(isImmersive) {
-        val window = (context as ComponentActivity).window
-        val controller = WindowCompat.getInsetsController(window, view)
-        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
-        if (isImmersive) {
-            controller.hide(WindowInsetsCompat.Type.systemBars())
-        } else {
-            controller.show(WindowInsetsCompat.Type.systemBars())
+        if (!settingState.enableHideStatusBar) return@LaunchedEffect
+        val activity = context as ComponentActivity
+        val window = activity.window
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+
+        @Suppress("DEPRECATION")
+        controller.apply {
+            if (isImmersive) {
+                var visibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                val navbar = (View.SYSTEM_UI_FLAG_LOW_PROFILE)
+                visibility = visibility or navbar
+                window.decorView.systemUiVisibility = visibility
+            } else {
+                show(WindowInsetsCompat.Type.systemBars())
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            }
         }
+
     }
     LaunchedEffect(readingScreenUiState.bookVolumes) {
         selectedVolumeId = readingScreenUiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == readingScreenUiState.contentUiState.readingChapterContent.id } }?.volumeId ?: -1
@@ -363,7 +371,6 @@ fun Content(
                     }
                     showSettingsBottomSheet = false
                 },
-                contentUiState = readingScreenUiState.contentUiState,
                 settingState = settingState,
                 onClickThemeSettings = onClickThemeSettings
             )
@@ -672,10 +679,10 @@ fun Indicator(
     enableReadingChapterProgressIndicator: Boolean,
     readingChapterProgress: Float
 ) {
-    val current = LocalDensity.current
+    /*val current = LocalDensity.current
     val batteryManager = LocalContext.current.getSystemService(BATTERY_SERVICE) as BatteryManager
     val batLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-    var progressIndicatorWidth by remember { mutableStateOf(0.dp) }
+*/
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -684,62 +691,58 @@ fun Indicator(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (enableBatteryIndicator)
-                Icon(
-                    modifier = Modifier.size(20.dp),
-                    painter =
-                    when {
-                        (batLevel == 0) -> painterResource(R.drawable.battery_horiz_000_24px)
-                        (batLevel in 1..10) -> painterResource(R.drawable.battery_very_low_24px)
-                        (batLevel in 11..35) -> painterResource(R.drawable.battery_low_24px)
-                        (batLevel in 36..65) -> painterResource(R.drawable.battery_horiz_050_24px)
-                        (batLevel in 66..90) -> painterResource(R.drawable.battery_horiz_075_24px)
-                        (batLevel in 91..100) -> painterResource(R.drawable.battery_full_alt_24px)
-                        else -> painterResource(R.drawable.battery_horiz_000_24px)
-                    },
-                    contentDescription = null
-                )
-            if (enableTimeIndicator)
+            if (enableTimeIndicator) {
                 AnimatedText(
-                    text = "${LocalDateTime.now().hour} : " + LocalDateTime.now().minute.let { if (it < 10) "0$it" else it.toString() },
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    text = String.format(Locale.US, "%d:%02d", LocalTime.now().hour, LocalTime.now().minute),
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.W500
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+            }
         }
-        Box(Modifier.width(12.dp))
-        Box {
-            if (enableChapterTitle)
-                LazyRow(
-                    Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(end = progressIndicatorWidth + 12.dp)) {
-                    item {
-                        AnimatedText(
-                            text = chapterTitle,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.W500
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (enableChapterTitle) {
+                AnimatedTextLine(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = chapterTitle,
+                    textAlign = TextAlign.End,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.W500
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        // End section
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (enableReadingChapterProgressIndicator) {
-                AnimatedText(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .onGloballyPositioned { layoutCoordinates ->
-                            with(current) {
-                                progressIndicatorWidth = layoutCoordinates.size.width.toDp()
-                            }
-                        },
-                    text = "${(readingChapterProgress * 100).toInt()}%",
-                    textAlign = TextAlign.Center,
+                RollingNumber(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    number = (readingChapterProgress * 100).toInt(),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.W500
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    length = 3
+                )
+                Text(
+                    text = "%",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.W500
                     ),
