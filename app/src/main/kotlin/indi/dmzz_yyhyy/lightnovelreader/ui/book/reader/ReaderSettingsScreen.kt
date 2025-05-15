@@ -246,15 +246,6 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
-            iconRes = R.drawable.battery_horiz_050_24px,
-            title = stringResource(R.string.settings_reader_battery_indicator),
-            description = stringResource(R.string.settings_reader_battery_indicator_desc),
-            checked = settingState.enableBatteryIndicator,
-            booleanUserData = settingState.enableBatteryIndicatorUserData,
-        )
-    }
-    item {
-        SettingsSwitchEntry(
             iconRes = R.drawable.outline_schedule_24px,
             title = stringResource(R.string.settings_reader_time_indicator),
             description = stringResource(R.string.settings_reader_time_indicator_desc),

@@ -78,7 +78,7 @@ fun RollingNumberPlaceholder(number: Int, style: TextStyle = LocalTextStyle.curr
     }
 }
 
-private const val RADIUS = 35F
+private const val RADIUS = 50f
 
 private const val GAP = (2 * PI / 10).toFloat()
 private const val ZERO_RADIAN = -(PI / 2 - GAP / 2).toFloat()

@@ -16,6 +16,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollCont
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -54,35 +55,38 @@ class ReaderViewModel @Inject constructor(
     val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
-        contentViewModel.changeBookId(bookId)
         viewModelScope.launch {
-            settingState.isUsingFlipPageUserData.getFlow().collect {
-                if (it == true && contentViewModel !is FlipPageContentViewModel) {
-                    contentViewModel = FlipPageContentViewModel(
+            settingState.isUsingFlipPageUserData.getFlow().collectLatest { isFlipEnabled ->
+                val useFlip = isFlipEnabled == true
+                val currentChapterId = uiState.contentUiState.readingChapterContent.id
+
+                if (useFlip && contentViewModel !is FlipPageContentViewModel) {
+                    val newContentViewModel = FlipPageContentViewModel(
                         bookRepository = bookRepository,
                         coroutineScope = viewModelScope,
                         updateReadingProgress = ::saveReadingProgress
                     )
-                    val chapterId = uiState.contentUiState.readingChapterContent.id
-                    contentViewModel.changeBookId(bookId)
-                    contentViewModel.changeChapter(chapterId)
-                    _uiState.contentUiState = contentViewModel.uiState
-                }
-                else if (contentViewModel !is ScrollContentViewModel) {
-                    contentViewModel = ScrollContentViewModel(
+                    newContentViewModel.changeBookId(bookId)
+                    newContentViewModel.changeChapter(currentChapterId)
+                    contentViewModel = newContentViewModel
+                    _uiState.contentUiState = newContentViewModel.uiState
+                } else if (!useFlip && contentViewModel !is ScrollContentViewModel) {
+                    val newViewModel = ScrollContentViewModel(
                         bookRepository = bookRepository,
                         coroutineScope = viewModelScope,
                         settingState = settingState,
                         updateReadingProgress = ::saveReadingProgress
                     )
-                    val chapterId = uiState.contentUiState.readingChapterContent.id
-                    contentViewModel.changeBookId(bookId)
-                    contentViewModel.changeChapter(chapterId)
-                    _uiState.contentUiState = contentViewModel.uiState
+                    newViewModel.changeBookId(bookId)
+                    newViewModel.changeChapter(currentChapterId)
+                    contentViewModel = newViewModel
+                    _uiState.contentUiState = newViewModel.uiState
                 }
             }
         }
     }
+
+
 
     fun lastChapter() = contentViewModel.loadLastChapter()
 

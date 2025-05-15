@@ -195,7 +195,7 @@ fun Content(
         controller.apply {
             if (isImmersive) {
                 var visibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                val navbar = (View.SYSTEM_UI_FLAG_LOW_PROFILE)
+                val navbar = (View.SYSTEM_UI_FLAG_LOW_PROFILE or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
                 visibility = visibility or navbar
                 window.decorView.systemUiVisibility = visibility
             } else {
@@ -286,7 +286,7 @@ fun Content(
             enter = fadeIn() + scaleIn(initialScale = 0.7f),
             exit = fadeOut() + scaleOut(targetScale = 0.7f)
         ) {
-            val isEnableIndicator = settingState.enableBatteryIndicator || settingState.enableTimeIndicator || settingState.enableReadingChapterProgressIndicator
+            val isEnableIndicator = settingState.enableTimeIndicator || settingState.enableReadingChapterProgressIndicator || settingState.enableChapterTitleIndicator
             Box(Modifier.fillMaxSize()) {
                 AnimatedContent(
                     readingScreenUiState.contentUiState,
@@ -335,12 +335,13 @@ fun Content(
                                     end = settingState.rightPadding.dp
                                 )
                             ),
-                        enableBatteryIndicator = settingState.enableBatteryIndicator,
+                        isFlipPageMode = settingState.isUsingFlipPage,
+                     // enableBatteryIndicator = settingState.enableBatteryIndicator,
                         enableTimeIndicator = settingState.enableTimeIndicator,
                         enableChapterTitle = settingState.enableChapterTitleIndicator,
                         chapterTitle = readingScreenUiState.contentUiState.readingChapterContent.title,
                         enableReadingChapterProgressIndicator = settingState.enableReadingChapterProgressIndicator,
-                        readingChapterProgress = readingScreenUiState.contentUiState.readingProgress
+                        readingChapterProgress = readingScreenUiState.contentUiState.readingProgress,
                     )
                 }
             }
@@ -427,17 +428,6 @@ private fun TopBar(
                 }
             }
         },
-        /*actions = {
-            IconButton(
-                enabled = false,
-                onClick = {
-                    //TODO 全屏
-                }) {
-                Icon(
-                    painter = painterResource(R.drawable.fullscreen_24px),
-                    contentDescription = "fullscreen")
-            }
-        },*/
         scrollBehavior = scrollBehavior
     )
 }
@@ -672,7 +662,8 @@ fun ChapterSelectorBottomSheet(
 @Composable
 fun Indicator(
     modifier: Modifier = Modifier,
-    enableBatteryIndicator: Boolean,
+    isFlipPageMode: Boolean,
+ // enableBatteryIndicator: Boolean,
     enableTimeIndicator: Boolean,
     enableChapterTitle: Boolean,
     chapterTitle: String,
@@ -727,7 +718,6 @@ fun Indicator(
             }
         }
 
-        // End section
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
