@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
@@ -49,6 +50,14 @@ class ReaderViewModel @Inject constructor(
                 bookRepository.getBookVolumes(value).collect {
                     _uiState.bookVolumes = it
                 }
+            }
+            viewModelScope.launch(Dispatchers.IO) {
+                statsRepository.updateReadingStatistics(
+                    ReadingStatsUpdate(
+                        bookId = bookId,
+                        sessionDelta = 1
+                    )
+                )
             }
         }
     val coroutineScope = CoroutineScope(Dispatchers.IO)
