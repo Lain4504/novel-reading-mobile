@@ -12,9 +12,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ColorPickerDialog
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
@@ -31,14 +31,7 @@ fun NavGraphBuilder.bookReaderDestination() {
             onClickLastChapter = viewModel::lastChapter,
             onClickNextChapter = viewModel::nextChapter,
             onChangeChapter = viewModel::changeChapter,
-            onClickChangeBackgroundColor = { navController.navigateToColorPickerDialog(
-                UserDataPath.Reader.BackgroundColor.path,
-                listOf(-1, 0x38E8CCA5, 0x38FF8080, 0x38d3b17d,0x3834C759, 0x3832ADE6, 0x38007AFF, 0x385856D6, 0x38AF52DE)
-            ) },
-            onClickChangeTextColor = { navController.navigateToColorPickerDialog(
-                UserDataPath.Reader.TextColor.path,
-                listOf(-1, 0xFF1D1B20, 0xFFE6E0E9)
-            ) }
+            onClickThemeSettings = navController::navigateToSettingsThemeDestination
         )
     }
     colorPickerDialog()
@@ -76,6 +69,6 @@ private fun NavGraphBuilder.colorPickerDialog() {
     }
 }
 
-private fun NavController.navigateToColorPickerDialog(colorUserDataPath: String, colors: List<Long>) {
+fun NavController.navigateToColorPickerDialog(colorUserDataPath: String, colors: List<Long>) {
     navigate(Route.Book.ColorPickerDialog(colorUserDataPath, colors.toLongArray()))
 }

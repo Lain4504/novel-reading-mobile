@@ -77,12 +77,13 @@ fun buildReportHeader(): String {
 
     report.append(
         """
-        OS_VERSION: ${getSystemPropertyWithAndroidAPI("os.version")}
+        OS_VERSION: ${getSystemPropertyWithAndroidAPI()}
         SDK_INT: ${Build.VERSION.SDK_INT}
-        RELEASE: ${Build.VERSION.RELEASE} RELEASE: ${Build.VERSION.RELEASE}
+        RELEASE: ${Build.VERSION.RELEASE}
         ID: ${Build.ID}
         DISPLAY: ${Build.DISPLAY}
         INCREMENTAL: ${Build.VERSION.INCREMENTAL}
+        
         """.trimIndent()
     )
 
@@ -94,12 +95,12 @@ fun buildReportHeader(): String {
         IS_DEBUGGABLE: ${systemProperties.getProperty("ro.debuggable")}
         IS_EMULATOR: ${systemProperties.getProperty("ro.boot.qemu")}
         IS_TREBLE_ENABLED: ${systemProperties.getProperty("ro.treble.enabled")}
+        
         """.trimIndent()
     )
 
     report.append(
         """
-        
         TYPE: ${Build.TYPE}
         TAGS: ${Build.TAGS}
 
@@ -111,16 +112,16 @@ fun buildReportHeader(): String {
         HARDWARE: ${Build.HARDWARE}
         DEVICE: ${Build.DEVICE}
         SUPPORTED_ABIS: ${Build.SUPPORTED_ABIS.filter { it.isNotBlank() }.joinToString(", ")}
+        
         """.trimIndent()
     )
 
     return report.toString()
 }
 
-@Suppress("SameParameterValue")
-private fun getSystemPropertyWithAndroidAPI(property: String): String? {
+private fun getSystemPropertyWithAndroidAPI(): String? {
     return try {
-        System.getProperty(property)
+        System.getProperty("os.version")
     } catch (e: Exception) {
         e.printStackTrace()
         null
@@ -152,7 +153,7 @@ private fun getSystemProperties(): Properties {
         process.destroy()
     } catch (e: IOException) {
         Log.e(
-            "LogUtils", "Failed to get run \"/system/bin/getprop\" to get system properties!",
+            "LogUtils", "Failed to get system properties!", e,
         )
     }
     return systemProperties

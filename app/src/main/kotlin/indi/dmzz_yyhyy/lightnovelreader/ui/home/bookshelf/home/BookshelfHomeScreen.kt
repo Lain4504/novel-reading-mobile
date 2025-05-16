@@ -534,7 +534,7 @@ fun TopBar(
     selectMode: Boolean,
     uiState: BookshelfHomeUiState,
     onClickCreate: () -> Unit,
-    @Suppress("UNUSED_PARAMETER") onClickSearch: () -> Unit,
+    @Suppress("UNUSED") onClickSearch: () -> Unit,
     onClickEdit: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,

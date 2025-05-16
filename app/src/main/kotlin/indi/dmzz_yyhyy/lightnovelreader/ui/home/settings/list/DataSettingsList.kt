@@ -103,13 +103,12 @@ fun DataSettingsList(
         description = stringResource(R.string.settings_select_data_source_desc),
         onClick = onClickChangeSource
     )
-    if (settingState.logLevelKey != "none")
-        SettingsClickableEntry(
-            iconRes = R.drawable.bug_report_24px,
-            title = "应用日志",
-            description = "显示应用日志",
-            onClick = onClickLogcat
-        )
+    SettingsClickableEntry(
+        iconRes = R.drawable.bug_report_24px,
+        title = "应用日志",
+        description = "查看与分享应用日志",
+        onClick = onClickLogcat
+    )
     SettingsMenuEntry(
         iconRes = R.drawable.bug_report_24px,
         title = "日志等级",
@@ -120,8 +119,6 @@ fun DataSettingsList(
     )
 }
 
-
-@Suppress("DuplicatedCode")
 fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
     val initUri = DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "primary:Documents")
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {

@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -65,7 +64,6 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("WrongConstant")
     fun cacheBook(bookId: Int): Flow<WorkInfo?> {
         val work = bookRepository.cacheBook(bookId)
         val isCachedFlow = bookRepository.isCacheBookWorkFlow(work.id)

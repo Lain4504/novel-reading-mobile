@@ -19,6 +19,7 @@ sealed class UserDataPath(
         data object FontLineHeight : UserDataPath("fontLineHeight", Reader)
         data object FontWeigh : UserDataPath("fontWeigh", Reader)
         data object KeepScreenOn : UserDataPath("keepScreenOn", Reader)
+        data object EnableHideStatusBar : UserDataPath("enableHideStatusBar", Reader)
         data object EnableBackgroundImage : UserDataPath("enableBackgroundImage", Reader)
         data object BackgroundImageDisplayMode : UserDataPath("backgroundImageDisplayMode", Reader)
         data object IsUsingFlipPage : UserDataPath("isUsingFlipPage", Reader)
@@ -38,9 +39,11 @@ sealed class UserDataPath(
         data object LeftPadding : UserDataPath("leftPadding", Reader)
         data object RightPadding : UserDataPath("rightPadding", Reader)
         data object TextColor : UserDataPath("textColor", Reader)
+        data object TextDarkColor : UserDataPath("textDarkColor", Reader)
         data object FontFamilyUri : UserDataPath("fontFamilyUri", Reader)
         data object BackgroundColor : UserDataPath("backgroundColor", Reader)
         data object BackgroundImageUri : UserDataPath("backgroundImageUri", Reader)
+        data object BackgroundDarkImageUri : UserDataPath("backgroundDarkImageUri", Reader)
     }
     data object ReadingBooks : UserDataPath("reading_books")
     data object Search: UserDataPath("search") {
@@ -59,6 +62,8 @@ sealed class UserDataPath(
             data object DarkMode : UserDataPath("dark_mode", Display)
             data object DynamicColors : UserDataPath("dynamic_color", Display)
             data object AppLocale : UserDataPath("app_locale", Display)
+            data object LightThemeName : UserDataPath("light_theme_name", Display)
+            data object DarkThemeName : UserDataPath("dark_theme_name", Display)
         }
         data object Data: UserDataPath("data", Settings) {
             data object WebDataSourceId : UserDataPath("web_data_source_id", Data)

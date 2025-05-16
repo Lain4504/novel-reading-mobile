@@ -91,12 +91,12 @@
 
 
     <string name="display_settings">Display</string>
-    <string name="settings_dark_theme">Dark Theme</string>
-    <string name="settings_dark_theme_desc">Override the app\'s dark theme setting</string>
+    <string name="settings_theme">Theme &amp; Paper</string>
+    <string name="settings_theme_desc">Custom app theme and paper texture</string>
     <string name="settings_dynamic_colors">Dynamic Colors</string>
     <string name="settings_dynamic_colors_desc">Apply system-generated dynamic colors (Android 12+ required)</string>
     <string name="settings_characters_variant">Chinese Characters Variant</string>
-    <string name="settings_characters_variant_desc">(Experimental) Set Chinese character variants for different language regions</string>
+    <string name="settings_characters_variant_desc">Set Chinese character variants for different language regions</string>
 
     <string name="data_settings">Data</string>
     <string name="settings_snap_data">Snapshot User Data</string>
@@ -108,7 +108,7 @@
 
     <string name="about_settings">About</string>
     <string name="settings_about_source_code"><![CDATA[View the source code at %1$s<br/>Report bugs & request features via %2$s]]></string>
-    <string name="settings_about_oss">LightNovelReader is the gift for all the novel lovers in the world</string>
+    <string name="settings_about_oss">LightNovelReader is the gift for all the light novel lovers in the world.</string>
     <string name="settings_github_repo">GitHub Repository</string>
     <string name="settings_github_repo_desc">Star our repo to help us reach more users</string>
     <string name="settings_communication">Communication</string>

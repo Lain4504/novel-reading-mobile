@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
+import androidx.navigation.compose.navigation
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
@@ -31,10 +32,16 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSettingsDebugDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsScreen
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home.SettingsViewModel
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.settingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.navigateToSettingsLogcatDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.settingsLogcatDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.settingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,8 +49,13 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Main.Settings.Home> {
+fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionScope) {
+    composable<Route.Main.Settings.Home>(
+        enterTransition = { expandEnter() },
+        exitTransition = { expandExit() },
+        popEnterTransition = { expandPopEnter() },
+        popExitTransition = { expandPopExit() }
+    ) {
         val navController = LocalNavController.current
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
         val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
@@ -59,6 +71,7 @@ fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransit
             onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             onClickLogcat = navController::navigateToSettingsLogcatDestination,
+            onClickThemeSettings = navController::navigateToSettingsThemeDestination,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
         )
@@ -67,8 +80,20 @@ fun NavGraphBuilder.settingsHomeDestination(sharedTransitionScope: SharedTransit
     exportUserDataDialog()
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.settingsNavigation(sharedTransitionScope: SharedTransitionScope) {
+    navigation<Route.Main.Settings>(
+        startDestination = Route.Main.Settings.Home
+    ) {
+        settingsDestination(sharedTransitionScope)
+        settingsDebugDestination()
+        settingsLogcatDestination()
+        settingsThemeDestination()
+    }
+}
+
 @Suppress("unused")
-fun NavController.navigateToHomeSettingDestination() {
+fun NavController.navigateToSettingsDestination() {
     navigate(Route.Main.Settings)
 }
 
@@ -140,7 +165,6 @@ private fun NavGraphBuilder.exportUserDataDialog() {
 private fun NavController.navigateToExportUserDataDialog() {
     navigate(Route.Main.ExportUserDataDialog)
 }
-
 
 @Suppress("DuplicatedCode", "SameParameterValue")
 private fun createDataFile(fileName: String, launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {

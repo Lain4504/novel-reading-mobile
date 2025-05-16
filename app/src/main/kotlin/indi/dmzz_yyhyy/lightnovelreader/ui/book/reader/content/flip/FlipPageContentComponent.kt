@@ -30,12 +30,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -46,13 +44,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.AppEvent
-import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
+import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -143,7 +141,7 @@ private fun SimpleFlipPageTextComponent(
                 style = textStyle!!.copy(
                     fontSize = settingState.fontSize.sp,
                     fontWeight = FontWeight.W400,
-                    lineHeight = (settingState.fontLineHeight.sp.value + settingState.fontSize.sp.value).sp
+                    lineHeight = (settingState.fontLineHeight + settingState.fontSize).sp
                 )
             )
             uiState.updatePageState(PagerState { slippedTextList.size })
@@ -232,16 +230,11 @@ private fun SimpleFlipPageTextComponent(
                 )
             },
     ) {
-        println("ui:${uiState.pagerState}")
         Box(Modifier.fillMaxSize()) {
             if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
                 Image(
                     modifier = Modifier.fillMaxSize(),
-                    painter =
-                    if (settingState.backgroundImageUri.toString()
-                            .isEmpty()
-                    ) painterResource(id = R.drawable.paper)
-                    else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                    painter = rememberReaderBackgroundPainter(settingState),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
@@ -251,12 +244,13 @@ private fun SimpleFlipPageTextComponent(
                 modifier = modifier
                     .fillMaxSize()
                     .padding(paddingValues),
+                imageModifier = Modifier.fillMaxSize().padding(paddingValues),
                 text = slippedTextList.getOrNull(it) ?: "",
                 fontSize = settingState.fontSize.sp,
                 fontLineHeight = settingState.fontLineHeight.sp,
                 fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                 fontFamily = rememberReaderFontFamily(settingState),
-                color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
+                color = readerTextColor(settingState)
             )
         }
     }

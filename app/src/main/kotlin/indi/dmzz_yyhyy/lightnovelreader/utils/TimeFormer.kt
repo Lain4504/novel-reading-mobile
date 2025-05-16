@@ -1,12 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.utils
 
-import android.annotation.SuppressLint
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
 
-@SuppressLint("NewApi")
 fun formTime(time: LocalDateTime): String {
     val now = LocalDateTime.now()
     val yearDiff = now.year - time.year

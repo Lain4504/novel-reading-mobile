@@ -99,6 +99,15 @@ sealed class MenuOptions {
         Option("verbose", R.string.key_log_level_verbose),
     )
 
+    data object LightThemeNameOptions: MenuOptions(
+        Option("light_default", R.string.key_light_theme_default)
+    )
+
+    data object DarkThemeNameOptions: MenuOptions(
+        Option("dark_default", R.string.key_dark_theme_default),
+        Option("dark_obsidian", R.string.key_dark_theme_obsidian)
+    )
+
     data object ReaderBgImageDisplayModeOptions: MenuOptions() {
         val Fixed = option("fixed", R.string.key_bg_image_display_mode_fixed)
         val Loop = option("loop", R.string.key_bg_image_display_mode_loop)

@@ -9,6 +9,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,11 +25,13 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 
 @Composable
 fun BaseContentComponent(
     modifier: Modifier = Modifier,
+    imageModifier: Modifier = Modifier,
     text: String,
     fontSize: TextUnit,
     fontLineHeight: TextUnit,
@@ -34,25 +40,33 @@ fun BaseContentComponent(
     color: Color
 ) {
     if (text.trim().startsWith("http://") || text.trim().startsWith("https://")) {
-        Box(modifier
-            .fillMaxWidth()
+        val context = LocalContext.current
+        var isLoading by remember { mutableStateOf(true) }
+
+        Box(
+            modifier = imageModifier.fillMaxWidth().padding(bottom = 8.dp)
         ) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp)
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp)
+                )
+            }
             AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center),
-                model = ImageRequest.Builder(LocalContext.current)
+                modifier = Modifier.align(Alignment.Center),
+                model = ImageRequest.Builder(context)
                     .data(text)
                     .crossfade(true)
                     .build(),
                 contentScale = ContentScale.FillWidth,
-                contentDescription = null
+                contentDescription = null,
+                onState = {
+                    if (it is AsyncImagePainter.State.Success || it is AsyncImagePainter.State.Error) {
+                        isLoading = false
+                    }
+                }
             )
         }
     } else

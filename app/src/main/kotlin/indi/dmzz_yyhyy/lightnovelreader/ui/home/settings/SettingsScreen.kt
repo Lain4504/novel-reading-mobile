@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.home
+package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -56,7 +56,6 @@ import androidx.work.OneTimeWorkRequest
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.AboutSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DataSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DisplaySettingsList
@@ -75,6 +74,7 @@ fun SettingsScreen(
     onClickChangeSource: () -> Unit,
     onClickExportUserData: () -> Unit,
     onClickDebugMode: () -> Unit,
+    onClickThemeSettings: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
 ) {
@@ -119,15 +119,8 @@ fun SettingsScreen(
                         title = stringResource(R.string.display_settings),
                         icon = ImageVector.vectorResource(R.drawable.light_mode_24px)
                     ) {
-                        DisplaySettingsList(settingState = settingState)
+                        DisplaySettingsList(settingState = settingState, onClickThemeSettings)
                     }
-                    /*SettingsCategory(
-                title = "阅读",
-                icon = ImageVector.vectorResource(R.drawable.outline_bookmark_24px),
-                content = { ReaderSettingsList(
-                    state = state,
-                ) }
-            )*/
                     SettingsCategory(
                         title = stringResource(R.string.data_settings),
                         icon = ImageVector.vectorResource(R.drawable.hard_disk_24px)
@@ -145,7 +138,6 @@ fun SettingsScreen(
                         icon = ImageVector.vectorResource(R.drawable.info_24px)
                     ) {
                         AboutSettingsList(
-                            settingState = settingState,
                             onClickDebugMode = onClickDebugMode
                         )
                     }

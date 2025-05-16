@@ -221,7 +221,7 @@ fun LogcatScreen(
                                     Column {
                                         Text("删除所有临时日志", style = MaterialTheme.typography.titleMedium)
                                         Text(
-                                            text = "清除应用缓存，这些临时日志也将被删除",
+                                            text = "清除应用缓存时，这些临时日志也将被删除",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.secondary
                                         )
