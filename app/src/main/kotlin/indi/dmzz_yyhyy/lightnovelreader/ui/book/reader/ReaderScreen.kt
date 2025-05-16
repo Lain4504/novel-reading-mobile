@@ -17,7 +17,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,7 +36,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,7 +61,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.isUnspecified
@@ -335,8 +331,6 @@ fun Content(
                                     end = settingState.rightPadding.dp
                                 )
                             ),
-                        isFlipPageMode = settingState.isUsingFlipPage,
-                     // enableBatteryIndicator = settingState.enableBatteryIndicator,
                         enableTimeIndicator = settingState.enableTimeIndicator,
                         enableChapterTitle = settingState.enableChapterTitleIndicator,
                         chapterTitle = readingScreenUiState.contentUiState.readingChapterContent.title,
@@ -354,7 +348,6 @@ fun Content(
         ) {
             BottomBar(
                 chapterContent = readingScreenUiState.contentUiState.readingChapterContent,
-                readingChapterProgress = readingScreenUiState.contentUiState.readingProgress,
                 onClickLastChapter = onClickLastChapter,
                 onClickNextChapter = onClickNextChapter,
                 onClickSettings = { showSettingsBottomSheet = true },
@@ -435,77 +428,78 @@ private fun TopBar(
 @Composable
 private fun BottomBar(
     chapterContent: ChapterContent,
-    readingChapterProgress: Float,
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onClickSettings: () -> Unit,
     onClickChapterSelector: () -> Unit
 ) {
     BottomAppBar {
-        Box(
+        Row(
             Modifier
-                .fillMaxHeight()
-                .width(12.dp))
-        IconButton(
-            onClick = onClickLastChapter,
-            enabled = chapterContent.hasLastChapter()
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(R.drawable.arrow_back_24px),
-                contentDescription = "lastChapter")
-        }
-        IconButton(
-            enabled = false,
-            onClick = {
-                //TODO 添加至书签
-            }) {
-            Icon(
-                painter = painterResource(R.drawable.outline_bookmark_24px),
-                contentDescription = "mark")
-        }
-        IconButton(onClick = onClickChapterSelector) {
-            Icon(painterResource(id = R.drawable.menu_24px), "menu")
-        }
-        IconButton(onClick = onClickSettings) {
-            Icon(
-                painter = painterResource(R.drawable.outline_settings_24px),
-                contentDescription = "setting")
-        }
-        Box(
-            Modifier
-                .padding(9.dp, 12.dp)
-                .weight(2f)) {
-            Box(Modifier.clip(ButtonDefaults.shape)) {
-                Box(
-                    Modifier
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                        .padding(24.dp, 11.5.dp)
-                ) {
-                    AnimatedText(
-                        modifier = Modifier.align(Alignment.Center),
-                        text = "${(readingChapterProgress * 100).toInt()}%",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.W500
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            Spacer(Modifier.width(4.dp))
+
+            IconButton(
+                onClick = onClickLastChapter,
+                enabled = chapterContent.hasLastChapter()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_back_24px),
+                    contentDescription = "lastChapter"
+                )
             }
+
+            Spacer(Modifier.width(8.dp))
+
+            IconButton(
+                enabled = false,
+                onClick = {
+                    // TODO 添加至书签
+                }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_bookmark_24px),
+                    contentDescription = "mark"
+                )
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            IconButton(onClick = onClickChapterSelector) {
+                Icon(
+                    painter = painterResource(id = R.drawable.menu_24px),
+                    contentDescription = "menu"
+                )
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            IconButton(onClick = onClickSettings) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_settings_24px),
+                    contentDescription = "setting"
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            IconButton(
+                onClick = onClickNextChapter,
+                enabled = chapterContent.hasNextChapter()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_forward_24px),
+                    contentDescription = "nextChapter"
+                )
+            }
+
+            Spacer(Modifier.width(4.dp))
         }
-        IconButton(
-            onClick = onClickNextChapter,
-            enabled = chapterContent.hasNextChapter()
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.arrow_forward_24px),
-                contentDescription = "nextChapter")
-        }
-        Box(
-            Modifier
-                .fillMaxHeight()
-                .width(12.dp))
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -662,18 +656,12 @@ fun ChapterSelectorBottomSheet(
 @Composable
 fun Indicator(
     modifier: Modifier = Modifier,
-    isFlipPageMode: Boolean,
- // enableBatteryIndicator: Boolean,
     enableTimeIndicator: Boolean,
     enableChapterTitle: Boolean,
     chapterTitle: String,
     enableReadingChapterProgressIndicator: Boolean,
     readingChapterProgress: Float
 ) {
-    /*val current = LocalDensity.current
-    val batteryManager = LocalContext.current.getSystemService(BATTERY_SERVICE) as BatteryManager
-    val batLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-*/
     Row(
         modifier = modifier
             .fillMaxWidth()
