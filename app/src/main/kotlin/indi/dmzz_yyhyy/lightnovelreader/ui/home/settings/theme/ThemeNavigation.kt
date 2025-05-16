@@ -46,7 +46,6 @@ fun NavGraphBuilder.settingsThemeDestination() {
     }
 }
 
-@Suppress("unused")
 fun NavController.navigateToSettingsThemeDestination() {
     navigate(Route.Main.Settings.Theme)
 }

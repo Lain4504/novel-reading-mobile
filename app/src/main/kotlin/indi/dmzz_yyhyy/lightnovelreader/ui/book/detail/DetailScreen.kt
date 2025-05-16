@@ -4,8 +4,10 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -236,15 +238,22 @@ private fun Content(
             item {
                 AnimatedVisibility(
                     visible = uiState.bookVolumes.volumes.isEmpty(),
-                    enter = fadeIn(),
-                    exit = fadeOut()
+                    exit = shrinkVertically()
                 ) {
-                    Loading()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Loading()
+                    }
                 }
             }
-            items(uiState.bookVolumes.volumes) {
+
+            items(uiState.bookVolumes.volumes, key = { it.volumeId }) { volume ->
                 VolumeItem(
-                    volume = it,
+                    volume = volume,
                     hideReadChapters = hideReadChapters,
                     readCompletedChapterIds = uiState.userReadingData.readCompletedChapterIds,
                     onClickChapter = onClickChapter,
@@ -252,16 +261,19 @@ private fun Content(
                     lastReadingChapterId = uiState.userReadingData.lastReadChapterId
                 )
             }
+            item {
+                Spacer(Modifier.height(36.dp))
+            }
         }
         AnimatedVisibility(
-            visible = lazyListState.isScrollingUp().value,
+            visible = lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
             enter = slideInHorizontally(
                 initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 300)
+                animationSpec = tween()
             ),
             exit = slideOutHorizontally(
                 targetOffsetX = { it },
-                animationSpec = tween(durationMillis = 300)
+                animationSpec = tween()
             )
         ) {
             Box(
@@ -649,116 +661,90 @@ private fun VolumeItem(
     }
     val isFullyRead = readCount >= totalCount
 
-    if (hideReadChapters && isFullyRead) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Row(
-                modifier = Modifier
-                    .height(54.dp)
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column {
-                    Text(
-                        text = volume.volumeTitle,
-                        fontWeight = FontWeight.W600,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                    Text(
-                        text = stringResource(R.string.info_reading_finished),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .height(54.dp)
+                .clickable {
+                    expanded = !expanded
                 }
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = volume.volumeTitle,
+                    fontWeight = FontWeight.W600,
+                    fontSize = 16.sp,
+                    color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = if (isFullyRead) stringResource(R.string.info_reading_finished)
+                    else stringResource(R.string.info_reading_progress, readCount, totalCount),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
+            if (hideReadChapters && isFullyRead) return@Row
+            Spacer(Modifier.weight(1f))
+            Icon(
+                modifier = Modifier
+                    .size(16.dp)
+                    .rotate(if (expanded) 90f else 0f),
+                painter = painterResource(id = R.drawable.arrow_forward_ios_24px),
+                contentDescription = "expand"
+            )
+            Spacer(Modifier.width(12.dp))
         }
-    } else {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Row(
-                modifier = Modifier
-                    .height(54.dp)
-                    .clickable {
-                        expanded = !expanded
-                    }
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column {
-                    Text(
-                        text = volume.volumeTitle,
-                        fontWeight = FontWeight.W600,
-                        fontSize = 16.sp,
-                        color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = if (isFullyRead) stringResource(R.string.info_reading_finished)
-                        else stringResource(R.string.info_reading_progress, readCount, totalCount),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-                Spacer(Modifier.weight(1f))
-                Icon(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .rotate(if (expanded) 90f else 0f),
-                    painter = painterResource(id = R.drawable.arrow_forward_ios_24px),
-                    contentDescription = "expand"
-                )
-                Spacer(Modifier.width(12.dp))
-            }
 
-            AnimatedVisibility(
-                visible = expanded,
-                enter = fadeIn(
-                    animationSpec = tween(durationMillis = 300)
-                ),
-                exit = fadeOut(
-                    animationSpec = tween(durationMillis = 300)
-                )
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    volume.chapters.forEach {
-                        if (!(hideReadChapters && readCompletedChapterIds.contains(it.id))) {
-                            Column(
-                                modifier = Modifier
-                                    .clickable { onClickChapter(it.id) }
-                                    .wrapContentHeight()
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 32.dp,
-                                        end = 32.dp,
-                                        top = 12.dp,
-                                        bottom = if (it.id == lastReadingChapterId) 6.dp else 12.dp
-                                    )
-                            ) {
-                                Text(
-                                    text = it.title,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 15.sp,
-                                    fontWeight =
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn() + expandVertically(tween(150)),
+            exit = fadeOut() + shrinkVertically(tween(150))
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                volume.chapters.forEach {
+                    AnimatedVisibility(
+                        visible = !(hideReadChapters && readCompletedChapterIds.contains(it.id)),
+                        enter = fadeIn() + expandVertically(tween(150)),
+                        exit = fadeOut() + shrinkVertically(tween(150))
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .clickable { onClickChapter(it.id) }
+                                .wrapContentHeight()
+                                .fillMaxWidth()
+                                .padding(
+                                    start = 32.dp,
+                                    end = 32.dp,
+                                    top = 12.dp,
+                                    bottom = if (it.id == lastReadingChapterId) 6.dp else 12.dp
+                                )
+                        ) {
+                            Text(
+                                text = it.title,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                fontSize = 15.sp,
+                                fontWeight =
                                     if (readCompletedChapterIds.contains(it.id))
                                         FontWeight.Normal
                                     else FontWeight.W600,
-                                    color =
+                                color =
                                     if (readCompletedChapterIds.contains(it.id))
                                         MaterialTheme.colorScheme.secondary
                                     else MaterialTheme.colorScheme.onSurface
+                            )
+                            if (it.id == lastReadingChapterId)
+                                Text(
+                                    text = "上次阅读",
+                                    maxLines = 1,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.W700,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
-                                if (it.id == lastReadingChapterId)
-                                    Text(
-                                        text = "上次阅读",
-                                        maxLines = 1,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.W700,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                            }
                         }
                     }
                 }
