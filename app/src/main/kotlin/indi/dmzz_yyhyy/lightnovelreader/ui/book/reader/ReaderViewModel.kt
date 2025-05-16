@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,13 +16,11 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip.FlipPageCont
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class)
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
@@ -86,8 +85,6 @@ class ReaderViewModel @Inject constructor(
         }
     }
 
-
-
     fun lastChapter() = contentViewModel.loadLastChapter()
 
     fun nextChapter() = contentViewModel.loadNextChapter()
@@ -97,11 +94,11 @@ class ReaderViewModel @Inject constructor(
     }
 
     private fun saveReadingProgress(progress: Float) {
+        if (_uiState.contentUiState.readingChapterContent.isEmpty()) return
+        val chapterId = _uiState.contentUiState.readingChapterContent.id
+        if (progress.isNaN() || progress == 0f || bookId == -1) return
+        Log.v("ReaderViewModel", "$bookId/$chapterId Saving progress $progress. (${_uiState.contentUiState.readingChapterContent.title})")
         viewModelScope.launch(Dispatchers.IO) {
-            if (progress.isNaN()) return@launch
-            if (_uiState.contentUiState.readingChapterContent.isEmpty()) return@launch
-            if (bookId == -1) return@launch
-            val chapterId = _uiState.contentUiState.readingChapterContent.id
             val currentTime = LocalDateTime.now()
 
             bookRepository.updateUserReadingData(bookId) { userReadingData ->
@@ -112,12 +109,13 @@ class ReaderViewModel @Inject constructor(
                     lastReadTime = currentTime
                     lastReadChapterId = chapterId
                     lastReadChapterProgress = progress.coerceIn(0f..1f)
-                    readingProgress = if (isChapterCompleted) {
-                        (userReadingData.readCompletedChapterIds.size + 1) /
-                                _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
+                    val totalChapters = _uiState.bookVolumes.volumes.sumOf { it.chapters.size }
+                    readingProgress = if (totalChapters == 0) {
+                        readingProgress
+                    } else if (isChapterCompleted) {
+                        (userReadingData.readCompletedChapterIds.size + 1) / totalChapters.toFloat()
                     } else {
-                        userReadingData.readCompletedChapterIds.size /
-                                _uiState.bookVolumes.volumes.sumOf { it.chapters.size }.toFloat()
+                        userReadingData.readCompletedChapterIds.size / totalChapters.toFloat()
                     }
                     if (isChapterCompleted)
                         readCompletedChapterIds.add(chapterId)
