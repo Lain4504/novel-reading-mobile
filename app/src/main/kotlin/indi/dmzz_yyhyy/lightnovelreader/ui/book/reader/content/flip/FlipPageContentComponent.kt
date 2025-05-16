@@ -244,6 +244,7 @@ private fun SimpleFlipPageTextComponent(
                 modifier = modifier
                     .fillMaxSize()
                     .padding(paddingValues),
+                imageModifier = Modifier.fillMaxSize().padding(paddingValues),
                 text = slippedTextList.getOrNull(it) ?: "",
                 fontSize = settingState.fontSize.sp,
                 fontLineHeight = settingState.fontLineHeight.sp,
