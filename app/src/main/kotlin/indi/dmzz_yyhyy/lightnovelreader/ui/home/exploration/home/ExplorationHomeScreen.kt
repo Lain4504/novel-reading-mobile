@@ -107,7 +107,7 @@ fun ExplorationHomeScreen(
             bottomBar = {
                 HomeNavigateBar(
                     modifier = Modifier.sharedElement(
-                        state = sharedTransitionScope.rememberSharedContentState(SharedContentKey.HomeNavigateBar),
+                        sharedTransitionScope.rememberSharedContentState(SharedContentKey.HomeNavigateBar),
                         animatedVisibilityScope
                     ),
                     selectedRoute = selectedRoute,

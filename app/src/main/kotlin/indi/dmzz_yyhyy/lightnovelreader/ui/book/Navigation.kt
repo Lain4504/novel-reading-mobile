@@ -13,10 +13,6 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 fun NavGraphBuilder.bookNavigation() {
     navigation<Route.Book>(
         startDestination = Route.Book.Detail(1),
-        enterTransition = { expandEnter() },
-        exitTransition = { expandExit() },
-        popEnterTransition = { expandPopEnter() },
-        popExitTransition = { expandPopExit() }
     ) {
         bookDetailDestination()
         bookReaderDestination()

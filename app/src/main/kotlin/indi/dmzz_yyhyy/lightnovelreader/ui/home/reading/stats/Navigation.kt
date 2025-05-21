@@ -9,18 +9,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.navigateToReadingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.readingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.readingStatsNavigation() {
     navigation<Route.Main.Reading.Stats>(
-        enterTransition = { expandEnter() },
-        exitTransition = { expandExit() },
-        popEnterTransition = { expandPopEnter() },
-        popExitTransition = { expandPopExit() },
         startDestination = Route.Main.Reading.Stats.Overview
     ) {
         readingStatsOverviewDestination()

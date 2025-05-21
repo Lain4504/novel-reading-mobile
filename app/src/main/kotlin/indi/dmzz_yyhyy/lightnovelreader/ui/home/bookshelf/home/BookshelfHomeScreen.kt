@@ -359,7 +359,7 @@ fun LazyListScope.UpdatedBooks(
         ) {
             uiState.bookInformationMap[updatedBookId]?.let {
                 BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
                     bookInformation = it,
                     selected = uiState.selectedBookIds.contains(it.id),
                     latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
@@ -385,18 +385,7 @@ fun LazyListScope.PinnedBooks(
 ) {
     val pinnedBookIds = uiState.selectedBookshelf.pinnedBookIds.reversed()
     if (pinnedBookIds.isEmpty()) return
-    stickyHeader {
-        CollapseGroupTitle(
-            modifier = Modifier.animateItem(),
-            icon = painterResource(R.drawable.keep_24px),
-            title = stringResource(
-                R.string.bookshelf_group_title_pinned,
-                pinnedBookIds.size
-            ),
-            expanded = uiState.pinnedExpanded,
-            onClickExpand = { uiState.pinnedExpanded = !uiState.pinnedExpanded }
-        )
-    }
+
     items(pinnedBookIds) { pinnedBookId ->
         AnimatedVisibility(
             visible = uiState.pinnedExpanded,
@@ -405,7 +394,7 @@ fun LazyListScope.PinnedBooks(
         ) {
             uiState.bookInformationMap[pinnedBookId]?.let {
                 BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
                     bookInformation = it,
                     selected = uiState.selectedBookIds.contains(it.id),
                     onClick = {
@@ -431,6 +420,9 @@ fun LazyListScope.AllBooks(
 ) {
     val allBookIds = uiState.selectedBookshelf.allBookIds.reversed()
     if (allBookIds.isEmpty()) return
+    item {
+        Spacer(Modifier.height(8.dp))
+    }
     stickyHeader {
         CollapseGroupTitle(
             modifier = Modifier.animateItem(),
@@ -454,7 +446,7 @@ fun LazyListScope.AllBooks(
         ) {
             uiState.bookInformationMap[bookId]?.let {
                 BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
                     bookInformation = it,
                     selected = uiState.selectedBookIds.contains(it.id),
                     onClick = {

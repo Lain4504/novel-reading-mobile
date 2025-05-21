@@ -2,8 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.NavHostController
@@ -14,6 +12,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.addBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.updatesAvailableDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.downloadManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.homeNavigation
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
+import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -25,8 +27,10 @@ fun LightNovelReaderNavHost(
             NavHost(
                 navController = navController,
                 startDestination = Route.Main,
-                enterTransition = { fadeIn() },
-                exitTransition = { fadeOut() }
+                enterTransition = { expandEnter() },
+                exitTransition = { expandExit() },
+                popEnterTransition = { expandPopEnter() },
+                popExitTransition = { expandPopExit() }
             ) {
                 homeNavigation(this@SharedTransitionLayout)
                 bookNavigation()
