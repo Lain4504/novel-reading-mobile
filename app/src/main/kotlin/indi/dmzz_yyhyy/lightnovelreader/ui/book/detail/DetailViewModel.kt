@@ -57,7 +57,7 @@ class DetailViewModel @Inject constructor(
                 _uiState.isInBookshelf = it != null
             }
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             downloadProgressRepository.downloadItemIdListFlow.collect { downloadItemList ->
                 _uiState.downloadItem = downloadItemList.findLast { it.bookId == _uiState.bookInformation.id && it.type == DownloadType.CACHE }
             }

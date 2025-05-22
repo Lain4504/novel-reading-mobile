@@ -262,24 +262,18 @@ private fun Content(
                 )
             }
             item {
-                Spacer(Modifier.height(36.dp))
+                Spacer(Modifier.height(48.dp))
             }
         }
         AnimatedVisibility(
-            visible = lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
-            enter = slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween()
-            ),
-            exit = slideOutHorizontally(
-                targetOffsetX = { it },
-                animationSpec = tween()
-            )
+            visible = lazyListState.canScrollForward && lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
+            enter = fadeIn(),
+            exit = fadeOut()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(end = 31.dp, bottom = 54.dp)
+                    .padding(end = 24.dp, bottom = 54.dp)
             ) {
                 ExtendedFloatingActionButton(
                     modifier = Modifier.align(Alignment.BottomEnd),
@@ -666,14 +660,13 @@ private fun VolumeItem(
     ) {
         Row(
             modifier = Modifier
-                .height(54.dp)
                 .clickable {
                     expanded = !expanded
                 }
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(5f).padding(vertical = 6.dp)) {
                 Text(
                     text = volume.volumeTitle,
                     fontWeight = FontWeight.W600,

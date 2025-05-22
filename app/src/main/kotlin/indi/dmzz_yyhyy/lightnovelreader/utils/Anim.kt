@@ -12,17 +12,19 @@ import androidx.compose.animation.slideOutHorizontally
 import kotlin.math.roundToInt
 
 val cubicBezierEasing = CubicBezierEasing(0.2f, 0.0f, 0.0f, 1.0f)
+const val animDuration = 360
+
 fun expandEnter(): EnterTransition =
     slideInHorizontally(
         animationSpec = tween(
-            durationMillis = 200,
+            durationMillis = animDuration,
             easing = cubicBezierEasing
         ),
         initialOffsetX = { (0.1f * it).roundToInt() }
     ) + fadeIn(
         animationSpec = tween(
-            delayMillis = 75,
-            durationMillis = 50,
+            delayMillis = 45,
+            durationMillis = 90,
             easing = LinearEasing
         )
     )
@@ -31,13 +33,13 @@ fun expandExit(): ExitTransition =
     slideOutHorizontally(
         animationSpec =
         tween(
-            durationMillis = 200,
+            durationMillis = animDuration,
             easing = cubicBezierEasing
         ),
         targetOffsetX = { (-0.1f * it).roundToInt() }
     ) + fadeOut(
         animationSpec = tween(
-            durationMillis = 75,
+            durationMillis = 50,
             easing = LinearEasing
         )
     )
@@ -46,14 +48,14 @@ fun expandPopEnter(): EnterTransition =
     slideInHorizontally(
         animationSpec =
         tween(
-            durationMillis = 200,
+            durationMillis = animDuration,
             easing = cubicBezierEasing
         ),
         initialOffsetX = { (-0.1f * it).roundToInt() }
     ) + fadeIn(
         animationSpec = tween(
-            delayMillis = 100,
-            durationMillis = 75,
+            delayMillis = 45,
+            durationMillis = 50,
             easing = LinearEasing
         )
     )
@@ -62,7 +64,7 @@ fun expandPopExit(): ExitTransition =
     slideOutHorizontally(
         animationSpec =
         tween(
-            durationMillis = 200,
+            durationMillis = animDuration,
             easing = cubicBezierEasing
         ),
         targetOffsetX = { (0.1f * it).roundToInt() }
@@ -70,5 +72,39 @@ fun expandPopExit(): ExitTransition =
         animationSpec = tween(
             durationMillis = 50,
             easing = LinearEasing
+        )
+    )
+
+fun fadeEnter(): EnterTransition =
+    fadeIn(
+        animationSpec = tween(
+            durationMillis = animDuration,
+            delayMillis = 50,
+            easing = cubicBezierEasing
+        )
+    )
+
+fun fadeExit(): ExitTransition =
+    fadeOut(
+        animationSpec = tween(
+            durationMillis = animDuration,
+            easing = cubicBezierEasing
+        )
+    )
+
+fun fadePopEnter(): EnterTransition =
+    fadeIn(
+        animationSpec = tween(
+            durationMillis = animDuration,
+            delayMillis = 50,
+            easing = cubicBezierEasing
+        )
+    )
+
+fun fadePopExit(): ExitTransition =
+    fadeOut(
+        animationSpec = tween(
+            durationMillis = 360,
+            easing = cubicBezierEasing
         )
     )
