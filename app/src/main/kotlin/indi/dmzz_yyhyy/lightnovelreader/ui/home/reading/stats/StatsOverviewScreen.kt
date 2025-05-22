@@ -56,6 +56,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarDay
@@ -293,7 +294,7 @@ private fun NoRecords() {
         modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-        style = MaterialTheme.typography.bodyMedium
+        style = AppTypography.bodyMedium
     )
 }
 
@@ -344,13 +345,13 @@ private fun StatSection(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = AppTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.weight(1f))
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyMedium,
+                style = AppTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -498,7 +499,7 @@ private fun TopBar(
         title = {
             Text(
                 text = stringResource(R.string.nav_statistics),
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTypography.titleTopBar,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,

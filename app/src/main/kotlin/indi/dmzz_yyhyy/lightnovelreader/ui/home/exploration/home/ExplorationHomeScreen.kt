@@ -67,6 +67,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
@@ -177,7 +178,7 @@ fun TopBar(
         title = {
             Text(
                 text = stringResource(id = R.string.nav_explore),
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTypography.titleTopBar,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,

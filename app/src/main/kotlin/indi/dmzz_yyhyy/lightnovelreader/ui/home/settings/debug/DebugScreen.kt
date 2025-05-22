@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +42,7 @@ fun DebugScreen(
                 title = {
                     Text(
                         text = "Debug",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = AppTypography.titleTopBar,
                         fontWeight = FontWeight.W400,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1

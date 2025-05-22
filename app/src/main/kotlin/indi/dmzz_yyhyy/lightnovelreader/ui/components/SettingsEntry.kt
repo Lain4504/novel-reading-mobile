@@ -43,11 +43,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
@@ -121,16 +121,13 @@ fun SettingsSwitchEntry(
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                fontSize = 16.sp,
-                lineHeight = 16.sp
+                style = AppTypography.labelLarge
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = description,
                 color = MaterialTheme.colorScheme.secondary,
-                fontSize = 14.sp,
-                lineHeight = 18.sp
+                style = AppTypography.labelMedium
             )
         }
 
@@ -227,16 +224,13 @@ private fun SettingsSliderEntry(
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                fontSize = 16.sp,
-                lineHeight = 16.sp
+                style = AppTypography.labelLarge
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "${DecimalFormat("#.#").format(value)}$unit",
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
-                lineHeight = 18.sp,
+                style = AppTypography.labelMedium,
                 maxLines = 1
             )
             Slider(
@@ -326,23 +320,19 @@ fun SettingsMenuEntry(
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                fontSize = 16.sp,
-                lineHeight = 16.sp
+                style = AppTypography.labelLarge
             )
             Spacer(modifier = Modifier.height(2.dp))
             description?.let {
                 Text(
                     text = description,
                     color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp
+                    style = AppTypography.labelMedium
                 )
             }
             AnimatedTextLine(
                 text = stringResource(selectedOption.nameId),
-                fontSize = 14.sp,
-                lineHeight = 18.sp,
+                style = AppTypography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
 
@@ -371,7 +361,7 @@ fun SettingsMenuEntry(
                                 Text(
                                     modifier = Modifier.padding(vertical = 4.dp),
                                     text = stringResource(option.nameId),
-                                    fontSize = 14.sp,
+                                    style = AppTypography.bodyLarge
                                 )
                             }
                         )
@@ -454,25 +444,21 @@ fun SettingsClickableEntry(
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                fontSize = 16.sp,
-                lineHeight = 16.sp
+                style = AppTypography.labelLarge
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = description,
                 color = MaterialTheme.colorScheme.secondary,
-                fontSize = 14.sp,
-                lineHeight = 18.sp
+                style = AppTypography.labelMedium
             )
             option?.let {
                 AnimatedTextLine(
                     text = it,
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp,
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

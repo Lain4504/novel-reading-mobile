@@ -82,6 +82,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
@@ -412,7 +413,7 @@ private fun TopBar(
                     AnimatedContent(title, label = "TitleAnimate") {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = AppTypography.titleTopBar,
                             fontWeight = FontWeight.W400,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1
@@ -554,7 +555,7 @@ fun ChapterSelectorBottomSheet(
                 Text(
                     modifier = Modifier.padding(start = 8.dp),
                     text = stringResource(R.string.select_chapter),
-                    style = MaterialTheme.typography.titleLarge,
+                    style = AppTypography.titleLarge,
                     fontWeight = FontWeight.W600
                 )
             }
@@ -676,9 +677,10 @@ fun Indicator(
                 AnimatedText(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     text = String.format(Locale.US, "%d:%02d", LocalTime.now().hour, LocalTime.now().minute),
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
+                    style = AppTypography.labelMedium.copy(
+                        letterSpacing = 1.sp
                     ),
+                    fontWeight = FontWeight.W500,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -696,9 +698,7 @@ fun Indicator(
                     modifier = Modifier.fillMaxWidth(),
                     text = chapterTitle,
                     textAlign = TextAlign.End,
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
-                    ),
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -713,7 +713,7 @@ fun Indicator(
                 RollingNumber(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     number = (readingChapterProgress * 100).toInt(),
-                    style = MaterialTheme.typography.labelLarge.copy(
+                    style = AppTypography.labelMedium.copy(
                         fontWeight = FontWeight.W500
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -721,9 +721,8 @@ fun Indicator(
                 )
                 Text(
                     text = "%",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
-                    ),
+                    style = AppTypography.labelMedium,
+                    fontWeight = FontWeight.W500,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

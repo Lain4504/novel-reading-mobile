@@ -1,15 +1,21 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -17,6 +23,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
@@ -33,7 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,12 +52,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Component
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.addToBookshelfAction
+import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 import kotlinx.coroutines.launch
 
@@ -73,7 +85,7 @@ fun ExpandedPageScreen(
     Scaffold(
         topBar = {
             TopBar(
-                scrollBehavior =  enterAlwaysScrollBehavior,
+                scrollBehavior = enterAlwaysScrollBehavior,
                 title = explorationExpandedPageUiState.pageTitle,
                 onClickBack = onClickBack
             )
@@ -84,13 +96,6 @@ fun ExpandedPageScreen(
             uiState = explorationUiState,
             refresh = refresh
         ) {
-            AnimatedVisibility(
-                visible = explorationExpandedPageUiState.bookList.isEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Loading()
-            }
             PullToRefreshBox(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -116,14 +121,40 @@ fun ExpandedPageScreen(
                 ) {
                     item {
                         LazyRow(
-                            modifier = Modifier.padding(start = 12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fadingEdge(
+                                    Brush.horizontalGradient(
+                                        0.02f to Color.Transparent,
+                                        0.05f to Color.White,
+                                        0.95f to Color.White,
+                                        0.98f to Color.Transparent
+                                    )
+                                ),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
+                            item {
+                                Spacer(Modifier.width(8.dp))
+                            }
                             items(explorationExpandedPageUiState.filters) {
                                 it.Component(dialog)
                             }
+                            item {
+                                Spacer(Modifier.width(8.dp))
+                            }
                         }
-                        Box(Modifier.height(3.dp))
+                        Spacer(Modifier.height(4.dp))
+                    }
+                    item {
+                        AnimatedVisibility(
+                            visible = explorationExpandedPageUiState.bookList.isEmpty(),
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                     itemsIndexed(explorationExpandedPageUiState.bookList) { index, bookInformation ->
                         val addToBookshelf = addToBookshelfAction.toSwipeAction {
@@ -139,9 +170,10 @@ fun ExpandedPageScreen(
                             ),
                             swipeToRightActions = listOf(addToBookshelf)
                         )
-                        LaunchedEffect(explorationExpandedPageUiState.bookList.size) {
-                            if (explorationExpandedPageUiState.bookList.size - index == 3) {
-                                loadMore.invoke()
+                        val bookList = explorationExpandedPageUiState.bookList
+                        LaunchedEffect(bookList.size) {
+                            if (bookList.isNotEmpty() && bookList.size - index <= 3) {
+                                loadMore()
                             }
                         }
                     }
@@ -162,7 +194,7 @@ fun TopBar(
         title = {
             Text(
                 text = stringResource(id = R.string.nav_explore_child, title),
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTypography.titleTopBar,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -177,14 +209,14 @@ fun TopBar(
                 )
             }
         },
-        actions = {
+        /*actions = {
             IconButton(onClick = {}) {
                 Icon(
                     painter = painterResource(id = R.drawable.more_vert_24px),
                     contentDescription = "more"
                 )
             }
-        },
-        scrollBehavior = scrollBehavior,
+        },*/
+        scrollBehavior = scrollBehavior
     )
 }

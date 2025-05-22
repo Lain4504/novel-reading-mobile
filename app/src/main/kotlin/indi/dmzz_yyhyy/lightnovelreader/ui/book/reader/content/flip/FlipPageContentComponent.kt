@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import indi.dmzz_yyhyy.lightnovelreader.AppEvent
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
@@ -200,7 +201,7 @@ private fun SimpleFlipPageTextComponent(
                 ),
         )
     }
-    textStyle = MaterialTheme.typography.bodyMedium
+    textStyle = AppTypography.bodyMedium
     HorizontalPager(
         state = uiState.pagerState,
         modifier = modifier

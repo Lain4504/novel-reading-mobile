@@ -52,6 +52,7 @@ import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
@@ -78,11 +79,13 @@ fun ReadingScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         updateReadingBooks()
     }
+    val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     with(sharedTransitionScope) {
         Scaffold(
             topBar = {
                 TopBar(
-                    scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
+                    scrollBehavior = pinnedScrollBehavior,
                     onClickDownloadManager = onClickDownloadManager,
                     onClickStats = onClickStats
                 )
@@ -107,7 +110,8 @@ fun ReadingScreen(
                     animatedVisibilityScope = animatedVisibilityScope,
                     recentReadingBookInformationMap = recentReadingBookInformationMap,
                     recentReadingUserReadingDataMap = recentReadingUserReadingDataMap,
-                    recentReadingBookIds = recentReadingBookIds
+                    recentReadingBookIds = recentReadingBookIds,
+                    scrollBehavior = pinnedScrollBehavior
                 )
             }
         }
@@ -123,6 +127,7 @@ private fun ReadingContent(
     recentReadingBookInformationMap: Map<Int, BookInformation>,
     recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
     recentReadingBookIds: List<Int>,
+    scrollBehavior: TopAppBarScrollBehavior,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
@@ -130,9 +135,9 @@ private fun ReadingContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp)
-            .nestedScroll(TopAppBarDefaults.pinnedScrollBehavior().nestedScrollConnection),
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (recentReadingBookIds.isNotEmpty())
+        if (recentReadingBookIds.isNotEmpty() && recentReadingUserReadingDataMap[recentReadingBookIds.first()] != null && recentReadingBookInformationMap[recentReadingBookIds.first()] != null) {
             item {
                 Box(
                     modifier = Modifier
@@ -144,11 +149,12 @@ private fun ReadingContent(
                         modifier = Modifier.padding(vertical = 4.dp),
                         text = stringResource(R.string.continue_reading),
                         maxLines = 1,
+                        style = AppTypography.titleSmall,
                         fontWeight = FontWeight.W600,
+                        letterSpacing = 0.5.sp
                     )
                 }
             }
-        if (recentReadingBookIds.isNotEmpty() && recentReadingUserReadingDataMap[recentReadingBookIds.first()] != null && recentReadingBookInformationMap[recentReadingBookIds.first()] != null) {
             item {
                 ReadingHeaderCard(
                     bookInformation = recentReadingBookInformationMap[recentReadingBookIds.first()]!!,
@@ -170,7 +176,9 @@ private fun ReadingContent(
                             R.string.recent_reads, recentReadingBookIds.size,
                         ),
                         maxLines = 1,
-                        fontWeight = FontWeight.Medium,
+                        style = AppTypography.titleSmall,
+                        fontWeight = FontWeight.W600,
+                        letterSpacing = 0.5.sp
                     )
                 }
             }
@@ -205,7 +213,6 @@ private fun ReadingContent(
                 ) {
                     Text(
                         text = stringResource(id = R.string.navigate_to_explore),
-                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.W500,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -226,9 +233,7 @@ private fun TopBar(
         title = {
             Text(
                 text = stringResource(R.string.nav_reading),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.W600,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = AppTypography.titleTopBar,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -286,19 +291,20 @@ private fun ReadingBookCard(
                     .padding(start = 12.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                val titleLineHeight = 20.sp
+                val textStyle = AppTypography.labelLarge
+                val textLineHeight = textStyle.lineHeight
                 Text(
                     modifier = Modifier
                         .height(
-                            with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                            with(LocalDensity.current) { (textLineHeight * 2.2f).toDp() }
                         )
                         .wrapContentHeight(Alignment.CenterVertically),
                     text = bookInformation.title,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.W600,
-                    fontSize = 16.sp,
-                    lineHeight = titleLineHeight,
+                    style = AppTypography.labelLarge,
+                    lineHeight = textLineHeight,
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -307,19 +313,18 @@ private fun ReadingBookCard(
                     Text(
                         text = bookInformation.author,
                         maxLines = 1,
+                        style = AppTypography.bodyMedium,
                         fontWeight = FontWeight.W600,
-                        color = MaterialTheme.colorScheme.primary,
-                        lineHeight = 20.sp,
-                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 Text(
                     text = bookInformation.description.trim(),
                     maxLines = 2,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    style = AppTypography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    lineHeight = 18.sp,
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -339,23 +344,20 @@ private fun ReadingBookCard(
                         Text(
                             text = formTime(userReadingData.lastReadTime),
                             modifier = Modifier.align(Alignment.CenterVertically),
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp
+                            style = AppTypography.labelSmall
                         )
                     }
                     Text(
-                        fontSize = 13.sp,
-                        lineHeight = 14.sp,
                         text = stringResource(
                             R.string.read_progress,
                             (userReadingData.readingProgress * 100).toInt().toString() + "%"
-                        )
+                        ),
+                        style = AppTypography.labelSmall
                     )
                     Text(
                         text = stringResource(R.string.read_minutes, (userReadingData.totalReadTime) / 60),
                         modifier = Modifier.align(Alignment.CenterVertically),
-                        fontSize = 13.sp,
-                        lineHeight = 14.sp
+                        style = AppTypography.labelSmall
                     )
                 }
 
@@ -380,7 +382,7 @@ private fun ReadingHeaderCard(
             modifier = modifier
                 .fillMaxWidth()
                 .height(178.dp)
-                .padding(4.dp),
+                .padding(horizontal = 4.dp),
         ) {
             Box {
                 Cover(
@@ -412,27 +414,28 @@ private fun ReadingHeaderCard(
                             formTime(userReadingData.lastReadTime)
                         ),
                         color = MaterialTheme.colorScheme.secondary,
-                        fontSize = 14.sp,
+                        style = AppTypography.labelMedium,
                     )
                 }
-                val titleLineHeight = 24.sp
+                val textStyle = AppTypography.titleLarge
+                val textLineHeight = textStyle.lineHeight
                 Text(
                     modifier = Modifier
                         .height(
-                            with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                            with(LocalDensity.current) { (textLineHeight * 2.2f).toDp() }
                         )
                         .wrapContentHeight(Alignment.CenterVertically),
                     text = bookInformation.title,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.W700,
-                    fontSize = 19.sp,
-                    lineHeight = titleLineHeight,
+                    style = textStyle,
+                    lineHeight = textLineHeight,
                 )
                 Text(
                     text = userReadingData.lastReadChapterTitle,
                     maxLines = 1,
-                    fontSize = 14.sp,
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.W600
@@ -455,7 +458,6 @@ private fun ReadingHeaderCard(
                     }
                 }
             }
-
         }
     }
 }

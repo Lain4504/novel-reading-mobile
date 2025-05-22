@@ -27,6 +27,7 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.update.Release
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
@@ -53,6 +54,7 @@ fun UpdatesAvailableDialog(
         title = {
             Text(
                 text = stringResource(R.string.dialog_updates_available),
+                style = AppTypography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         },
@@ -73,7 +75,7 @@ fun UpdatesAvailableDialog(
                         item {
                             Text(
                                 text = stringResource(R.string.changelog),
-                                style = MaterialTheme.typography.titleMedium,
+                                style = AppTypography.titleMedium,
                             )
                         }
                         item {

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,13 +76,12 @@ fun EditBookshelfScreen(
                 value = bookshelf.name,
                 onValueChange = onNameChange,
                 label = { Text(stringResource(R.string.name)) },
-                placeholder = { Text(stringResource(R.string.bookshelf_name_placeholder)) },
                 supportingText = {
                     if (isNameEmpty) {
                         Text(
                             text = stringResource(R.string.bookshelf_name_placeholder),
                             color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = AppTypography.bodyMedium
                         )
                     }
                 },
@@ -103,10 +103,8 @@ fun EditBookshelfScreen(
             Text(
                 modifier = Modifier.padding(16.dp, 10.dp),
                 text = stringResource(R.string.bookshelf_settings),
-                style = MaterialTheme.typography.displayLarge,
+                style = AppTypography.titleSmall,
                 fontWeight = FontWeight.W600,
-                fontSize = 17.sp,
-                lineHeight = 16.sp,
                 letterSpacing = 0.5.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -167,7 +165,7 @@ private fun TopBar(
         title = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTypography.titleTopBar,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface
             )
