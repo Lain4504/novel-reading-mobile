@@ -189,8 +189,8 @@ fun DailyChart(
         StatsCard(
             title = "活动"
         ) {
-            val startedBooks = stats?.startedBooks.orEmpty()
-            val favoriteBooks = stats?.favoriteBooks.orEmpty()
+            val startedBooks = stats.startedBooks
+            val favoriteBooks = stats.favoriteBooks
             Column {
                 if (startedBooks.isNotEmpty()) {
                     Row(

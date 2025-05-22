@@ -13,7 +13,7 @@ object AppTypography {
 
     val bodyLarge = TextStyle(fontSize = 15.sp, lineHeight = 24.sp)
     val bodyMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp)
-    val bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 17.sp)
+//  val bodySmall = TextStyle(fontSize = 13.sp, lineHeight = 17.sp)
 
     val labelLarge = TextStyle(fontSize = 16.sp, lineHeight = 20.sp)
     val labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 18.sp)
