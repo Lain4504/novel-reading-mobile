@@ -49,6 +49,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -86,6 +87,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
+import kotlinx.coroutines.delay
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 
@@ -151,9 +153,19 @@ private fun Content(
     val lazyListState = rememberLazyListState()
     var scrolledY by remember { mutableFloatStateOf(0f) }
     var previousOffset by remember { mutableIntStateOf(0) }
+    var showEmptyPage by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.bookInformation.isEmpty()) {
+        if (uiState.bookInformation.isEmpty()) {
+            delay(300)
+            showEmptyPage = true
+        } else {
+            showEmptyPage = false
+        }
+    }
 
     AnimatedVisibility(
-        visible = uiState.bookInformation.isEmpty(),
+        visible = showEmptyPage,
         enter = fadeIn(),
         exit = fadeOut()
     ) {

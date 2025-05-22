@@ -1,6 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -91,23 +94,32 @@ fun StatsOverviewScreen(
             )
         }
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        Crossfade(
+            targetState = uiState.isLoading
+        ) { isLoading ->
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item { CalendarBlock(viewModel, onSelectedDate = {viewModel.selectDate(it)}) }
-                item { DailyStatsBlock(uiState, onClickDetailScreen) }
-                item { TotalStatsBlock(uiState) }
+            else {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        CalendarBlock(
+                            viewModel,
+                            onSelectedDate = { viewModel.selectDate(it) })
+                    }
+                    item { DailyStatsBlock(uiState, onClickDetailScreen) }
+                    item { TotalStatsBlock(uiState) }
+                }
             }
         }
     }

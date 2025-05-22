@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,6 +36,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +64,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -131,6 +138,38 @@ private fun ReadingContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
+    var showEmptyPage by remember { mutableStateOf(false) }
+
+    LaunchedEffect(recentReadingBookIds) {
+        if (recentReadingBookIds.isEmpty()) {
+            delay(800)
+            showEmptyPage = true
+        } else {
+            showEmptyPage = false
+        }
+    }
+
+    AnimatedVisibility(
+        visible = showEmptyPage,
+        enter = fadeIn(animationSpec = tween(durationMillis = 300)),
+        exit = fadeOut(animationSpec = tween(durationMillis = 300))
+    ) {
+        EmptyPage(
+            icon = painterResource(R.drawable.empty_90dp),
+            titleId = R.string.nothing_here,
+            descriptionId = R.string.nothing_here_desc_reading,
+            button = {
+                Button(onClick = onClickJumpToExploration) {
+                    Text(
+                        text = stringResource(id = R.string.navigate_to_explore),
+                        fontWeight = FontWeight.W500,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+        )
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -197,28 +236,6 @@ private fun ReadingContent(
         item {
             Spacer(Modifier.height(12.dp))
         }
-    }
-    AnimatedVisibility(
-        visible = recentReadingBookIds.isEmpty(),
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        EmptyPage(
-            icon = painterResource(R.drawable.empty_90dp),
-            titleId = R.string.nothing_here,
-            descriptionId = R.string.nothing_here_desc_reading,
-            button = {
-                Button(
-                    onClick = onClickJumpToExploration
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.navigate_to_explore),
-                        fontWeight = FontWeight.W500,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
-        )
     }
 }
 
