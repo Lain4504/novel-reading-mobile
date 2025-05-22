@@ -193,9 +193,8 @@ fun ExplorationSearchScreen(
                             ) {
                                 Text(
                                     text = stringResource(id = R.string.search_history),
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.W600,
-                                    lineHeight = 16.sp,
+                                    style = AppTypography.titleSmall,
+                                    fontWeight = FontWeight.W600
                                 )
 
                                 Box(Modifier.weight(2f))
@@ -210,9 +209,8 @@ fun ExplorationSearchScreen(
                                 ) {
                                     Text(
                                         text = stringResource(id = R.string.search_history_clear),
-                                        fontSize = 16.sp,
+                                        style = AppTypography.titleSmall,
                                         fontWeight = FontWeight.W600,
-                                        lineHeight = 16.sp,
                                     )
                                 }
                             }
@@ -240,7 +238,7 @@ fun ExplorationSearchScreen(
                                         Text(
                                             modifier = Modifier.padding(start = 8.dp),
                                             text = it,
-                                            fontSize = 16.sp,
+                                            style = AppTypography.labelLarge,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Box(Modifier.weight(2f))

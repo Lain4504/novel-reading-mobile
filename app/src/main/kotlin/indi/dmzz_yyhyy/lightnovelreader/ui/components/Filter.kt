@@ -151,9 +151,8 @@ fun BaseFilter(
             ) {
                 Text(
                     text = title,
-                    style = AppTypography.labelLarge,
+                    style = AppTypography.labelMedium,
                     fontWeight = FontWeight.W500,
-                    fontSize = 14.sp,
                     color = it
                 )
             }
@@ -223,9 +222,8 @@ fun FilterChipsDialog(
                             ) {
                                 Text(
                                     text = choice,
-                                    style = AppTypography.labelLarge,
+                                    style = AppTypography.labelMedium,
                                     fontWeight = FontWeight.W500,
-                                    fontSize = 14.sp,
                                     color = it
                                 )
                             }

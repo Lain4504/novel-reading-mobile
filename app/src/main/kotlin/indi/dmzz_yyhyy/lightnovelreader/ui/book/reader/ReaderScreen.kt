@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -517,7 +518,7 @@ fun ChapterSelectorBottomSheet(
 ) {
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val indexedItems = bookVolumes.volumes.flatMap { volume ->
+    val bookVolumesMap = bookVolumes.volumes.flatMap { volume ->
         listOf(volume to null) + volume.chapters.map { volume to it }
     }
 
@@ -527,7 +528,7 @@ fun ChapterSelectorBottomSheet(
     }
 
     LaunchedEffect(sheetState.currentValue == PartiallyExpanded && sheetState.currentValue != Expanded) {
-        val targetIndex = indexedItems.indexOfFirst { (_, chapter) ->
+        val targetIndex = bookVolumesMap.indexOfFirst { (_, chapter) ->
             chapter?.id == readingChapterId
         }
         if (targetIndex >= 0) {
@@ -566,7 +567,25 @@ fun ChapterSelectorBottomSheet(
                 },
                 state = lazyColumnState
             ) {
-                items(indexedItems) { (volume, chapter) ->
+                if (bookVolumesMap.isEmpty()) {
+                    item {
+                        AnimatedVisibility(
+                            visible = bookVolumesMap.isEmpty(),
+                            enter = expandVertically(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().height(300.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+                    }
+                    return@LazyColumn
+                }
+                items(bookVolumesMap) { (volume, chapter) ->
                     if (chapter == null) {
                         Box(
                             modifier = Modifier
@@ -588,7 +607,7 @@ fun ChapterSelectorBottomSheet(
                                     Text(
                                         text = volume.volumeTitle,
                                         fontWeight = FontWeight.W600,
-                                        fontSize = 16.sp,
+                                        style = AppTypography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
@@ -597,7 +616,7 @@ fun ChapterSelectorBottomSheet(
                                             volume.chapters.size
                                         ),
                                         color = MaterialTheme.colorScheme.secondary,
-                                        fontSize = 14.sp
+                                        style = AppTypography.labelMedium
                                     )
                                 }
                                 Box(Modifier.weight(2f))
@@ -639,7 +658,7 @@ fun ChapterSelectorBottomSheet(
                                         Text(
                                             text = chapter.title,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                            fontSize = 15.sp,
+                                            style = AppTypography.titleSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 2
                                         )

@@ -202,14 +202,12 @@ fun SliderDialog(
 
             Spacer(Modifier.height(16.dp))
 
-            // 优化后的Slider（处理精度问题）
             Slider(
                 modifier = Modifier.fillMaxWidth(),
                 value = value,
                 valueRange = valueRange,
                 steps = steps,
                 onValueChange = { newValue ->
-                    // 按步长取整处理（如果steps>0）
                     val adjustedValue = if (steps > 0) {
                         val stepSize = (valueRange.endInclusive - valueRange.start) / (steps + 1)
                         valueRange.start + round((newValue - valueRange.start) / stepSize) * stepSize

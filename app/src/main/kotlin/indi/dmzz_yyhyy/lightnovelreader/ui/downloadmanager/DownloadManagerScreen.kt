@@ -188,18 +188,15 @@ private fun Card(
                 text = bookInformation.title,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = AppTypography.bodyLarge,
-                fontWeight = FontWeight.W600,
-                fontSize = 16.sp
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.W600
             )
             Text(
                 text = bookInformation.author,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = AppTypography.titleMedium,
+                style = AppTypography.bodyMedium,
                 fontWeight = FontWeight.W500,
-                fontSize = 14.sp,
-                lineHeight = AppTypography.titleMedium.lineHeight,
                 letterSpacing = 0.15.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -219,9 +216,8 @@ private fun Card(
                         else "${downloadItem.type.typeName}完成",
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = AppTypography.titleMedium,
+                    style = AppTypography.bodyMedium,
                     fontWeight = FontWeight.W500,
-                    fontSize = 14.sp,
                     letterSpacing = 0.15.sp,
                     color = MaterialTheme.colorScheme.secondary
                 )

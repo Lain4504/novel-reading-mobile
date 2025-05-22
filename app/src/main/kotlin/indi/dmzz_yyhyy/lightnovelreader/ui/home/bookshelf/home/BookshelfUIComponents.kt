@@ -167,8 +167,6 @@ fun BookCardContent(
                     style = AppTypography.labelMedium
                 )
                 Text(
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
                     text = stringResource(
                         R.string.book_info_word_count_kilo,
                         bookInformation.wordCount / 1000

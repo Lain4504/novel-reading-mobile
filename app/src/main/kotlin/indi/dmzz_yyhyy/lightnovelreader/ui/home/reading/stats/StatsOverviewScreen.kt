@@ -1,9 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -144,7 +141,7 @@ private fun CalendarBlock(
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
         Text(
             text = "活动",
-            fontSize = 18.sp,
+            style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )
         Spacer(Modifier.height(8.dp))
@@ -178,7 +175,7 @@ private fun CalendarBlock(
         ) {
             Text(
                 text = "少",
-                fontSize = 12.sp
+                style = AppTypography.bodySmall
             )
             Spacer(Modifier.width(6.dp))
             Level.entries.forEach { level ->
@@ -187,7 +184,7 @@ private fun CalendarBlock(
             Spacer(Modifier.width(6.dp))
             Text(
                 text = "多 (${uiState.thresholds}+)",
-                fontSize = 12.sp
+                style = AppTypography.bodySmall
             )
         }
     }
@@ -211,7 +208,7 @@ private fun DailyStatsBlock(
         ) {
             AnimatedText(
                 text = selectedDate.toString(),
-                fontSize = 18.sp,
+                style = AppTypography.titleMedium,
                 fontWeight = FontWeight.W600
             )
             Spacer(Modifier.weight(1f))
@@ -381,14 +378,14 @@ private fun DataItem(leftText: String, rightText: String) {
         Text(
             modifier = Modifier.weight(1f),
             text = leftText,
-            fontSize = 14.sp,
+            style = AppTypography.bodyMedium,
             maxLines = 1,
             overflow = Ellipsis
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = rightText,
-            fontSize = 14.sp,
+            style = AppTypography.bodyMedium,
             color = MaterialTheme.colorScheme.outline,
             maxLines = 1
         )
@@ -408,7 +405,7 @@ fun TotalStatsBlock(
     ) {
         Text(
             text = "总统计",
-            fontSize = 18.sp,
+            style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )
         Spacer(Modifier.height(8.dp))
@@ -463,7 +460,7 @@ fun StatsCard(
         Box(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
-                fontSize = 15.sp,
+                style = AppTypography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 modifier = Modifier
@@ -583,6 +580,14 @@ private fun LevelBox(
 
 @Composable
 private fun WeekHeader(dayOfWeek: DayOfWeek) {
+    val text = if (dayOfWeek in listOf(
+            DayOfWeek.MONDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.FRIDAY,
+            DayOfWeek.SUNDAY
+        )
+    ) dayOfWeek.displayText() else ""
+
     Box(
         modifier = Modifier.height(20.dp)
     ) {
@@ -590,11 +595,10 @@ private fun WeekHeader(dayOfWeek: DayOfWeek) {
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(horizontal = 4.dp),
-            text = dayOfWeek.displayText(),
-            fontSize = 14.sp,
+            text = text,
+            style = AppTypography.titleVerySmall,
         )
     }
-
 }
 
 @Composable
@@ -614,7 +618,7 @@ private fun MonthHeader(
                 .fillMaxWidth()
                 .padding(horizontal = 4.dp),
         ) {
-            Text(text = title, fontSize = 12.sp)
+            Text(text = title, style = AppTypography.titleVerySmall)
         }
     }
 }

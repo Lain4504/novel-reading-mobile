@@ -137,15 +137,14 @@ fun EditBookshelfScreen(
                     headlineContent = {
                         Text(
                             text = stringResource(R.string.settings_delete_bookshelf),
-                            fontSize = 16.sp,
+                            style = AppTypography.titleMedium,
                             modifier = Modifier.padding(bottom = 2.dp)
                         )
                     },
                     supportingContent = {
                         Text(
                             text = stringResource(R.string.settings_delete_bookshelf_desc),
-                            fontSize = 14.sp,
-                            lineHeight = 15.sp
+                            style = AppTypography.bodyMedium
                         )
                     },
                 )
@@ -205,8 +204,8 @@ fun SwitchSettingItem(
 ) {
     ListItem(
         modifier = Modifier.clickable {onValueChange(!value)},
-        headlineContent = { Text(text = title, fontSize = 16.sp, modifier = Modifier.padding(bottom = 2.dp)) },
-        supportingContent = { Text(text = description, fontSize = 14.sp, lineHeight = 15.sp) },
+        headlineContent = { Text(text = title, style = AppTypography.titleMedium, modifier = Modifier.padding(bottom = 2.dp)) },
+        supportingContent = { Text(text = description, style = AppTypography.bodyMedium) },
         trailingContent = {
             Switch(
                 checked = value,

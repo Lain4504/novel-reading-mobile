@@ -248,7 +248,7 @@ fun ExplorationPage(
                         Text(
                             modifier = Modifier.weight(2f),
                             text = explorationBooksRow.title,
-                            fontSize = 17.sp,
+                            style = AppTypography.titleMedium,
                             fontWeight = FontWeight.W600,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -318,25 +318,31 @@ fun ExplorationPage(
                                     ) {
                                         val titleLineHeight = 16.sp
                                         Text(
-                                            modifier = Modifier.height(
-                                                with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
-                                            ).wrapContentHeight(Alignment.Top),
+                                            modifier = Modifier
+                                                .height(
+                                                    with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                                                )
+                                                .wrapContentHeight(Alignment.Top),
                                             text = explorationDisplayBook.title,
-                                            fontSize = 13.sp,
+                                            style = AppTypography.titleVerySmall.copy(
+                                                letterSpacing = 0.5.sp
+                                            ),
                                             lineHeight = titleLineHeight,
                                             fontWeight = FontWeight.W500,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis
                                         )
-                                        if (explorationDisplayBook.author.isNotEmpty())
+                                        if (explorationDisplayBook.author.isNotEmpty()) {
                                             Text(
                                                 text = explorationDisplayBook.author,
-                                                fontSize = 13.sp,
-                                                lineHeight = 18.sp,
+                                                style = AppTypography.titleVerySmall.copy(
+                                                    letterSpacing = 0.5.sp
+                                                ),
                                                 color = MaterialTheme.colorScheme.secondary,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
+                                        }
                                     }
                                 }
                             }
@@ -347,7 +353,8 @@ fun ExplorationPage(
                         }
                     }
                     Box(
-                        Modifier.fillMaxWidth()
+                        Modifier
+                            .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
                         HorizontalDivider()
