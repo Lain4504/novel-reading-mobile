@@ -101,6 +101,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.pinAction
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -295,9 +296,19 @@ fun BookshelfHomeScreen(
                     }
                 }
 
+                var showEmptyPage by remember { mutableStateOf(false) }
+                val allBookIds = uiState.selectedBookshelf.allBookIds
+                LaunchedEffect(allBookIds) {
+                    if (allBookIds.isEmpty()) {
+                        delay(140)
+                        showEmptyPage = true
+                    } else {
+                        showEmptyPage = false
+                    }
+                }
 
                 AnimatedVisibility(
-                    visible = uiState.selectedBookshelf.allBookIds.isEmpty(),
+                    visible = showEmptyPage,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {

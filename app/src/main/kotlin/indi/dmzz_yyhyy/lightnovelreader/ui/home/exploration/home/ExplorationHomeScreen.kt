@@ -43,6 +43,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,6 +76,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -139,8 +141,20 @@ fun ExplorationHomeScreen(
                             )
                         }
                     }
+
+                    var showEmptyPage by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(explorationHomeUiState.explorationPageBooksRawList) {
+                        if (explorationHomeUiState.explorationPageBooksRawList.isEmpty()) {
+                            delay(140)
+                            showEmptyPage = true
+                        } else {
+                            showEmptyPage = false
+                        }
+                    }
+
                     AnimatedVisibility(
-                        visible = explorationHomeUiState.explorationPageBooksRawList.isEmpty(),
+                        visible = showEmptyPage,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {

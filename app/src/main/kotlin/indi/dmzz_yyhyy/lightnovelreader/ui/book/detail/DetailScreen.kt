@@ -157,7 +157,7 @@ private fun Content(
 
     LaunchedEffect(uiState.bookInformation.isEmpty()) {
         if (uiState.bookInformation.isEmpty()) {
-            delay(300)
+            delay(140)
             showEmptyPage = true
         } else {
             showEmptyPage = false

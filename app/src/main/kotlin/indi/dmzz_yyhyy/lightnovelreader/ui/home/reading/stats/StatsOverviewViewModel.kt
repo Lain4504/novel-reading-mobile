@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.utils.DurationFormat
 import indi.dmzz_yyhyy.lightnovelreader.utils.quickSelect
@@ -78,26 +79,48 @@ class StatsOverviewViewModel @Inject constructor(
 
     private fun getDateDetails(selectedDate: LocalDate) {
         val records = _uiState.bookRecordsByDate[selectedDate] ?: emptyList()
+        if (records.isEmpty()) {
+            _uiState.selectedDateDetails = null
+            return
+        }
         val dateFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-        val totalDuration = records.sumOf { it.totalTime }.toDuration(DurationUnit.SECONDS)
-        val formattedTotalTime = DurationFormat().format(totalDuration, DurationFormat.Unit.SECOND)
-        val timeDetails = records.map { record ->
-            val book = _uiState.bookInformationMap[record.bookId] ?: BookInformation.empty()
-            val time = record.totalTime
-            book to time
-        }.toMutableList()
-        val firstRecord = records.minByOrNull { it.firstSeen }
-        val lastRecord = records.maxByOrNull { it.lastSeen }
+        var totalSeconds = 0L
+        var firstRecord: BookRecordEntity? = null
+        var lastRecord: BookRecordEntity? = null
+        val detailsList = mutableListOf<Pair<BookInformation, Int>>()
+
+        for (rec in records) {
+            totalSeconds += rec.totalTime
+
+            if (firstRecord == null || rec.firstSeen.isBefore(firstRecord.firstSeen)) {
+                firstRecord = rec
+            }
+            if (lastRecord == null || rec.lastSeen.isAfter(lastRecord.lastSeen)) {
+                lastRecord = rec
+            }
+
+            val bookInfo = _uiState.bookInformationMap[rec.bookId] ?: BookInformation.empty()
+            detailsList += bookInfo to rec.totalTime
+        }
+
+        val sortedDetails = detailsList
+            .sortedByDescending { it.second }
+            .toMutableList()
+
+        val formattedTotal = DurationFormat()
+            .format(totalSeconds.toDuration(DurationUnit.SECONDS), DurationFormat.Unit.SECOND)
+
         _uiState.selectedDateDetails = DailyDateDetails(
-            formattedTotalTime = formattedTotalTime,
-            timeDetails = timeDetails,
-            firstBook = firstRecord?.let { _uiState.bookInformationMap[it.bookId] },
-            firstSeenTime = firstRecord?.firstSeen?.format(dateFormatter),
-            lastBook = lastRecord?.let { _uiState.bookInformationMap[it.bookId] },
-            lastSeenTime = lastRecord?.lastSeen?.format(dateFormatter)
+            formattedTotalTime = formattedTotal,
+            timeDetails = sortedDetails,
+            firstBook      = firstRecord?.let { _uiState.bookInformationMap[it.bookId] },
+            firstSeenTime  = firstRecord?.firstSeen?.format(dateFormatter),
+            lastBook       = lastRecord?.let  { _uiState.bookInformationMap[it.bookId] },
+            lastSeenTime   = lastRecord?.lastSeen?.format(dateFormatter)
         )
     }
+
 
     private suspend fun generateLevelMap(
         startDate: LocalDate,

@@ -142,7 +142,7 @@ private fun ReadingContent(
 
     LaunchedEffect(recentReadingBookIds) {
         if (recentReadingBookIds.isEmpty()) {
-            delay(800)
+            delay(140)
             showEmptyPage = true
         } else {
             showEmptyPage = false

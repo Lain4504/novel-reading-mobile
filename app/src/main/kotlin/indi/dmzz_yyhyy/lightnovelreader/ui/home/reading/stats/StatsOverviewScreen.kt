@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
@@ -315,26 +314,43 @@ private fun computeDailyDetails(
 
     val dateFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-    val totalDuration = records.sumOf { it.totalTime }.toDuration(DurationUnit.SECONDS)
-    val formattedTotalTime = DurationFormat().format(totalDuration, DurationFormat.Unit.SECOND)
+    var totalSeconds = 0L
+    var firstRecord: BookRecordEntity? = null
+    var lastRecord: BookRecordEntity? = null
+    val timeDetailsList = mutableListOf<Pair<BookInformation, Int>>()
 
-    val timeDetails = records.map { record ->
-        val book = bookInfoMap[record.bookId] ?: MutableBookInformation.empty().apply { title = "..." }
-        book to record.totalTime
+    for (rec in records) {
+        totalSeconds += rec.totalTime
+
+        if (firstRecord == null || rec.firstSeen.isBefore(firstRecord.firstSeen)) {
+            firstRecord = rec
+        }
+
+        if (lastRecord == null || rec.lastSeen.isAfter(lastRecord.lastSeen)) {
+            lastRecord = rec
+        }
+
+        val book = bookInfoMap[rec.bookId] ?: BookInformation.empty()
+        timeDetailsList.add(book to rec.totalTime)
     }
 
-    val firstRecord = records.minByOrNull { it.firstSeen }
-    val lastRecord = records.maxByOrNull { it.lastSeen }
+    val sortedTimeDetails = timeDetailsList.sortedByDescending { it.second }
+
+    val formattedTotalTime = DurationFormat().format(
+        totalSeconds.toDuration(DurationUnit.SECONDS),
+        DurationFormat.Unit.SECOND
+    )
 
     return DailyDateDetails(
         formattedTotalTime = formattedTotalTime,
-        timeDetails = timeDetails,
+        timeDetails = sortedTimeDetails,
         firstBook = firstRecord?.let { bookInfoMap[it.bookId] },
         firstSeenTime = firstRecord?.firstSeen?.format(dateFormatter),
         lastBook = lastRecord?.let { bookInfoMap[it.bookId] },
         lastSeenTime = lastRecord?.lastSeen?.format(dateFormatter)
     )
 }
+
 
 @Composable
 private fun StatSection(
@@ -354,13 +370,13 @@ private fun StatSection(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = title,
-                style = AppTypography.bodyMedium,
+                style = AppTypography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.weight(1f))
             Text(
                 text = value,
-                style = AppTypography.bodyMedium,
+                style = AppTypography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
