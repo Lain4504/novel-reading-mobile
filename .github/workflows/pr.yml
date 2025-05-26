@@ -1,5 +1,6 @@
 name: DebugApkBuild
 on:
+  merge_group:
   pull_request:
     branches: [master, refactoring]
     paths:
