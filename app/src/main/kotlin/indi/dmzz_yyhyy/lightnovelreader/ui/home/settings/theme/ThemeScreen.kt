@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.theme.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.selectDataFile
@@ -115,7 +116,7 @@ fun DarkModeSettings(
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         text = stringResource(R.string.app_settings),
-        fontSize = 15.sp,
+        style = AppTypography.titleSmall,
         fontWeight = FontWeight.W600
     )
     Row(
@@ -136,7 +137,7 @@ fun DarkModeSettings(
                     selected = settingState.darkModeKey == "Disabled",
                     onClick = { settingState.darkModeKeyUserData.asynchronousSet("Disabled") }
                 )
-                Text(stringResource(R.string.key_dark_mode_disabled), fontSize = 15.sp)
+                Text(stringResource(R.string.key_dark_mode_disabled), style = AppTypography.labelMedium)
             }
         }
 
@@ -152,7 +153,7 @@ fun DarkModeSettings(
                     selected = settingState.darkModeKey == "Enabled",
                     onClick = { settingState.darkModeKeyUserData.asynchronousSet("Enabled") }
                 )
-                Text(stringResource(R.string.key_dark_mode_enabled), fontSize = 15.sp)
+                Text(stringResource(R.string.key_dark_mode_enabled), style = AppTypography.labelMedium)
             }
         }
 
@@ -207,7 +208,7 @@ fun DarkModeSettings(
                     selected = settingState.darkModeKey == "FollowSystem",
                     onClick = { settingState.darkModeKeyUserData.asynchronousSet("FollowSystem") }
                 )
-                Text(stringResource(R.string.key_dark_mode_follow_system), fontSize = 15.sp)
+                Text(stringResource(R.string.key_dark_mode_follow_system), style = AppTypography.labelMedium)
             }
         }
     }
@@ -263,7 +264,7 @@ fun ReaderThemeSettingsList(
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         text = stringResource(R.string.paper_settings),
-        fontSize = 15.sp,
+        style = AppTypography.titleSmall,
         fontWeight = FontWeight.W600
     )
     SettingsSwitchEntry(
@@ -282,8 +283,8 @@ fun ReaderThemeSettingsList(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(stringResource(R.string.settings_theme_bg_image_built_in), fontSize = 16.sp)
-                    Text(stringResource(R.string.settings_theme_bg_image_built_in_desc), fontSize = 14.sp, color = colorScheme.secondary)
+                    Text(stringResource(R.string.settings_theme_bg_image_built_in), style = AppTypography.titleMedium)
+                    Text(stringResource(R.string.settings_theme_bg_image_built_in_desc), style = AppTypography.labelMedium, color = colorScheme.secondary)
                 }
                 Spacer(Modifier.weight(1f))
                 RadioButton(
@@ -300,7 +301,7 @@ fun ReaderThemeSettingsList(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(stringResource(R.string.settings_theme_bg_image_custom), fontSize = 16.sp)
+                    Text(stringResource(R.string.settings_theme_bg_image_custom), style = AppTypography.titleMedium)
                 }
                 Spacer(Modifier.weight(1f))
 
@@ -338,28 +339,7 @@ fun ReaderThemeSettingsList(
                 )
             }
             Spacer(Modifier.height(12.dp))
-            if (customBgIsEmpty) {
-                BasePageItem(
-                    modifier = Modifier
-                        .widthIn(max = 400.dp)
-                        .height(170.dp)
-                ) {
-                    Box (
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(9.dp))
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            modifier = Modifier.fillMaxSize(),
-                            painter = rememberAsyncImagePainter(R.drawable.paper),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-            } else if (
+            if (
                 settingState.backgroundImageUri.toString().isNotBlank()
                 || settingState.backgroundDarkImageUri.toString().isNotBlank()
                 ) {
@@ -484,7 +464,7 @@ fun ReaderThemeSettingsList(
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         text = stringResource(R.string.text_settings),
-        fontSize = 15.sp,
+        style = AppTypography.titleSmall,
         fontWeight = FontWeight.W600
     )
     Spacer(Modifier.height(12.dp))
@@ -714,8 +694,7 @@ fun BackgroundImageSettingItem(
                     modifier = Modifier.fillMaxSize(),
                     painter = rememberAsyncImagePainter(uri),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
-
+                    contentScale = ContentScale.Crop
                 )
             }
 

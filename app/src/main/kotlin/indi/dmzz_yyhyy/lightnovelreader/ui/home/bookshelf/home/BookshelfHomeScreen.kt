@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,6 +93,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
@@ -101,6 +101,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.pinAction
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -295,9 +296,19 @@ fun BookshelfHomeScreen(
                     }
                 }
 
+                var showEmptyPage by remember { mutableStateOf(false) }
+                val allBookIds = uiState.selectedBookshelf.allBookIds
+                LaunchedEffect(allBookIds) {
+                    if (allBookIds.isEmpty()) {
+                        delay(140)
+                        showEmptyPage = true
+                    } else {
+                        showEmptyPage = false
+                    }
+                }
 
                 AnimatedVisibility(
-                    visible = uiState.selectedBookshelf.allBookIds.isEmpty(),
+                    visible = showEmptyPage,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
@@ -336,9 +347,6 @@ fun LazyListScope.UpdatedBooks(
 ) {
     val updatedBookIds = uiState.selectedBookshelf.updatedBookIds.reversed()
     if (updatedBookIds.isEmpty()) return
-    item {
-        Spacer(Modifier.height(8.dp))
-    }
     stickyHeader {
         CollapseGroupTitle(
             modifier = Modifier.animateItem(),
@@ -369,10 +377,8 @@ fun LazyListScope.UpdatedBooks(
                         else onSelectedChange(it.id) },
                     onLongPress = { }
                 )
-
             }
         }
-
     }
 }
 
@@ -385,7 +391,18 @@ fun LazyListScope.PinnedBooks(
 ) {
     val pinnedBookIds = uiState.selectedBookshelf.pinnedBookIds.reversed()
     if (pinnedBookIds.isEmpty()) return
-
+    stickyHeader {
+        CollapseGroupTitle(
+            modifier = Modifier.animateItem(),
+            icon = painterResource(R.drawable.keep_24px),
+            title = stringResource(
+                R.string.bookshelf_group_title_pinned,
+                pinnedBookIds.size
+            ),
+            expanded = uiState.pinnedExpanded,
+            onClickExpand = { uiState.pinnedExpanded = !uiState.pinnedExpanded }
+        )
+    }
     items(pinnedBookIds) { pinnedBookId ->
         AnimatedVisibility(
             visible = uiState.pinnedExpanded,
@@ -407,7 +424,6 @@ fun LazyListScope.PinnedBooks(
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -420,9 +436,6 @@ fun LazyListScope.AllBooks(
 ) {
     val allBookIds = uiState.selectedBookshelf.allBookIds.reversed()
     if (allBookIds.isEmpty()) return
-    item {
-        Spacer(Modifier.height(8.dp))
-    }
     stickyHeader {
         CollapseGroupTitle(
             modifier = Modifier.animateItem(),
@@ -466,13 +479,12 @@ fun LazyListScope.AllBooks(
             Text(
                 modifier = Modifier.padding(vertical = 18.dp),
                 text = "${allBookIds.size} 本书",
-                fontSize = 14.sp,
+                style = AppTypography.labelMedium,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.outline
             )
         }
     }
-
 }
 
 @Composable
@@ -500,10 +512,8 @@ fun CollapseGroupTitle(
             AnimatedText(
                 modifier = Modifier.weight(2f),
                 text = title,
-                style = MaterialTheme.typography.displayLarge,
+                style = AppTypography.titleSmall,
                 fontWeight = FontWeight.W600,
-                fontSize = 15.sp,
-                lineHeight = 16.sp,
                 letterSpacing = 0.5.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -567,7 +577,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.bookshelf_create_title),
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = AppTypography.bodyLarge
                         )
                     },
                     onClick = onClickCreate
@@ -576,7 +586,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.bookshelf_settings),
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = AppTypography.bodyLarge
                         )
                     },
                     onClick = onClickEdit
@@ -585,7 +595,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.share_bookshelf),
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = AppTypography.bodyLarge
                         )
                     },
                     onClick = onClickShareBookshelf
@@ -594,7 +604,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.import_and_export),
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = AppTypography.bodyLarge
                         )
                     },
                     trailingIcon = {
@@ -626,7 +636,10 @@ fun TopBar(
                 onDismissRequest = { exportImportMenuExpended = false }
             ) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.export_to_lnr_file)) },
+                    text = { Text(
+                        text = stringResource(R.string.export_to_lnr_file),
+                        style = AppTypography.bodyLarge
+                    ) },
                     onClick = {
                         onClickSaveThisBookshelf()
                         exportImportMenuExpended = false
@@ -634,7 +647,10 @@ fun TopBar(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.export_all_to_lnr_file)) },
+                    text = { Text(
+                        text = stringResource(R.string.export_all_to_lnr_file),
+                        style = AppTypography.bodyLarge
+                    ) },
                     onClick = {
                         onClickSaveAllBookshelf()
                         exportImportMenuExpended = false
@@ -642,7 +658,10 @@ fun TopBar(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.import_from_file)) },
+                    text = { Text(
+                        text = stringResource(R.string.import_from_file),
+                        style = AppTypography.bodyLarge
+                    ) },
                     onClick = {
                         onClickImportBookshelf()
                         exportImportMenuExpended = false
@@ -658,8 +677,7 @@ fun TopBar(
             AnimatedText(
                 text = if (selectMode) stringResource(R.string.nav_bookshelf_select_mode, uiState.selectedBookIds.size)
                     else stringResource(R.string.nav_bookshelf),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.W600,
+                style = AppTypography.titleTopBar,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -724,10 +742,10 @@ fun TopBar(
         },
         windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
+        colors = if (uiState.selectMode) TopAppBarDefaults.mediumTopAppBarColors(
             containerColor = backgroundColor,
             scrolledContainerColor = backgroundColor
-        )
+        ) else TopAppBarDefaults.topAppBarColors()
     )
 }
 

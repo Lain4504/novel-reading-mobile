@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
@@ -74,11 +75,10 @@ fun SettingsBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .padding(top = 16.dp)
         ) {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTypography.titleLarge,
                 text = stringResource(R.string.reader_settings),
                 fontWeight = FontWeight.W600
             )

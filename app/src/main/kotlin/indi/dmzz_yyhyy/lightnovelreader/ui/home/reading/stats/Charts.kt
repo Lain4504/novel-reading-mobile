@@ -25,11 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import com.himanshoe.charty.bar.BarChart
 import com.himanshoe.charty.bar.StackedBarChart
@@ -46,6 +43,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -145,10 +143,7 @@ fun ReadTimeStackedBarChart(
                 showXLabel = data.size < 8,
                 xAxisCharCount = 5,
                 showYLabel = true,
-                labelTextStyle = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.W500,
-                ),
+                labelTextStyle = AppTypography.bodySmall,
                 textColor = colorScheme.secondary.asSolidChartColor()
             ),
             barChartColorConfig = BarChartColorConfig.default().copy(
@@ -177,7 +172,7 @@ fun ReadTimeStackedBarChart(
                     )
                     Text(
                         text = bookInformationMap[bookId]?.title ?: "...",
-                        fontSize = 13.sp,
+                        style = AppTypography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -198,7 +193,7 @@ fun ReadTimeStackedBarChart(
                     )
                     Text(
                         text = stringResource(R.string.others),
-                        fontSize = 13.sp,
+                        style = AppTypography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -248,10 +243,8 @@ fun LastNDaysChart(
             showXLabel = data.size < 8,
             xAxisCharCount = 5,
             showYLabel = true,
-            labelTextStyle = TextStyle(
-                color = colorScheme.secondary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.W500,
+            labelTextStyle = AppTypography.bodySmall.copy(
+                color = colorScheme.secondary
             )
         ),
         barChartColorConfig = BarChartColorConfig.default().copy(
@@ -317,7 +310,7 @@ fun DailyBarChart(
                     )
                     Text(
                         text = it.name,
-                        fontSize = 13.sp,
+                        style = AppTypography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

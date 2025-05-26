@@ -31,6 +31,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.Filter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SliderFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SwitchFilter
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 
 @Composable
 fun Filter.Component(dialog: (@Composable () -> Unit) -> Unit) {
@@ -150,9 +151,8 @@ fun BaseFilter(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTypography.labelMedium,
                     fontWeight = FontWeight.W500,
-                    fontSize = 14.sp,
                     color = it
                 )
             }
@@ -222,9 +222,8 @@ fun FilterChipsDialog(
                             ) {
                                 Text(
                                     text = choice,
-                                    style = MaterialTheme.typography.labelLarge,
+                                    style = AppTypography.labelMedium,
                                     fontWeight = FontWeight.W500,
-                                    fontSize = 14.sp,
                                     color = it
                                 )
                             }

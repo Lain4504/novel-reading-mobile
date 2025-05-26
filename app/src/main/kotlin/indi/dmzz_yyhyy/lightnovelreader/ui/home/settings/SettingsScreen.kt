@@ -50,10 +50,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.work.OneTimeWorkRequest
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.AboutSettingsList
@@ -157,8 +157,7 @@ private fun TopBar(
         title = {
             Text(
                 text = stringResource(R.string.nav_settings),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.W600,
+                style = AppTypography.titleTopBar,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -217,9 +216,8 @@ fun SettingsCategory(
 
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = AppTypography.titleLarge,
                     fontWeight = FontWeight.W600,
-                    fontSize = 18.sp,
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 14.dp)

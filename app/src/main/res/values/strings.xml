@@ -60,7 +60,7 @@
     <string name="settings_github_proxy">GitHub Proxy</string>
     <string name="settings_github_proxy_desc">Choose a GitHub proxy for faster access, if applicable</string>
 
-    <string name="reader_settings">Reader</string>
+    <string name="reader_settings">Reader Settings</string>
     <string name="settings_reader_font_size">Font Size</string>
     <string name="settings_reader_line_spacing">Line Spacing</string>
     <string name="settings_reader_keep_screen_on">Keep Screen On</string>

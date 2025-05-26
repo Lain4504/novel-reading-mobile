@@ -43,6 +43,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +68,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
@@ -74,6 +76,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -138,8 +141,20 @@ fun ExplorationHomeScreen(
                             )
                         }
                     }
+
+                    var showEmptyPage by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(explorationHomeUiState.explorationPageBooksRawList) {
+                        if (explorationHomeUiState.explorationPageBooksRawList.isEmpty()) {
+                            delay(140)
+                            showEmptyPage = true
+                        } else {
+                            showEmptyPage = false
+                        }
+                    }
+
                     AnimatedVisibility(
-                        visible = explorationHomeUiState.explorationPageBooksRawList.isEmpty(),
+                        visible = showEmptyPage,
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -177,7 +192,7 @@ fun TopBar(
         title = {
             Text(
                 text = stringResource(id = R.string.nav_explore),
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTypography.titleTopBar,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -247,7 +262,7 @@ fun ExplorationPage(
                         Text(
                             modifier = Modifier.weight(2f),
                             text = explorationBooksRow.title,
-                            fontSize = 17.sp,
+                            style = AppTypography.titleMedium,
                             fontWeight = FontWeight.W600,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -317,25 +332,31 @@ fun ExplorationPage(
                                     ) {
                                         val titleLineHeight = 16.sp
                                         Text(
-                                            modifier = Modifier.height(
-                                                with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
-                                            ).wrapContentHeight(Alignment.Top),
+                                            modifier = Modifier
+                                                .height(
+                                                    with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                                                )
+                                                .wrapContentHeight(Alignment.Top),
                                             text = explorationDisplayBook.title,
-                                            fontSize = 13.sp,
+                                            style = AppTypography.titleVerySmall.copy(
+                                                letterSpacing = 0.5.sp
+                                            ),
                                             lineHeight = titleLineHeight,
                                             fontWeight = FontWeight.W500,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis
                                         )
-                                        if (explorationDisplayBook.author.isNotEmpty())
+                                        if (explorationDisplayBook.author.isNotEmpty()) {
                                             Text(
                                                 text = explorationDisplayBook.author,
-                                                fontSize = 13.sp,
-                                                lineHeight = 18.sp,
+                                                style = AppTypography.titleVerySmall.copy(
+                                                    letterSpacing = 0.5.sp
+                                                ),
                                                 color = MaterialTheme.colorScheme.secondary,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
+                                        }
                                     }
                                 }
                             }
@@ -346,7 +367,8 @@ fun ExplorationPage(
                         }
                     }
                     Box(
-                        Modifier.fillMaxWidth()
+                        Modifier
+                            .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
                         HorizontalDivider()

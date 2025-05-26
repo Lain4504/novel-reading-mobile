@@ -20,7 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -45,11 +44,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.DailyBarChart
@@ -162,13 +161,13 @@ fun StatsCard(
             Column {
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    style = AppTypography.titleMedium,
                     fontWeight = FontWeight.W600
                 )
                 if (subTitle != null) {
                     Text(
                         text = subTitle,
-                        fontSize = 15.sp,
+                        style = AppTypography.titleSmall,
                         color = colorScheme.secondary
                     )
                 }
@@ -213,7 +212,7 @@ fun DailyChart(
                         ) {
                             Text(
                                 text = stringResource(R.string.activity_first_read),
-                                fontSize = 14.sp,
+                                style = AppTypography.titleSmall,
                                 fontWeight = FontWeight.W500
                             )
                             val displayedTitles = startedBooks.take(2).mapNotNull { bookId ->
@@ -223,9 +222,8 @@ fun DailyChart(
                             }
                             Text(
                                 text = if (displayedTitles.size == 1) displayedTitles[0]
-                                    else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
-                                fontSize = 13.sp,
-                                lineHeight = 16.sp,
+                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
+                                style = AppTypography.labelSmall,
                                 maxLines = 2,
                                 color = colorScheme.secondary,
                                 overflow = TextOverflow.Ellipsis
@@ -260,7 +258,7 @@ fun DailyChart(
                         ) {
                             Text(
                                 text = stringResource(R.string.activity_collections),
-                                fontSize = 14.sp,
+                                style = AppTypography.titleSmall,
                                 fontWeight = FontWeight.W500
                             )
                             val displayedTitles = favoriteBooks.take(2).mapNotNull { bookId ->
@@ -270,9 +268,8 @@ fun DailyChart(
                             }
                             Text(
                                 text = if (displayedTitles.size == 1) displayedTitles[0]
-                                else displayedTitles.joinToString("、\n") + stringResource(R.string.activity_etc),
-                                fontSize = 13.sp,
-                                lineHeight = 16.sp,
+                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
+                                style = AppTypography.labelSmall,
                                 maxLines = 2,
                                 color = colorScheme.secondary,
                                 overflow = TextOverflow.Ellipsis
@@ -458,16 +455,15 @@ private fun TopBar(
             Column {
                 Text(
                     text = stringResource(R.string.detail_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.W600,
+                    style = AppTypography.titleTopBar,
                     color = colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 AnimatedText(
                     text = if (dateRange.first == dateRange.second) dateRange.second.toString()
-                        else "${dateRange.first} " + stringResource(R.string.to) + " ${dateRange.second} ",
-                    style = MaterialTheme.typography.titleSmall,
+                    else "${dateRange.first} " + stringResource(R.string.to) + " ${dateRange.second} ",
+                    style = AppTypography.titleSubTopBar,
                     color = colorScheme.onSurfaceVariant
                 )
             }
