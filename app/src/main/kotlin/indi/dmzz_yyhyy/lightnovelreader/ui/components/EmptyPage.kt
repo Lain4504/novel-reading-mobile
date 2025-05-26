@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 
 @Composable
 fun EmptyPage(
@@ -57,15 +57,14 @@ fun EmptyPage(
             Spacer(Modifier.height(42.dp))
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineSmall,
+                style = AppTypography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 text = description,
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
+                style = AppTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.secondary,
             )
             if (button != {}) { Spacer(Modifier.height(35.dp)) }

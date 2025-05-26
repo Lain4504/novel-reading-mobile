@@ -1,9 +1,13 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadItem
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
@@ -50,8 +56,8 @@ fun DownloadManagerScreen(
                 title = {
                     Text(
                         text = "书本管理",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.W700
+                        style = AppTypography.titleTopBar,
+                        fontWeight = FontWeight.W600
                     )
                 },
                 navigationIcon = {
@@ -90,7 +96,7 @@ private fun Content(
             description = "无正在下载的内容",
         )
     LazyColumn(
-        modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
+        modifier = Modifier.padding(horizontal = 18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         if (downloadItemIdList.any { it.progress < 1f })
@@ -98,7 +104,7 @@ private fun Content(
                 Text(
                     modifier = Modifier.height(34.dp).animateItem(),
                     text = "进行中",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = AppTypography.bodyLarge,
                     fontWeight = FontWeight.W600
                 )
             }
@@ -122,16 +128,15 @@ private fun Content(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        modifier = Modifier.height(34.dp).weight(1f),
                         text = "已完成",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = AppTypography.bodyLarge,
                         fontWeight = FontWeight.W600
                     )
+                    Spacer(Modifier.weight(1f))
                     TextButton(onClickClearCompleted) {
                         Text(
-                            modifier = Modifier.height(34.dp),
                             text = "全部清除",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = AppTypography.bodyLarge,
                             fontWeight = FontWeight.W600,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -161,6 +166,10 @@ private fun Card(
     downloadItem: DownloadItem,
     onClickCancel: () -> Unit
 ) {
+    val progressAnim by animateFloatAsState(
+        targetValue = downloadItem.progress,
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+    )
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -179,18 +188,15 @@ private fun Card(
                 text = bookInformation.title,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.W600,
-                fontSize = 16.sp
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.W600
             )
             Text(
                 text = bookInformation.author,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
+                style = AppTypography.bodyMedium,
                 fontWeight = FontWeight.W500,
-                fontSize = 14.sp,
-                lineHeight = MaterialTheme.typography.titleLarge.lineHeight,
                 letterSpacing = 0.15.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -210,9 +216,8 @@ private fun Card(
                         else "${downloadItem.type.typeName}完成",
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = AppTypography.bodyMedium,
                     fontWeight = FontWeight.W500,
-                    fontSize = 14.sp,
                     letterSpacing = 0.15.sp,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -220,7 +225,7 @@ private fun Card(
             if (downloadItem.progress < 1)
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
-                    progress = { downloadItem.progress },
+                    progress = { progressAnim },
                 )
         }
         if (downloadItem.progress < 1)

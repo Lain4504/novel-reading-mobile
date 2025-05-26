@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogEntry
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogLevel
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -88,8 +89,16 @@ fun LogcatScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("日志", style = MaterialTheme.typography.titleLarge)
-                        AnimatedTextLine(uiState.selectedLogFile, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            text = "日志",
+                            style = AppTypography.titleTopBar
+                        )
+                        AnimatedTextLine(
+                            text = uiState.selectedLogFile,
+                            style = AppTypography.titleSubTopBar,
+                            color = MaterialTheme.colorScheme.secondary,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 },
                 navigationIcon = {
@@ -188,7 +197,7 @@ fun LogcatScreen(
                                                 if (subText.isNotEmpty()) {
                                                     Text(
                                                         text = subText,
-                                                        style = MaterialTheme.typography.bodySmall,
+                                                        style = AppTypography.bodyLarge,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                         maxLines = 1,
                                                         overflow = TextOverflow.Ellipsis
@@ -219,10 +228,10 @@ fun LogcatScreen(
                             DropdownMenuItem(
                                 text = {
                                     Column {
-                                        Text("删除所有临时日志", style = MaterialTheme.typography.titleMedium)
+                                        Text("删除所有临时日志", style = AppTypography.titleMedium)
                                         Text(
                                             text = "清除应用缓存时，这些临时日志也将被删除",
-                                            style = MaterialTheme.typography.bodyMedium,
+                                            style = AppTypography.bodyLarge,
                                             color = MaterialTheme.colorScheme.secondary
                                         )
                                     }
@@ -238,7 +247,10 @@ fun LogcatScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                                     ) {
-                                        Text("自动滚动", style = MaterialTheme.typography.titleMedium)
+                                        Text(
+                                            text = "自动滚动",
+                                            style = AppTypography.bodyLarge
+                                        )
                                         Spacer(Modifier.weight(1f))
                                         Switch(
                                             checked = autoScrollEnabled,
@@ -257,7 +269,10 @@ fun LogcatScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                                     ) {
-                                        Text("自动换行", style = MaterialTheme.typography.titleMedium)
+                                        Text(
+                                            text = "自动换行",
+                                            style = AppTypography.bodyLarge
+                                        )
                                         Spacer(Modifier.weight(1f))
                                         Switch(
                                             checked = unwrapLogsText,

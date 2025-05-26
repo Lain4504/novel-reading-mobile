@@ -54,8 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarDay
@@ -90,23 +90,32 @@ fun StatsOverviewScreen(
             )
         }
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        Crossfade(
+            targetState = uiState.isLoading
+        ) { isLoading ->
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item { CalendarBlock(viewModel, onSelectedDate = {viewModel.selectDate(it)}) }
-                item { DailyStatsBlock(uiState, onClickDetailScreen) }
-                item { TotalStatsBlock(uiState) }
+            else {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        CalendarBlock(
+                            viewModel,
+                            onSelectedDate = { viewModel.selectDate(it) })
+                    }
+                    item { DailyStatsBlock(uiState, onClickDetailScreen) }
+                    item { TotalStatsBlock(uiState) }
+                }
             }
         }
     }
@@ -131,7 +140,7 @@ private fun CalendarBlock(
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
         Text(
             text = "活动",
-            fontSize = 18.sp,
+            style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )
         Spacer(Modifier.height(8.dp))
@@ -165,7 +174,7 @@ private fun CalendarBlock(
         ) {
             Text(
                 text = "少",
-                fontSize = 12.sp
+                style = AppTypography.bodySmall
             )
             Spacer(Modifier.width(6.dp))
             Level.entries.forEach { level ->
@@ -174,7 +183,7 @@ private fun CalendarBlock(
             Spacer(Modifier.width(6.dp))
             Text(
                 text = "多 (${uiState.thresholds}+)",
-                fontSize = 12.sp
+                style = AppTypography.bodySmall
             )
         }
     }
@@ -198,7 +207,7 @@ private fun DailyStatsBlock(
         ) {
             AnimatedText(
                 text = selectedDate.toString(),
-                fontSize = 18.sp,
+                style = AppTypography.titleMedium,
                 fontWeight = FontWeight.W600
             )
             Spacer(Modifier.weight(1f))
@@ -293,7 +302,7 @@ private fun NoRecords() {
         modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-        style = MaterialTheme.typography.bodyMedium
+        style = AppTypography.bodyMedium
     )
 }
 
@@ -305,26 +314,43 @@ private fun computeDailyDetails(
 
     val dateFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-    val totalDuration = records.sumOf { it.totalTime }.toDuration(DurationUnit.SECONDS)
-    val formattedTotalTime = DurationFormat().format(totalDuration, DurationFormat.Unit.SECOND)
+    var totalSeconds = 0L
+    var firstRecord: BookRecordEntity? = null
+    var lastRecord: BookRecordEntity? = null
+    val timeDetailsList = mutableListOf<Pair<BookInformation, Int>>()
 
-    val timeDetails = records.map { record ->
-        val book = bookInfoMap[record.bookId] ?: MutableBookInformation.empty().apply { title = "..." }
-        book to record.totalTime
+    for (rec in records) {
+        totalSeconds += rec.totalTime
+
+        if (firstRecord == null || rec.firstSeen.isBefore(firstRecord.firstSeen)) {
+            firstRecord = rec
+        }
+
+        if (lastRecord == null || rec.lastSeen.isAfter(lastRecord.lastSeen)) {
+            lastRecord = rec
+        }
+
+        val book = bookInfoMap[rec.bookId] ?: BookInformation.empty()
+        timeDetailsList.add(book to rec.totalTime)
     }
 
-    val firstRecord = records.minByOrNull { it.firstSeen }
-    val lastRecord = records.maxByOrNull { it.lastSeen }
+    val sortedTimeDetails = timeDetailsList.sortedByDescending { it.second }
+
+    val formattedTotalTime = DurationFormat().format(
+        totalSeconds.toDuration(DurationUnit.SECONDS),
+        DurationFormat.Unit.SECOND
+    )
 
     return DailyDateDetails(
         formattedTotalTime = formattedTotalTime,
-        timeDetails = timeDetails,
+        timeDetails = sortedTimeDetails,
         firstBook = firstRecord?.let { bookInfoMap[it.bookId] },
         firstSeenTime = firstRecord?.firstSeen?.format(dateFormatter),
         lastBook = lastRecord?.let { bookInfoMap[it.bookId] },
         lastSeenTime = lastRecord?.lastSeen?.format(dateFormatter)
     )
 }
+
 
 @Composable
 private fun StatSection(
@@ -344,13 +370,13 @@ private fun StatSection(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = AppTypography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.weight(1f))
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyMedium,
+                style = AppTypography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -368,14 +394,14 @@ private fun DataItem(leftText: String, rightText: String) {
         Text(
             modifier = Modifier.weight(1f),
             text = leftText,
-            fontSize = 14.sp,
+            style = AppTypography.bodyMedium,
             maxLines = 1,
             overflow = Ellipsis
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = rightText,
-            fontSize = 14.sp,
+            style = AppTypography.bodyMedium,
             color = MaterialTheme.colorScheme.outline,
             maxLines = 1
         )
@@ -395,7 +421,7 @@ fun TotalStatsBlock(
     ) {
         Text(
             text = "总统计",
-            fontSize = 18.sp,
+            style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )
         Spacer(Modifier.height(8.dp))
@@ -450,7 +476,7 @@ fun StatsCard(
         Box(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
-                fontSize = 15.sp,
+                style = AppTypography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 modifier = Modifier
@@ -498,7 +524,7 @@ private fun TopBar(
         title = {
             Text(
                 text = stringResource(R.string.nav_statistics),
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTypography.titleTopBar,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -570,6 +596,14 @@ private fun LevelBox(
 
 @Composable
 private fun WeekHeader(dayOfWeek: DayOfWeek) {
+    val text = if (dayOfWeek in listOf(
+            DayOfWeek.MONDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.FRIDAY,
+            DayOfWeek.SUNDAY
+        )
+    ) dayOfWeek.displayText() else ""
+
     Box(
         modifier = Modifier.height(20.dp)
     ) {
@@ -577,11 +611,10 @@ private fun WeekHeader(dayOfWeek: DayOfWeek) {
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(horizontal = 4.dp),
-            text = dayOfWeek.displayText(),
-            fontSize = 14.sp,
+            text = text,
+            style = AppTypography.titleVerySmall,
         )
     }
-
 }
 
 @Composable
@@ -601,7 +634,7 @@ private fun MonthHeader(
                 .fillMaxWidth()
                 .padding(horizontal = 4.dp),
         ) {
-            Text(text = title, fontSize = 12.sp)
+            Text(text = title, style = AppTypography.titleVerySmall)
         }
     }
 }

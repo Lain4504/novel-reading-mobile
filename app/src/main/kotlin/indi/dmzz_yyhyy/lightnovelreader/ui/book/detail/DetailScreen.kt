@@ -8,8 +8,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,6 +49,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -77,17 +76,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
+import kotlinx.coroutines.delay
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 
@@ -153,9 +153,19 @@ private fun Content(
     val lazyListState = rememberLazyListState()
     var scrolledY by remember { mutableFloatStateOf(0f) }
     var previousOffset by remember { mutableIntStateOf(0) }
+    var showEmptyPage by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.bookInformation.isEmpty()) {
+        if (uiState.bookInformation.isEmpty()) {
+            delay(140)
+            showEmptyPage = true
+        } else {
+            showEmptyPage = false
+        }
+    }
 
     AnimatedVisibility(
-        visible = uiState.bookInformation.isEmpty(),
+        visible = showEmptyPage,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -210,8 +220,8 @@ private fun Content(
                 ) {
                     Text(
                         text = stringResource(R.string.detail_contents),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        style = AppTypography.titleLarge,
+                        fontWeight = FontWeight.W600
                     )
                     AssistChip(
                         onClick = { hideReadChapters = !hideReadChapters },
@@ -317,7 +327,7 @@ private fun TopBar(
                 item {
                     Text(
                         text = stringResource(R.string.detail_title),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = AppTypography.titleTopBar,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1
@@ -374,16 +384,14 @@ private fun BookCardBlock(
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.W600,
-                fontSize = 19.sp,
-                lineHeight = 24.sp,
+                style = AppTypography.titleLarge
             )
             if (bookInformation.subtitle.isNotEmpty()) {
                 Text(
                     text = bookInformation.subtitle,
                     maxLines = 2,
                     color = MaterialTheme.colorScheme.secondary,
-                    lineHeight = 20.sp,
-                    fontSize = 15.sp,
+                    style = AppTypography.labelMedium
                 )
             }
             Text(
@@ -391,8 +399,7 @@ private fun BookCardBlock(
                 maxLines = 1,
                 fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.primary,
-                lineHeight = 20.sp,
-                fontSize = 16.sp,
+                style = AppTypography.labelLarge
             )
             Column {
                 Row(
@@ -410,8 +417,7 @@ private fun BookCardBlock(
                             bookInformation.lastUpdated.dayOfMonth
                         ),
                         maxLines = 1,
-                        fontSize = 14.sp,
-                        lineHeight = 17.sp,
+                        style = AppTypography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -433,8 +439,7 @@ private fun BookCardBlock(
                             bookInformation.wordCount / 1000
                         ),
                         maxLines = 1,
-                        fontSize = 14.sp,
-                        lineHeight = 17.sp,
+                        style = AppTypography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -591,8 +596,8 @@ private fun IntroBlock(description: String) {
     ) {
         Text(
             text = stringResource(R.string.detail_introduction),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
+            style = AppTypography.titleLarge,
+            fontWeight = FontWeight.W600
         )
         Box(
             modifier = Modifier.fillMaxWidth()
@@ -609,13 +614,12 @@ private fun IntroBlock(description: String) {
                         else Brush.verticalGradient(listOf(Color.White, Color.White))
                     ),
                 text = description,
-                fontSize = 15.sp,
+                style = AppTypography.bodyLarge,
                 maxLines = if (!expanded) 4 else 99,
                 onTextLayout = {
                     overflowed = it.hasVisualOverflow || expanded
                 },
-                color = MaterialTheme.colorScheme.onSurface,
-                overflow = TextOverflow.Ellipsis
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
         if (overflowed) {
@@ -666,17 +670,19 @@ private fun VolumeItem(
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.weight(5f).padding(vertical = 6.dp)) {
+            Column(modifier = Modifier
+                .weight(5f)
+                .padding(vertical = 6.dp)) {
                 Text(
                     text = volume.volumeTitle,
                     fontWeight = FontWeight.W600,
-                    fontSize = 16.sp,
+                    style = AppTypography.titleMedium,
                     color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = if (isFullyRead) stringResource(R.string.info_reading_finished)
                     else stringResource(R.string.info_reading_progress, readCount, totalCount),
-                    fontSize = 14.sp,
+                    style = AppTypography.titleSmall,
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
@@ -720,7 +726,7 @@ private fun VolumeItem(
                                 text = it.title,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
-                                fontSize = 15.sp,
+                                style = AppTypography.titleSmall,
                                 fontWeight =
                                     if (readCompletedChapterIds.contains(it.id))
                                         FontWeight.Normal
@@ -730,14 +736,15 @@ private fun VolumeItem(
                                         MaterialTheme.colorScheme.secondary
                                     else MaterialTheme.colorScheme.onSurface
                             )
-                            if (it.id == lastReadingChapterId)
+                            if (it.id == lastReadingChapterId) {
                                 Text(
                                     text = "上次阅读",
                                     maxLines = 1,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.W700,
+                                    style = AppTypography.titleSmall,
+                                    fontWeight = FontWeight.W600,
                                     color = MaterialTheme.colorScheme.primary
                                 )
+                            }
                         }
                     }
                 }
@@ -818,15 +825,12 @@ fun BookInfoBottomSheet(
             onDismissRequest = onDismissRequest,
             sheetState = sheetState
         ) {
-            val titleStyle = TextStyle(
+            val titleStyle = AppTypography.titleMedium.copy(
                 color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp
+                fontWeight = FontWeight.W600
             )
-            val contentStyle = TextStyle(
-                color = MaterialTheme.colorScheme.secondary,
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp
+            val contentStyle = AppTypography.labelLarge.copy(
+                color = MaterialTheme.colorScheme.secondary
             )
 
             Column(

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 
 @Composable
@@ -126,17 +127,18 @@ fun BookCardContent(
                 .padding(start = 12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            val titleLineHeight = 20.sp
+            val textStyle = AppTypography.titleMedium
+            val textLineHeight = textStyle.lineHeight
             Text(
                 modifier = Modifier.height(
-                    with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
+                    with(LocalDensity.current) { (textLineHeight * 2.2f).toDp() }
                 ).wrapContentHeight(Alignment.CenterVertically),
                 text = bookInformation.title,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.W600,
-                fontSize = 16.sp,
-                lineHeight = titleLineHeight,
+                style = textStyle,
+                lineHeight = textLineHeight,
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -147,8 +149,7 @@ fun BookCardContent(
                     maxLines = 1,
                     fontWeight = FontWeight.W600,
                     color = MaterialTheme.colorScheme.primary,
-                    lineHeight = 20.sp,
-                    fontSize = 14.sp,
+                    style = AppTypography.titleSmall
                 )
                 BookStatusIcon(bookInformation)
             }
@@ -157,22 +158,20 @@ fun BookCardContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
                     text = stringResource(
                         R.string.book_info_update_date,
                         bookInformation.lastUpdated.year,
                         bookInformation.lastUpdated.monthValue,
                         bookInformation.lastUpdated.dayOfMonth
-                    )
+                    ),
+                    style = AppTypography.labelMedium
                 )
                 Text(
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
                     text = stringResource(
                         R.string.book_info_word_count_kilo,
                         bookInformation.wordCount / 1000
-                    )
+                    ),
+                    style = AppTypography.labelMedium
                 )
             }
             if (latestChapterTitle == null) {
@@ -180,23 +179,20 @@ fun BookCardContent(
                     text = bookInformation.description.trim(),
                     maxLines = 2,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.secondary,
-                    lineHeight = 18.sp,
+                    style = AppTypography.labelMedium,
                 )
             } else {
                 Column {
                     Text(
                         text = "已更新至: ",
-                        fontSize = 14.sp,
-                        lineHeight = 18.sp,
+                        style = AppTypography.labelMedium,
                     )
                     Text(
                         text = latestChapterTitle,
                         fontWeight = FontWeight.W500,
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 14.sp,
-                        lineHeight = 18.sp,
+                        style = AppTypography.labelMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
