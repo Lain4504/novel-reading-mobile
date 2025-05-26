@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
@@ -100,11 +101,12 @@ fun ExplorationSearchScreen(
                         onDismissRequest = { dropdownMenuExpanded = false }) {
                         explorationSearchUiState.searchTypeNameList.forEach {
                             DropdownMenuItem(
-                                text = { Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.W400
-                                ) },
+                                text = {
+                                    Text(
+                                        text = it,
+                                        style = AppTypography.labelMedium
+                                    )
+                                },
                                 onClick = {
                                     dropdownMenuExpanded = false
                                     onChangeSearchType(it)
@@ -134,8 +136,7 @@ fun ExplorationSearchScreen(
                             onExpandedChange = { searchBarExpanded = it },
                             placeholder = { AnimatedText(
                                 text = explorationSearchUiState.searchTip,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.W400,
+                                style = AppTypography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             ) },
                             leadingIcon = {
@@ -192,9 +193,8 @@ fun ExplorationSearchScreen(
                             ) {
                                 Text(
                                     text = stringResource(id = R.string.search_history),
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.W600,
-                                    lineHeight = 16.sp,
+                                    style = AppTypography.titleSmall,
+                                    fontWeight = FontWeight.W600
                                 )
 
                                 Box(Modifier.weight(2f))
@@ -209,9 +209,8 @@ fun ExplorationSearchScreen(
                                 ) {
                                     Text(
                                         text = stringResource(id = R.string.search_history_clear),
-                                        fontSize = 16.sp,
+                                        style = AppTypography.titleSmall,
                                         fontWeight = FontWeight.W600,
-                                        lineHeight = 16.sp,
                                     )
                                 }
                             }
@@ -239,7 +238,7 @@ fun ExplorationSearchScreen(
                                         Text(
                                             modifier = Modifier.padding(start = 8.dp),
                                             text = it,
-                                            fontSize = 16.sp,
+                                            style = AppTypography.labelLarge,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Box(Modifier.weight(2f))
@@ -293,10 +292,8 @@ fun ExplorationSearchScreen(
                                 explorationSearchUiState.searchResult.size,
                                 if (explorationSearchUiState.isLoadingComplete) "" else "..."
                             ),
-                            style = MaterialTheme.typography.displayLarge,
-                            fontSize = 16.sp,
+                            style = AppTypography.labelLarge,
                             fontWeight = FontWeight.W600,
-                            lineHeight = 16.sp,
                             letterSpacing = 0.5.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

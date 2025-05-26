@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,6 +83,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
@@ -412,7 +414,7 @@ private fun TopBar(
                     AnimatedContent(title, label = "TitleAnimate") {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = AppTypography.titleTopBar,
                             fontWeight = FontWeight.W400,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1
@@ -516,7 +518,7 @@ fun ChapterSelectorBottomSheet(
 ) {
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val indexedItems = bookVolumes.volumes.flatMap { volume ->
+    val bookVolumesMap = bookVolumes.volumes.flatMap { volume ->
         listOf(volume to null) + volume.chapters.map { volume to it }
     }
 
@@ -526,7 +528,7 @@ fun ChapterSelectorBottomSheet(
     }
 
     LaunchedEffect(sheetState.currentValue == PartiallyExpanded && sheetState.currentValue != Expanded) {
-        val targetIndex = indexedItems.indexOfFirst { (_, chapter) ->
+        val targetIndex = bookVolumesMap.indexOfFirst { (_, chapter) ->
             chapter?.id == readingChapterId
         }
         if (targetIndex >= 0) {
@@ -554,7 +556,7 @@ fun ChapterSelectorBottomSheet(
                 Text(
                     modifier = Modifier.padding(start = 8.dp),
                     text = stringResource(R.string.select_chapter),
-                    style = MaterialTheme.typography.titleLarge,
+                    style = AppTypography.titleLarge,
                     fontWeight = FontWeight.W600
                 )
             }
@@ -565,7 +567,25 @@ fun ChapterSelectorBottomSheet(
                 },
                 state = lazyColumnState
             ) {
-                items(indexedItems) { (volume, chapter) ->
+                if (bookVolumesMap.isEmpty()) {
+                    item {
+                        AnimatedVisibility(
+                            visible = bookVolumesMap.isEmpty(),
+                            enter = expandVertically(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().height(300.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+                    }
+                    return@LazyColumn
+                }
+                items(bookVolumesMap) { (volume, chapter) ->
                     if (chapter == null) {
                         Box(
                             modifier = Modifier
@@ -587,7 +607,7 @@ fun ChapterSelectorBottomSheet(
                                     Text(
                                         text = volume.volumeTitle,
                                         fontWeight = FontWeight.W600,
-                                        fontSize = 16.sp,
+                                        style = AppTypography.titleMedium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
@@ -596,7 +616,7 @@ fun ChapterSelectorBottomSheet(
                                             volume.chapters.size
                                         ),
                                         color = MaterialTheme.colorScheme.secondary,
-                                        fontSize = 14.sp
+                                        style = AppTypography.labelMedium
                                     )
                                 }
                                 Box(Modifier.weight(2f))
@@ -638,7 +658,7 @@ fun ChapterSelectorBottomSheet(
                                         Text(
                                             text = chapter.title,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                            fontSize = 15.sp,
+                                            style = AppTypography.titleSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 2
                                         )
@@ -676,9 +696,10 @@ fun Indicator(
                 AnimatedText(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     text = String.format(Locale.US, "%d:%02d", LocalTime.now().hour, LocalTime.now().minute),
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
+                    style = AppTypography.labelMedium.copy(
+                        letterSpacing = 1.sp
                     ),
+                    fontWeight = FontWeight.W500,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -696,9 +717,7 @@ fun Indicator(
                     modifier = Modifier.fillMaxWidth(),
                     text = chapterTitle,
                     textAlign = TextAlign.End,
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
-                    ),
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -713,7 +732,7 @@ fun Indicator(
                 RollingNumber(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     number = (readingChapterProgress * 100).toInt(),
-                    style = MaterialTheme.typography.labelLarge.copy(
+                    style = AppTypography.labelMedium.copy(
                         fontWeight = FontWeight.W500
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -721,9 +740,8 @@ fun Indicator(
                 )
                 Text(
                     text = "%",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.W500
-                    ),
+                    style = AppTypography.labelMedium,
+                    fontWeight = FontWeight.W500,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

@@ -37,8 +37,7 @@ fun NavGraphBuilder.homeNavigation(sharedTransitionScope: SharedTransitionScope)
             else null
         },
         exitTransition = {
-            if (isInMainNavigation(initialState.destination, targetState.destination)) fadeExit()
-            else fadeExit()
+            fadeExit()
         },
         popEnterTransition = {
             if (isInMainNavigation(initialState.destination, targetState.destination)) fadePopEnter()

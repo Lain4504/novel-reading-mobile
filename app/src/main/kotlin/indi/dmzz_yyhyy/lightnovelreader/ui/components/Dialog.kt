@@ -2,7 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -25,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,29 +39,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isUnspecified
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import kotlin.math.round
 
 @Composable
 fun BaseDialog(
@@ -93,7 +89,7 @@ fun BaseDialog(
             ) {
                 Text(
                     text = dismissText,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -102,7 +98,7 @@ fun BaseDialog(
             ) {
                 Text(
                     text = confirmationText,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -138,8 +134,8 @@ fun BaseDialog(
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.W400,
+                style = AppTypography.titleLarge,
+                fontWeight = FontWeight.W500,
             )
             Box(Modifier.height(16.dp))
             Text(
@@ -148,8 +144,7 @@ fun BaseDialog(
                     .padding(horizontal = 24.dp),
                 textAlign = TextAlign.Start,
                 text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.W400,
+                style = AppTypography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Box(Modifier.height(16.dp))
@@ -158,6 +153,7 @@ fun BaseDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SliderDialog(
     onDismissRequest: () -> Unit,
@@ -179,43 +175,53 @@ fun SliderDialog(
         dismissText = stringResource(R.string.cancel),
         confirmationText = stringResource(R.string.apply),
     ) {
-        val sliderPercentage = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-        val current = LocalDensity.current
-        var indicatorWidthDp by remember { mutableStateOf(0F) }
-
-        Box(modifier = Modifier.width(350.dp))  {
-            Box(
-                modifier = Modifier
-                    .offset(x = ((sliderPercentage * 300 + 25) - (indicatorWidthDp / 2)).dp)
-                    .clip(RoundedCornerShape(64.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .padding(12.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    modifier = Modifier
-                        .onGloballyPositioned { layoutCoordinates ->
-                            with(current) {
-                                indicatorWidthDp = layoutCoordinates.size.width.toDp().value
-                            }
-                        }
-                        .padding(horizontal = 12.dp),
-                    text = value.toInt().toString(),
-                    textAlign = TextAlign.Center,
-                    fontSize = 16.sp
+                    text = "字数限制：",
+                    style = AppTypography.labelMedium
+                )
+                Spacer(Modifier.weight(1f))
+                RollingNumber(
+                    number = value.toInt(),
+                    style = AppTypography.labelMedium,
+                    separator = true
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = "以上",
+                    style = AppTypography.labelMedium
                 )
             }
+
+            Spacer(Modifier.height(16.dp))
+
+            Slider(
+                modifier = Modifier.fillMaxWidth(),
+                value = value,
+                valueRange = valueRange,
+                steps = steps,
+                onValueChange = { newValue ->
+                    val adjustedValue = if (steps > 0) {
+                        val stepSize = (valueRange.endInclusive - valueRange.start) / (steps + 1)
+                        valueRange.start + round((newValue - valueRange.start) / stepSize) * stepSize
+                    } else {
+                        newValue
+                    }
+                    onSlideChange(adjustedValue)
+                },
+                onValueChangeFinished = onSliderChangeFinished,
+                colors = SliderDefaults.colors(
+                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                )
+            )
         }
-        Slider(
-            modifier = Modifier.width(300.dp).align(Alignment.CenterHorizontally),
-            value = value,
-            valueRange = valueRange,
-            steps = steps,
-            onValueChange = onSlideChange,
-            onValueChangeFinished = onSliderChangeFinished,
-            colors = SliderDefaults.colors(
-                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
-            ),
-        )
     }
 }
 
@@ -296,7 +302,7 @@ fun ExportUserDataDialog(
             ) {
                 Text(
                     text = stringResource(R.string.cancel),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -305,7 +311,7 @@ fun ExportUserDataDialog(
             ) {
                 Text(
                     text = stringResource(R.string.export_and_share),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -314,7 +320,7 @@ fun ExportUserDataDialog(
             ) {
                 Text(
                     text = stringResource(R.string.export_to_file),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -402,24 +408,22 @@ fun SettingsAboutInfoDialog(
 
                         Text(
                             stringResource(id = R.string.app_name),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontSize = 18.sp
+                            style = AppTypography.titleLarge
                         )
                         Text(
                             BuildConfig.APPLICATION_ID,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 14.sp
+                            style = AppTypography.labelMedium
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-
                 Text(
                     text = stringResource(R.string.settings_about_oss),
-                    fontSize = 14.sp,
+                    style = AppTypography.labelMedium
                 )
+                Spacer(Modifier.height(10.dp))
                 val annotatedString = AnnotatedString.Companion.fromHtml(
                     htmlString = stringResource(
                         id = R.string.settings_about_source_code,
@@ -440,9 +444,7 @@ fun SettingsAboutInfoDialog(
                 )
                 Text(
                     text = annotatedString,
-                    style = TextStyle(
-                        fontSize = 14.sp
-                    )
+                    style = AppTypography.bodyMedium
                 )
 
                 Spacer(modifier = Modifier.height(18.dp))
@@ -563,4 +565,45 @@ fun ColorPickerDialog(
             }
         }
     }
+}
+
+@Composable
+fun DeleteBookshelfDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit) {
+    AlertDialog(
+        title = {
+            Text(
+                text = stringResource(R.string.dialog_delete_bookshelf),
+                style = AppTypography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.dialog_delete_bookshelf_text),
+                style = AppTypography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(
+                onClick = onConfirmation
+            ) {
+                Text(
+                    text = stringResource(android.R.string.ok)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest
+            ) {
+                Text(
+                    text = stringResource(R.string.cancel)
+                )
+            }
+        }
+    )
 }
