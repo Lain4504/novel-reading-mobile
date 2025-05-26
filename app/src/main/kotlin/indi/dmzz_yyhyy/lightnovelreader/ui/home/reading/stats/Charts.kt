@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +42,7 @@ import com.himanshoe.charty.bar.model.StorageData
 import com.himanshoe.charty.common.ChartColor
 import com.himanshoe.charty.common.LabelConfig
 import com.himanshoe.charty.common.asSolidChartColor
+import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
@@ -129,7 +131,7 @@ fun ReadTimeStackedBarChart(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Text("没有记录")
+            Text(stringResource(R.string.no_records))
         }
         return
     }
@@ -195,7 +197,7 @@ fun ReadTimeStackedBarChart(
                             .background(Color.Gray)
                     )
                     Text(
-                        text = "其他",
+                        text = stringResource(R.string.others),
                         fontSize = 13.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -230,7 +232,7 @@ fun LastNDaysChart(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Text("没有记录")
+            Text(stringResource(R.string.no_records))
         }
         return
     }
@@ -274,7 +276,7 @@ fun DailyBarChart(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Text("没有记录")
+            Text(stringResource(R.string.no_records))
         }
         return
     }
@@ -351,7 +353,7 @@ fun WeeklyCountChart(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Text("没有记录")
+            Text(stringResource(R.string.no_records))
         }
         return
     }

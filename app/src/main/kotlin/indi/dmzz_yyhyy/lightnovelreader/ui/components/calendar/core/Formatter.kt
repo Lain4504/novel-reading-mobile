@@ -6,7 +6,7 @@ import java.time.Month
 import java.time.YearMonth
 import java.time.format.TextStyle
 
-private val locale = Locale("zh-CN")
+private val locale = Locale.current
 
 fun YearMonth.displayText(short: Boolean): String {
     return month.displayText(short = short)

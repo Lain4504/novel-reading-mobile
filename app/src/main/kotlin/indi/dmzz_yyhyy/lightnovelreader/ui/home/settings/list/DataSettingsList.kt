@@ -105,14 +105,14 @@ fun DataSettingsList(
     )
     SettingsClickableEntry(
         iconRes = R.drawable.bug_report_24px,
-        title = "应用日志",
-        description = "查看与分享应用日志",
+        title = stringResource(R.string.settings_app_logs),
+        description = stringResource(R.string.settings_app_logs_desc),
         onClick = onClickLogcat
     )
     SettingsMenuEntry(
         iconRes = R.drawable.bug_report_24px,
-        title = "日志等级",
-        description = "设置日志过滤等级，重启应用后生效",
+        title = stringResource(R.string.settings_app_log_level),
+        description = stringResource(R.string.settings_app_log_level_desc),
         options = MenuOptions.LogLevelOptions,
         selectedOptionKey = settingState.logLevelKey,
         onOptionChange = settingState.logLevelKeyUserData::asynchronousSet

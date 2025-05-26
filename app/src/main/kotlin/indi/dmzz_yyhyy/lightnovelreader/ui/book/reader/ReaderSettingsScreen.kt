@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -101,9 +102,9 @@ fun ContentSettings(
     onClickThemeSettings: () -> Unit
 ) {
     val tabs = listOf(
-        TabItem("外观", R.drawable.filled_menu_book_24px),
-        TabItem("操作", R.drawable.settings_applications_24px),
-        TabItem("边距", R.drawable.aspect_ratio_24px),
+        TabItem(stringResource(R.string.appearence_settings), R.drawable.filled_menu_book_24px),
+        TabItem(stringResource(R.string.control_settings), R.drawable.settings_applications_24px),
+        TabItem(stringResource(R.string.margin_settings), R.drawable.aspect_ratio_24px),
     )
 
     val pagerState = rememberPagerState(initialPage = selectedTabIndex, pageCount = { tabs.size })
@@ -159,7 +160,7 @@ fun TabsRow(
             SecondaryIndicator(
                 modifier = Modifier
                     .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
             )
         }
@@ -169,10 +170,11 @@ fun TabsRow(
                 selected = selectedTabIndex == index,
                 onClick = { onTabSelected(index) },
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .padding(horizontal = 6.dp)
                     .clip(RoundedCornerShape(6.dp)),
                 content = {
                     Row(
+                        modifier = Modifier.height(50.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -182,8 +184,7 @@ fun TabsRow(
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            text = tab.title,
-                            modifier = Modifier.padding(8.dp)
+                            text = tab.title
                         )
                     }
                 }
@@ -199,8 +200,8 @@ fun LazyListScope.AppearancePage(
     item {
         SettingsClickableEntry(
             iconRes = R.drawable.format_paint_24px,
-            title = "主题设置……",
-            description = "调整阅读器和纸张选项",
+            title = stringResource(R.string.settings_theme_settings),
+            description = stringResource(R.string.settings_theme_settings_desc),
             onClick = onClickThemeSettings
         )
     }
@@ -216,8 +217,8 @@ fun LazyListScope.AppearancePage(
     item {
         SettingsSwitchEntry(
             iconRes = R.drawable.toolbar_24px,
-            title = "隐藏状态栏",
-            description = "处于沉浸阅读模式时，允许隐藏系统状态栏和导航栏",
+            title = stringResource(R.string.settings_hide_status_bar),
+            description = stringResource(R.string.settings_hide_status_bar_desc),
             checked = settingState.enableHideStatusBar,
             booleanUserData = settingState.enableHideStatusBarUserData,
         )
@@ -225,8 +226,8 @@ fun LazyListScope.AppearancePage(
     item {
         SettingsSwitchEntry(
             iconRes = R.drawable.translate_24px,
-            title = "简繁转换",
-            description = "将内容从简体转换为繁体",
+            title = stringResource(R.string.settings_trad_conversion),
+            description = stringResource(R.string.settings_trad_conversion_desc),
             checked = settingState.enableSimplifiedTraditionalTransform,
             booleanUserData = settingState.enableSimplifiedTraditionalTransformUserData,
         )
@@ -287,8 +288,8 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
             SettingsSwitchEntry(
                 modifier = Modifier.animateItem(),
                 iconRes = R.drawable.unfold_more_double_24px,
-                title = "无痕滚动",
-                description = "滚动翻页时的章节切换时无痕",
+                title = stringResource(R.string.settings_continous_scrolling),
+                description = stringResource(R.string.settings_continous_scrolling_desc),
                 checked = settingState.isUsingContinuousScrolling,
                 booleanUserData = settingState.isUsingContinuousScrollingUserData,
             )
@@ -388,7 +389,6 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     }
 }
 
-@Suppress("DuplicatedCode")
 fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>, mime: String) {
     val initUri = DocumentsContract.buildDocumentUri(
         "com.android.externalstorage.pictures",

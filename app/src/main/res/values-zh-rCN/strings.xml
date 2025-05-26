@@ -32,6 +32,8 @@
     <string name="hide_read">仅显示未读</string>
     <string name="export_to_file">导出至文件</string>
     <string name="export_and_share">导出并分享</string>
+    <string name="choose_light_bg">选择浅色背景</string>
+    <string name="choose_dark_bg">选择深色背景</string>
     <!-- Hints -->
     <string name="nothing_here">没有内容</string>
     <string name="nothing_here_desc_reading">阅读一些书本之后，它们将显示在此处</string>
@@ -83,14 +85,33 @@
     <string name="settings_reader_left_margin">左边距</string>
     <string name="settings_reader_right_margin">右边距</string>
 
-
     <string name="display_settings">显示</string>
     <string name="settings_theme">主题与纸张</string>
     <string name="settings_theme_desc">设置应用主题和阅读器纸张</string>
-    <string name="settings_dynamic_colors">系统动态配色</string>
-    <string name="settings_dynamic_colors_desc">从系统主题应用动态配色 (Android 12 +)</string>
+    <string name="settings_theme_light_theme">浅色主题</string>
+    <string name="settings_theme_light_theme_desc">指定应用在浅色模式下的主题</string>
+    <string name="settings_theme_dark_theme">深色主题</string>
+    <string name="settings_theme_dark_theme_desc">指定应用在深色模式下的主题</string>
+    <string name="settings_theme_dynamic_colors">系统动态配色</string>
+    <string name="settings_theme_dynamic_colors_desc">从系统主题应用动态配色 (Android 12 +)</string>
     <string name="settings_characters_variant">汉字变体</string>
     <string name="settings_characters_variant_desc">使用指定语言的汉字变体，需要系统字体支持</string>
+    <string name="paper_settings">纸张</string>
+    <string name="settings_theme_bg_image">背景图片</string>
+    <string name="settings_theme_bg_image_desc">自定义阅读器背景图片</string>
+    <string name="settings_theme_bg_image_built_in">应用内置</string>
+    <string name="settings_theme_bg_image_built_in_desc">牛皮纸</string>
+    <string name="settings_theme_bg_image_custom">自定义</string>
+    <string name="settings_theme_bg_display_mode">背景显示模式</string>
+    <string name="settings_theme_bg_display_mode_desc">指定自定义背景图片显示模式</string>
+    <string name="settings_theme_bg_color">背景颜色</string>
+    <string name="settings_theme_bg_color_desc">自定义阅读器背景色</string>
+    <string name="text_settings">文本</string>
+    <string name="settings_theme_text_color">文本颜色</string>
+    <string name="settings_theme_text_color_desc">自定义阅读器文本颜色</string>
+    <string name="settings_theme_text_font">文本字体</string>
+    <string name="settings_theme_text_font_desc">使用应用内置的字体或自定义字体文件</string>
+    <string name="settings_theme_text_font_weight">字重</string>
 
     <string name="data_settings">数据</string>
     <string name="settings_snap_data">快照数据</string>
@@ -99,8 +120,14 @@
     <string name="settings_import_data_desc">从选定的 .lnr 文件导入用户数据</string>
     <string name="settings_select_data_source">切换数据源</string>
     <string name="settings_select_data_source_desc">清除缓存并切换软件数据源。当前的用户数据不会丢失，并将在下次切换回当前数据源时恢复</string>
+    <string name="settings_app_logs">应用日志</string>
+    <string name="settings_app_logs_desc">查看与分享应用日志（调试用途）</string>
+    <string name="settings_app_log_level">日志等级</string>
+    <string name="settings_app_log_level_desc">设置日志过滤等级，重启应用后生效</string>
 
     <string name="about_settings">关于</string>
+    <string name="settings_debug_tools">调试工具</string>
+    <string name="settings_debug_tools_desc">Debug 用调试工具</string>
     <string name="settings_about_source_code"><![CDATA[在 %1$s 查看源代码<br/>在 %2$s 提交 Bug 或新功能请求]]></string>
     <string name="settings_about_oss">LightNovelReader 是献给世界上所有阅读爱好者的礼物。</string>
     <string name="settings_github_repo">GitHub 仓库</string>
@@ -118,6 +145,17 @@
     <string name="settings_book_update_reminder_desc">应用在后台时，检查并通知书本更新</string>
     <string name="settings_delete_bookshelf">删除书架</string>
     <string name="settings_delete_bookshelf_desc">永久移除该书架</string>
+    <string name="appearence_settings">外观</string>
+    <string name="control_settings">操作</string>
+    <string name="margin_settings">边距</string>
+    <string name="settings_theme_settings">主题设置……</string>
+    <string name="settings_theme_settings_desc">调整阅读器和纸张选项</string>
+    <string name="settings_hide_status_bar">隐藏状态栏</string>
+    <string name="settings_hide_status_bar_desc">处于沉浸阅读模式时，允许隐藏系统状态栏和导航栏</string>
+    <string name="settings_trad_conversion">简繁转换</string>
+    <string name="settings_trad_conversion_desc">将内容从简体转换为繁体</string>
+    <string name="settings_continous_scrolling">无痕滚动</string>
+    <string name="settings_continous_scrolling_desc">滚动翻页时无痕切换章节</string>
 
     <!-- UI -->
     <string name="detail_introduction">介绍</string>
@@ -133,6 +171,7 @@
     <string name="start_reading">开始阅读</string>
     <string name="continue_reading">继续阅读</string>
     <string name="resume_last_reading">继续上次阅读</string>
+    <string name="last_read">上次阅读</string>
     <string name="last_read_info">上次阅读 | %s</string>
     <string name="navigate_to_explore">转至『探索』</string>
     <string name="book_completed">已完结</string>
@@ -154,7 +193,7 @@
     <string name="bookshelf_create_title">创建书架</string>
     <string name="bookshelf_book_count">共 %d 本</string>
     <string name="share_bookshelf">分享书架</string>
-    <string name="import_and_export">导入和导出</string>
+    <string name="import_and_export">导入和导出……</string>
     <string name="export_to_lnr_file">导出为 .lnr 文件</string>
     <string name="export_all_to_lnr_file">导出全部为 .lnr 文件</string>
     <string name="import_from_file">从文件导入</string>
@@ -174,6 +213,49 @@
     <string name="read_minutes">• %d 分钟</string>
     <string name="translators">翻译贡献者</string>
     <string name="select_chapter">章节选择</string>
+    <string name="logs_title">日志</string>
+    <string name="log_source">日志来源</string>
+    <string name="log_clear">删除所有临时日志 Logs</string>
+    <string name="log_clear_desc">清除应用缓存时，这些临时日志也将被删除</string>
+    <string name="auto_scroll">自动滚动</string>
+    <string name="word_wrap">自动换行</string>
+    <string name="log_shared">分享的日志</string>
+    <string name="log_crash">App 崩溃</string>
+    <string name="log_empty_list">空日志列表</string>
+    <string name="detail_info_title">标题</string>
+    <string name="detail_info_id">ID</string>
+    <string name="detail_info_author">作者</string>
+    <string name="detail_info_publishing_house">文库</string>
+    <string name="detail_info_updated_on">更新</string>
+    <string name="detail_info_tags">标签</string>
+    <string name="detail_info_stats">统计</string>
+    <string name="view_daily">日</string>
+    <string name="view_weekly">周</string>
+    <string name="view_monthly">月</string>
+    <string name="activity">活动</string>
+    <string name="activity_first_read">第一次读了</string>
+    <string name="activity_collections">已收藏</string>
+    <string name="activity_etc"> 等</string>
+    <string name="activity_reading_time">阅读时间</string>
+    <string name="activity_read">读过</string>
+    <string name="n_books">%d 本书</string>
+    <string name="time_distribution">时间分布</string>
+    <string name="reading_details">阅读详情</string>
+    <string name="to">至</string>
+    <string name="heatmap_indicator_less">少</string>
+    <string name="heatmap_indicator_more">多 (%d+)</string>
+    <string name="time_range">时间范围</string>
+    <string name="first_seen">最早 - %s</string>
+    <string name="last_seen">最晚 - %s</string>
+    <string name="no_records">没有记录</string>
+    <string name="total_record">总记录</string>
+    <string name="reading_sessions">阅读会话</string>
+    <string name="reading_sessions_unit">次</string>
+    <string name="reading_duration">阅读时长</string>
+    <string name="reading_duration_unit">时 %d 分</string>
+    <string name="cached">已缓存</string>
+    <string name="cached_false">未缓存</string>
+    <string name="others">其他</string>
 
     <!-- Dialogs -->
     <string name="dialog_about_version">版本</string>
@@ -195,10 +277,7 @@
     <string name="dialog_snap_bookmarks">书签</string>
     <string name="dialog_snap_bookmarks_text">包括全部书本的书签信息</string>
     <string name="dialog_select_data_source_text">选择使用的数据源，这将清除缓存并切换软件数据源。当前的用户数据不会丢失，并将在下次切换回当前数据源时恢复。</string>
-    <string name="dialog_github_proxy_notice">请注意: 由于代理普遍不支持加速 GitHub API, 所以我们无法在检查环节使用代理。</string>
-    <string name="dialog_github_proxy_supporting_text">协议和结尾的"/"不可省略</string>
-    <string name="dialog_github_proxy_custom_url">自定义 URL</string>
-    <string name="dialog_github_proxy_custom_url_hint">格式示范: \n</string>
+
     <!-- Publishing House Filter -->
     <string name="key_pub_filter_title">文库筛选</string>
     <string name="key_pub_filter_desc">根据小说的文库筛选</string>

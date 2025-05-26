@@ -550,8 +550,10 @@ private fun QuickOperationsBlock(
                 .weight(1f)
         ) {
             QuickOperationButton(
-                icon = if(uiState.isInBookshelf) painterResource(R.drawable.filled_bookmark_add_24px) else painterResource(R.drawable.bookmark_add_24px),
-                title = if(uiState.isInBookshelf) "查看收藏" else stringResource(R.string.add_to_bookshelf),
+                icon = if(uiState.isInBookshelf) painterResource(R.drawable.filled_bookmark_add_24px)
+                    else painterResource(R.drawable.bookmark_add_24px),
+                title = if(uiState.isInBookshelf) stringResource(R.string.activity_collections)
+                    else stringResource(R.string.add_to_bookshelf),
                 onClick = onClickAddToBookShelf
             )
         }
@@ -561,11 +563,12 @@ private fun QuickOperationsBlock(
                 .weight(1f)
         ) {
             QuickOperationButton(
-                icon = if(uiState.isCached) painterResource(R.drawable.filled_cloud_download_24px) else painterResource(R.drawable.cloud_download_24px),
+                icon = if(uiState.isCached) painterResource(R.drawable.filled_cloud_download_24px)
+                else painterResource(R.drawable.cloud_download_24px),
                 title =
                 if (uiState.isCached && (uiState.downloadItem == null || uiState.downloadItem!!.progress == 1f) )
-                    "已缓存"
-                else if(uiState.downloadItem == null) "未缓存"
+                    stringResource(R.string.cached)
+                else if(uiState.downloadItem == null) stringResource(R.string.cached_false)
                 else "${(uiState.downloadItem!!.progress*100).toInt()}%",
                 onClick = if(uiState.downloadItem == null) onClickCache else {{}}
             )
@@ -739,7 +742,7 @@ private fun VolumeItem(
                             )
                             if (it.id == lastReadingChapterId)
                                 Text(
-                                    text = "上次阅读",
+                                    text = stringResource(R.string.last_read),
                                     maxLines = 1,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.W700,
@@ -842,7 +845,7 @@ fun BookInfoBottomSheet(
                     .padding(horizontal = 18.dp, vertical = 8.dp)
             ) {
                 InfoItem(
-                    title = "标题",
+                    title = stringResource(R.string.detail_info_title),
                     content = bookInformation.title,
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
@@ -858,7 +861,7 @@ fun BookInfoBottomSheet(
                 }
 
                 InfoItem(
-                    title = "ID",
+                    title = stringResource(R.string.detail_info_id),
                     content = bookInformation.id.toString(),
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
@@ -866,7 +869,7 @@ fun BookInfoBottomSheet(
                 )
 
                 InfoItem(
-                    title = "作者",
+                    title = stringResource(R.string.detail_info_author),
                     content = bookInformation.author,
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
@@ -874,7 +877,7 @@ fun BookInfoBottomSheet(
                 )
 
                 InfoItem(
-                    title = "文库",
+                    title = stringResource(R.string.detail_info_publishing_house),
                     content = bookInformation.publishingHouse,
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
@@ -884,7 +887,7 @@ fun BookInfoBottomSheet(
                 val dateFormat = "yyyy-MM-dd"
                 val formatter = DateTimeFormatter.ofPattern(dateFormat)
                 InfoItem(
-                    title = "更新",
+                    title = stringResource(R.string.detail_info_updated_on),
                     content = bookInformation.lastUpdated.format(formatter) + "\n" + if(bookInformation.isComplete) "完结" else "连载中",
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
@@ -892,7 +895,7 @@ fun BookInfoBottomSheet(
                 )
 
                 InfoItem(
-                    title = "标签",
+                    title = stringResource(R.string.detail_info_tags),
                     content = bookInformation.tags.joinToString(separator = "，"),
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
@@ -900,7 +903,7 @@ fun BookInfoBottomSheet(
                 )
 
                 InfoItem(
-                    title = "统计",
+                    title = stringResource(R.string.detail_info_stats),
                     content = "${NumberFormat.getInstance().format(bookInformation.wordCount)} 字\n共计 ${bookVolumes.volumes.count()} 卷, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size}} 章节",
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
