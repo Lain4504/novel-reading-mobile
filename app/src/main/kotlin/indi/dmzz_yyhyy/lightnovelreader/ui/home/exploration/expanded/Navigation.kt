@@ -23,10 +23,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationExpandDestination() {
     composable<Route.Main.Exploration.Expanded>(
-        enterTransition = { expandEnter() },
-        exitTransition = { expandExit() },
-        popEnterTransition = { expandPopEnter() },
-        popExitTransition = { expandPopExit() }
+
     ) { entry ->
         val navController = LocalNavController.current
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }

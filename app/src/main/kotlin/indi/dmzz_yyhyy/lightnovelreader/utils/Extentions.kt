@@ -15,6 +15,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.util.Collections
@@ -114,4 +115,19 @@ fun <K, V> MutableMap<K, V>.putWithLimit(key: K, value: V) {
         keys.firstOrNull()?.let { remove(it) }
     }
     this[key] = value
+}
+
+val homeRoutes = listOf(
+    "Reading.Home", "Bookshelf.Home", "Exploration.Home", "Settings.Home"
+)
+
+fun isInMainNavigation(from: NavDestination, to: NavDestination): Boolean {
+    val fromRoute = from.route ?: return false
+    val toRoute = to.route ?: return false
+
+    val fromMatch = homeRoutes.any(fromRoute::contains)
+    if (!fromMatch) return false
+
+    val toMatch = homeRoutes.any(toRoute::contains)
+    return toMatch
 }

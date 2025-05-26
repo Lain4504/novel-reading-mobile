@@ -24,10 +24,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.bookshelfEditDestination() {
     composable<Route.Main.Bookshelf.Edit>(
-        enterTransition = { expandEnter() },
-        exitTransition = { expandExit() },
-        popEnterTransition = { expandPopEnter() },
-        popExitTransition = { expandPopExit() }
+
     ) {
         val navController = LocalNavController.current
         val editBookshelfViewModel = hiltViewModel<EditBookshelfViewModel>()

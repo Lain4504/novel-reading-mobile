@@ -16,12 +16,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.settingsThemeDestination() {
-    composable<Route.Main.Settings.Theme>(
-        enterTransition = { expandEnter() },
-        exitTransition = { expandExit() },
-        popEnterTransition = { expandPopEnter() },
-        popExitTransition = { expandPopExit() }
-    ) {
+    composable<Route.Main.Settings.Theme> {
         val navController = LocalNavController.current
         val viewModel = hiltViewModel<ThemeViewModel>()
         val readerSettingState = viewModel.settingState
