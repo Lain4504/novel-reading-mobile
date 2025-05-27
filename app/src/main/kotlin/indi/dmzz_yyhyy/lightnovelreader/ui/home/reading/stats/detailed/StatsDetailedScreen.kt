@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,7 +69,11 @@ fun StatsDetailedScreen(
     val uiState = viewModel.uiState
     uiState.selectedDate = targetDate
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val viewOptions = listOf("日", "周", "月")
+    val viewOptions = listOf(
+        stringResource(R.string.view_daily),
+        stringResource(R.string.view_weekly),
+        stringResource(R.string.view_monthly)
+    )
 
     LaunchedEffect(targetDate) {
         initialize(targetDate)
@@ -187,32 +192,37 @@ fun DailyChart(
 
     if (isActivityVisible) {
         StatsCard(
-            title = "活动"
+            title = stringResource(R.string.activity)
         ) {
             val startedBooks = stats.startedBooks
             val favoriteBooks = stats.favoriteBooks
             Column {
                 if (startedBooks.isNotEmpty()) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().clipToBounds(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clipToBounds(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(
-                            modifier = Modifier.padding(start = 24.dp).fillMaxWidth().weight(1f, fill = false)
+                            modifier = Modifier
+                                .padding(start = 24.dp)
+                                .fillMaxWidth()
+                                .weight(1f, fill = false)
                         ) {
                             Text(
-                                text = "第一次读",
+                                text = stringResource(R.string.activity_first_read),
                                 style = AppTypography.titleSmall,
                                 fontWeight = FontWeight.W500
                             )
                             val displayedTitles = startedBooks.take(2).mapNotNull { bookId ->
                                 uiState.bookInformationMap[bookId]?.title?.let { title ->
-                                    if (title.length > 10) title.substring(0, 10) + "..." else title
+                                    if (title.length > 10) title.substring(0, 10) + stringResource(R.string.ellipsis) else title
                                 }
                             }
                             Text(
                                 text = if (displayedTitles.size == 1) displayedTitles[0]
-                                    else displayedTitles.joinToString("、\n") + " 等 ",
+                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
                                 style = AppTypography.labelSmall,
                                 maxLines = 2,
                                 color = colorScheme.secondary,
@@ -220,7 +230,9 @@ fun DailyChart(
                             )
                         }
                         Box(
-                            modifier = Modifier.rotate(4f).offset(y = 24.dp)
+                            modifier = Modifier
+                                .rotate(4f)
+                                .offset(y = 24.dp)
                         ) {
                             BookStack(
                                 uiState = uiState,
@@ -233,25 +245,30 @@ fun DailyChart(
                 }
                 if (favoriteBooks.isNotEmpty()) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().clipToBounds(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clipToBounds(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(
-                            modifier = Modifier.padding(start = 24.dp).fillMaxWidth().weight(1f, fill = false)
+                            modifier = Modifier
+                                .padding(start = 24.dp)
+                                .fillMaxWidth()
+                                .weight(1f, fill = false)
                         ) {
                             Text(
-                                text = "已收藏",
+                                text = stringResource(R.string.activity_collections),
                                 style = AppTypography.titleSmall,
                                 fontWeight = FontWeight.W500
                             )
                             val displayedTitles = favoriteBooks.take(2).mapNotNull { bookId ->
                                 uiState.bookInformationMap[bookId]?.title?.let { title ->
-                                    if (title.length > 10) title.substring(0, 10) + "..." else title
+                                    if (title.length > 10) title.substring(0, 10) + stringResource(R.string.ellipsis) else title
                                 }
                             }
                             Text(
                                 text = if (displayedTitles.size == 1) displayedTitles[0]
-                                else displayedTitles.joinToString("、\n") + " 等 ",
+                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
                                 style = AppTypography.labelSmall,
                                 maxLines = 2,
                                 color = colorScheme.secondary,
@@ -259,7 +276,9 @@ fun DailyChart(
                             )
                         }
                         Box(
-                            modifier = Modifier.rotate(-3f).offset(y = 24.dp)
+                            modifier = Modifier
+                                .rotate(-3f)
+                                .offset(y = 24.dp)
                         ) {
                             BookStack(
                                 uiState = uiState,
@@ -275,7 +294,7 @@ fun DailyChart(
     }
 
     StatsCard(
-        title = "阅读时长"
+        title = stringResource(R.string.activity_reading_time)
     ) {
         Column {
             Spacer(Modifier.height(12.dp))
@@ -290,7 +309,7 @@ fun DailyChart(
                 Spacer(Modifier.weight(1f))
             }
             Spacer(Modifier.height(6.dp))
-            Text("${books.size} 本书")
+            Text(stringResource(R.string.n_books, books.size))
             Spacer(Modifier.height(12.dp))
             DailyBarChart(
                 recordList = uiState.targetDateRangeRecordsMap[uiState.selectedDate],
@@ -305,7 +324,7 @@ fun WeeklyItem(
     uiState: StatsDetailedUiState,
 ) {
     StatsCard(
-        title = "近 7 日阅读详情"
+        title = stringResource(R.string.reading_details)
     ) {
         Box {
             ReadTimeStackedBarChart(
@@ -322,7 +341,7 @@ fun WeeklyItem(
     }
 
     StatsCard(
-        title = "时间分布"
+        title = stringResource(R.string.time_distribution)
     ) {
         WeeklyCountChart(
             dateRange = uiState.targetDateRange,
@@ -336,7 +355,7 @@ fun MonthlySummaryChart(
     uiState: StatsDetailedUiState
 ) {
     StatsCard(
-        title = "近 30 日阅读时长"
+        title = stringResource(R.string.activity_reading_time)
     ) {
         Box {
             LastNDaysChart(
@@ -351,7 +370,7 @@ fun MonthlySummaryChart(
     }
 
     StatsCard(
-        title = "本月读过"
+        title = stringResource(R.string.activity_read)
     ) {
         val (startDate, endDate) = uiState.targetDateRange
 
@@ -368,7 +387,7 @@ fun MonthlySummaryChart(
             count = 8
         )
         Spacer(Modifier.height(6.dp))
-        Text("${books.size} 本书")
+        Text(stringResource(R.string.n_books, books.size))
     }
 }
 
@@ -379,7 +398,9 @@ fun BookStack(
     count: Int,
 ) {
     Box(
-        modifier = Modifier.wrapContentWidth().padding(end = min(books.size, count).dp * 20)
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(end = min(books.size, count).dp * 20)
     ) {
         books.distinct().take(count).fastForEachIndexed { index, bookId ->
             val scale = 1f - (index * 0.01f).coerceAtMost(0.3f)
@@ -433,7 +454,7 @@ private fun TopBar(
         title = {
             Column {
                 Text(
-                    text = "详细统计",
+                    text = stringResource(R.string.detail_title),
                     style = AppTypography.titleTopBar,
                     color = colorScheme.onSurface,
                     maxLines = 1,
@@ -441,7 +462,7 @@ private fun TopBar(
                 )
                 AnimatedText(
                     text = if (dateRange.first == dateRange.second) dateRange.second.toString()
-                        else dateRange.first.toString() + " 至 " + dateRange.second,
+                    else "${dateRange.first} " + stringResource(R.string.to) + " ${dateRange.second} ",
                     style = AppTypography.titleSubTopBar,
                     color = colorScheme.onSurfaceVariant
                 )

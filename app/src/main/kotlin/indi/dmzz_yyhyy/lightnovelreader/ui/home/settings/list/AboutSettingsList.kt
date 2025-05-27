@@ -55,8 +55,8 @@ fun AboutSettingsList(
     if (BuildConfig.DEBUG)
         SettingsClickableEntry(
             iconRes = R.drawable.adb_24px,
-            title = "调试工具",
-            description = "Debug 用调试工具",
+            title = stringResource(R.string.settings_debug_tools),
+            description = stringResource(R.string.key_dark_theme_default),
             onClick = onClickDebugMode
         )
 }

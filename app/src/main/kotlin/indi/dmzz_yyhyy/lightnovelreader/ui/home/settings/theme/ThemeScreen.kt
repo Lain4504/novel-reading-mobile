@@ -115,7 +115,7 @@ fun DarkModeSettings(
 ) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-        text = "应用",
+        text = stringResource(R.string.app_settings),
         style = AppTypography.titleSmall,
         fontWeight = FontWeight.W600
     )
@@ -223,8 +223,8 @@ fun ThemeSettingsList(
     SettingsSwitchEntry(
         modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.format_color_fill_24px,
-        title = stringResource(R.string.settings_dynamic_colors),
-        description = stringResource(R.string.settings_dynamic_colors_desc),
+        title = stringResource(R.string.settings_theme_dynamic_colors),
+        description = stringResource(R.string.settings_theme_dynamic_colors_desc),
         checked = settingState.dynamicColorsKey,
         booleanUserData = settingState.dynamicColorsKeyUserData,
         disabled = Build.VERSION.SDK_INT < Build.VERSION_CODES.S
@@ -233,8 +233,8 @@ fun ThemeSettingsList(
         SettingsMenuEntry(
             modifier = Modifier.background(colorScheme.background),
             iconRes = R.drawable.light_mode_24px,
-            title = "浅色主题",
-            description = if (LocalAppTheme.current.isDark) "切换至浅色模式以预览主题" else "指定应用在浅色模式下的主题",
+            title = stringResource(R.string.settings_theme_light_theme),
+            description = stringResource(R.string.settings_theme_light_theme_desc),
             options = MenuOptions.LightThemeNameOptions,
             selectedOptionKey = settingState.lightThemeName,
             onOptionChange = settingState.lightThemeNameUserData::asynchronousSet
@@ -242,8 +242,8 @@ fun ThemeSettingsList(
         SettingsMenuEntry(
             modifier = Modifier.background(colorScheme.background),
             iconRes = R.drawable.dark_mode_24px,
-            title = "深色主题",
-            description = if (LocalAppTheme.current.isDark) "指定应用在深色模式下的主题" else "切换至深色模式以预览主题",
+            title = stringResource(R.string.settings_theme_dark_theme),
+            description = stringResource(R.string.settings_theme_dark_theme_desc),
             options = MenuOptions.DarkThemeNameOptions,
             selectedOptionKey = settingState.darkThemeName,
             onOptionChange = settingState.darkThemeNameUserData::asynchronousSet
@@ -263,15 +263,15 @@ fun ReaderThemeSettingsList(
     Spacer(Modifier.height(12.dp))
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-        text = "纸张",
+        text = stringResource(R.string.paper_settings),
         style = AppTypography.titleSmall,
         fontWeight = FontWeight.W600
     )
     SettingsSwitchEntry(
         modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.imagesearch_roller_24px,
-        title = "背景图片",
-        description = "自定义阅读器背景图片",
+        title = stringResource(R.string.settings_theme_bg_image),
+        description = stringResource(R.string.settings_theme_bg_image_desc),
         checked = settingState.enableBackgroundImage,
         booleanUserData = settingState.enableBackgroundImageUserData
     )
@@ -283,8 +283,8 @@ fun ReaderThemeSettingsList(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("应用内置", style = AppTypography.titleMedium)
-                    Text("牛皮纸", style = AppTypography.labelMedium, color = colorScheme.secondary)
+                    Text(stringResource(R.string.settings_theme_bg_image_built_in), style = AppTypography.titleMedium)
+                    Text(stringResource(R.string.settings_theme_bg_image_built_in_desc), style = AppTypography.labelMedium, color = colorScheme.secondary)
                 }
                 Spacer(Modifier.weight(1f))
                 RadioButton(
@@ -301,7 +301,7 @@ fun ReaderThemeSettingsList(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("自定义", style = AppTypography.titleMedium)
+                    Text(stringResource(R.string.settings_theme_bg_image_custom), style = AppTypography.titleMedium)
                 }
                 Spacer(Modifier.weight(1f))
 
@@ -423,9 +423,9 @@ fun ReaderThemeSettingsList(
     if (settingState.enableBackgroundImage) {
         SettingsMenuEntry(
             modifier = Modifier.background(colorScheme.background),
-            title = "背景显示模式",
+            title = stringResource(R.string.settings_theme_bg_display_mode),
             iconRes = R.drawable.insert_page_break_24px,
-            description = "指定自定义背景图片的显示模式",
+            description = stringResource(R.string.settings_theme_bg_display_mode_desc),
             options = MenuOptions.ReaderBgImageDisplayModeOptions,
             selectedOptionKey = settingState.backgroundImageDisplayMode,
             stringUserData = settingState.backgroundImageDisplayModeUserData
@@ -437,8 +437,8 @@ fun ReaderThemeSettingsList(
         SettingsClickableEntry(
             modifier = Modifier.background(colorScheme.background),
             iconRes = R.drawable.colorize_24px,
-            title = "背景颜色",
-            description = "自定义阅读器背景色",
+            title = stringResource(R.string.settings_theme_bg_color),
+            description = stringResource(R.string.settings_theme_bg_color_desc),
             onClick = onClickChangeBackgroundColor,
             trailingContent = {
                 androidx.compose.foundation.Canvas(
@@ -463,7 +463,7 @@ fun ReaderThemeSettingsList(
     Spacer(Modifier.height(8.dp))
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-        text = "文本",
+        text = stringResource(R.string.text_settings),
         style = AppTypography.titleSmall,
         fontWeight = FontWeight.W600
     )
@@ -475,8 +475,8 @@ fun ReaderThemeSettingsList(
     SettingsClickableEntry (
         modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.palette_24px,
-        title = "文本颜色",
-        description = "自定义阅读器文本颜色",
+        title = stringResource(R.string.settings_theme_text_color),
+        description = stringResource(R.string.settings_theme_text_color_desc),
         onClick = { onClickChangeTextColor() },
         trailingContent = {
             androidx.compose.foundation.Canvas(
@@ -544,8 +544,8 @@ fun ReaderThemeSettingsList(
     SettingsMenuEntry(
         modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.text_fields_24px,
-        title = "文本字体",
-        description = "使用应用内置的字体或自定义字体文件",
+        title = stringResource(R.string.settings_theme_text_font),
+        description = stringResource(R.string.settings_theme_text_font_desc),
         options = MenuOptions.SelectText,
         selectedOptionKey = if (settingState.fontFamilyUri.toString()
                 .isEmpty()
@@ -596,7 +596,7 @@ fun ReaderThemeSettingsList(
     SettingsSliderEntry(
         modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.format_bold_24px,
-        title = "字重",
+        title = stringResource(R.string.settings_theme_text_font_weight),
         unit = "",
         valueRange = 100f..900f,
         value = settingState.fontWeigh,
@@ -719,7 +719,7 @@ fun BackgroundImageSettingItem(
                             tint = colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("选择浅色背景", color = colorScheme.onSurface)
+                        Text(stringResource(R.string.choose_light_bg), color = colorScheme.onSurface)
                     }
                 }
 
@@ -739,7 +739,7 @@ fun BackgroundImageSettingItem(
                             tint = colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("选择深色背景", color = colorScheme.onSurface)
+                        Text(stringResource(R.string.choose_dark_bg), color = colorScheme.onSurface)
                     }
                 }
             }

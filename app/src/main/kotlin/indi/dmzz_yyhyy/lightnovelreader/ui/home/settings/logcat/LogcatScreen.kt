@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -90,7 +91,7 @@ fun LogcatScreen(
                 title = {
                     Column {
                         Text(
-                            text = "日志",
+                            text = stringResource(R.string.logs_title),
                             style = AppTypography.titleTopBar
                         )
                         AnimatedTextLine(
@@ -152,7 +153,7 @@ fun LogcatScreen(
                             value = uiState.selectedLogFile,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("日志来源") },
+                            label = { Text(stringResource(R.string.log_source)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                             colors = ExposedDropdownMenuDefaults.textFieldColors(),
                             modifier = Modifier
@@ -228,9 +229,9 @@ fun LogcatScreen(
                             DropdownMenuItem(
                                 text = {
                                     Column {
-                                        Text("删除所有临时日志", style = AppTypography.titleMedium)
+                                        Text(stringResource(R.string.log_clear), style = AppTypography.titleMedium)
                                         Text(
-                                            text = "清除应用缓存时，这些临时日志也将被删除",
+                                            text = stringResource(R.string.log_clear_desc),
                                             style = AppTypography.bodyLarge,
                                             color = MaterialTheme.colorScheme.secondary
                                         )
@@ -248,7 +249,7 @@ fun LogcatScreen(
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                                     ) {
                                         Text(
-                                            text = "自动滚动",
+                                            stringResource(R.string.auto_scroll),
                                             style = AppTypography.bodyLarge
                                         )
                                         Spacer(Modifier.weight(1f))
@@ -270,7 +271,7 @@ fun LogcatScreen(
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                                     ) {
                                         Text(
-                                            text = "自动换行",
+                                            text = stringResource(R.string.word_wrap),
                                             style = AppTypography.bodyLarge
                                         )
                                         Spacer(Modifier.weight(1f))
@@ -300,13 +301,14 @@ fun LogcatScreen(
     }
 }
 
+@Composable
 private fun parseFileLabel(fileName: String): Pair<String, String> {
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
     val displayFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
     val (prefix, rawTimestamp) = when {
-        fileName.startsWith("lnr_export_") -> "分享的日志" to fileName.removePrefix("lnr_export_").removeSuffix(".log")
-        fileName.startsWith("lnr_panic_") -> "App 崩溃" to fileName.removePrefix("lnr_panic_").removeSuffix(".log")
+        fileName.startsWith("lnr_export_") -> stringResource(R.string.log_shared) to fileName.removePrefix("lnr_export_").removeSuffix(".log")
+        fileName.startsWith("lnr_panic_") -> stringResource(R.string.log_crash) to fileName.removePrefix("lnr_panic_").removeSuffix(".log")
         else -> null to null
     }
 
@@ -351,8 +353,7 @@ fun EmptyLogListContent() {
                 contentDescription = "empty_list_icon"
             )
             Spacer(Modifier.height(18.dp))
-            Text("空日志列表，等待更新")
-            Text("")
+            Text(stringResource(R.string.log_empty_list))
         }
     }
 }

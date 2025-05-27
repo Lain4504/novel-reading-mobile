@@ -139,7 +139,7 @@ private fun CalendarBlock(
 
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
         Text(
-            text = "活动",
+            text = stringResource(R.string.activity),
             style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )
@@ -173,7 +173,7 @@ private fun CalendarBlock(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "少",
+                text = stringResource(R.string.heatmap_indicator_less),
                 style = AppTypography.bodySmall
             )
             Spacer(Modifier.width(6.dp))
@@ -182,7 +182,7 @@ private fun CalendarBlock(
             }
             Spacer(Modifier.width(6.dp))
             Text(
-                text = "多 (${uiState.thresholds}+)",
+                text = stringResource(R.string.heatmap_indicator_more, uiState.thresholds),
                 style = AppTypography.bodySmall
             )
         }
@@ -220,7 +220,7 @@ private fun DailyStatsBlock(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             modifier = Modifier.padding(end = 10.dp),
-                            text = "详情"
+                            text = stringResource(R.string.detail_title)
                         )
                         Icon(
                             painter = painterResource(R.drawable.arrow_forward_24px), null
@@ -242,7 +242,7 @@ private fun DailyStatsBlock(
         ) {
             StatSection(
                 icon = painterResource(R.drawable.schedule_90dp),
-                title = "阅读时长",
+                title = stringResource(R.string.activity_reading_time),
                 value = details?.formattedTotalTime ?: "--"
             ) {
                 Crossfade(targetState = details?.timeDetails.isNullOrEmpty(), label = "") { isEmpty ->
@@ -268,7 +268,7 @@ private fun DailyStatsBlock(
 
             StatSection(
                 icon = painterResource(R.drawable.schedule_90dp),
-                title = "时间范围",
+                title = stringResource(R.string.time_range),
                 value = ""
             ) {
                 Crossfade(
@@ -280,10 +280,10 @@ private fun DailyStatsBlock(
                     } else {
                         Column {
                             details?.firstBook?.let {
-                                DataItem(it.title, "最早 (${details.firstSeenTime})")
+                                DataItem(it.title, stringResource(R.string.first_seen, details.firstSeenTime.toString()))
                             }
                             details?.lastBook?.let {
-                                DataItem(it.title, "最晚 (${details.lastSeenTime})")
+                                DataItem(it.title, stringResource(R.string.last_seen, details.lastSeenTime.toString()))
                             }
                         }
                     }
@@ -298,7 +298,7 @@ private fun DailyStatsBlock(
 @Composable
 private fun NoRecords() {
     Text(
-        text = "没有记录",
+        text = stringResource(R.string.no_records),
         modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
@@ -420,7 +420,7 @@ fun TotalStatsBlock(
             .padding(horizontal = 18.dp)
     ) {
         Text(
-            text = "总统计",
+            text = stringResource(R.string.total_record),
             style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )
@@ -437,9 +437,9 @@ fun TotalStatsBlock(
                 StatsCard(
                     modifier = Modifier.weight(1f),
                     icon = painterResource(R.drawable.outline_book_24px),
-                    title = "阅读会话",
+                    title = stringResource(R.string.reading_sessions),
                     value = totalSessions.toString(),
-                    unit = "次"
+                    unit = stringResource(R.string.reading_sessions_unit)
                 )
             }
 
@@ -447,9 +447,9 @@ fun TotalStatsBlock(
                 StatsCard(
                     modifier = Modifier.weight(1f),
                     icon = painterResource(R.drawable.schedule_90dp),
-                    title = "阅读时长",
+                    title = stringResource(R.string.reading_duration),
                     value = "${totalSeconds / 3600}",
-                    unit = "时 ${(totalSeconds % 3600) / 60} 分"
+                    unit = stringResource(R.string.reading_duration_unit, (totalSeconds % 3600) / 60)
                 )
             }
         }
@@ -616,6 +616,7 @@ private fun WeekHeader(dayOfWeek: DayOfWeek) {
         )
     }
 }
+
 
 @Composable
 private fun MonthHeader(
