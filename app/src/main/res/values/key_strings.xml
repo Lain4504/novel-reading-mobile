@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- GitHub Proxy -->
-    <string name="key_proxy_disabled">Unspecified</string>
-    <string name="key_proxy_disabled_desc">Proxy disabled</string>
-    <string name="key_proxy_gh_proxy_com" translatable="false">gh-proxy.com</string>
-    <string name="key_proxy_3rd_party_service_desc">Third-party public service</string>
-    <string name="key_proxy_ghgo_xyz" translatable="false">ghgo.xyz</string>
-    <string name="key_proxy_custom">Custom</string>
-    <string name="key_proxy_custom_desc">Custom proxy site URL</string>
     <!-- Update Channel -->
     <string name="key_update_channel_release">Release Builds</string>
     <string name="key_update_channel_development">Development Builds</string>
@@ -32,6 +24,7 @@
     <string name="key_dark_theme_default">Default</string>
     <string name="key_dark_theme_obsidian">Obsidian</string>
     <!-- Experimental Locale -->
+    <string name="key_locale_none">Follow System</string>
     <string name="key_locale_zh_cn" translatable="false">简体中文 (中国大陆)</string>
     <string name="key_locale_zh_hk" translatable="false">繁體中文 (香港)</string>
     <string name="key_locale_zh_tw" translatable="false">繁體中文 (臺灣)</string>

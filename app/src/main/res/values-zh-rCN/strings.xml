@@ -1,4 +1,5 @@
 <resources>
+    <string name="language">简体中文 (中国大陆)</string>
     <string name="language_translators">NightFish, yukonisen</string>
     <!-- navigation items -->
     <string name="nav_reading">阅读中</string>
@@ -52,8 +53,6 @@
     <string name="settings_get_updates_desc">手动获取应用更新</string>
     <string name="settings_distribution_platform">更新分发平台</string>
     <string name="settings_distribution_platform_settings_desc"><!--reserved--></string>
-    <string name="settings_github_proxy">GitHub 代理</string>
-    <string name="settings_github_proxy_desc">对于中国大陆用户，使用 GitHub 代理地址以获得更流畅的访问 </string>
 
     <string name="reader_settings">阅读设置</string>
     <string name="settings_reader_font_size">字体大小</string>
@@ -185,7 +184,6 @@
     <string name="book_info_update_date">%d-%d-%d 更新</string>
     <string name="book_info_word_count_kilo">%dK 字</string>
     <string name="name">名称</string>
-    <string name="settings_preview">设置预览</string>
     <string name="bookshelf_name">书架名称</string>
     <string name="bookshelf_name_suggestion">为书架命名，建议长度在6个汉字以内</string>
     <string name="bookshelf_name_placeholder">输入书架名称</string>
@@ -259,8 +257,6 @@
 
     <!-- Dialogs -->
     <string name="dialog_about_version">版本</string>
-    <string name="dialog_about_build_time">构建时间</string>
-    <string name="dialog_about_build_host">构建主机</string>
     <string name="dialog_delete_bookshelf">删除书架</string>
     <string name="dialog_delete_bookshelf_text">确定要删除这个书架吗？它将会永久失去！（真的很久！）</string>
     <string name="dialog_add_to_bookshelf_text">将这本书添加至以下书架</string>

@@ -56,7 +56,7 @@ fun AboutSettingsList(
         SettingsClickableEntry(
             iconRes = R.drawable.adb_24px,
             title = stringResource(R.string.settings_debug_tools),
-            description = stringResource(R.string.key_dark_theme_default),
+            description = stringResource(R.string.settings_debug_tools_desc),
             onClick = onClickDebugMode
         )
 }

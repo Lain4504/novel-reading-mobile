@@ -74,12 +74,16 @@ class MainActivity : ComponentActivity() {
                 )
         }
         coroutineScope.launch(Dispatchers.IO) {
-            userDataRepository.stringUserData(UserDataPath.Settings.Display.AppLocale.path).getFlow().collect {
-                appLocale = it ?: "${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}"
-                if (appLocale.split("-").size < 2)
-                    appLocale = "${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}"
-            }
+            userDataRepository.stringUserData(UserDataPath.Settings.Display.AppLocale.path)
+                .getFlow()
+                .collect { value ->
+                    val locale = Locale.current.platformLocale
+                    val deviceLocale = "${locale.language}-${locale.country}"
+                    appLocale = if (value.isNullOrBlank() || value == "none") deviceLocale
+                    else value
+                }
         }
+
         coroutineScope.launch(Dispatchers.IO) {
             userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkMode.path).getFlow().collect {
                 darkMode = it ?: "FollowSystem"
