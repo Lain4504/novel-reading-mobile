@@ -3,6 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -77,9 +78,9 @@ class MainActivity : ComponentActivity() {
             userDataRepository.stringUserData(UserDataPath.Settings.Display.AppLocale.path)
                 .getFlow()
                 .collect { value ->
-                    val locale = Locale.current.platformLocale
-                    val deviceLocale = "${locale.language}-${locale.country}"
-                    appLocale = if (value.isNullOrBlank() || value == "none") deviceLocale
+                    val locale = Resources.getSystem().configuration.locales[0]
+                    val systemLocale = "${locale.language}-${locale.country}"
+                    appLocale = if (value.isNullOrBlank() || value == "none") systemLocale
                     else value
                 }
         }
