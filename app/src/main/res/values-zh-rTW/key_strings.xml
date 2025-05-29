@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Publishing House Filter -->
+    <string name="key_pub_filter_title">文庫篩選</string>
+    <string name="key_pub_filter_desc">根據小說的文庫篩選</string>
+    <!-- Initial letter Filter -->
+    <string name="key_letter_filter_title">首字母篩選</string>
+    <string name="key_letter_filter_desc">根據小說標題的拼音首字母篩選</string>
+    <!-- Reader Custom -->
+    <string name="key_customize_image">自訂圖片</string>
+    <string name="key_default_image">預設圖片</string>
+    <string name="key_default_text">預設字型</string>
+    <string name="key_customize_text">自訂字型</string>
     <!-- Update Channel -->
     <string name="key_update_channel_release">正式發布版</string>
     <string name="key_update_channel_development">開發版 (最新功能和錯誤修復)</string>

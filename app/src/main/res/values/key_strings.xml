@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Publishing House Filter -->
+    <string name="key_pub_filter_title">Publishing House Filter</string>
+    <string name="key_pub_filter_desc">Filter by publishing house.</string>
+    <!-- Initial letter Filter -->
+    <string name="key_letter_filter_title">First Letter Filter</string>
+    <string name="key_letter_filter_desc">Filter by the first letter of the book\'s title (Pinyin).</string>
+    <!-- Reader Custom -->
+    <string name="key_customize_image">Customize Image</string>
+    <string name="key_default_image">Default Image</string>
+    <string name="key_default_text">Default Font</string>
+    <string name="key_customize_text">Customize Image</string>
     <!-- Update Channel -->
     <string name="key_update_channel_release">Release Builds</string>
     <string name="key_update_channel_development">Development Builds</string>
+    <string name="key_update_channel_ci" translatable="false">CI</string>
     <!-- Distribution Platform -->
     <string name="key_platform_github" translatable="false">GitHub</string>
     <string name="key_platform_appcenter" translatable="false">AppCenter</string>

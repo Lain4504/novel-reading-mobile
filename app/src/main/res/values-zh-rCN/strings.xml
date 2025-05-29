@@ -12,13 +12,8 @@
     <string name="nav_settings">设置</string>
     <string name="nav_statistics">统计</string>
     <!-- Operations -->
-    <string name="submit">提交</string>
     <string name="cancel">取消</string>
-    <string name="menu">菜单</string>
-    <string name="more">更多</string>
-    <string name="any">任意</string>
     <string name="apply">设定</string>
-    <string name="accept">接受</string>
     <string name="decline">拒绝</string>
     <string name="manual_download">手动下载</string>
     <string name="follow_system">跟随系统</string>
@@ -273,17 +268,5 @@
     <string name="dialog_snap_bookmarks">书签</string>
     <string name="dialog_snap_bookmarks_text">包括全部书本的书签信息</string>
     <string name="dialog_select_data_source_text">选择使用的数据源，这将清除缓存并切换软件数据源。当前的用户数据不会丢失，并将在下次切换回当前数据源时恢复。</string>
-
-    <!-- Publishing House Filter -->
-    <string name="key_pub_filter_title">文库筛选</string>
-    <string name="key_pub_filter_desc">根据小说的文库筛选</string>
-    <!-- Initial letter Filter -->
-    <string name="key_letter_filter_title">首字母筛选</string>
-    <string name="key_letter_filter_desc">根据小说标题的拼音首字母筛选</string>
-    <string name="key_customize_image">自定义图片</string>
-    <string name="key_default_image">默认图片</string>
-    <string name="key_default_text">默认字体</string>
-    <string name="key_customize_text">自定义字体</string>
-    <string name="key_update_channel_ci">CI</string>
 
 </resources>

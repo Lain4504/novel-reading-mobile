@@ -258,8 +258,7 @@ private fun TopBar(
         actions = {
             IconButton(onClick = onClickDownloadManager) {
                 Icon(
-                    painter = painterResource(R.drawable.download_24px),
-                    contentDescription = stringResource(R.string.more)
+                    painter = painterResource(R.drawable.download_24px), null
                 )
             }
             IconButton(

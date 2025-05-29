@@ -709,8 +709,7 @@ fun TopBar(
                 }*/
                 IconButton(onClick = { mainMenuExpended = true }) {
                     Icon(
-                        painter = painterResource(R.drawable.more_vert_24px),
-                        contentDescription = stringResource(R.string.more)
+                        painter = painterResource(R.drawable.more_vert_24px), null
                     )
                 }
             } else {

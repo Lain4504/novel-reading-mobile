@@ -14,13 +14,8 @@
     <string name="nav_statistics">Statistics</string>
 
     <!-- Operations -->
-    <string name="submit">Submit</string>
     <string name="cancel">Cancel</string>
-    <string name="menu">Menu</string>
-    <string name="more">More</string>
-    <string name="any">Any</string>
     <string name="apply">Apply</string>
-    <string name="accept">Accept</string>
     <string name="decline">Decline</string>
     <string name="manual_download">Manual</string>
     <string name="follow_system">Follow System</string>
@@ -278,15 +273,5 @@
     <string name="dialog_snap_bookmarks">Bookmarks</string>
     <string name="dialog_snap_bookmarks_text">Includes all book bookmarks.</string>
     <string name="dialog_select_data_source_text">Select the data source. This will clear the cache and switch the app\'s data source. Your current user data will remain intact and can be restored upon switching back.</string>
-    <string name="key_pub_filter_title">Publishing House Filter</string>
-    <string name="key_pub_filter_desc">Filter by publishing house.</string>
-    <string name="key_letter_filter_title">First Letter Filter</string>
-    <string name="key_letter_filter_desc">Filter by the first letter of the book\'s title (Pinyin).</string>
-    <string name="key_customize_image">Customize Image</string>
-    <string name="key_default_image">Default Image</string>
-    <string name="key_default_text">Default Font</string>
-    <string name="key_customize_text">Customize Image</string>
-    <string name="key_update_channel_ci">CI</string>
-
 
 </resources>
