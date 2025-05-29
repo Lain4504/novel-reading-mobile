@@ -143,7 +143,7 @@
     <string name="settings_book_update_reminder_desc">Check for book updates and notify in the background</string>
     <string name="settings_delete_bookshelf">Delete Bookshelf</string>
     <string name="settings_delete_bookshelf_desc">Permanently delete this bookshelf</string>
-    <string name="appearence_settings">Appearance</string>
+    <string name="appearance_settings">Appearance</string>
     <string name="control_settings">Controls</string>
     <string name="margin_settings">Margins</string>
     <string name="settings_theme_settings">Theme Settings…</string>

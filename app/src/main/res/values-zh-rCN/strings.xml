@@ -139,7 +139,7 @@
     <string name="settings_book_update_reminder_desc">应用在后台时，检查并通知书本更新</string>
     <string name="settings_delete_bookshelf">删除书架</string>
     <string name="settings_delete_bookshelf_desc">永久移除该书架</string>
-    <string name="appearence_settings">外观</string>
+    <string name="appearance_settings">外观</string>
     <string name="control_settings">操作</string>
     <string name="margin_settings">边距</string>
     <string name="settings_theme_settings">主题设置……</string>

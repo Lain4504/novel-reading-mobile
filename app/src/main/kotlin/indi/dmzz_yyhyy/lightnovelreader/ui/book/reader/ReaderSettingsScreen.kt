@@ -102,7 +102,7 @@ fun ContentSettings(
     onClickThemeSettings: () -> Unit
 ) {
     val tabs = listOf(
-        TabItem(stringResource(R.string.appearence_settings), R.drawable.filled_menu_book_24px),
+        TabItem(stringResource(R.string.appearance_settings), R.drawable.filled_menu_book_24px),
         TabItem(stringResource(R.string.control_settings), R.drawable.settings_applications_24px),
         TabItem(stringResource(R.string.margin_settings), R.drawable.aspect_ratio_24px),
     )
