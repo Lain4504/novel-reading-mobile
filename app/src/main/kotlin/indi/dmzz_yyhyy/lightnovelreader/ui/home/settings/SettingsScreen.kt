@@ -119,7 +119,10 @@ fun SettingsScreen(
                         title = stringResource(R.string.display_settings),
                         icon = ImageVector.vectorResource(R.drawable.light_mode_24px)
                     ) {
-                        DisplaySettingsList(settingState = settingState, onClickThemeSettings)
+                        DisplaySettingsList(
+                            settingState = settingState,
+                            onClickThemeSettings = onClickThemeSettings
+                        )
                     }
                     SettingsCategory(
                         title = stringResource(R.string.data_settings),
