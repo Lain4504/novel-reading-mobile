@@ -36,7 +36,7 @@
     <string name="key_dark_theme_default">Default</string>
     <string name="key_dark_theme_obsidian">Obsidian</string>
     <!-- Experimental Locale -->
-    <string name="key_locale_none">Follow System</string>
+    <string name="key_locale_none">Not set</string>
     <string name="key_locale_zh_cn" translatable="false">简体中文 (中国大陆)</string>
     <string name="key_locale_zh_hk" translatable="false">繁體中文 (香港)</string>
     <string name="key_locale_zh_tw" translatable="false">繁體中文 (台灣)</string>

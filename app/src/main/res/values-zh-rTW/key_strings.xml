@@ -24,7 +24,7 @@
     <string name="key_dark_theme_default">預設</string>
     <string name="key_dark_theme_obsidian">黑曜石</string>
     <!-- Experimental Locale -->
-    <string name="key_locale_none">跟隨系統語言</string>
+    <string name="key_locale_none">跟隨應用程式語言</string>
     <!-- FlipAnime -->
     <string name="key_flip_animation_none">無</string>
     <string name="key_flip_animation_scroll">捲動</string>
