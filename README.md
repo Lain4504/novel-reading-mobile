@@ -1,3 +1,5 @@
+**简体中文** | [繁體中文](README_TW.md) | [English](README_US.md)
+
 <div align="center">
     <h1>LightNovelReader</h1>
     <a><img alt="Android" src="https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white&style=for-the-badge"/></a>
@@ -24,6 +26,7 @@ LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件�
 - 热情的开发者，还有更多…
 
 ## 下载
+
 从 [GitHub Releases](https://github.com/dmzz-yyhyy/LightNovelReader/releases/latest) 下载最新发布版。要体验最新的功能与 Bug 修复，请从 [Actions](https://github.com/dmzz-yyhyy/LightNovelReader/actions) 下载最新构建。
 
 ## 支持
@@ -40,6 +43,7 @@ LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件�
 | ![image](assets/light3.png) |
 
 ### 关于 EpubLib
+
 为了处理epub的导出问题，我们单独创建了一个epub处理模块，如果您感兴趣，可以看[**这里**](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/epub.md)
 
 ## License
