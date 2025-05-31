@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">LightNovelReader</string>
+    <string name="language">English</string>
     <string name="language_translators">yukonisen, NightFish</string>
     <!-- Navigation Items -->
     <string name="nav_reading">Reading</string>
@@ -13,13 +14,8 @@
     <string name="nav_statistics">Statistics</string>
 
     <!-- Operations -->
-    <string name="submit">Submit</string>
     <string name="cancel">Cancel</string>
-    <string name="menu">Menu</string>
-    <string name="more">More</string>
-    <string name="any">Any</string>
     <string name="apply">Apply</string>
-    <string name="accept">Accept</string>
     <string name="decline">Decline</string>
     <string name="manual_download">Manual</string>
     <string name="follow_system">Follow System</string>
@@ -57,8 +53,6 @@
     <string name="settings_get_updates_desc">Check and install the latest version.</string>
     <string name="settings_distribution_platform">Distribution Platform</string>
     <string name="settings_distribution_platform_settings_desc"><!--reserved--></string>
-    <string name="settings_github_proxy">GitHub Proxy</string>
-    <string name="settings_github_proxy_desc">Choose a GitHub proxy for faster access, if applicable</string>
 
     <string name="reader_settings">Reader Settings</string>
     <string name="settings_reader_font_size">Font Size</string>
@@ -99,6 +93,8 @@
     <string name="settings_theme_dark_theme_desc">Set the app theme for dark mode</string>
     <string name="settings_theme_dynamic_colors">Dynamic Colors</string>
     <string name="settings_theme_dynamic_colors_desc">Apply system-generated dynamic colors (Android 12+ required)</string>
+    <string name="settings_app_language">Language</string>
+    <string name="settings_app_language_desc">Set the app language</string>
     <string name="settings_characters_variant">Chinese Characters Variant</string>
     <string name="settings_characters_variant_desc">Set Chinese character variants for different language regions</string>
     <string name="paper_settings">Paper</string>
@@ -149,7 +145,7 @@
     <string name="settings_book_update_reminder_desc">Check for book updates and notify in the background</string>
     <string name="settings_delete_bookshelf">Delete Bookshelf</string>
     <string name="settings_delete_bookshelf_desc">Permanently delete this bookshelf</string>
-    <string name="appearence_settings">Appearance</string>
+    <string name="appearance_settings">Appearance</string>
     <string name="control_settings">Controls</string>
     <string name="margin_settings">Margins</string>
     <string name="settings_theme_settings">Theme Settings…</string>
@@ -189,7 +185,6 @@
     <string name="book_info_update_date">Updated on %d-%d-%d</string>
     <string name="book_info_word_count_kilo">%dK Words</string>
     <string name="name">Name</string>
-    <string name="settings_preview">Settings Preview</string>
     <string name="bookshelf_name">Bookshelf Name</string>
     <string name="bookshelf_name_suggestion">Name your bookshelf with a simple name</string>
     <string name="bookshelf_name_placeholder">Enter the bookshelf name.</string>
@@ -264,8 +259,6 @@
     
     <!-- Dialogs -->
     <string name="dialog_about_version">Version</string>
-    <string name="dialog_about_build_time">Build Time</string>
-    <string name="dialog_about_build_host">Build Host</string>
     <string name="dialog_delete_bookshelf">Delete Bookshelf</string>
     <string name="dialog_delete_bookshelf_text">Are you sure you want to delete this bookshelf? This bookshelf will be lost forever! (A long time!)</string>
     <string name="dialog_add_to_bookshelf_text">Add this book to the following bookshelves</string>
@@ -282,15 +275,5 @@
     <string name="dialog_snap_bookmarks">Bookmarks</string>
     <string name="dialog_snap_bookmarks_text">Includes all book bookmarks.</string>
     <string name="dialog_select_data_source_text">Select the data source. This will clear the cache and switch the app\'s data source. Your current user data will remain intact and can be restored upon switching back.</string>
-    <string name="key_pub_filter_title">Publishing House Filter</string>
-    <string name="key_pub_filter_desc">Filter by publishing house.</string>
-    <string name="key_letter_filter_title">First Letter Filter</string>
-    <string name="key_letter_filter_desc">Filter by the first letter of the book\'s title (Pinyin).</string>
-    <string name="key_customize_image">Customize Image</string>
-    <string name="key_default_image">Default Image</string>
-    <string name="key_default_text">Default Font</string>
-    <string name="key_customize_text">Customize Image</string>
-    <string name="key_update_channel_ci">CI</string>
-
 
 </resources>

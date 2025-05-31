@@ -3,6 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -74,12 +75,16 @@ class MainActivity : ComponentActivity() {
                 )
         }
         coroutineScope.launch(Dispatchers.IO) {
-            userDataRepository.stringUserData(UserDataPath.Settings.Display.AppLocale.path).getFlow().collect {
-                appLocale = it ?: "${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}"
-                if (appLocale.split("-").size < 2)
-                    appLocale = "${Locale.current.platformLocale.language}-${Locale.current.platformLocale.variant}"
-            }
+            userDataRepository.stringUserData(UserDataPath.Settings.Display.AppLocale.path)
+                .getFlow()
+                .collect { value ->
+                    val locale = Resources.getSystem().configuration.locales[0]
+                    val systemLocale = "${locale.language}-${locale.country}"
+                    appLocale = if (value.isNullOrBlank() || value == "none") systemLocale
+                    else value
+                }
         }
+
         coroutineScope.launch(Dispatchers.IO) {
             userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkMode.path).getFlow().collect {
                 darkMode = it ?: "FollowSystem"

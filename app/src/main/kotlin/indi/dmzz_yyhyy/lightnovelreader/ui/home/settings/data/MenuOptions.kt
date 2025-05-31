@@ -82,6 +82,7 @@ sealed class MenuOptions {
     )
 
     data object AppLocaleOptions: MenuOptions(
+        Option("none", R.string.key_locale_none),
         Option("zh-CN", R.string.key_locale_zh_cn),
         Option("zh-HK", R.string.key_locale_zh_hk),
         Option("zh-TW", R.string.key_locale_zh_tw),

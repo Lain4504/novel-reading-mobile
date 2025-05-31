@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- GitHub Proxy -->
-    <string name="key_proxy_disabled">Unspecified</string>
-    <string name="key_proxy_disabled_desc">Proxy disabled</string>
-    <string name="key_proxy_gh_proxy_com" translatable="false">gh-proxy.com</string>
-    <string name="key_proxy_3rd_party_service_desc">Third-party public service</string>
-    <string name="key_proxy_ghgo_xyz" translatable="false">ghgo.xyz</string>
-    <string name="key_proxy_custom">Custom</string>
-    <string name="key_proxy_custom_desc">Custom proxy site URL</string>
+    <!-- Publishing House Filter -->
+    <string name="key_pub_filter_title">Publishing House Filter</string>
+    <string name="key_pub_filter_desc">Filter by publishing house.</string>
+    <!-- Initial letter Filter -->
+    <string name="key_letter_filter_title">First Letter Filter</string>
+    <string name="key_letter_filter_desc">Filter by the first letter of the book\'s title (Pinyin).</string>
+    <!-- Reader Custom -->
+    <string name="key_customize_image">Customize Image</string>
+    <string name="key_default_image">Default Image</string>
+    <string name="key_default_text">Default Font</string>
+    <string name="key_customize_text">Customize Image</string>
     <!-- Update Channel -->
     <string name="key_update_channel_release">Release Builds</string>
     <string name="key_update_channel_development">Development Builds</string>
+    <string name="key_update_channel_ci" translatable="false">CI</string>
     <!-- Distribution Platform -->
     <string name="key_platform_github" translatable="false">GitHub</string>
     <string name="key_platform_appcenter" translatable="false">AppCenter</string>
@@ -32,9 +36,10 @@
     <string name="key_dark_theme_default">Default</string>
     <string name="key_dark_theme_obsidian">Obsidian</string>
     <!-- Experimental Locale -->
+    <string name="key_locale_none">Not set</string>
     <string name="key_locale_zh_cn" translatable="false">简体中文 (中国大陆)</string>
     <string name="key_locale_zh_hk" translatable="false">繁體中文 (香港)</string>
-    <string name="key_locale_zh_tw" translatable="false">繁體中文 (臺灣)</string>
+    <string name="key_locale_zh_tw" translatable="false">繁體中文 (台灣)</string>
     <string name="key_locale_ja_jp" translatable="false">日本語</string>
     <string name="key_locale_ko_kr" translatable="false">한국어 (대한민국)</string>
     <string name="key_locale_ko_kp" translatable="false">한국어 (조선민주주의인민공화국)</string>

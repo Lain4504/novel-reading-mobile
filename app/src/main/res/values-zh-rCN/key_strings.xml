@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- GitHub Proxy -->
-    <string name="key_proxy_disabled">未指定</string>
-    <string name="key_proxy_disabled_desc">禁用代理</string>
-    <string name="key_proxy_gh_proxy_com" translatable="false">gh-proxy.com</string>
-    <string name="key_proxy_3rd_party_service_desc">第三方提供的公益加速服务</string>
-    <string name="key_proxy_custom">自定义</string>
-    <string name="key_proxy_custom_desc">自行填写加速地址站点</string>
+    <!-- Publishing House Filter -->
+    <string name="key_pub_filter_title">文库筛选</string>
+    <string name="key_pub_filter_desc">根据小说的文库筛选</string>
+    <!-- Initial letter Filter -->
+    <string name="key_letter_filter_title">首字母筛选</string>
+    <string name="key_letter_filter_desc">根据小说标题的拼音首字母筛选</string>
+    <!-- Reader Custom -->
+    <string name="key_customize_image">自定义图片</string>
+    <string name="key_default_image">默认图片</string>
+    <string name="key_default_text">默认字体</string>
+    <string name="key_customize_text">自定义字体</string>
     <!-- Update Channel -->
     <string name="key_update_channel_release">正式发布版</string>
     <string name="key_update_channel_development">开发版 (最新功能和错误修复)</string>
@@ -19,6 +23,8 @@
     <!-- Dark Theme Name -->
     <string name="key_dark_theme_default">默认</string>
     <string name="key_dark_theme_obsidian">黑曜石</string>
+    <!-- Experimental Locale -->
+    <string name="key_locale_none">跟随应用语言</string>
     <!-- FlipAnime -->
     <string name="key_flip_animation_none">无</string>
     <string name="key_flip_animation_scroll">滚动</string>
