@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontFamily
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.theme.LocalAppTheme
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

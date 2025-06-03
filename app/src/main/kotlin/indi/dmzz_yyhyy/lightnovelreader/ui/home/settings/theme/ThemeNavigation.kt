@@ -5,14 +5,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import indi.dmzz_yyhyy.lightnovelreader.theme.LocalAppTheme
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToColorPickerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.settingsThemeDestination() {

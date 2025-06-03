@@ -39,6 +39,8 @@
     <string name="offline_desc">当前无法获取在线数据，请刷新重试\n检查源网站连通性，或者换个网络试试</string>
     <!-- Settings -->
     <string name="app_settings">应用</string>
+    <string name="theme_settings">主题</string>
+
     <string name="app_updates">更新</string>
     <string name="settings_auto_check_updates">自动检查更新</string>
     <string name="settings_auto_check_updates_desc">应用启动后自动检查更新</string>
@@ -87,9 +89,11 @@
     <string name="settings_theme_dark_theme">深色主题</string>
     <string name="settings_theme_dark_theme_desc">指定应用在深色模式下的主题</string>
     <string name="settings_theme_dynamic_colors">系统动态配色</string>
-    <string name="settings_theme_dynamic_colors_desc">从系统主题应用动态配色 (Android 12 +)</string>
+    <string name="settings_theme_dynamic_colors_desc">从系统主题应用动态配色</string>
+    <string name="settings_theme_dynamic_colors_desc_unavailable">从系统主题应用动态配色 (需要 Android 12+)</string>
     <string name="settings_app_language">语言</string>
     <string name="settings_app_language_desc">设置应用语言</string>
+    <string name="settings_app_language_desc_unavailable">设置应用语言 (需要 Android 13+)</string>
     <string name="settings_characters_variant">汉字变体</string>
     <string name="settings_characters_variant_desc">使用指定语言的汉字变体，需要系统字体支持</string>
     <string name="paper_settings">纸张</string>
