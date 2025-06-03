@@ -63,7 +63,7 @@ import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
-import indi.dmzz_yyhyy.lightnovelreader.theme.LocalAppTheme
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.selectDataFile
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
