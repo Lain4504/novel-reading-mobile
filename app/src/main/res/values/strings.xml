@@ -43,6 +43,7 @@
 
     <!-- Settings -->
     <string name="app_settings">App</string>
+    <string name="theme_settings">Theme</string>
 
     <string name="app_updates">Updates</string>
     <string name="settings_auto_check_updates">Auto Check for Updates</string>
@@ -92,9 +93,11 @@
     <string name="settings_theme_dark_theme">Dark Theme</string>
     <string name="settings_theme_dark_theme_desc">Set the app theme for dark mode</string>
     <string name="settings_theme_dynamic_colors">Dynamic Colors</string>
+    <string name="settings_theme_dynamic_colors_desc_unavailable">Apply system-generated dynamic colors</string>
     <string name="settings_theme_dynamic_colors_desc">Apply system-generated dynamic colors (Android 12+ required)</string>
     <string name="settings_app_language">Language</string>
     <string name="settings_app_language_desc">Set the app language</string>
+    <string name="settings_app_language_desc_unavailable">Set the app language (Android 13+ required)</string>
     <string name="settings_characters_variant">Chinese Characters Variant</string>
     <string name="settings_characters_variant_desc">Set Chinese character variants for different language regions</string>
     <string name="paper_settings">Paper</string>

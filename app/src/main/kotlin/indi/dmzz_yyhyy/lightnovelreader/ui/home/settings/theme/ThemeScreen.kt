@@ -115,7 +115,7 @@ fun DarkModeSettings(
 ) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-        text = stringResource(R.string.app_settings),
+        text = stringResource(R.string.theme_settings),
         style = AppTypography.titleSmall,
         fontWeight = FontWeight.W600
     )
@@ -224,7 +224,9 @@ fun ThemeSettingsList(
         modifier = Modifier.background(colorScheme.background),
         iconRes = R.drawable.format_color_fill_24px,
         title = stringResource(R.string.settings_theme_dynamic_colors),
-        description = stringResource(R.string.settings_theme_dynamic_colors_desc),
+        description = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+            stringResource(R.string.settings_theme_dynamic_colors_desc_unavailable)
+        else stringResource(R.string.settings_theme_dynamic_colors_desc),
         checked = settingState.dynamicColorsKey,
         booleanUserData = settingState.dynamicColorsKeyUserData,
         disabled = Build.VERSION.SDK_INT < Build.VERSION_CODES.S

@@ -19,25 +19,29 @@ fun DisplaySettingsList(
     onClickThemeSettings: () -> Unit
 ) {
     val context = LocalContext.current
+    val isAboveTiramisu = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     SettingsClickableEntry(
         iconRes = R.drawable.format_paint_24px,
         title = stringResource(R.string.settings_theme),
         description = stringResource(R.string.settings_theme_desc),
         onClick = onClickThemeSettings
     )
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        SettingsClickableEntry(
-            iconRes = R.drawable.language_24px,
-            title = stringResource(R.string.settings_app_language),
-            description = stringResource(R.string.settings_app_language_desc),
-            option = stringResource(R.string.language),
-            onClick = {
+    SettingsClickableEntry(
+        iconRes = R.drawable.language_24px,
+        title = stringResource(R.string.settings_app_language),
+        description = if (isAboveTiramisu)
+            stringResource(R.string.settings_app_language_desc)
+        else stringResource(R.string.settings_app_language_desc_unavailable),
+        option = if (isAboveTiramisu) stringResource(R.string.language)
+        else stringResource(R.string.follow_system),
+        onClick = {
+            if (isAboveTiramisu) {
                 val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS)
                 intent.data = Uri.fromParts("package", context.packageName, null)
                 context.startActivity(intent)
-            }
-        )
-    }
+            } else return@SettingsClickableEntry
+        }
+    )
     SettingsMenuEntry(
         iconRes = R.drawable.translate_24px,
         title = stringResource(R.string.settings_characters_variant),

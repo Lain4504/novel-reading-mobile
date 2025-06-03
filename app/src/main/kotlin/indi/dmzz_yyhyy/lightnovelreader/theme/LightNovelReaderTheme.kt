@@ -2,7 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.theme
 
 import android.app.Activity
 import android.os.Build
-import android.view.WindowInsets
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -82,7 +81,7 @@ fun LightNovelReaderTheme(
         } else {
             window.decorView.setOnApplyWindowInsetsListener { view, insets ->
                 view.setPadding(
-                    0, 0, 0, insets.getInsets(WindowInsets.Type.navigationBars()).bottom
+                    0, 0, 0, 0
                 )
                 insets
             }
