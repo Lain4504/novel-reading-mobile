@@ -47,6 +47,7 @@ import indi.dmzz_yyhyy.lightnovelreader.AppEvent
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
@@ -63,6 +64,7 @@ fun FlipPageContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     SimpleFlipPageTextComponent(
         modifier = modifier,
@@ -70,6 +72,7 @@ fun FlipPageContentComponent(
         uiState = uiState,
         settingState = settingState,
         changeIsImmersive = changeIsImmersive,
+        onZoomImage = onZoomImage
     )
 }
 
@@ -80,6 +83,7 @@ private fun SimpleFlipPageTextComponent(
     uiState: FlipPageContentUiState,
     settingState: SettingState,
     changeIsImmersive: () -> Unit,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     val content = uiState.readingChapterContent.content
     val textMeasurer = rememberTextMeasurer()
@@ -250,7 +254,8 @@ private fun SimpleFlipPageTextComponent(
                 fontLineHeight = settingState.fontLineHeight.sp,
                 fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                 fontFamily = rememberReaderFontFamily(settingState),
-                color = readerTextColor(settingState)
+                color = readerTextColor(settingState),
+                onZoomImage = onZoomImage
             )
         }
     }

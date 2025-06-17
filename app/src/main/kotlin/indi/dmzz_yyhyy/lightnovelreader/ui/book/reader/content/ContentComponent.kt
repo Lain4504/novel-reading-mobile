@@ -17,6 +17,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip.FlipPageCont
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip.FlipPageContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentUiState
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 
@@ -27,10 +28,11 @@ fun ContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     when(uiState) {
-        is FlipPageContentUiState -> FlipPageContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive)
-        is ScrollContentUiState -> ScrollContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive)
+        is FlipPageContentUiState -> FlipPageContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
+        is ScrollContentUiState -> ScrollContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
         is PreviewContentUiState -> {
             Box(
                 modifier = Modifier.padding(paddingValues),
@@ -51,7 +53,8 @@ fun ContentComponent(
                             fontLineHeight = settingState.fontLineHeight.sp,
                             fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                             fontFamily = rememberReaderFontFamily(settingState),
-                            color = readerTextColor(settingState)
+                            color = readerTextColor(settingState),
+                            onZoomImage = onZoomImage
                         )
                     }
             }

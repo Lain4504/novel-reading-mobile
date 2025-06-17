@@ -98,6 +98,19 @@ object Route {
                 return result
             }
         }
+        @Serializable
+        data class ImageViewerDialog(
+            val imageUrl: String,
+            val originalX: Float,
+            val originalY: Float,
+            val originalWidth: Float,
+            val originalHeight: Float,
+            val startX: Float,
+            val startY: Float,
+            val startWidth: Float,
+            val startHeight: Float
+        )
+
     }
     @Serializable
     object UpdatesAvailableDialog

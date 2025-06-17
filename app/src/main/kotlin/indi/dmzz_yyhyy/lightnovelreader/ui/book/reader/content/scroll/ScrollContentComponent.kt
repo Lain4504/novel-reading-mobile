@@ -33,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
@@ -44,14 +45,16 @@ fun ScrollContentComponent(
     uiState: ScrollContentUiState,
     settingState: SettingState,
     paddingValues: PaddingValues,
-    changeIsImmersive: () -> Unit
+    changeIsImmersive: () -> Unit,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     ScrollContentTextComponent(
         modifier = modifier,
         uiState = uiState,
         settingState = settingState,
         paddingValues = paddingValues,
-        changeIsImmersive = changeIsImmersive
+        changeIsImmersive = changeIsImmersive,
+        onZoomImage = onZoomImage
     )
 }
 
@@ -61,7 +64,8 @@ fun ScrollContentTextComponent(
     uiState: ScrollContentUiState,
     settingState: SettingState,
     paddingValues: PaddingValues,
-    changeIsImmersive: () -> Unit
+    changeIsImmersive: () -> Unit,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     val density = LocalDensity.current
     val screenHeight = LocalContext.current.resources.displayMetrics.heightPixels
@@ -203,7 +207,8 @@ fun ScrollContentTextComponent(
                             fontLineHeight = settingState.fontLineHeight.sp,
                             fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                             fontFamily = fontFamily,
-                            color = textColor
+                            color = textColor,
+                            onZoomImage = onZoomImage
                         )
                     }
             }
