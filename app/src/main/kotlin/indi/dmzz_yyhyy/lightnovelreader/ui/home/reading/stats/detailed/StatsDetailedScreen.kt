@@ -149,34 +149,38 @@ fun StatsCard(
     subTitle: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp, horizontal = 12.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = colorScheme.surfaceContainer,
-        shadowElevation = 2.dp
+    Column(
+        modifier = modifier.padding(horizontal = 12.dp)
     ) {
-        Box(modifier = Modifier.padding(16.dp)) {
-            Column {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp)
+        ) {
+            Text(
+                text = title,
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.W600
+            )
+            if (subTitle != null) {
                 Text(
-                    text = title,
-                    style = AppTypography.titleMedium,
-                    fontWeight = FontWeight.W600
+                    text = subTitle,
+                    style = AppTypography.titleSmall,
+                    color = colorScheme.secondary
                 )
-                if (subTitle != null) {
-                    Text(
-                        text = subTitle,
-                        style = AppTypography.titleSmall,
-                        color = colorScheme.secondary
-                    )
-                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = colorScheme.surfaceContainerLowest
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 content()
             }
         }
+        Spacer(Modifier.height(16.dp))
     }
 }
-
 
 @Composable
 fun DailyChart(
