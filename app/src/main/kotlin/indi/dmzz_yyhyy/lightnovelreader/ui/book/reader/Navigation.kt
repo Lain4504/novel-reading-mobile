@@ -1,13 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.content.Context
-import android.graphics.Rect
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.HiltViewModelFactory
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,6 +35,7 @@ fun NavGraphBuilder.bookReaderDestination() {
             onClickNextChapter = viewModel::nextChapter,
             onChangeChapter = viewModel::changeChapter,
             onClickThemeSettings = navController::navigateToSettingsThemeDestination,
+            onZoomImage = navController::navigateToImageViewerDialog
         )
     }
     colorPickerDialog()

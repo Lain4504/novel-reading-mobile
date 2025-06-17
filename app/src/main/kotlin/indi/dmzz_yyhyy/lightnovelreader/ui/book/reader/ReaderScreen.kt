@@ -6,13 +6,9 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -90,6 +86,7 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.RollingNumber
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
@@ -99,7 +96,7 @@ import java.time.LocalTime
 import java.util.Locale
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderScreen(
     readingScreenUiState: ReaderScreenUiState,
@@ -110,7 +107,8 @@ fun ReaderScreen(
     onClickLastChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChangeChapter: (Int) -> Unit,
-    onClickThemeSettings: () -> Unit
+    onClickThemeSettings: () -> Unit,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isImmersive by remember { mutableStateOf(false) }
@@ -154,7 +152,8 @@ fun ReaderScreen(
             onClickNextChapter = onClickNextChapter,
             onChangeChapter = onChangeChapter,
             onChangeIsImmersive = { isImmersive = !isImmersive },
-            onClickThemeSettings = onClickThemeSettings
+            onClickThemeSettings = onClickThemeSettings,
+            onZoomImage = onZoomImage
         )
     }
 }
@@ -171,7 +170,8 @@ fun Content(
     onClickNextChapter: () -> Unit,
     onChangeChapter: (Int) -> Unit,
     onChangeIsImmersive: () -> Unit,
-    onClickThemeSettings: () -> Unit
+    onClickThemeSettings: () -> Unit,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     val activity = LocalActivity.current as Activity
     val coroutineScope = rememberCoroutineScope()
@@ -188,7 +188,6 @@ fun Content(
 
     LaunchedEffect(isImmersive) {
         if (!settingState.enableHideStatusBar) return@LaunchedEffect
-        val activity = context as ComponentActivity
         val window = activity.window
         val controller = WindowCompat.getInsetsController(window, window.decorView)
 
@@ -312,6 +311,7 @@ fun Content(
                             end = settingState.rightPadding.dp
                         ),
                         changeIsImmersive = onChangeIsImmersive,
+                        onZoomImage = onZoomImage
                     )
 
                 }

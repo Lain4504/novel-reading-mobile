@@ -16,8 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToImageViewerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ZoomableImage
 
@@ -30,11 +28,11 @@ fun BaseContentComponent(
     fontLineHeight: TextUnit,
     fontWeight: FontWeight,
     fontFamily: FontFamily?,
-    color: Color
+    color: Color,
+    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
     val trimmed = text.trim()
     if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-        val navController = LocalNavController.current
         var originalLayout by remember { mutableStateOf<ImageLayoutInfo?>(null) }
 
         ZoomableImage(
@@ -45,11 +43,7 @@ fun BaseContentComponent(
             },
             onZoomEnd = { zoomLayout ->
                 originalLayout?.let { orig ->
-                    navController.navigateToImageViewerDialog( // FIXME: use callback!! FIXME FIXME
-                        imageUrl = trimmed,
-                        originalLayout = orig,
-                        startLayout = zoomLayout
-                    )
+                    onZoomImage(trimmed, orig, zoomLayout)
                 }
             }
         )

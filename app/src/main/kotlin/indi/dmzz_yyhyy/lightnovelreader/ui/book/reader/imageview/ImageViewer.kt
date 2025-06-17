@@ -29,9 +29,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -53,12 +52,11 @@ fun ImageViewerScreen(
     startHeight: Float,
     onDismissRequest: () -> Unit
 ) {
-    val density = LocalDensity.current
-    val config = LocalConfiguration.current
     val coroutineScope = rememberCoroutineScope()
 
-    val screenWidth = with(density) { config.screenWidthDp.dp.toPx() }
-    val screenHeight = with(density) { config.screenHeightDp.dp.toPx() }
+    val windowInfo = LocalWindowInfo.current
+    val screenWidth = windowInfo.containerSize.width.toFloat()
+    val screenHeight = windowInfo.containerSize.height.toFloat()
 
     val originalCenter = remember {
         Offset(originalX + originalWidth / 2f, originalY + originalHeight / 2f)
