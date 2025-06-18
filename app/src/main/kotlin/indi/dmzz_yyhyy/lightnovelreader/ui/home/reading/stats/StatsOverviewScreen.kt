@@ -45,6 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +83,7 @@ fun StatsOverviewScreen(
 ) {
     val uiState = viewModel.uiState
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val haptic = LocalHapticFeedback.current
 
     Scaffold(
         topBar = {
@@ -111,7 +114,11 @@ fun StatsOverviewScreen(
                     item {
                         CalendarBlock(
                             viewModel,
-                            onSelectedDate = { viewModel.selectDate(it) })
+                            onSelectedDate = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                viewModel.selectDate(it)
+                            }
+                        )
                     }
                     item { DailyStatsBlock(uiState, onClickDetailScreen) }
                     item { TotalStatsBlock(uiState) }

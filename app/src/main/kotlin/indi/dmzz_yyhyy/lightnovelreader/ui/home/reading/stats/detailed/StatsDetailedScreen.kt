@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -34,8 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -51,12 +48,56 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ActivityStatsCard
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.DailyBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 import kotlin.math.min
+
+sealed class StatsViewOption(val viewIndex: Int) {
+    abstract fun rangeFor(date: LocalDate): ClosedRange<LocalDate>
+
+    object Daily : StatsViewOption(viewIndex = 0) {
+        override fun rangeFor(date: LocalDate): ClosedRange<LocalDate> {
+            return date..date
+        }
+    }
+
+    object Weekly : StatsViewOption(viewIndex = 1) {
+        override fun rangeFor(date: LocalDate): ClosedRange<LocalDate> {
+            val startOfWeek = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+            val endOfWeek = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+            return startOfWeek..endOfWeek
+        }
+    }
+
+    object Monthly : StatsViewOption(viewIndex = 2) {
+        override fun rangeFor(date: LocalDate): ClosedRange<LocalDate> {
+            val startOfMonth = date.withDayOfMonth(1)
+            val endOfMonth = date.with(TemporalAdjusters.lastDayOfMonth())
+            return startOfMonth..endOfMonth
+        }
+    }
+
+    companion object {
+        fun fromIndex(index: Int): StatsViewOption = when (index) {
+            Daily.viewIndex -> Daily
+            Weekly.viewIndex -> Weekly
+            Monthly.viewIndex -> Monthly
+            else -> throw IllegalArgumentException("invalid viewIndex $index")
+        }
+    }
+}
+
+private operator fun LocalDate.rangeTo(other: LocalDate): ClosedRange<LocalDate> = object : ClosedRange<LocalDate> {
+    override val start: LocalDate = this@rangeTo
+    override val endInclusive: LocalDate = other
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -186,116 +227,11 @@ fun StatsCard(
 fun DailyChart(
     uiState: StatsDetailedUiState
 ) {
+    ActivityStatsCard(uiState)
+
     val books = uiState.targetDateRangeRecordsMap[uiState.selectedDate]
             ?.map { it.bookId }
             .orEmpty()
-    val stats = uiState.targetDateRangeStatsMap[uiState.selectedDate]
-    val isActivityVisible = stats?.startedBooks?.isNotEmpty() == true
-            || stats?.finishedBooks?.isNotEmpty() == true
-            || stats?.favoriteBooks?.isNotEmpty() == true
-
-    if (isActivityVisible) {
-        StatsCard(
-            title = stringResource(R.string.activity)
-        ) {
-            val startedBooks = stats.startedBooks
-            val favoriteBooks = stats.favoriteBooks
-            Column {
-                if (startedBooks.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clipToBounds(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 24.dp)
-                                .fillMaxWidth()
-                                .weight(1f, fill = false)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.activity_first_read),
-                                style = AppTypography.titleSmall,
-                                fontWeight = FontWeight.W500
-                            )
-                            val displayedTitles = startedBooks.take(2).mapNotNull { bookId ->
-                                uiState.bookInformationMap[bookId]?.title?.let { title ->
-                                    if (title.length > 10) title.substring(0, 10) + stringResource(R.string.ellipsis) else title
-                                }
-                            }
-                            Text(
-                                text = if (displayedTitles.size == 1) displayedTitles[0]
-                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
-                                style = AppTypography.labelSmall,
-                                maxLines = 2,
-                                color = colorScheme.secondary,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .rotate(4f)
-                                .offset(y = 24.dp)
-                        ) {
-                            BookStack(
-                                uiState = uiState,
-                                books = startedBooks,
-                                count = 5
-                            )
-                        }
-                    }
-                    HorizontalDivider()
-                }
-                if (favoriteBooks.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clipToBounds(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 24.dp)
-                                .fillMaxWidth()
-                                .weight(1f, fill = false)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.activity_collections),
-                                style = AppTypography.titleSmall,
-                                fontWeight = FontWeight.W500
-                            )
-                            val displayedTitles = favoriteBooks.take(2).mapNotNull { bookId ->
-                                uiState.bookInformationMap[bookId]?.title?.let { title ->
-                                    if (title.length > 10) title.substring(0, 10) + stringResource(R.string.ellipsis) else title
-                                }
-                            }
-                            Text(
-                                text = if (displayedTitles.size == 1) displayedTitles[0]
-                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
-                                style = AppTypography.labelSmall,
-                                maxLines = 2,
-                                color = colorScheme.secondary,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .rotate(-3f)
-                                .offset(y = 24.dp)
-                        ) {
-                            BookStack(
-                                uiState = uiState,
-                                books = favoriteBooks,
-                                count = 5
-                            )
-                        }
-                    }
-                    HorizontalDivider()
-                }
-            }
-        }
-    }
 
     StatsCard(
         title = stringResource(R.string.activity_reading_time)
@@ -327,6 +263,8 @@ fun DailyChart(
 fun WeeklyItem(
     uiState: StatsDetailedUiState,
 ) {
+    ActivityStatsCard(uiState)
+
     StatsCard(
         title = stringResource(R.string.reading_details)
     ) {
@@ -358,6 +296,8 @@ fun WeeklyItem(
 fun MonthlySummaryChart(
     uiState: StatsDetailedUiState
 ) {
+    ActivityStatsCard(uiState)
+
     StatsCard(
         title = stringResource(R.string.activity_reading_time)
     ) {
@@ -397,12 +337,13 @@ fun MonthlySummaryChart(
 
 @Composable
 fun BookStack(
+    modifier: Modifier = Modifier,
     uiState: StatsDetailedUiState,
     books: List<Int>,
     count: Int,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentWidth()
             .padding(end = min(books.size, count).dp * 20)
     ) {
