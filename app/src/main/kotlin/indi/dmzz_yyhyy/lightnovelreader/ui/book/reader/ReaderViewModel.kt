@@ -47,27 +47,24 @@ class ReaderViewModel @Inject constructor(
             contentViewModel.changeBookId(value)
             addToReadingBook(value)
             viewModelScope.launch(Dispatchers.IO) {
-                bookRepository.getBookVolumes(value).collect {
-                    _uiState.bookVolumes = it
-                }
-            }
-            viewModelScope.launch(Dispatchers.IO) {
                 statsRepository.updateReadingStatistics(
                     ReadingStatsUpdate(
-                        bookId = bookId,
+                        bookId = value,
                         sessionDelta = 1
                     )
                 )
-                val readingData = bookRepository.getUserReadingData(bookId)
-                if (readingData.lastReadTime.year < 1971)
-                    coroutineScope.launch {
-                        statsRepository.updateBookStatus(
-                            bookId = bookId,
-                            isFirstReading = true
-                        )
-                    }
+                val readingData = bookRepository.getUserReadingData(value)
+                statsRepository.updateBookStatus(
+                    bookId = value,
+                    isFirstReading = readingData.lastReadTime.year != 1971
+                )
+            }
+
+            viewModelScope.launch(Dispatchers.IO) {
+                bookRepository.getBookVolumes(value).collect { _uiState.bookVolumes = it }
             }
         }
+
     val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {

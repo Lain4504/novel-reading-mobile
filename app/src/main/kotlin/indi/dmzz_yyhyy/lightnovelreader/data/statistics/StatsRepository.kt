@@ -8,7 +8,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
-import indi.dmzz_yyhyy.lightnovelreader.utils.putWithLimit
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
@@ -30,8 +29,6 @@ class StatsRepository @Inject constructor(
     private val bookRecordDao: BookRecordDao
 ) {
     private val bookReadTimeBuffer = mutableMapOf<Int, Pair<LocalTime, Int>>()
-    private val dateStatsMap = mutableMapOf<LocalDate, ReadingStatisticsEntity>()
-    private val dateRecordsMap = mutableMapOf<LocalDate, List<BookRecordEntity>>()
 
     suspend fun accumulateBookReadTime(bookId: Int, seconds: Int) {
         if (seconds < 0) {
@@ -73,7 +70,6 @@ class StatsRepository @Inject constructor(
         return allDates.mapNotNull { date ->
             val statistics = statsMap[date]
             val records = recordsMap[date] ?: emptyList()
-
             statistics?.toDailyStatsData(records)
         }
     }
@@ -87,47 +83,27 @@ class StatsRepository @Inject constructor(
             recordEntities.forEach {
                 bookRecordDao.insertBookRecord(it)
             }
-
-            dateStatsMap[statsEntity.date] = statsEntity
-            dateRecordsMap[statsEntity.date] = recordEntities
         }
     }
 
-
-
     suspend fun getReadingStatistics(start: LocalDate, end: LocalDate? = null): Map<LocalDate, ReadingStatisticsEntity> {
         return if (end == null) {
-            val cached = dateStatsMap[start]
-            if (cached != null) {
-                mapOf(start to cached)
-            } else {
-                val entity = readingStatisticsDao.getReadingStatisticsForDate(start) ?: createStatsEntity(start)
-                dateStatsMap[start] = entity
-                mapOf(start to entity)
-            }
+            val entity = readingStatisticsDao.getReadingStatisticsForDate(start) ?: createStatsEntity(start)
+            mapOf(start to entity)
         } else {
             val allDates = generateSequence(start) { it.plusDays(1) }
                 .takeWhile { !it.isAfter(end) }
                 .toList()
 
-            val cachedStats = allDates.associateWithNotNull { dateStatsMap[it] }
-            val missingDates = allDates.filter { it !in cachedStats }
+            val fetchedStats = readingStatisticsDao.getReadingStatisticsBetweenDates(allDates.first(), allDates.last())
+                .groupBy { it.date }
+                .mapValues { it.value.first() }
 
-            val fetchedStats = if (missingDates.isNotEmpty()) {
-                readingStatisticsDao.getReadingStatisticsBetweenDates(missingDates.first(), missingDates.last())
-                    .groupBy { it.date }
-                    .mapValues { it.value.first() }
-                    .also { dateStatsMap.putAll(it) }
-            } else {
-                emptyMap()
+            fetchedStats.ifEmpty {
+                allDates.associateWith { createStatsEntity(it) }
             }
-
-            cachedStats + fetchedStats
         }
     }
-
-    private inline fun <T, K : Any> Iterable<T>.associateWithNotNull(transform: (T) -> K?): Map<T, K> =
-        mapNotNull { item -> transform(item)?.let { item to it } }.toMap()
 
     suspend fun getBookRecords(
         start: LocalDate,
@@ -137,7 +113,7 @@ class StatsRepository @Inject constructor(
             val records = bookRecordDao.getBookRecordsForDate(start)
             mapOf(start to records)
         } else {
-             bookRecordDao.getBookRecordsBetweenDates(start, end).groupBy { it.date }
+            bookRecordDao.getBookRecordsBetweenDates(start, end).groupBy { it.date }
         }
         val bookRecordsList = raw.mapValues { (_, records) ->
             records.filter { it.id != -721 } // We exclude total records with id -721 on fetch
@@ -147,7 +123,7 @@ class StatsRepository @Inject constructor(
     }
 
     /**
-     具有特殊 id 的总阅读记录 Entity，用于总体统计
+     * 具有特殊 id 的总阅读记录 Entity，用于总体统计
      */
     private fun createTotalRecordEntity(): BookRecordEntity = BookRecordEntity(
         id = -721,
@@ -168,7 +144,6 @@ class StatsRepository @Inject constructor(
         firstSeen = LocalTime.now(),
         lastSeen = LocalTime.now()
     )
-
 
     fun createStatsEntity(date: LocalDate) = ReadingStatisticsEntity(
         date = date,
@@ -212,9 +187,6 @@ class StatsRepository @Inject constructor(
 
         updateTotalRecord(update)
 
-        dateStatsMap.putWithLimit(today, updatedStats)
-        dateRecordsMap.putWithLimit(today, listOf(newBookRecord))
-
         readingStatisticsDao.insertReadingStatistics(updatedStats)
         bookRecordDao.insertBookRecord(newBookRecord)
 
@@ -228,8 +200,7 @@ class StatsRepository @Inject constructor(
         isFinishedReading: Boolean = false
     ) {
         val date = LocalDate.now()
-        val existing = getReadingStatistics(date)
-        val currentEntity = existing[date] ?: createStatsEntity(date)
+        val currentEntity = readingStatisticsDao.getReadingStatisticsForDate(date) ?: createStatsEntity(date)
 
         val updatedEntity = currentEntity.copy(
             favoriteBooks = updateList(currentEntity.favoriteBooks, bookId, isFavorite),
@@ -237,7 +208,6 @@ class StatsRepository @Inject constructor(
             finishedBooks = updateList(currentEntity.finishedBooks, bookId, isFinishedReading)
         )
 
-        dateStatsMap[date] = updatedEntity
         readingStatisticsDao.insertReadingStatistics(updatedEntity)
     }
 
@@ -255,7 +225,6 @@ class StatsRepository @Inject constructor(
         if (add) {
             if (item !in list) list + item else list
         } else list - item
-
 
     fun clear() {
         readingStatisticsDao.clear()
