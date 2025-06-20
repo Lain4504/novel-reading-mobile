@@ -86,7 +86,8 @@ private fun BookActivitySection(
         Column(
             modifier = Modifier
                 .padding(start = 24.dp)
-                .weight(1f, fill = true)
+                .weight(1f, fill = true),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
                 text = stringResource(titleResId),
@@ -96,7 +97,7 @@ private fun BookActivitySection(
             titleList.forEach {
                 Text(
                     text = it,
-                    style = AppTypography.labelSmall,
+                    style = AppTypography.labelMedium,
                     maxLines = 1,
                     color = colorScheme.secondary,
                     overflow = TextOverflow.Ellipsis
@@ -105,7 +106,7 @@ private fun BookActivitySection(
             if (displayedTitles.size > titleList.size)
                 Text(
                     text = stringResource(R.string.activity_etc, displayedTitles.size),
-                    style = AppTypography.labelSmall,
+                    style = AppTypography.labelMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -114,7 +115,7 @@ private fun BookActivitySection(
         Box(
             modifier = Modifier
                 .rotate(angle)
-                .offset(y = 24.dp)
+                .offset(y = 16.dp)
         ) {
             BookStack(
                 modifier = Modifier.clipToBounds(),
@@ -174,6 +175,7 @@ fun ActivityStatsCard(
                     bookInfoMap = uiState.bookInformationMap,
                     uiState = uiState
                 )
+                HorizontalDivider()
             }
         }
     }
