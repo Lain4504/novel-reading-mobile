@@ -31,7 +31,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
@@ -168,15 +167,14 @@ fun ActivityStatsCard(
                 )
                 HorizontalDivider()
             }
-            /*if (finishedBooks.isNotEmpty()) {
+            if (finishedBooks.isNotEmpty()) {
                 BookActivitySection(
                     titleResId = R.string.activity_finished,
                     bookIds = finishedBooks,
                     bookInfoMap = uiState.bookInformationMap,
                     uiState = uiState
                 )
-                HorizontalDivider()
-            }*/
+            }
         }
     }
 }

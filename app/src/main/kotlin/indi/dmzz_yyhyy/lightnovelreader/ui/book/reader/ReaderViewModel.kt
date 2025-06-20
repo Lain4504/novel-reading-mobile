@@ -58,6 +58,14 @@ class ReaderViewModel @Inject constructor(
                         sessionDelta = 1
                     )
                 )
+                val readingData = bookRepository.getUserReadingData(bookId)
+                if (readingData.lastReadTime.year < 1971)
+                    coroutineScope.launch {
+                        statsRepository.updateBookStatus(
+                            bookId = bookId,
+                            isFirstReading = true
+                        )
+                    }
             }
         }
     val coroutineScope = CoroutineScope(Dispatchers.IO)

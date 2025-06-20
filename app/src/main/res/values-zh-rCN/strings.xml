@@ -234,6 +234,7 @@
     <string name="activity">活动</string>
     <string name="activity_first_read">第一次读了</string>
     <string name="activity_collections">已收藏</string>
+    <string name="activity_finished">已读完</string>
     <string name="activity_etc"> 等 %d 本书</string>
     <string name="activity_reading_time">阅读时间</string>
     <string name="activity_read">读过</string>

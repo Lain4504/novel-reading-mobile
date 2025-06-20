@@ -235,8 +235,9 @@
     <string name="view_weekly">Weekly</string>
     <string name="view_monthly">Monthly</string>
     <string name="activity">Activity</string>
-    <string name="activity_first_read">First Read</string>
-    <string name="activity_collections">Collections</string>
+    <string name="activity_first_read">Started</string>
+    <string name="activity_collections">Collected</string>
+    <string name="activity_finished">Finished</string>
     <string name="activity_etc"> and %d more</string>
     <string name="activity_reading_time">Reading Time</string>
     <string name="activity_read">Read</string>

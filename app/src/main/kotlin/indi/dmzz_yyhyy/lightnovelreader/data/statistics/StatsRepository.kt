@@ -237,7 +237,7 @@ class StatsRepository @Inject constructor(
             finishedBooks = updateList(currentEntity.finishedBooks, bookId, isFinishedReading)
         )
 
-        dateStatsMap.putWithLimit(date, updatedEntity)
+        dateStatsMap[date] = updatedEntity
         readingStatisticsDao.insertReadingStatistics(updatedEntity)
     }
 
@@ -251,11 +251,11 @@ class StatsRepository @Inject constructor(
         return count
     }
 
-    private fun updateList(
-        original: List<Int>,
-        bookId: Int,
-        condition: Boolean
-    ) = if (condition) (original + bookId).distinct() else original
+    fun updateList(list: List<Int>, item: Int, add: Boolean): List<Int> =
+        if (add) {
+            if (item !in list) list + item else list
+        } else list - item
+
 
     fun clear() {
         readingStatisticsDao.clear()
