@@ -3,7 +3,6 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,9 +48,9 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ActivityStatsCard
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.DailyBarChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadingTimeStatsCard
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -228,35 +227,7 @@ fun DailyChart(
     uiState: StatsDetailedUiState
 ) {
     ActivityStatsCard(uiState)
-
-    val books = uiState.targetDateRangeRecordsMap[uiState.selectedDate]
-            ?.map { it.bookId }
-            .orEmpty()
-
-    StatsCard(
-        title = stringResource(R.string.activity_reading_time)
-    ) {
-        Column {
-            Spacer(Modifier.height(12.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BookStack(
-                    uiState = uiState,
-                    books = books,
-                    count = 8
-                )
-                Spacer(Modifier.weight(1f))
-            }
-            Spacer(Modifier.height(6.dp))
-            Text(stringResource(R.string.n_books, books.size))
-            Spacer(Modifier.height(12.dp))
-            DailyBarChart(
-                recordList = uiState.targetDateRangeRecordsMap[uiState.selectedDate],
-                bookInformationMap = uiState.bookInformationMap
-            )
-        }
-    }
+    ReadingTimeStatsCard(uiState)
 }
 
 @Composable
@@ -290,6 +261,8 @@ fun WeeklyItem(
             statsMap = uiState.targetDateRangeStatsMap
         )
     }
+
+    ReadingTimeStatsCard(uiState)
 }
 
 @Composable
@@ -313,26 +286,7 @@ fun MonthlySummaryChart(
         }
     }
 
-    StatsCard(
-        title = stringResource(R.string.activity_read)
-    ) {
-        val (startDate, endDate) = uiState.targetDateRange
-
-        val books = uiState.targetDateRangeRecordsMap
-            .filterKeys { it in startDate..endDate }
-            .values
-            .flatten()
-            .map { it.bookId }
-
-        Spacer(Modifier.height(10.dp))
-        BookStack(
-            uiState = uiState,
-            books = books,
-            count = 8
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(stringResource(R.string.n_books, books.size))
-    }
+    ReadingTimeStatsCard(uiState)
 }
 
 @Composable

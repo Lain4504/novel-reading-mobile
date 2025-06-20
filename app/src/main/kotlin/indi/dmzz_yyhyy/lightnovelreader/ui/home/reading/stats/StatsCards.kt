@@ -1,13 +1,22 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
+import android.text.format.DateUtils
+import androidx.compose.compiler.plugins.kotlin.lower.fastForEach
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
@@ -17,13 +26,17 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.BookStack
@@ -164,6 +177,151 @@ fun ActivityStatsCard(
                 )
                 HorizontalDivider()
             }*/
+        }
+    }
+}
+
+/**
+ * 阅读时间卡片（适用各种时间范围）
+ */
+@Composable
+fun ReadingTimeStatsCard(
+    uiState: StatsDetailedUiState
+) {
+    val dateRange = uiState.currentDateRange
+    val allRecords = uiState.targetDateRangeRecordsMap
+        .filterKeys { it in dateRange }
+        .values
+        .flatten()
+
+    val books = allRecords.map { it.bookId }
+
+    StatsCard(title = stringResource(R.string.activity_reading_time)) {
+        Column {
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val orderedBooks = allRecords
+                    .sortedBy { it.lastSeen }
+                    .map { it.bookId }
+                    .distinct()
+                BookStack(
+                    uiState = uiState,
+                    books = orderedBooks,
+                    count = 8
+                )
+                Spacer(Modifier.weight(1f))
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(stringResource(R.string.n_books, books.distinct().size))
+            Spacer(Modifier.height(12.dp))
+            ReadingTimeBar(
+                recordList = allRecords,
+                bookInformationMap = uiState.bookInformationMap
+            )
+        }
+    }
+}
+
+
+@Composable
+fun ReadingTimeBar(
+    recordList: List<BookRecordEntity>?,
+    bookInformationMap: Map<Int, BookInformation>
+) {
+    if (recordList.isNullOrEmpty()) {
+        Box(
+            modifier = Modifier
+                .height(80.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(stringResource(R.string.no_records))
+        }
+        return
+    }
+
+    val grouped = recordList.groupBy { it.bookId }
+    val totalTime = recordList.sumOf { it.totalTime }.toFloat()
+    val sortedBooks = grouped
+        .mapValues { it.value.sumOf { r -> r.totalTime } }
+        .toList()
+        .sortedByDescending { it.second }
+
+    val colors = assignColors(recordList)
+    val topBooks = sortedBooks.take(8)
+    val othersTime = sortedBooks.drop(8).sumOf { it.second }
+
+    val barItems = buildList {
+        addAll(topBooks.map { (bookId, time) ->
+            Triple(
+                bookInformationMap[bookId]?.title ?: "Unknown",
+                time to (time / totalTime),
+                colors[bookId]?.value?.first() ?: Color.Gray
+            )
+        })
+        if (othersTime > 0) {
+            add(Triple(
+                stringResource(R.string.others),
+                othersTime to (othersTime / totalTime),
+                Color.Gray
+            ))
+        }
+    }
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(30.dp)
+                .clip(RoundedCornerShape(16.dp))
+        ) {
+            barItems.fastForEach { (_, pair, color) ->
+                val ratio = pair.second
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(ratio.coerceAtLeast(0.01f))
+                        .background(color)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            barItems.fastForEach { (title, pair, color) ->
+                val (timeMinutes, _) = pair
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                        )
+                        Text(
+                            text = title,
+                            style = AppTypography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    val formattedTime = DateUtils.formatElapsedTime(timeMinutes * 1L)
+                    Text(
+                        text = formattedTime,
+                        style = AppTypography.labelMedium,
+                        color = colorScheme.onSurfaceVariant
+                    )
+
+                }
+            }
         }
     }
 }
