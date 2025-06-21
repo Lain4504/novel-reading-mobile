@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberEnd
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
@@ -138,6 +139,7 @@ private fun HourlyReadingTimeChart(
                     )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
+                    label = rememberAxisLabelComponent(color = colorScheme.onSurface),
                     itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 6 }),
                     valueFormatter = CartesianValueFormatter { _, x, _ ->
                         "${x.toInt()}$hourClockLabel"
@@ -241,15 +243,18 @@ fun ReadingTimeChart(
                     )
                 ),
                 endAxis = VerticalAxis.rememberEnd(
+                    label = rememberAxisLabelComponent(color = colorScheme.onSurface),
                     itemPlacer = EndAxisItemPlacer,
                     guideline = rememberAxisGuidelineComponent(shape = CorneredShape.Pill),
                     valueFormatter = verticalAxisFormatter
                 ),
                 topAxis = HorizontalAxis.rememberTop(
+                    label = rememberAxisLabelComponent(color = colorScheme.onSurface),
                     itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 3 }),
                     valueFormatter = TopAxisValueFormatter
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
+                    label = rememberAxisLabelComponent(color = colorScheme.onSurface),
                     itemPlacer = HorizontalAxis.ItemPlacer.aligned(),
                     valueFormatter = BottomAxisValueFormatter
                 ),
