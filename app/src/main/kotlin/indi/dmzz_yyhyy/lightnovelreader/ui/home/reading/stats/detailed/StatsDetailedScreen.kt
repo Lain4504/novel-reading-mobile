@@ -42,16 +42,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ActivityStatsCard
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadingTimeStatsCard
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.MonthlyReadingTimeStatsCard
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadingDetailStatsCard
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyReadingTimeStatsCard
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -103,7 +101,7 @@ private operator fun LocalDate.rangeTo(other: LocalDate): ClosedRange<LocalDate>
 fun StatsDetailedScreen(
     targetDate: LocalDate,
     initialize: (LocalDate) -> Unit,
-    viewModel: StatsDetailedViewModel = hiltViewModel(),
+    viewModel: StatsDetailedViewModel,
     onClickBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
@@ -223,73 +221,6 @@ fun StatsCard(
 }
 
 @Composable
-fun DailyChart(
-    uiState: StatsDetailedUiState
-) {
-    ActivityStatsCard(uiState)
-    ReadingTimeStatsCard(uiState)
-}
-
-@Composable
-fun WeeklyItem(
-    uiState: StatsDetailedUiState,
-) {
-    ActivityStatsCard(uiState)
-
-    StatsCard(
-        title = stringResource(R.string.reading_details)
-    ) {
-        Box {
-            ReadTimeStackedBarChart(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()
-                    .height(230.dp),
-                bookInformationMap = uiState.bookInformationMap,
-                recordMap = uiState.targetDateRangeRecordsMap,
-                dateRange = uiState.targetDateRange,
-            )
-        }
-
-    }
-
-    StatsCard(
-        title = stringResource(R.string.time_distribution)
-    ) {
-        WeeklyCountChart(
-            dateRange = uiState.targetDateRange,
-            statsMap = uiState.targetDateRangeStatsMap
-        )
-    }
-
-    ReadingTimeStatsCard(uiState)
-}
-
-@Composable
-fun MonthlySummaryChart(
-    uiState: StatsDetailedUiState
-) {
-    ActivityStatsCard(uiState)
-
-    StatsCard(
-        title = stringResource(R.string.activity_reading_time)
-    ) {
-        Box {
-            LastNDaysChart(
-                dateRange = uiState.targetDateRange,
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()
-                    .height(230.dp),
-                statsMap = uiState.targetDateRangeStatsMap
-            )
-        }
-    }
-
-    ReadingTimeStatsCard(uiState)
-}
-
-@Composable
 fun BookStack(
     modifier: Modifier = Modifier,
     uiState: StatsDetailedUiState,
@@ -326,19 +257,34 @@ fun BookStack(
 
 private fun LazyListScope.dailyStatistics(uiState: StatsDetailedUiState) {
     item {
-        DailyChart(uiState)
+        ActivityStatsCard(uiState)
+    }
+    item {
+        ReadingDetailStatsCard(uiState)
     }
 }
 
 private fun LazyListScope.weeklyStatistics(uiState: StatsDetailedUiState) {
     item {
-        WeeklyItem(uiState)
+        ActivityStatsCard(uiState)
+    }
+    item {
+        WeeklyReadingTimeStatsCard(uiState)
+    }
+    item {
+        ReadingDetailStatsCard(uiState)
     }
 }
 
 private fun LazyListScope.monthlyStatistics(uiState: StatsDetailedUiState) {
     item {
-        MonthlySummaryChart(uiState)
+        ActivityStatsCard(uiState)
+    }
+    item {
+        MonthlyReadingTimeStatsCard(uiState)
+    }
+    item {
+        ReadingDetailStatsCard(uiState)
     }
 }
 

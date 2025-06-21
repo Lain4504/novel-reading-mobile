@@ -91,7 +91,7 @@ fun CountChart(
             }
         }
 
-        drawLabelsAndAxis(daysData, config, labelConfig, textMeasurer, barWidth, daySpacingPx, canvasHeight)
+        drawLabelsAndAxis(daysData, labelConfig, textMeasurer, barWidth, daySpacingPx, canvasHeight)
         if (config.showAxis) drawAxis(config)
     }
 }
@@ -119,7 +119,6 @@ private fun DrawScope.drawAxis(config: CountChartConfig) {
 
 private fun DrawScope.drawLabelsAndAxis(
     daysData: List<DayData>,
-    config: CountChartConfig,
     labelConfig: LabelConfig,
     textMeasurer: TextMeasurer,
     barWidth: Float,

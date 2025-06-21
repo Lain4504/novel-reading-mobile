@@ -260,7 +260,11 @@
     <string name="cached">Cached</string>
     <string name="cached_false">Not Cached</string>
     <string name="others">Others</string>
-    
+    <string name="unit_hour_clock">h</string>
+    <string name="unit_hours">h&#160;</string>
+    <string name="unit_minutes">m&#160;</string>
+    <string name="unit_seconds">s</string>
+
     <!-- Dialogs -->
     <string name="dialog_about_version">Version</string>
     <string name="dialog_delete_bookshelf">Delete Bookshelf</string>

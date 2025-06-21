@@ -1,53 +1,62 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
-import com.himanshoe.charty.bar.BarChart
-import com.himanshoe.charty.bar.StackedBarChart
-import com.himanshoe.charty.bar.StorageBar
-import com.himanshoe.charty.bar.config.BarChartColorConfig
-import com.himanshoe.charty.bar.config.BarChartConfig
-import com.himanshoe.charty.bar.model.BarData
-import com.himanshoe.charty.bar.model.StackBarData
-import com.himanshoe.charty.bar.model.StorageData
 import com.himanshoe.charty.common.ChartColor
 import com.himanshoe.charty.common.LabelConfig
 import com.himanshoe.charty.common.asSolidChartColor
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberEnd
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
+import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.StatsDetailedUiState
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.currentDateRange
+import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd")
 val predefinedColors = listOf(
     Color(0xFF2196F3),
     Color(0xFF4CAF50),
@@ -58,6 +67,22 @@ val predefinedColors = listOf(
     Color(0xFF3F51B5),
     Color(0xFFFF5722),
 )
+
+private val BottomAxisLabelKey = ExtraStore.Key<List<String>>()
+private val BottomAxisValueFormatter = CartesianValueFormatter { context, x, _ ->
+    val labels = context.model.extraStore[BottomAxisLabelKey]
+    val idx = x.toInt().coerceIn(labels.indices)
+    labels[idx]
+}
+
+private val TopAxisLabelKey = ExtraStore.Key<List<String>>()
+private val TopAxisValueFormatter = CartesianValueFormatter { context, x, _ ->
+    val labels = context.model.extraStore[TopAxisLabelKey]
+    labels[x.toInt().coerceIn(labels.indices)]
+}
+
+private const val EndAxisStep = 5.0
+private val EndAxisItemPlacer = VerticalAxis.ItemPlacer.step({ EndAxisStep })
 
 fun assignColors(
     records: List<BookRecordEntity>
@@ -79,150 +104,15 @@ fun assignColors(
 }
 
 @Composable
-fun ReadTimeStackedBarChart(
-    bookInformationMap: Map<Int, BookInformation>,
-    dateRange: Pair<LocalDate, LocalDate>,
-    recordMap: Map<LocalDate, List<BookRecordEntity>>,
-    modifier: Modifier = Modifier
-) {
-    var selectedIndex by remember { mutableIntStateOf(-1) }
-    val (startDate, endDate) = dateRange
-
-    val allRecords = recordMap
-        .filterKeys { it in startDate..endDate }
-        .values
-        .flatten()
-    val bookColors = assignColors(allRecords)
-
-    val filteredRecordMap = recordMap
-        .filterKeys { it in startDate..endDate }
-        .toSortedMap()
-
-    val data = filteredRecordMap.map { (date, records) ->
-        val groupedRecords = records.groupBy { it.bookId }
-
-        val sortedBooks = groupedRecords.entries
-            .map { entry ->
-                val bookTime = entry.value.sumOf { it.totalTime / 60 }.toFloat()
-                entry.key to bookTime
-            }
-            .sortedByDescending { it.second }
-
-        val (coloredBooks, grayBooks) = sortedBooks.partition { bookColors[it.first]?.value?.first() != Color.Gray }
-        val sortedBooksWithColors = coloredBooks + grayBooks
-
-        val values = sortedBooksWithColors.map { it.second }
-        val colors = sortedBooksWithColors.map { bookColors[it.first] ?: Color.Gray.asSolidChartColor() }
-
-        StackBarData(
-            label = date.format(dateFormatter),
-            values = values,
-            colors = colors
-        )
-    }
-
-    if (data.isEmpty()) return
-    if (data.all { barData -> barData.values.all { it <= 0.0f } }) {
-        Box(
-            modifier = Modifier
-                .height(80.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(stringResource(R.string.no_records))
-        }
-        return
-    }
-
-    Column {
-        StackedBarChart(
-            data = { data },
-            target = null,
-            modifier = modifier,
-            labelConfig = LabelConfig(
-                showXLabel = data.size < 8,
-                xAxisCharCount = 5,
-                showYLabel = true,
-                labelTextStyle = AppTypography.bodySmall,
-                textColor = colorScheme.secondary.asSolidChartColor()
-            ),
-            barChartColorConfig = BarChartColorConfig.default().copy(
-                barBackgroundColor = Color.Transparent.asSolidChartColor()
-            ),
-            onBarClick = { index, _ -> selectedIndex = index }
-        )
-        Spacer(Modifier.height(10.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 4.dp)
-        ) {
-            val (coloredBooks, grayBooks) = bookColors.entries.partition { it.value.value.first() != Color.Gray }
-            coloredBooks.fastForEach { (bookId, chartColor) ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 4.dp)
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(chartColor.value.first())
-                    )
-                    Text(
-                        text = bookInformationMap[bookId]?.title ?: "...",
-                        style = AppTypography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            if (grayBooks.isNotEmpty()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 4.dp)
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray)
-                    )
-                    Text(
-                        text = stringResource(R.string.others),
-                        style = AppTypography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun LastNDaysChart(
-    modifier: Modifier = Modifier,
-    dateRange: Pair<LocalDate, LocalDate>,
+private fun HourlyReadingTimeChart(
+    date: LocalDate,
     statsMap: Map<LocalDate, ReadingStatisticsEntity>
 ) {
-    val readTimeMap = statsMap.mapValues { (_, entity) ->
-        entity.readingTimeCount.getTotalMinutes()
-    }
-
-    val (startDate, endDate) = dateRange
-    val filteredMap = readTimeMap.filterKeys { it in startDate..endDate }
-        .toSortedMap()
-    val convertedMap: Map<String, Int> = filteredMap
-        .map { (date, time) -> date.format(dateFormatter) to time }
-        .toMap()
-
-    if (convertedMap.values.sum() < 1) {
+    val hourlyMap = statsMap[date]?.readingTimeCount?.getHourStatistics() ?: emptyMap()
+    val total = hourlyMap.values.sum()
+    if (total < 1) {
         Box(
-            modifier = Modifier
+            Modifier
                 .height(80.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -231,92 +121,183 @@ fun LastNDaysChart(
         }
         return
     }
-    val data = filteredMap.map { (date, value) ->
-        BarData(
-            xValue = date.format(dateFormatter),
-            yValue = value.toFloat()
+    val labels = List(24) { "$it" }
+    val values = List(24) { hourlyMap[it]?.toFloat() ?: 0f }
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(values) {
+        modelProducer.runTransaction {
+            columnSeries { series(values) }
+            extras { it[BottomAxisLabelKey] = labels }
+        }
+    }
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    ) {
+        val hourClockLabel = stringResource(R.string.unit_hour_clock)
+        val minuteLabel = stringResource(R.string.unit_minutes)
+
+        Text(
+            modifier = Modifier.padding(vertical = 10.dp),
+            text = "Stats of $date",
+            style = AppTypography.titleMedium
+        )
+
+        val marker = rememberMarker(valueFormatter = DefaultCartesianMarker.ValueFormatter { _, targets ->
+            val columnTarget = (targets.firstOrNull() as? ColumnCartesianLayerMarkerTarget)
+            val entry = columnTarget?.columns?.firstOrNull()?.entry
+            if (entry != null) {
+                val hour = entry.x.toInt().coerceIn(0, 23)
+                val minute = entry.y.toInt()
+                SpannableStringBuilder().append(
+                    "$hour$hourClockLabel: $minute$minuteLabel",
+                    ForegroundColorSpan(columnTarget.columns.first().color),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            } else SpannableStringBuilder()
+        })
+
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(colorScheme.primary),
+                            thickness = 36.dp,
+                            shape = CorneredShape.rounded(topLeftPercent = 26, topRightPercent = 26)
+                        )
+                    )
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 6 }),
+                    valueFormatter = CartesianValueFormatter { _, x, _ ->
+                        "${x.toInt()}$hourClockLabel"
+                    }
+                ),
+                decorations = emptyList(),
+                marker = marker,
+            ),
+            modelProducer = modelProducer,
+            modifier = Modifier.fillMaxSize(),
+            scrollState = rememberVicoScrollState(scrollEnabled = false),
         )
     }
-    BarChart(
-        modifier = modifier,
-        labelConfig = LabelConfig.default().copy(
-            showXLabel = data.size < 8,
-            xAxisCharCount = 5,
-            showYLabel = true,
-            labelTextStyle = AppTypography.bodySmall.copy(
-                color = colorScheme.secondary
-            )
-        ),
-        barChartColorConfig = BarChartColorConfig.default().copy(
-            fillBarColor = colorScheme.primary.copy(alpha = 0.75f).asSolidChartColor()
-        ),
-        data = { data },
-        barChartConfig = BarChartConfig.default().copy(
-            cornerRadius = CornerRadius(10f),
-        )
-    )
 }
 
 @Composable
-fun DailyBarChart(
-    recordList: List<BookRecordEntity>?,
-    bookInformationMap: Map<Int, BookInformation>
+fun ReadingTimeChart(
+    uiState: StatsDetailedUiState,
+    labelMapper: (LocalDate) -> String,
 ) {
-    if (recordList == null) {
-        Box(
-            modifier = Modifier
-                .height(80.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(stringResource(R.string.no_records))
-        }
-        return
+    val range = uiState.currentDateRange
+    val statsMap = uiState.targetDateRangeStatsMap
+    val dates = remember(range.start, range.endInclusive) {
+        generateSequence(range.start) { it.plusDays(1) }
+            .takeWhile { it <= range.endInclusive }
+            .toList()
+    }
+    if (dates.isEmpty()) return
+
+    val labels = remember(dates) { dates.map { labelMapper(it) } }
+    val topLabels = remember(dates) {
+        val formatter = DateTimeFormatter.ofPattern("M/d")
+        dates.map { date -> formatter.format(date) }
     }
 
-    val bookColors = assignColors(recordList)
-    val totalTime = recordList.sumOf { it.totalTime }.toFloat()
-    val grouped = recordList.groupBy { it.bookId }
-
-    val data = grouped.map { (bookId, records) ->
-        val bookTime = records.sumOf { it.totalTime }.toFloat()
-        StorageData(
-            name = bookInformationMap[bookId]?.title ?: "Unknown",
-            value = if (totalTime > 0) bookTime / totalTime else 0f,
-            color = bookColors[bookId] ?: Color.Gray.asSolidChartColor()
-        )
-    }.sortedByDescending { it.value }
-
-    Column(modifier = Modifier.fillMaxWidth()
-        .padding(vertical = 4.dp)
-    ) {
-        StorageBar(
-            data = { data },
-            modifier = Modifier.fillMaxWidth().height(30.dp)
-        )
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-        ) {
-            data.fastForEach {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(it.color.value.first())
-                    )
-                    Text(
-                        text = it.name,
-                        style = AppTypography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+    val values = remember(dates, statsMap) {
+        dates.map { statsMap[it]?.readingTimeCount?.getTotalMinutes()?.toFloat() ?: 0f }
+    }
+    var selectedIndex by remember { mutableStateOf(-1f) }
+    LaunchedEffect(range.start, range.endInclusive) {
+        selectedIndex = -1f
+    }
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(values) {
+        modelProducer.runTransaction {
+            columnSeries { series(values) }
+            extras {
+                it[BottomAxisLabelKey] = labels
+                it[TopAxisLabelKey] = topLabels
             }
         }
+    }
+
+    val minuteLabel = stringResource(R.string.unit_minutes)
+    val verticalAxisFormatter = CartesianValueFormatter { _, value, _ ->
+        val formatted = DecimalFormat("#,###").format(value.toInt())
+        "$formatted$minuteLabel"
+    }
+
+    val marker = rememberMarker(
+        valueFormatter = DefaultCartesianMarker.ValueFormatter { _, targets ->
+            val columnTarget = (targets.firstOrNull() as? ColumnCartesianLayerMarkerTarget)
+            val entry = columnTarget?.columns?.firstOrNull()?.entry
+            if (entry != null) {
+                val idx = entry.x.toInt().coerceIn(dates.indices)
+                val date = dates[idx]
+                val totalMin = statsMap[date]?.readingTimeCount?.getTotalMinutes() ?: 0
+                SpannableStringBuilder().append(
+                    "${dates[selectedIndex.toInt()]}: ${DecimalFormat("#,###").format(totalMin)}$minuteLabel",
+                    ForegroundColorSpan(columnTarget.columns.first().color),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            } else SpannableStringBuilder()
+        }
+    )
+
+    val markerVisibilityListener = object : CartesianMarkerVisibilityListener {
+        override fun onHidden(marker: CartesianMarker) { }
+        override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+            val columnTarget = (targets.firstOrNull() as? ColumnCartesianLayerMarkerTarget)
+            val entry = columnTarget?.columns?.firstOrNull()?.entry
+            if (entry != null) {
+                selectedIndex = entry.x.toFloat()
+            }
+        }
+    }
+
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .height(300.dp)
+    ) {
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(colorScheme.primary),
+                            thickness = 16.dp,
+                            shape = CorneredShape.rounded(topLeftPercent = 26, topRightPercent = 26)
+                        )
+                    )
+                ),
+                endAxis = VerticalAxis.rememberEnd(
+                    itemPlacer = EndAxisItemPlacer,
+                    guideline = rememberAxisGuidelineComponent(shape = CorneredShape.Pill),
+                    valueFormatter = verticalAxisFormatter
+                ),
+                topAxis = HorizontalAxis.rememberTop(
+                    itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 3 }),
+                    valueFormatter = TopAxisValueFormatter
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    itemPlacer = HorizontalAxis.ItemPlacer.aligned(),
+                    valueFormatter = BottomAxisValueFormatter
+                ),
+                decorations = emptyList(),
+                marker = marker,
+                markerVisibilityListener = markerVisibilityListener,
+            ),
+            modelProducer = modelProducer,
+            modifier = Modifier.fillMaxSize(),
+            scrollState = rememberVicoScrollState(scrollEnabled = true),
+        )
+    }
+
+    if (selectedIndex.toInt() in dates.indices) {
+        HourlyReadingTimeChart(date = dates[selectedIndex.toInt()], statsMap = statsMap)
     }
 }
 
@@ -329,12 +310,13 @@ fun WeeklyCountChart(
     val countMap = statsMap.mapValues { (_, entity) ->
         entity.readingTimeCount
     }
+    val formatter = DateTimeFormatter.ofPattern("MM/dd")
     val data = countMap
         .filterKeys { it in startDate..endDate }
         .toSortedMap()
         .map { (date, count) ->
             DayData(
-                dayLabel = date.format(dateFormatter),
+                dayLabel = date.format(formatter),
                 hourValues = List(24) { hour -> count.getMinute(hour) }
             )
         }

@@ -43,6 +43,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.StatsCard
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.StatsDetailedUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.currentDateRange
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 import kotlin.random.Random
 
 /**
@@ -182,10 +184,10 @@ fun ActivityStatsCard(
 }
 
 /**
- * 阅读时间卡片（适用各种时间范围）
+ * 阅读详情卡片（适用各种时间范围）
  */
 @Composable
-fun ReadingTimeStatsCard(
+fun ReadingDetailStatsCard(
     uiState: StatsDetailedUiState
 ) {
     val dateRange = uiState.currentDateRange
@@ -196,7 +198,7 @@ fun ReadingTimeStatsCard(
 
     val books = allRecords.map { it.bookId }
 
-    StatsCard(title = stringResource(R.string.activity_reading_time)) {
+    StatsCard(title = stringResource(R.string.reading_details)) {
         Column {
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -218,6 +220,36 @@ fun ReadingTimeStatsCard(
                 recordList = allRecords,
                 bookInformationMap = uiState.bookInformationMap
             )
+        }
+    }
+}
+
+@Composable
+fun WeeklyReadingTimeStatsCard(
+    uiState: StatsDetailedUiState,
+    modifier: Modifier = Modifier
+) {
+    StatsCard(
+        modifier = modifier,
+        title = stringResource(R.string.activity_reading_time)
+    ) {
+        ReadingTimeChart(uiState) { date ->
+            date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+        }
+    }
+}
+
+@Composable
+fun MonthlyReadingTimeStatsCard(
+    uiState: StatsDetailedUiState,
+    modifier: Modifier = Modifier
+) {
+    StatsCard(
+        modifier = modifier,
+        title = stringResource(R.string.activity_reading_time)
+    ) {
+        ReadingTimeChart(uiState) { date ->
+            date.dayOfMonth.toString()
         }
     }
 }
@@ -296,23 +328,21 @@ fun ReadingTimeBar(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                        )
-                        Text(
-                            text = title,
-                            style = AppTypography.bodyMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        modifier = Modifier.weight(1f, fill = true),
+                        text = title,
+                        style = AppTypography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.width(12.dp))
                     val formattedTime = DateUtils.formatElapsedTime(timeMinutes * 1L)
                     Text(
                         text = formattedTime,

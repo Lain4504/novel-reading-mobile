@@ -239,8 +239,7 @@ fun Content(
     LaunchedEffect(isRunning) {
         while (isRunning) {
             val now = LocalTime.now()
-            val elapsed = 1
-            accumulateReadingTime(readingScreenUiState.bookId, elapsed)
+            accumulateReadingTime(readingScreenUiState.bookId, 1)
             lastUpdate = now
             delay(1000)
         }
