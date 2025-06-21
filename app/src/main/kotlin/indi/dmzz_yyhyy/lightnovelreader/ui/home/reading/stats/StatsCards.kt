@@ -47,6 +47,36 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.random.Random
 
+val predefinedColors = listOf(
+    Color(0xFF2196F3),
+    Color(0xFF4CAF50),
+    Color(0xFFFF9800),
+    Color(0xFFF44336),
+    Color(0xFF9C27B0),
+    Color(0xFF00BCD4),
+    Color(0xFF3F51B5),
+    Color(0xFFFF5722),
+)
+
+private fun assignColors(
+    records: List<BookRecordEntity>
+): Map<Int, Color> {
+    return records
+        .groupBy { it.bookId }
+        .mapValues { (_, list) -> list.sumOf { it.totalTime } }
+        .toList()
+        .sortedByDescending { it.second }
+        .mapIndexed { index, (bookId, _) ->
+            val color = if (index < predefinedColors.size) {
+                predefinedColors[index]
+            } else {
+                Color.Gray
+            }
+            bookId to color
+        }
+        .toMap()
+}
+
 /**
  * @return startedBooks/favoriteBooks/finishedBooks 在日期范围内的 BookId 列表
  */
@@ -254,7 +284,6 @@ fun MonthlyReadingTimeStatsCard(
     }
 }
 
-
 @Composable
 fun ReadingTimeBar(
     recordList: List<BookRecordEntity>?,
@@ -288,7 +317,7 @@ fun ReadingTimeBar(
             Triple(
                 bookInformationMap[bookId]?.title ?: "Unknown",
                 time to (time / totalTime),
-                colors[bookId]?.value?.first() ?: Color.Gray
+                colors[bookId] ?: Color.Gray
             )
         })
         if (othersTime > 0) {

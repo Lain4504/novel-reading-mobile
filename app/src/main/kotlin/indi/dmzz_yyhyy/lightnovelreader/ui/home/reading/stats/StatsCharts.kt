@@ -19,12 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.himanshoe.charty.common.ChartColor
-import com.himanshoe.charty.common.LabelConfig
-import com.himanshoe.charty.common.asSolidChartColor
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -48,7 +44,6 @@ import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.StatsDetailedUiState
@@ -56,17 +51,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.currentDa
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-val predefinedColors = listOf(
-    Color(0xFF2196F3),
-    Color(0xFF4CAF50),
-    Color(0xFFFF9800),
-    Color(0xFFF44336),
-    Color(0xFF9C27B0),
-    Color(0xFF00BCD4),
-    Color(0xFF3F51B5),
-    Color(0xFFFF5722),
-)
 
 private val BottomAxisLabelKey = ExtraStore.Key<List<String>>()
 private val BottomAxisValueFormatter = CartesianValueFormatter { context, x, _ ->
@@ -83,25 +67,6 @@ private val TopAxisValueFormatter = CartesianValueFormatter { context, x, _ ->
 
 private const val EndAxisStep = 5.0
 private val EndAxisItemPlacer = VerticalAxis.ItemPlacer.step({ EndAxisStep })
-
-fun assignColors(
-    records: List<BookRecordEntity>
-): Map<Int, ChartColor> {
-    return records
-        .groupBy { it.bookId }
-        .mapValues { (_, list) -> list.sumOf { it.totalTime } }
-        .toList()
-        .sortedByDescending { it.second }
-        .mapIndexed { index, (bookId, _) ->
-            val color = if (index < predefinedColors.size) {
-                predefinedColors[index]
-            } else {
-                Color.Gray
-            }
-            bookId to color.asSolidChartColor()
-        }
-        .toMap()
-}
 
 @Composable
 private fun HourlyReadingTimeChart(
@@ -299,56 +264,4 @@ fun ReadingTimeChart(
     if (selectedIndex.toInt() in dates.indices) {
         HourlyReadingTimeChart(date = dates[selectedIndex.toInt()], statsMap = statsMap)
     }
-}
-
-@Composable
-fun WeeklyCountChart(
-    statsMap: Map<LocalDate, ReadingStatisticsEntity>,
-    dateRange: Pair<LocalDate, LocalDate>,
-) {
-    val (startDate, endDate) = dateRange
-    val countMap = statsMap.mapValues { (_, entity) ->
-        entity.readingTimeCount
-    }
-    val formatter = DateTimeFormatter.ofPattern("MM/dd")
-    val data = countMap
-        .filterKeys { it in startDate..endDate }
-        .toSortedMap()
-        .map { (date, count) ->
-            DayData(
-                dayLabel = date.format(formatter),
-                hourValues = List(24) { hour -> count.getMinute(hour) }
-            )
-        }
-
-    if (countMap.entries.sumOf { it.value.getTotalMinutes() } < 1) {
-        Box(
-            modifier = Modifier
-                .height(80.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(stringResource(R.string.no_records))
-        }
-        return
-    }
-
-    CountChart(
-        data = { data },
-        modifier = Modifier
-            .fillMaxSize()
-            .height(320.dp)
-            .padding(16.dp),
-        config = CountChartConfig(
-            barColor = colorScheme.onPrimaryContainer,
-            daySpacing = 12.dp
-        ),
-        labelConfig = LabelConfig(
-            showXLabel = true,
-            showYLabel = true,
-            textColor = Color.DarkGray.asSolidChartColor(),
-            xAxisCharCount = 7,
-            labelTextStyle = null,
-        )
-    )
 }

@@ -133,7 +133,6 @@ dependencies {
     // Swipe
     implementation(libs.swipe)
     // Chart
-    implementation(libs.charty)
     implementation(libs.vico.compose.m3)
 }
 
