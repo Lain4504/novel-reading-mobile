@@ -188,10 +188,10 @@ fun StatsCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
-        modifier = modifier.padding(horizontal = 12.dp)
+        modifier = modifier.padding(horizontal = 16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp)
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             Text(
                 text = title,

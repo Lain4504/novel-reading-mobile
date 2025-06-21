@@ -46,7 +46,7 @@ fun rememberMarker(
         rememberShapeComponent(
             fill = fill(MaterialTheme.colorScheme.background),
             shape = labelBackgroundShape,
-            strokeThickness = 2.dp,
+            strokeThickness = 1.dp,
             strokeFill = fill(MaterialTheme.colorScheme.outline),
         )
     val label =

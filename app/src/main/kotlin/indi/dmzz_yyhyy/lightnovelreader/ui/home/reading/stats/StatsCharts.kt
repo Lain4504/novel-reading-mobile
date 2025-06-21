@@ -51,6 +51,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.currentDa
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 private val BottomAxisLabelKey = ExtraStore.Key<List<String>>()
 private val BottomAxisValueFormatter = CartesianValueFormatter { context, x, _ ->
@@ -73,6 +74,13 @@ private fun HourlyReadingTimeChart(
     date: LocalDate,
     statsMap: Map<LocalDate, ReadingStatisticsEntity>
 ) {
+    val formatter = DateTimeFormatter.ofPattern("MM/dd", Locale.getDefault())
+    val formattedDate = date.format(formatter)
+    Text(
+        modifier = Modifier.padding(top = 10.dp),
+        text = stringResource(R.string.detail_of_date, formattedDate),
+        style = AppTypography.titleMedium
+    )
     val hourlyMap = statsMap[date]?.readingTimeCount?.getHourStatistics() ?: emptyMap()
     val total = hourlyMap.values.sum()
     if (total < 1) {
@@ -103,12 +111,6 @@ private fun HourlyReadingTimeChart(
     ) {
         val hourClockLabel = stringResource(R.string.unit_hour_clock)
         val minuteLabel = stringResource(R.string.unit_minutes)
-
-        Text(
-            modifier = Modifier.padding(vertical = 10.dp),
-            text = "Stats of $date",
-            style = AppTypography.titleMedium
-        )
 
         val marker = rememberMarker(valueFormatter = DefaultCartesianMarker.ValueFormatter { _, targets ->
             val columnTarget = (targets.firstOrNull() as? ColumnCartesianLayerMarkerTarget)
