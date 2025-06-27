@@ -34,8 +34,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -95,7 +98,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DetailScreen(
     uiState: DetailUiState,
-    onClickExportToEpub: () -> Unit,
+    onClickExportToEpub: (ExportSettings) -> Unit,
     onClickBackButton: () -> Unit,
     onClickChapter: (Int) -> Unit,
     onClickReadFromStart: () -> Unit,
@@ -105,27 +108,42 @@ fun DetailScreen(
     onClickTag: (String) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showExportBottomSheet by remember { mutableStateOf(false) }
+    var exportSettings by remember { mutableStateOf(ExportSettings()) }
+    val exportBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopBar(
+                bookVolumes = uiState.bookVolumes,
                 onClickBackButton = onClickBackButton,
                 onClickExport = {
-                    onClickExportToEpub.invoke()
+                    showExportBottomSheet = true
                 },
                 scrollBehavior = scrollBehavior
             )
         },
     ) { paddingValues ->
-        Box(Modifier.padding(paddingValues)) {
-            Content(
-                uiState = uiState,
-                onClickChapter = onClickChapter,
-                onClickReadFromStart = onClickReadFromStart,
-                onClickContinueReading = onClickContinueReading,
-                cacheBook = cacheBook,
-                requestAddBookToBookshelf = requestAddBookToBookshelf,
-                onClickTag = onClickTag
+        Content(
+            modifier = Modifier.padding(paddingValues),
+            uiState = uiState,
+            onClickChapter = onClickChapter,
+            onClickReadFromStart = onClickReadFromStart,
+            onClickContinueReading = onClickContinueReading,
+            cacheBook = cacheBook,
+            requestAddBookToBookshelf = requestAddBookToBookshelf,
+            onClickTag = onClickTag
+        )
+        AnimatedVisibility(visible = showExportBottomSheet) {
+
+            ExportBottomSheet(
+                sheetState = exportBottomSheetState,
+                bookVolumes = uiState.bookVolumes,
+                settings = exportSettings,
+                onSettingsChange = { exportSettings = it },
+                onDismissRequest = { showExportBottomSheet = false },
+                onClickExport = onClickExportToEpub
             )
         }
     }
@@ -137,6 +155,7 @@ private val itemVerticalPadding = 8.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
+    modifier: Modifier = Modifier,
     uiState: DetailUiState,
     onClickChapter: (Int) -> Unit,
     onClickReadFromStart: () -> Unit,
@@ -177,7 +196,7 @@ private fun Content(
         exit = fadeOut()
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             state = lazyListState
         ) {
             item {
@@ -314,9 +333,204 @@ private fun Content(
     )
 }
 
+data class ExportSettings(
+    val selectedVolumeIds: Set<Int> = emptySet(),
+    val includeImages: Boolean = true
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExportBottomSheet(
+    sheetState: SheetState,
+    bookVolumes: BookVolumes,
+    settings: ExportSettings,
+    onSettingsChange: (ExportSettings) -> Unit,
+    onDismissRequest: () -> Unit,
+    onClickExport: (ExportSettings) -> Unit
+) {
+    val isSplitEnabled = settings.selectedVolumeIds.isNotEmpty()
+    val allVolumeIds = bookVolumes.volumes.map { it.volumeId }.toSet()
+
+    val selectedVolumeIds = if (isSplitEnabled) {
+        settings.selectedVolumeIds
+    } else {
+        allVolumeIds
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        tonalElevation = 16.dp
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = "导出为 Epub",
+                    style = AppTypography.titleLarge
+                )
+                Spacer(Modifier.width(16.dp))
+                Button(onClick = {
+                    if (isSplitEnabled) {
+                        onClickExport(settings.copy(selectedVolumeIds = selectedVolumeIds))
+                    } else {
+                        onClickExport(settings.copy(selectedVolumeIds = emptySet()))
+                    }
+                    onDismissRequest()
+                }) {
+                    Text("导出", fontWeight = FontWeight.SemiBold)
+                }
+            }
+
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(end = 16.dp)
+            ) {
+                item {
+                    SettingChip(
+                        label = "包含图片",
+                        selected = settings.includeImages,
+                        onClick = {
+                            onSettingsChange(settings.copy(includeImages = !settings.includeImages))
+                        }
+                    )
+                }
+
+                item {
+                    SettingChip(
+                        label = "分卷导出",
+                        selected = isSplitEnabled,
+                        onClick = {
+                            onSettingsChange(
+                                settings.copy(
+                                    selectedVolumeIds = if (isSplitEnabled) emptySet() else allVolumeIds
+                                )
+                            )
+                        }
+                    )
+                }
+
+                if (isSplitEnabled) {
+                    val isAllSelected = selectedVolumeIds.size == allVolumeIds.size
+                    if (!isAllSelected) {
+                        item {
+                            SettingChip(
+                                label = "全选",
+                                selected = false,
+                                onClick = {
+                                    onSettingsChange(settings.copy(selectedVolumeIds = allVolumeIds))
+                                }
+                            )
+                        }
+                        item {
+                            SettingChip(
+                                label = "反选",
+                                selected = false,
+                                onClick = {
+                                    val toggled = allVolumeIds - selectedVolumeIds
+                                    onSettingsChange(settings.copy(selectedVolumeIds = toggled))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp, horizontal = 18.dp))
+
+            LazyColumn {
+                items(bookVolumes.volumes) { volume ->
+                    val isChecked = volume.volumeId in selectedVolumeIds
+                    val isInteractive = isSplitEnabled
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(enabled = isInteractive) {
+                                if (isInteractive) {
+                                    val updated = if (isChecked) {
+                                        selectedVolumeIds - volume.volumeId
+                                    } else {
+                                        selectedVolumeIds + volume.volumeId
+                                    }
+                                    onSettingsChange(settings.copy(selectedVolumeIds = updated))
+                                }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f, fill = true),
+                            text = volume.volumeTitle,
+                            style = AppTypography.titleMedium,
+                            color = if (isInteractive) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Checkbox(
+                            checked = isChecked,
+                            onCheckedChange = {
+                                if (isInteractive) {
+                                    val updated = if (isChecked) {
+                                        selectedVolumeIds - volume.volumeId
+                                    } else {
+                                        selectedVolumeIds + volume.volumeId
+                                    }
+                                    onSettingsChange(settings.copy(selectedVolumeIds = updated))
+                                }
+                            },
+                            enabled = isInteractive
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun SettingChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        leadingIcon = {
+            if (selected) {
+                Icon(
+                    painter = painterResource(R.drawable.check_24px),
+                    contentDescription = ""
+                )
+            }
+        },
+        label = {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = if (selected)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
+    bookVolumes: BookVolumes,
     onClickBackButton: () -> Unit,
     onClickExport: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
@@ -336,7 +550,9 @@ private fun TopBar(
             }
         },
         actions = {
+            println(bookVolumes.volumes)
             IconButton(
+                enabled = bookVolumes.volumes.isNotEmpty(),
                 onClick = onClickExport
             ) {
                 Icon(painterResource(id = R.drawable.file_export_24px), "export to epub")
