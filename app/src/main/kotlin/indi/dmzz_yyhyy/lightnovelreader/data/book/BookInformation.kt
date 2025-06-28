@@ -36,7 +36,7 @@ interface BookInformation {
         )
     }
 
-    fun isEmpty() = id == -1
+    fun isEmpty() = id == -1 || title == ""
 
     @Suppress("unused")
     fun toMutable(): MutableBookInformation {

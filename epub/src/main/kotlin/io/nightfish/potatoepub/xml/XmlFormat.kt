@@ -1,10 +1,10 @@
 package io.nightfish.potatoepub.xml
 
-import java.io.StringWriter
 import org.dom4j.Document
 import org.dom4j.DocumentHelper
 import org.dom4j.io.OutputFormat
 import org.dom4j.io.XMLWriter
+import java.io.StringWriter
 
 
 fun Document.asFormatedXml(): String {
@@ -15,6 +15,7 @@ fun Document.asFormatedXml(): String {
     format.isExpandEmptyElements = false
     val strWtr = StringWriter()
     val xmlWrt = XMLWriter(strWtr, format)
+    println(this.asXML())
     xmlWrt.write(DocumentHelper.parseText(this.asXML()))
     xmlWrt.flush()
     xmlWrt.close()

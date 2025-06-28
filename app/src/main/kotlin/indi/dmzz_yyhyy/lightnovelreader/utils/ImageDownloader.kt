@@ -67,6 +67,9 @@ class ImageDownloader(
             return btData
         } catch (e: Exception) {
             e.printStackTrace()
+            CoroutineScope(Dispatchers.Main).launch {
+                println(strUrl)
+            }
         }
         return null
     }

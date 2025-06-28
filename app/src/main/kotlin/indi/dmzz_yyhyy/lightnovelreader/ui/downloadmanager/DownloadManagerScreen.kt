@@ -169,6 +169,7 @@ private fun Card(
     val progressAnim by animateFloatAsState(
         targetValue = downloadItem.progress,
         animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        label = "",
     )
     Row(
         modifier = modifier,
@@ -206,14 +207,16 @@ private fun Card(
                     modifier = Modifier.size(16.dp),
                     painter =
                         if (downloadItem.progress >= 1) painterResource(R.drawable.done_outline_24px)
-                        else painterResource(downloadItem.type.icon),
+                        else if (downloadItem.progress >= 0) painterResource(downloadItem.type.icon)
+                        else painterResource(R.drawable.error_24px),
                     contentDescription = null
                 )
                 Box(Modifier.width(10.dp))
                 Text(
                     text =
                         if (downloadItem.progress < 1) "${formTime(downloadItem.startTime)}  已下载 ${(downloadItem.progress*100).toInt()}%"
-                        else "${downloadItem.type.typeName}完成",
+                        else if (downloadItem.progress > 0) "${downloadItem.type.typeName}完成"
+                        else "${downloadItem.type.typeName}失败, 请检查您的网络环境或寻求开发者帮助",
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = AppTypography.bodyMedium,
