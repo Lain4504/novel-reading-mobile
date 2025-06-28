@@ -33,5 +33,6 @@ class LightNovelReaderApplication : Application(), Configuration.Provider {
             loggerRepository.logLevel = LogLevel.from(userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path).getOrDefault("none"))
             loggerRepository.startLogging()
         }
+        WorkManager.getInstance(this).cancelAllWork()
     }
 }
