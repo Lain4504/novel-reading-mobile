@@ -20,6 +20,8 @@ interface UserReadingData {
     val lastReadChapterProgress: Float
     val readCompletedChapterIds: List<Int>
 
+    fun isEmpty(): Boolean = id == -1
+
     companion object {
         fun empty(): UserReadingData = MutableUserReadingData(
             -1,

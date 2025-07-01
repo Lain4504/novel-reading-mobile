@@ -115,15 +115,19 @@ class ExportBookToEPUBWork @AssistedInject constructor(
         }
         val tasks = mutableListOf<ImageDownloader.Task>()
         val epub = EpubBuilder().apply {
-            val bookInformation = webBookDataSource.getBookInformation(bookId) ?: return Result.failure().also {
-                updateFailureNotification(bookId)
-            }
-            val bookVolumes = webBookDataSource.getBookVolumes(bookId) ?: return Result.failure().also {
+            val bookInformation = webBookDataSource.getBookInformation(bookId)
+            if (bookInformation.isEmpty()) {
                 downloadItem.progress = -1f
                 updateFailureNotification(bookId)
+                return Result.failure()
+            }
+            val bookVolumes = webBookDataSource.getBookVolumes(bookId)
+            if (bookVolumes.isEmpty()) {
+                downloadItem.progress = -1f
+                updateFailureNotification(bookId)
+                return Result.failure()
             }
             val bookContentMap = mutableMapOf<Int, ChapterContent>()
-
             updateProgressNotification(bookId, 0)
             downloadItem.progress = 0f
             val volumesCount = bookVolumes.volumes.size
@@ -135,10 +139,13 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                 updateProgressNotification(bookId, progressForVolume)
                 downloadItem.progress = progressForVolume / 100f
                 volume.chapters.forEach {
-                    bookContentMap[it.id] = webBookDataSource.getChapterContent(it.id, bookId) ?: return Result.failure().also {
+                    val chapterContent = webBookDataSource.getChapterContent(it.id, bookId)
+                    if (chapterContent.isEmpty()) {
                         downloadItem.progress = -1f
                         updateFailureNotification(bookId)
+                        return Result.failure()
                     }
+                    bookContentMap[it.id] = webBookDataSource.getChapterContent(it.id, bookId)
                 }
             }
 
