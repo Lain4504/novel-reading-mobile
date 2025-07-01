@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip
 
+import android.util.Log
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.snapshotFlow
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
@@ -27,7 +28,6 @@ class FlipPageContentViewModel(
     init {
         coroutineScope.launch(Dispatchers.IO) {
             snapshotFlow { uiState.pagerState }.collect { pagerState ->
-                println(uiState.pagerState.pageCount)
                 collectProgressJob?.cancel()
                 collectProgressJob = coroutineScope.launch(Dispatchers.IO) {
                     snapshotFlow { pagerState.settledPage }.collect {
@@ -46,9 +46,10 @@ class FlipPageContentViewModel(
         uiState.pagerState = pagerState
         if (pagerState.pageCount == 0) return
         if (notRecoveredProgress <= 0) return
+        val recoveredProgress = this.notRecoveredProgress
         notRecoveredProgress = 0f
         coroutineScope.launch {
-            uiState.pagerState.scrollToPage((pagerState.pageCount * notRecoveredProgress).toInt() - 1)
+            uiState.pagerState.scrollToPage((pagerState.pageCount * recoveredProgress).toInt() - 1)
         }
     }
 
@@ -71,29 +72,39 @@ class FlipPageContentViewModel(
     }
 
     override fun changeChapter(id: Int) {
+        if (id < 0) {
+            Log.e("FlipPageContentViewModel", "a id less than 0 was transferred")
+            return
+        }
         notRecoveredProgress = 0f
         uiState.readingProgress = 0f
+        uiState.readingChapterContent = bookRepository.getStateChapterContent(id, uiState.bookId)
+        uiState.readingChapterContent
         coroutineScope.launch(Dispatchers.IO) {
-            uiState.readingChapterContent =
-                bookRepository.getStateChapterContent(id, uiState.bookId)
-            val content = bookRepository.getStateChapterContent(id, uiState.bookId)
-            if (content.id == -1) return@launch
-            bookRepository.updateUserReadingData(uiState.bookId) {
-                it.apply {
-                    lastReadChapterProgress =
-                        if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f
-                    lastReadTime = LocalDateTime.now()
-                    lastReadChapterId = id
-                    lastReadChapterTitle = uiState.readingChapterContent.title
+            snapshotFlow { uiState.readingChapterContent.title }.collect { title ->
+                bookRepository.updateUserReadingData(uiState.bookId) {
+                    it.apply {
+                        lastReadChapterProgress =
+                            if (it.lastReadChapterId == id) it.lastReadChapterProgress else 0f
+                        lastReadTime = LocalDateTime.now()
+                        lastReadChapterId = id
+                        lastReadChapterTitle = title
+                    }
                 }
             }
-            if (content.hasNextChapter()) {
-                bookRepository.getChapterContentFlow(
-                    chapterId = id,
-                    bookId = uiState.bookId
-                )
+        }
+        coroutineScope.launch(Dispatchers.IO) {
+            snapshotFlow { uiState.readingChapterContent.nextChapter }.collect {
+                if (uiState.readingChapterContent.hasNextChapter()) {
+                    bookRepository.getChapterContentFlow(
+                        chapterId = it,
+                        bookId = uiState.bookId
+                    )
+                }
             }
-            bookRepository.getUserReadingDataFlow(uiState.bookId).collect {
+        }
+        coroutineScope.launch(Dispatchers.IO) {
+            bookRepository.getUserReadingData(uiState.bookId).let {
                 if (it.lastReadChapterId == uiState.readingChapterContent.id)
                     notRecoveredProgress = it.lastReadChapterProgress
             }

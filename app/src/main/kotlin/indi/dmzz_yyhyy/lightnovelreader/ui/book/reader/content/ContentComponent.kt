@@ -18,8 +18,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip.FlipPageCont
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
-import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
+import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 
 @Composable
 fun ContentComponent(
@@ -30,33 +30,35 @@ fun ContentComponent(
     changeIsImmersive: () -> Unit,
     onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
 ) {
-    when(uiState) {
-        is FlipPageContentUiState -> FlipPageContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
-        is ScrollContentUiState -> ScrollContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
-        is PreviewContentUiState -> {
-            Box(
-                modifier = Modifier.padding(paddingValues),
-            ) {
-                uiState.readingChapterContent.content
-                    .split("[image]")
-                    .filter { it.isNotBlank() }
-                    .forEach {
-                        BaseContentComponent(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                                ),
-                            text = it,
-                            fontSize = settingState.fontSize.sp,
-                            fontLineHeight = settingState.fontLineHeight.sp,
-                            fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                            fontFamily = rememberReaderFontFamily(settingState),
-                            color = readerTextColor(settingState),
-                            onZoomImage = onZoomImage
-                        )
-                    }
+    uiState.let { contentUiState ->
+        when(contentUiState) {
+            is FlipPageContentUiState -> FlipPageContentComponent(modifier, contentUiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
+            is ScrollContentUiState -> ScrollContentComponent(modifier, contentUiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
+            is PreviewContentUiState -> {
+                Box(
+                    modifier = Modifier.padding(paddingValues),
+                ) {
+                    uiState.readingChapterContent.content
+                        .split("[image]")
+                        .filter { it.isNotBlank() }
+                        .forEach {
+                            BaseContentComponent(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                                    ),
+                                text = it,
+                                fontSize = settingState.fontSize.sp,
+                                fontLineHeight = settingState.fontLineHeight.sp,
+                                fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                                fontFamily = rememberReaderFontFamily(settingState),
+                                color = readerTextColor(settingState),
+                                onZoomImage = onZoomImage
+                            )
+                        }
+                }
             }
         }
     }

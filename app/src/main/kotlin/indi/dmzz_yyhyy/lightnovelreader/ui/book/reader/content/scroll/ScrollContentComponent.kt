@@ -1,5 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +37,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
@@ -105,112 +109,125 @@ fun ScrollContentTextComponent(
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
         uiState.writeProgressRightNow()
     }
-    LazyColumn(
-        modifier = modifier
-            .padding(paddingValues)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        changeIsImmersive.invoke()
-                    }
-                )
-            }
-            .onGloballyPositioned {
-                uiState.setLazyColumnSize(it.size)
-            },
-        state = uiState.lazyListState,
+    AnimatedVisibility(
+        uiState.contentList.isEmpty(),
+        enter = fadeIn(),
+        exit = fadeOut()
     ) {
-        items(
-            items = uiState.contentList,
-            key = { it.id }
+        Loading()
+    }
+    AnimatedVisibility(
+        uiState.contentList.isNotEmpty(),
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        LazyColumn(
+            modifier = modifier
+                .padding(paddingValues)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            changeIsImmersive.invoke()
+                        }
+                    )
+                }
+                .onGloballyPositioned {
+                    uiState.setLazyColumnSize(it.size)
+                },
+            state = uiState.lazyListState,
         ) {
-            Column(
-                Modifier.defaultMinSize(
-                    minHeight = with(density) {
-                        screenHeight.toDp()
-                    }
-                )
+            items(
+                items = uiState.contentList,
+                key = { it.id }
             ) {
-                if (settingState.isUsingContinuousScrolling) {
-                    val titleRegex = Regex("^(第[一二三四五六七八九十]+卷)\\s+(.*)")
-                    val matchResult = titleRegex.find(it.title)
+                Column(
+                    Modifier.defaultMinSize(
+                        minHeight = with(density) {
+                            screenHeight.toDp()
+                        }
+                    )
+                ) {
+                    if (settingState.isUsingContinuousScrolling) {
+                        val titleRegex = Regex("^(第[一二三四五六七八九十]+卷)\\s+(.*)")
+                        val matchResult = titleRegex.find(it.title)
 
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(vertical = 36.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        if (matchResult != null) {
-                            val (volumeTitle, chapterTitle) = matchResult.destructured
-                            Text(
-                                text = volumeTitle,
-                                textAlign = TextAlign.Center,
-                                fontSize = (settingState.fontSize + 2).sp,
-                                fontWeight = FontWeight.Medium,
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(vertical = 36.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            if (matchResult != null) {
+                                val (volumeTitle, chapterTitle) = matchResult.destructured
+                                Text(
+                                    text = volumeTitle,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = (settingState.fontSize + 2).sp,
+                                    fontWeight = FontWeight.Medium,
+                                    fontFamily = fontFamily,
+                                    color = textColor,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp),
+                                    text = chapterTitle,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = (settingState.fontSize + 6).sp,
+                                    lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
+                                    fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
+                                    fontFamily = fontFamily,
+                                    color = textColor
+                                )
+                            } else {
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp),
+                                    text = it.title,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = (settingState.fontSize + 6).sp,
+                                    lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
+                                    fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
+                                    fontFamily = fontFamily,
+                                    color = textColor
+                                )
+                            }
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                HorizontalDivider(
+                                    modifier = Modifier.width(48.dp),
+                                    color = textColor
+                                )
+                            }
+                            Spacer(Modifier.height(16.dp))
+                        }
+                    }
+
+                    it.content
+                        .split("[image]")
+                        .filter { it.isNotBlank() }
+                        .forEach {
+                            BaseContentComponent(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .defaultMinSize(
+                                        minHeight = with(density) {
+                                            screenHeight.toDp()
+                                        }
+                                    ),
+                                text = it,
+                                fontSize = settingState.fontSize.sp,
+                                fontLineHeight = settingState.fontLineHeight.sp,
+                                fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                                 fontFamily = fontFamily,
                                 color = textColor,
-                                modifier = Modifier.fillMaxWidth()
+                                onZoomImage = onZoomImage
                             )
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                text = chapterTitle,
-                                textAlign = TextAlign.Center,
-                                fontSize = (settingState.fontSize + 6).sp,
-                                lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
-                                fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
-                                fontFamily = fontFamily,
-                                color = textColor
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                text = it.title,
-                                textAlign = TextAlign.Center,
-                                fontSize = (settingState.fontSize + 6).sp,
-                                lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
-                                fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
-                                fontFamily = fontFamily,
-                                color = textColor
-                            )
-                        }
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            HorizontalDivider(
-                                modifier = Modifier.width(48.dp),
-                                color = textColor
-                            )
-                        }
-                        Spacer(Modifier.height(16.dp))
                     }
                 }
-
-                it.content
-                    .split("[image]")
-                    .filter { it.isNotBlank() }
-                    .forEach {
-                        BaseContentComponent(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .defaultMinSize(
-                                    minHeight = with(density) {
-                                        screenHeight.toDp()
-                                    }
-                                ),
-                            text = it,
-                            fontSize = settingState.fontSize.sp,
-                            fontLineHeight = settingState.fontLineHeight.sp,
-                            fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                            fontFamily = fontFamily,
-                            color = textColor,
-                            onZoomImage = onZoomImage
-                        )
-                    }
             }
         }
     }
