@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.book
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -8,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.time.LocalDateTime
 
+@Stable
 interface UserReadingData {
     val id: Int
     val lastReadTime: LocalDateTime

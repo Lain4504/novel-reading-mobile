@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8
 
+import android.util.Log
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionPost
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import org.jsoup.Connection
@@ -27,8 +28,9 @@ fun Connection.wenku8Cookie(): Connection =
         .cookie(" Hm_lpvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294503")
 
 @OptIn(ExperimentalEncodingApi::class)
-fun wenku8Api(request: String): Document? =
-    Jsoup
+fun wenku8Api(request: String): Document? {
+    Log.i("Wenku8API", "require to wenku8 with $request")
+    return Jsoup
         .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
         .data(
             "request", Base64.encode(request.toByteArray()),
@@ -36,7 +38,9 @@ fun wenku8Api(request: String): Document? =
             "appver", "1.21"
         )
         .autoReconnectionPost()
-        ?.outputSettings(Document.OutputSettings()
-            .prettyPrint(false)
-            .syntax(Document.OutputSettings.Syntax.xml)
+        ?.outputSettings(
+            Document.OutputSettings()
+                .prettyPrint(false)
+                .syntax(Document.OutputSettings.Syntax.xml)
         )
+}

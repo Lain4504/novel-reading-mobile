@@ -11,7 +11,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 
 @Stable
 interface ReaderScreenUiState {
-    val isLoading: Boolean get() = contentUiState.readingChapterContent.isEmpty()
     val bookId: Int
     val userReadingData: UserReadingData
     val bookVolumes: BookVolumes

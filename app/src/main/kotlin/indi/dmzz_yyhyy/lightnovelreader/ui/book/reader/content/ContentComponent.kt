@@ -29,32 +29,34 @@ fun ContentComponent(
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
 ) {
-    when(uiState) {
-        is FlipPageContentUiState -> FlipPageContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive)
-        is ScrollContentUiState -> ScrollContentComponent(modifier, uiState, settingState, paddingValues, changeIsImmersive)
-        is PreviewContentUiState -> {
-            Box(
-                modifier = Modifier.padding(paddingValues),
-            ) {
-                uiState.readingChapterContent.content
-                    .split("[image]")
-                    .filter { it.isNotBlank() }
-                    .forEach {
-                        BaseContentComponent(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                                ),
-                            text = it,
-                            fontSize = settingState.fontSize.sp,
-                            fontLineHeight = settingState.fontLineHeight.sp,
-                            fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                            fontFamily = rememberReaderFontFamily(settingState),
-                            color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
-                        )
-                    }
+    uiState.let {
+        when(it) {
+            is FlipPageContentUiState -> FlipPageContentComponent(modifier, it, settingState, paddingValues, changeIsImmersive)
+            is ScrollContentUiState -> ScrollContentComponent(modifier, it, settingState, paddingValues, changeIsImmersive)
+            is PreviewContentUiState -> {
+                Box(
+                    modifier = Modifier.padding(paddingValues),
+                ) {
+                    uiState.readingChapterContent.content
+                        .split("[image]")
+                        .filter { it.isNotBlank() }
+                        .forEach {
+                            BaseContentComponent(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                                    ),
+                                text = it,
+                                fontSize = settingState.fontSize.sp,
+                                fontLineHeight = settingState.fontLineHeight.sp,
+                                fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                                fontFamily = rememberReaderFontFamily(settingState),
+                                color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
+                            )
+                        }
+                }
             }
         }
     }

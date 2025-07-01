@@ -1,15 +1,15 @@
 package indi.dmzz_yyhyy.lightnovelreader.utils
 
 import android.util.Log
+import org.jsoup.Connection
+import org.jsoup.HttpStatusException
+import org.jsoup.nodes.Document
 import java.io.IOException
 import java.lang.Thread.sleep
 import java.net.SocketException
 import javax.net.ssl.SSLHandshakeException
-import org.jsoup.Connection
-import org.jsoup.HttpStatusException
-import org.jsoup.nodes.Document
 
-fun Connection.autoReconnectionGet(lastReconnectTimes: Int = 10, lastReconnectTime: Int = 250): Document? =
+fun Connection.autoReconnectionGet(lastReconnectTimes: Int = 3, lastReconnectTime: Int = 250): Document? =
     try {
         this.get()
     } catch (e: HttpStatusException) {
@@ -50,7 +50,7 @@ fun Connection.autoReconnectionGet(lastReconnectTimes: Int = 10, lastReconnectTi
             null
     }
 
-fun Connection.autoReconnectionPost(lastReconnectTimes: Int = 10, lastReconnectTime: Int = 250): Document? =
+fun Connection.autoReconnectionPost(lastReconnectTimes: Int = 3, lastReconnectTime: Int = 250): Document? =
     try {
         this.post()
     } catch (e: HttpStatusException) {

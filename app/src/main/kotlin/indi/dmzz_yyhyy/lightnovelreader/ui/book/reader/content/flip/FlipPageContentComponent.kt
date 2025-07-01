@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -51,7 +54,9 @@ import indi.dmzz_yyhyy.lightnovelreader.AppEvent
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -83,7 +88,6 @@ private fun SimpleFlipPageTextComponent(
     settingState: SettingState,
     changeIsImmersive: () -> Unit,
 ) {
-    val content = uiState.readingChapterContent.content
     val textMeasurer = rememberTextMeasurer()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -94,20 +98,17 @@ private fun SimpleFlipPageTextComponent(
     var slippedTextList by remember { mutableStateOf(emptyList<String>()) }
     var readingPageFistCharOffset by remember { mutableIntStateOf(0) }
     fun lastPage(pagerState: PagerState) {
-        println(pagerState.currentPage)
         if (pagerState.currentPage != 0)
             scope.launch {
                 if (settingState.flipAnime != MenuOptions.FlipAnimationOptions.None)
                     pagerState.animateScrollToPage(pagerState.currentPage - 1)
                 else
                     pagerState.scrollToPage(pagerState.currentPage - 1)
-                println(pagerState.currentPage)
             }
         else if (settingState.fastChapterChange && slippedTextList.isNotEmpty()) uiState.loadLastChapter.invoke()
     }
 
     fun nextPage(pagerState: PagerState) {
-        println("fun:$pagerState")
         if (pagerState.currentPage + 1 < pagerState.pageCount)
             scope.launch {
                 if (settingState.flipAnime != MenuOptions.FlipAnimationOptions.None)
@@ -119,15 +120,17 @@ private fun SimpleFlipPageTextComponent(
     }
 
     LaunchedEffect(
-        content,
+        uiState.readingChapterContent.content,
         textStyle,
         settingState.fontLineHeight.sp,
         settingState.fontSize.sp,
         constraints?.maxHeight,
         constraints?.maxWidth
     ) {
+        uiState.readingChapterContent.debugPrint("GetOnChange")
+        uiState.debugPrint("GetOnChange")
         val key =
-            content.hashCode() + settingState.fontLineHeight.sp.value.hashCode() + settingState.fontSize.sp.value.hashCode() + constraints?.maxHeight.hashCode() + constraints?.maxWidth.hashCode()
+            uiState.readingChapterContent.content.hashCode() + settingState.fontLineHeight.sp.value.hashCode() + settingState.fontSize.sp.value.hashCode() + constraints?.maxHeight.hashCode() + constraints?.maxWidth.hashCode()
         if (constraints == null || textStyle == null || key == contentKey) return@LaunchedEffect
         contentKey = key
         slipTextJob?.cancel()
@@ -139,7 +142,7 @@ private fun SimpleFlipPageTextComponent(
             slippedTextList = slipText(
                 textMeasurer = textMeasurer,
                 constraints = constraints!!,
-                text = content,
+                text = uiState.readingChapterContent.content,
                 style = textStyle!!.copy(
                     fontSize = settingState.fontSize.sp,
                     fontWeight = FontWeight.W400,
@@ -203,61 +206,73 @@ private fun SimpleFlipPageTextComponent(
         )
     }
     textStyle = MaterialTheme.typography.bodyMedium
-    HorizontalPager(
-        state = uiState.pagerState,
-        modifier = modifier
-            .draggable(
-                enabled = settingState.isUsingFlipPage,
-                interactionSource = remember { MutableInteractionSource() },
-                orientation = Orientation.Vertical,
-                state = rememberDraggableState {},
-                onDragStopped = {
-                    if (it.absoluteValue > 60) changeIsImmersive.invoke()
-                }
-            )
-            .pointerInput(
-                settingState.isUsingFlipPage,
-                settingState.flipAnime,
-                settingState.fastChapterChange
-            ) {
-                detectTapGestures(
-                    onTap = {
-                        if (settingState.isUsingFlipPage)
-                            if (it.x <= context.resources.displayMetrics.widthPixels * 0.425) lastPage(
-                                uiState.pagerState
-                            )
-                            else nextPage(uiState.pagerState)
-                        else changeIsImmersive.invoke()
+    AnimatedVisibility(
+        uiState.readingChapterContent.isEmpty(),
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Loading()
+    }
+    AnimatedVisibility(
+        !uiState.readingChapterContent.isEmpty(),
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        HorizontalPager(
+            state = uiState.pagerState,
+            modifier = modifier
+                .draggable(
+                    enabled = settingState.isUsingFlipPage,
+                    interactionSource = remember { MutableInteractionSource() },
+                    orientation = Orientation.Vertical,
+                    state = rememberDraggableState {},
+                    onDragStopped = {
+                        if (it.absoluteValue > 60) changeIsImmersive.invoke()
                     }
                 )
-            },
-    ) {
-        println("ui:${uiState.pagerState}")
-        Box(Modifier.fillMaxSize()) {
-            if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
-                Image(
-                    modifier = Modifier.fillMaxSize(),
-                    painter =
-                    if (settingState.backgroundImageUri.toString()
-                            .isEmpty()
-                    ) painterResource(id = R.drawable.paper)
-                    else rememberAsyncImagePainter(settingState.backgroundImageUri),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
+                .pointerInput(
+                    settingState.isUsingFlipPage,
+                    settingState.flipAnime,
+                    settingState.fastChapterChange
+                ) {
+                    detectTapGestures(
+                        onTap = {
+                            if (settingState.isUsingFlipPage)
+                                if (it.x <= context.resources.displayMetrics.widthPixels * 0.425) lastPage(
+                                    uiState.pagerState
+                                )
+                                else nextPage(uiState.pagerState)
+                            else changeIsImmersive.invoke()
+                        }
+                    )
+                },
+        ) {
+            Box(Modifier.fillMaxSize()) {
+                if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
+                    Image(
+                        modifier = Modifier.fillMaxSize(),
+                        painter =
+                        if (settingState.backgroundImageUri.toString()
+                                .isEmpty()
+                        ) painterResource(id = R.drawable.paper)
+                        else rememberAsyncImagePainter(settingState.backgroundImageUri),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                BaseContentComponent(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    text = slippedTextList.getOrNull(it) ?: "",
+                    fontSize = settingState.fontSize.sp,
+                    fontLineHeight = settingState.fontLineHeight.sp,
+                    fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                    fontFamily = rememberReaderFontFamily(settingState),
+                    color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
                 )
             }
-
-            BaseContentComponent(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                text = slippedTextList.getOrNull(it) ?: "",
-                fontSize = settingState.fontSize.sp,
-                fontLineHeight = settingState.fontLineHeight.sp,
-                fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                fontFamily = rememberReaderFontFamily(settingState),
-                color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
-            )
         }
     }
 }

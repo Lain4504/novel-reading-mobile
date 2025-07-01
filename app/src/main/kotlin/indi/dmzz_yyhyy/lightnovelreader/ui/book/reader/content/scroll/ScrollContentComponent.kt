@@ -1,6 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
@@ -35,6 +38,7 @@ import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 
@@ -107,66 +111,94 @@ fun ScrollContentTextComponent(
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
         uiState.writeProgressRightNow()
     }
-    LazyColumn(
-        modifier = modifier
-            .padding(paddingValues)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        changeIsImmersive.invoke()
-                    }
-                )
-            }
-            .onGloballyPositioned {
-                uiState.setLazyColumnSize(it.size)
-            },
-        state = uiState.lazyListState,
+    AnimatedVisibility(
+        uiState.contentList.isEmpty(),
+        enter = fadeIn(),
+        exit = fadeOut()
     ) {
-        items(
-            items = uiState.contentList,
-            key = { it.id }
-        ) {
-            Column(
-                Modifier.defaultMinSize(
-                    minHeight = with(density) {
-                        screenHeight.toDp()
-                    }
-                )
-            ) {
-                if (settingState.isUsingContinuousScrolling)
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = it.title,
-                        fontSize = (settingState.fontSize + 10).sp,
-                        lineHeight = (settingState.fontSize + settingState.fontLineHeight + 10).sp,
-                        fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
-                        fontFamily = rememberReaderFontFamily(settingState),
-                        color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
+        Loading()
+    }
+    AnimatedVisibility(
+        uiState.contentList.isNotEmpty(),
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        LazyColumn(
+            modifier = modifier
+                .padding(paddingValues)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            changeIsImmersive.invoke()
+                        }
                     )
-                it.content
-                    .split("[image]")
-                    .filter { it.isNotBlank() }
-                    .forEach {
-                        BaseContentComponent(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .defaultMinSize(
-                                    minHeight = with(density) {
-                                        screenHeight.toDp()
-                                    }
-                                )
-                                .padding(
-                                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
-                                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
-                                ),
-                            text = it,
-                            fontSize = settingState.fontSize.sp,
-                            fontLineHeight = settingState.fontLineHeight.sp,
-                            fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                }
+                .onGloballyPositioned {
+                    uiState.setLazyColumnSize(it.size)
+                },
+            state = uiState.lazyListState,
+        ) {
+            items(
+                items = uiState.contentList,
+                key = { it.id }
+            ) {
+                Column(
+                    Modifier.defaultMinSize(
+                        minHeight = with(density) {
+                            screenHeight.toDp()
+                        }
+                    )
+                ) {
+                    if (settingState.isUsingContinuousScrolling)
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = it.title,
+                            fontSize = (settingState.fontSize + 10).sp,
+                            lineHeight = (settingState.fontSize + settingState.fontLineHeight + 10).sp,
+                            fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
                             fontFamily = rememberReaderFontFamily(settingState),
                             color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
                         )
+                    AnimatedVisibility(
+                        it.isEmpty(),
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Loading()
                     }
+                    AnimatedVisibility(
+                        !it.isEmpty(),
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        it.content
+                            .split("[image]")
+                            .filter { it.isNotBlank() }
+                            .forEach {
+                                BaseContentComponent(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .defaultMinSize(
+                                            minHeight = with(density) {
+                                                screenHeight.toDp()
+                                            }
+                                        )
+                                        .padding(
+                                            start = paddingValues.calculateStartPadding(
+                                                LayoutDirection.Ltr
+                                            ),
+                                            end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                                        ),
+                                    text = it,
+                                    fontSize = settingState.fontSize.sp,
+                                    fontLineHeight = settingState.fontLineHeight.sp,
+                                    fontWeight = FontWeight(settingState.fontWeigh.toInt()),
+                                    fontFamily = rememberReaderFontFamily(settingState),
+                                    color = if (settingState.textColor.isUnspecified) MaterialTheme.colorScheme.onBackground else settingState.textColor
+                                )
+                            }
+                    }
+                }
             }
         }
     }
