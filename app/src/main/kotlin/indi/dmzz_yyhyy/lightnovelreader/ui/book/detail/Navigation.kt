@@ -40,8 +40,9 @@ fun NavGraphBuilder.bookDetailDestination() {
         }
         DetailScreen(
             uiState = viewModel.uiState,
-            onClickExportToEpub = {
-                navController.navigateToExportToEpubDialog(bookId, viewModel.uiState.bookInformation.title)
+            onClickExportToEpub = { settings ->
+                println(settings)
+                //navController.navigateToExportToEpubDialog(bookId, viewModel.uiState.bookInformation.title)
             },
             onClickBackButton = navController::popBackStackIfResumed,
             onClickChapter = {
