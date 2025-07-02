@@ -7,23 +7,31 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.hilt.work.HiltWorker
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadProgressRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadType
 import indi.dmzz_yyhyy.lightnovelreader.data.download.MutableDownloadItem
+import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.ExportType
 import indi.dmzz_yyhyy.lightnovelreader.utils.ImageDownloader
+import io.nightfish.potatoepub.builder.ChapterBuilder
 import io.nightfish.potatoepub.builder.EpubBuilder
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.FileInputStream
 import java.time.LocalDateTime
 
@@ -32,12 +40,13 @@ class ExportBookToEPUBWork @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val webBookDataSource: WebBookDataSource,
+    private val localBookDataSource: LocalBookDataSource,
     private val downloadProgressRepository: DownloadProgressRepository
-) : Worker(appContext, workerParams) {
+) : CoroutineWorker(appContext, workerParams) {
 
     private val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private var notification: Notification? = null
-    val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private var includeImages = true
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -99,11 +108,13 @@ class ExportBookToEPUBWork @AssistedInject constructor(
         notificationManager.notify(bookId, notification)
     }
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         createNotificationChannel()
         val bookId = inputData.getInt("bookId", -1)
         showProgressNotification(bookId)
-        val fileUri = inputData.getString("uri")?.let(Uri::parse) ?: return Result.failure()
+        val exportType = ExportType.valueOf(inputData.getString("exportType") ?: return@withContext Result.failure())
+        includeImages = inputData.getBoolean("includeImages", true)
+        val fileUri = inputData.getString("uri")?.let(Uri::parse) ?: return@withContext Result.failure()
         val tempDir = applicationContext.cacheDir.resolve("epub").resolve(bookId.toString())
         val cover = tempDir.resolve("cover.jpg")
         val downloadItem = MutableDownloadItem(DownloadType.EPUB_EXPORT, bookId)
@@ -111,79 +122,196 @@ class ExportBookToEPUBWork @AssistedInject constructor(
         if (bookId < 0) {
             downloadItem.progress = -1f
             updateFailureNotification(bookId)
-            return Result.failure()
+            return@withContext Result.failure()
         }
         val tasks = mutableListOf<ImageDownloader.Task>()
-        val epub = EpubBuilder().apply {
-            val bookInformation = webBookDataSource.getBookInformation(bookId)
-            if (bookInformation.isEmpty()) {
+        var bookInformation = webBookDataSource.getBookInformation(bookId)
+        if (bookInformation.isEmpty()) {
+            val localData = localBookDataSource.getBookInformation(bookId)
+            if (localData == null || localData.isEmpty()) {
                 downloadItem.progress = -1f
                 updateFailureNotification(bookId)
-                return Result.failure()
+                return@withContext Result.failure()
             }
-            val bookVolumes = webBookDataSource.getBookVolumes(bookId)
-            if (bookVolumes.isEmpty()) {
+            else bookInformation = localBookDataSource.getBookInformation(bookId)!!
+        }
+        var bookVolumes = webBookDataSource.getBookVolumes(bookId)
+        if (bookVolumes.isEmpty()) {
+            val localData = localBookDataSource.getBookVolumes(bookId)
+            if (localData == null || localData.isEmpty()) {
                 downloadItem.progress = -1f
                 updateFailureNotification(bookId)
-                return Result.failure()
+                return@withContext Result.failure()
             }
-            val bookContentMap = mutableMapOf<Int, ChapterContent>()
-            updateProgressNotification(bookId, 0)
-            downloadItem.progress = 0f
-            val volumesCount = bookVolumes.volumes.size
-            var currentVolumeIndex1 = 0
+            else bookVolumes = localData
+        }
+        val bookContentMap = mutableMapOf<Int, ChapterContent>()
+        updateProgressNotification(bookId, 0)
+        downloadItem.progress = 0f
+        val volumesCount = bookVolumes.volumes.size
+        var currentVolumeIndex1 = 0
 
-            bookVolumes.volumes.forEach { volume ->
-                currentVolumeIndex1++
-                val progressForVolume = (20 * currentVolumeIndex1) / volumesCount
-                updateProgressNotification(bookId, progressForVolume)
-                downloadItem.progress = progressForVolume / 100f
-                volume.chapters.forEach {
-                    val chapterContent = webBookDataSource.getChapterContent(it.id, bookId)
-                    if (chapterContent.isEmpty()) {
+        bookVolumes.volumes.forEach { volume ->
+            currentVolumeIndex1++
+            val progressForVolume = (20 * currentVolumeIndex1) / volumesCount
+            updateProgressNotification(bookId, progressForVolume)
+            downloadItem.progress = progressForVolume / 100f
+            volume.chapters.forEach {
+                var chapterContent = webBookDataSource.getChapterContent(it.id, bookId)
+                if (chapterContent.isEmpty()) {
+                    val localData = localBookDataSource.getChapterContent(it.id)
+                    if (localData == null || localData.isEmpty()) {
                         downloadItem.progress = -1f
                         updateFailureNotification(bookId)
-                        return Result.failure()
+                        return@withContext Result.failure()
                     }
-                    bookContentMap[it.id] = webBookDataSource.getChapterContent(it.id, bookId)
+                    else chapterContent = localData
+                }
+                bookContentMap[it.id] = chapterContent
+            }
+        }
+        updateProgressNotification(bookId, 20)
+        downloadItem.progress = 0.2f
+
+        updateProgressNotification(bookId, 20)
+        downloadItem.progress = 0.2f
+
+        return@withContext when (exportType) {
+            ExportType.BOOK -> bookToEPUB(
+                bookInformation,
+                bookVolumes,
+                bookContentMap,
+                tempDir,
+                tasks,
+                volumesCount,
+                bookId,
+                downloadItem,
+                cover,
+                fileUri
+            )
+            ExportType.VOLUMES -> volumesToEPUB(
+                bookInformation,
+                bookVolumes,
+                bookContentMap,
+                tempDir,
+                tasks,
+                volumesCount,
+                bookId,
+                downloadItem,
+                cover,
+                fileUri
+            )
+        }
+    }
+
+    private suspend fun volumesToEPUB(
+        bookInformation: BookInformation,
+        bookVolumes: BookVolumes,
+        bookContentMap: MutableMap<Int, ChapterContent>,
+        tempDir: File,
+        tasks: MutableList<ImageDownloader.Task>,
+        volumesCount: Int,
+        bookId: Int,
+        downloadItem: MutableDownloadItem,
+        cover: File,
+        fileUri: Uri
+    ): Result = withContext(Dispatchers.IO) {
+        val epubMap = mutableMapOf<String, EpubBuilder>()
+        for ((currentVolumeIndex, volume) in bookVolumes.volumes.withIndex()) {
+            val epub = EpubBuilder().apply {
+                title = volume.volumeTitle
+                modifier = LocalDateTime.now()
+                creator = bookInformation.author
+                description = bookInformation.description
+                publisher = bookInformation.publishingHouse
+                if (currentVolumeIndex == 0)
+                    cover(cover)
+                else {
+                    val url = webBookDataSource.getCoverUrlInVolume(bookId, volume)
+                    if (url == null) {
+                        cover(cover)
+                    } else {
+                        val image = tempDir.resolve(url.hashCode().toString() + ".jpg")
+                        tasks.add(ImageDownloader.Task(image, url))
+                        cover(image)
+                    }
+                }
+                val progressForVolume = (30 * currentVolumeIndex) / volumesCount
+                updateProgressNotification(bookId, 20 + progressForVolume)
+                downloadItem.progress = (20f + progressForVolume) / 100f
+                chapter {
+                    for (chapterInformation in volume.chapters) {
+                        packChapter(chapterInformation, bookContentMap, tempDir, tasks)
+                    }
                 }
             }
+            epubMap[volume.volumeTitle] = epub
+        }
 
+        val imageDownloader = ImageDownloader(
+            tasks = tasks,
+            onProgress = { current, total ->
+                val progress = (50 + current.toFloat() / total * 40).toInt()
+                updateProgressNotification(bookId, progress)
+                downloadItem.progress = progress / 100f
+            }
+        )
+
+        if (async { imageDownloader.run() }.await() == Result.failure()) {
+            downloadItem.progress = -1f
+            return@withContext Result.failure()
+        }
+
+        val folder = DocumentFile.fromTreeUri(applicationContext, fileUri)
+        if (folder == null) {
+            downloadItem.progress = -1f
+            return@withContext Result.failure()
+        }
+        for (epub in epubMap.entries) {
+            val epubUri = folder.createFile("application/epub+zip", "$epub.epub")?.uri
+            if (epubUri == null) {
+                downloadItem.progress = -1f
+                return@withContext Result.failure()
+            }
+            val result = saveEpub(
+                bookId,
+                downloadItem,
+                tempDir,
+                epub.value,
+                epubUri
+            )
+            if (result == Result.failure()) {
+                downloadItem.progress = -1f
+                return@withContext Result.failure()
+            }
+        }
+
+        return@withContext Result.success()
+    }
+
+    private suspend fun bookToEPUB(
+        bookInformation: BookInformation,
+        bookVolumes: BookVolumes,
+        bookContentMap: MutableMap<Int, ChapterContent>,
+        tempDir: File,
+        tasks: MutableList<ImageDownloader.Task>,
+        volumesCount: Int,
+        bookId: Int,
+        downloadItem: MutableDownloadItem,
+        cover: File,
+        fileUri: Uri
+    ): Result = withContext(Dispatchers.IO) {
+        var currentVolumeIndex = 0
+        val epub = EpubBuilder().apply {
             title = bookInformation.title
             modifier = LocalDateTime.now()
             creator = bookInformation.author
             description = bookInformation.description
             publisher = bookInformation.publishingHouse
-            updateProgressNotification(bookId, 20)
-            downloadItem.progress = 0.2f
-
-
-            var currentVolumeIndex = 0
-            updateProgressNotification(bookId, 20)
-            downloadItem.progress = 0.2f
 
             bookVolumes.volumes.forEach { volume ->
                 chapter {
-                    title(volume.volumeTitle)
-                    volume.chapters.forEach {
-                        chapter {
-                            title(it.title)
-                            content {
-                                bookContentMap[it.id]!!.content.replace("[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]", "").split("[image]").filter { it.isNotEmpty() }.forEach { singleText ->
-                                    if (singleText.startsWith("http://") || singleText.startsWith("https://")) {
-                                        val image = tempDir.resolve(singleText.hashCode().toString() + ".jpg")
-                                        tasks.add(ImageDownloader.Task(image, singleText))
-                                        image(image)
-                                    } else {
-                                        singleText.split("\n").forEach {
-                                            text(it)
-                                            br()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    packVolume(volume, bookContentMap, tempDir, tasks)
                 }
                 currentVolumeIndex++
                 val progressForVolume = (30 * currentVolumeIndex) / volumesCount
@@ -194,69 +322,118 @@ class ExportBookToEPUBWork @AssistedInject constructor(
             cover(cover)
         }
 
-        var result = Result.success()
+        val imageDownloader = async {
+            ImageDownloader(
+                tasks = tasks,
+                onProgress = { current, total ->
+                    val progress = (50 + current.toFloat() / total * 40).toInt()
+                    updateProgressNotification(bookId, progress)
+                    downloadItem.progress = progress / 100f
+                }
+            ).run()
+        }
 
-        val imageDownloader = ImageDownloader(
-            tasks = tasks,
-            coroutineScope = coroutineScope,
-            onProgress = { current, total ->
-                val progress = (50 + current.toFloat() / total * 40).toInt()
-                updateProgressNotification(bookId, progress)
-                downloadItem.progress = progress / 100f
-            },
-            onFinished = {
-                coroutineScope.launch {
-                    updateProgressNotification(bookId, 90)
-                    downloadItem.progress = 90f
-                    downloadItem.progress = 0.90f
 
-                    val file = tempDir.resolve("epub")
-                    try {
-                        epub.build().save(file)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        updateFailureNotification(bookId)
-                        result = Result.failure()
-                        downloadItem.progress = -1f
-                        return@launch
-                    }
-                    updateProgressNotification(bookId, 95)
-                    downloadItem.progress = 0.95f
-                    applicationContext.contentResolver.openOutputStream(fileUri)?.use { outputStream ->
-                        FileInputStream(file).use { inputStream ->
-                            val buffer = ByteArray(1024 * 1024) // = 1MB
-                            var bytesRead: Int
-                            var totalBytes = 0L
-                            val fileSize = file.length()
-
-                            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                                outputStream.write(buffer, 0, bytesRead)
-                                totalBytes += bytesRead
-                                if (fileSize > 0) {
-                                    val writeProgress = 95 + (totalBytes.toFloat() / fileSize * 5).toInt()
-                                    updateProgressNotification(bookId, writeProgress)
-                                    downloadItem.progress = writeProgress / 100f
-                                }
-                            }
-                        }
-                    }
-                    tempDir.delete()
+        return@withContext if (imageDownloader.await() == Result.success()) {
+            saveEpub(bookId, downloadItem, tempDir, epub, fileUri).also {
+                if (it == Result.success())
                     updateCompletionNotification(bookId)
+                else {
+                    downloadItem.progress = -1f
+                    updateFailureNotification(bookId)
                 }
             }
-        )
-        while (!imageDownloader.isDone) {
-            Thread.sleep(500)
-        }
-        return result.also {
-            if (it == Result.success())
-                updateCompletionNotification(bookId)
+        } else {
+            downloadItem.progress = -1f
+            updateFailureNotification(bookId)
+            Result.failure()
         }
     }
 
+    private fun ChapterBuilder.packVolume(
+        volume: Volume,
+        bookContentMap: MutableMap<Int, ChapterContent>,
+        tempDir: File,
+        tasks: MutableList<ImageDownloader.Task>
+    ) {
+        title(volume.volumeTitle)
+        volume.chapters.forEach {
+            chapter {
+                packChapter(it, bookContentMap, tempDir, tasks)
+            }
+        }
+    }
 
-    override fun onStopped() {
-        super.onStopped()
-        coroutineScope.cancel()
+    private fun ChapterBuilder.packChapter(
+        it: ChapterInformation,
+        bookContentMap: MutableMap<Int, ChapterContent>,
+        tempDir: File,
+        tasks: MutableList<ImageDownloader.Task>
+    ) {
+        title(it.title)
+        content {
+            bookContentMap[it.id]!!.content.replace(
+                "[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]",
+                ""
+            ).split("[image]").filter { it.isNotEmpty() }.forEach { singleText ->
+                if (singleText.startsWith("http://") || singleText.startsWith("https://") && includeImages) {
+                    val image = tempDir.resolve(singleText.hashCode().toString() + ".jpg")
+                    tasks.add(ImageDownloader.Task(image, singleText))
+                    image(image)
+                } else {
+                    singleText.split("\n").forEach {
+                        text(it)
+                        br()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun saveEpub(
+        bookId: Int,
+        downloadItem: MutableDownloadItem,
+        tempDir: File,
+        epub: EpubBuilder,
+        fileUri: Uri
+    ): Result {
+        updateProgressNotification(bookId, 90)
+        downloadItem.progress = 90f
+        downloadItem.progress = 0.90f
+
+        val file = tempDir.resolve("epub")
+        try {
+            epub.build().save(file)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            updateFailureNotification(bookId)
+            downloadItem.progress = -1f
+            return Result.failure()
+        }
+        updateProgressNotification(bookId, 95)
+        downloadItem.progress = 0.95f
+        applicationContext.contentResolver.openOutputStream(fileUri)
+            ?.use { outputStream ->
+                FileInputStream(file).use { inputStream ->
+                    val buffer = ByteArray(1024 * 1024) // = 1MB
+                    var bytesRead: Int
+                    var totalBytes = 0L
+                    val fileSize = file.length()
+
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                        totalBytes += bytesRead
+                        if (fileSize > 0) {
+                            val writeProgress =
+                                95 + (totalBytes.toFloat() / fileSize * 5).toInt()
+                            updateProgressNotification(bookId, writeProgress)
+                            downloadItem.progress = writeProgress / 100f
+                        }
+                    }
+                }
+            }
+        tempDir.delete()
+        updateCompletionNotification(bookId)
+        return Result.success()
     }
 }

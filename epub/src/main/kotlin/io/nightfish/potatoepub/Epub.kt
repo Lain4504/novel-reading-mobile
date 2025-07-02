@@ -46,6 +46,9 @@ class Epub(
         target.parentFile.mkdirs()
         if (!target.exists()) {
             target.createNewFile()
+        } else {
+            target.delete()
+            target.createNewFile()
         }
         ZipOutputStream(target.outputStream()).use { out ->
             val mineTypeEntry = ZipEntry("mimetype")

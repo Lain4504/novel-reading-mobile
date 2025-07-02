@@ -23,6 +23,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
+import indi.dmzz_yyhyy.lightnovelreader.utils.ImageDownloader
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -430,5 +431,20 @@ object Wenku8Api: WebBookDataSource {
     override fun progressBookTagClick(tag: String, navController: NavController) {
         if (tagList.contains(tag))
             navController.navigateToExplorationExpandDestination(tag)
+    }
+
+    override fun getCoverUrlInVolume(bookId: Int, volume: Volume): String? {
+        return volume.chapters
+            .find { it.title == "插图" }
+            ?.let {
+                val chapterContent = getChapterContent(bookId, it.id)
+                if (chapterContent.isEmpty()) return null
+                chapterContent.content.split("[image]").filter { it.isNotEmpty() }.forEach { singleText ->
+                    if (singleText.startsWith("http://") || singleText.startsWith("https://")) {
+                        return singleText
+                    }
+                }
+                return null
+            }
     }
 }

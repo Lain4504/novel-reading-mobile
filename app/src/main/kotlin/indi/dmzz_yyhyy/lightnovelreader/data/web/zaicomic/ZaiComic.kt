@@ -101,26 +101,26 @@ object ZaiComic : WebBookDataSource {
             .data
             .data
 
-    override fun getBookInformation(id: Int): BookInformation? {
+    override fun getBookInformation(id: Int): BookInformation {
         val detailData = getComicDetail(id)
-        return detailData?.toBookInformation()
+        return detailData?.toBookInformation() ?: BookInformation.empty()
     }
 
-    override fun getBookVolumes(id: Int): BookVolumes? {
+    override fun getBookVolumes(id: Int): BookVolumes {
         val detailData = getComicDetail(id)
         return detailData?.toBookVolumes()
             ?.let {
                 comicVolumesCacheMap[id] = it
                 it
-            }
+            } ?: BookVolumes.empty()
     }
 
-    override fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent? {
+    override fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent {
         val volumes =
             if (comicVolumesCacheMap.contains(bookId))
-                comicVolumesCacheMap[bookId] ?: return null
+                comicVolumesCacheMap[bookId] ?: return ChapterContent.empty()
             else
-                getBookVolumes(bookId) ?: return null
+                getBookVolumes(bookId)
         val chapterIds = mutableListOf<Int>()
             .apply {
                 volumes.volumes.forEach { volume ->
@@ -128,7 +128,7 @@ object ZaiComic : WebBookDataSource {
                 }
             }
         val chapterIdIndex = chapterIds.indexOfFirst(chapterId::equals)
-        if (chapterIdIndex == -1) return null
+        if (chapterIdIndex == -1) return ChapterContent.empty()
         val lastChapterId =
             if (chapterIdIndex != 0) chapterIds[chapterIdIndex - 1]
             else -1
@@ -197,7 +197,7 @@ object ZaiComic : WebBookDataSource {
                 ids.forEach { id ->
                     delay(1)
                     comicList.update {
-                        it + (getBookInformation(id) ?: return@update it)
+                        it + (getBookInformation(id))
                     }
                 }
                 page++

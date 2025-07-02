@@ -4,13 +4,14 @@ import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import kotlinx.coroutines.flow.Flow
 
 /**
  * LightNovelReader 的网络数据提供源接口，可以通过实现此接口使软件支持新的数据源
- * 版本: 0.3
+ * 版本: 0.4
  */
 interface WebBookDataSource {
     val id: Int
@@ -118,4 +119,10 @@ interface WebBookDataSource {
      * 用于处理书本tag的点击跳转事件
      */
     fun progressBookTagClick(tag: String, navController: NavController) {  }
+
+    /**
+     * 根据卷获取该卷封面的Url, 用于EPUB分卷导出
+     * 如无, 则返回null
+     */
+    fun getCoverUrlInVolume(bookId: Int, volume: Volume): String? = null
 }

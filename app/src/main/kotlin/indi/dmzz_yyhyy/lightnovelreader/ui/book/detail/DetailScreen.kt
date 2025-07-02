@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -8,10 +7,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,17 +31,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -70,12 +62,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -91,8 +79,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import kotlinx.coroutines.delay
-import java.text.NumberFormat
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -329,200 +315,6 @@ private fun Content(
         isVisible = showInfoBottomSheet,
         onDismissRequest = {
             showInfoBottomSheet = false
-        }
-    )
-}
-
-data class ExportSettings(
-    val selectedVolumeIds: Set<Int> = emptySet(),
-    val includeImages: Boolean = true
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ExportBottomSheet(
-    sheetState: SheetState,
-    bookVolumes: BookVolumes,
-    settings: ExportSettings,
-    onSettingsChange: (ExportSettings) -> Unit,
-    onDismissRequest: () -> Unit,
-    onClickExport: (ExportSettings) -> Unit
-) {
-    val isSplitEnabled = settings.selectedVolumeIds.isNotEmpty()
-    val allVolumeIds = bookVolumes.volumes.map { it.volumeId }.toSet()
-
-    val selectedVolumeIds = if (isSplitEnabled) {
-        settings.selectedVolumeIds
-    } else {
-        allVolumeIds
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = sheetState,
-        tonalElevation = 16.dp
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = "导出为 Epub",
-                    style = AppTypography.titleLarge
-                )
-                Spacer(Modifier.width(16.dp))
-                Button(onClick = {
-                    if (isSplitEnabled) {
-                        onClickExport(settings.copy(selectedVolumeIds = selectedVolumeIds))
-                    } else {
-                        onClickExport(settings.copy(selectedVolumeIds = emptySet()))
-                    }
-                    onDismissRequest()
-                }) {
-                    Text("导出", fontWeight = FontWeight.SemiBold)
-                }
-            }
-
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(end = 16.dp)
-            ) {
-                item {
-                    SettingChip(
-                        label = "包含图片",
-                        selected = settings.includeImages,
-                        onClick = {
-                            onSettingsChange(settings.copy(includeImages = !settings.includeImages))
-                        }
-                    )
-                }
-
-                item {
-                    SettingChip(
-                        label = "分卷导出",
-                        selected = isSplitEnabled,
-                        onClick = {
-                            onSettingsChange(
-                                settings.copy(
-                                    selectedVolumeIds = if (isSplitEnabled) emptySet() else allVolumeIds
-                                )
-                            )
-                        }
-                    )
-                }
-
-                if (isSplitEnabled) {
-                    val isAllSelected = selectedVolumeIds.size == allVolumeIds.size
-                    if (!isAllSelected) {
-                        item {
-                            SettingChip(
-                                label = "全选",
-                                selected = false,
-                                onClick = {
-                                    onSettingsChange(settings.copy(selectedVolumeIds = allVolumeIds))
-                                }
-                            )
-                        }
-                        item {
-                            SettingChip(
-                                label = "反选",
-                                selected = false,
-                                onClick = {
-                                    val toggled = allVolumeIds - selectedVolumeIds
-                                    onSettingsChange(settings.copy(selectedVolumeIds = toggled))
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp, horizontal = 18.dp))
-
-            LazyColumn {
-                items(bookVolumes.volumes) { volume ->
-                    val isChecked = volume.volumeId in selectedVolumeIds
-                    val isInteractive = isSplitEnabled
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(enabled = isInteractive) {
-                                if (isInteractive) {
-                                    val updated = if (isChecked) {
-                                        selectedVolumeIds - volume.volumeId
-                                    } else {
-                                        selectedVolumeIds + volume.volumeId
-                                    }
-                                    onSettingsChange(settings.copy(selectedVolumeIds = updated))
-                                }
-                            }
-                            .padding(horizontal = 16.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f, fill = true),
-                            text = volume.volumeTitle,
-                            style = AppTypography.titleMedium,
-                            color = if (isInteractive) MaterialTheme.colorScheme.onSurface
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                        Spacer(Modifier.width(12.dp))
-                        Checkbox(
-                            checked = isChecked,
-                            onCheckedChange = {
-                                if (isInteractive) {
-                                    val updated = if (isChecked) {
-                                        selectedVolumeIds - volume.volumeId
-                                    } else {
-                                        selectedVolumeIds + volume.volumeId
-                                    }
-                                    onSettingsChange(settings.copy(selectedVolumeIds = updated))
-                                }
-                            },
-                            enabled = isInteractive
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-private fun SettingChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        leadingIcon = {
-            if (selected) {
-                Icon(
-                    painter = painterResource(R.drawable.check_24px),
-                    contentDescription = ""
-                )
-            }
-        },
-        label = {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = if (selected)
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     )
 }
@@ -972,157 +764,3 @@ private fun VolumeItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-@Composable
-fun BookInfoBottomSheet(
-    bookInformation: BookInformation,
-    bookVolumes: BookVolumes,
-    sheetState: SheetState,
-    isVisible: Boolean,
-    onDismissRequest: () -> Unit,
-) {
-    @Composable
-    fun InfoItem(
-        title: String? = "",
-        content: String,
-        titleStyle: TextStyle,
-        contentStyle: TextStyle,
-        icon: Painter? = null
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.weight(3f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                icon?.let {
-                    Icon(
-                        painter = it,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Text(
-                    text = title!!,
-                    style = titleStyle
-                )
-            }
-
-            Row(
-                modifier = Modifier.weight(7f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val context = LocalContext.current
-                val clipboardManager = LocalClipboardManager.current
-
-                Text(
-                    text = content,
-                    style = contentStyle,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                clipboardManager.setText(AnnotatedString(content))
-                                Toast
-                                    .makeText(context, "内容已复制", Toast.LENGTH_SHORT)
-                                    .show()
-                            },
-                        )
-                )
-            }
-        }
-    }
-
-    AnimatedVisibility(visible = isVisible) {
-        ModalBottomSheet(
-            onDismissRequest = onDismissRequest,
-            sheetState = sheetState
-        ) {
-            val titleStyle = AppTypography.titleMedium.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.W600
-            )
-            val contentStyle = AppTypography.labelLarge.copy(
-                color = MaterialTheme.colorScheme.secondary
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 8.dp)
-            ) {
-                InfoItem(
-                    title = stringResource(R.string.detail_info_title),
-                    content = bookInformation.title,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.title_24px)
-                )
-
-                if (bookInformation.subtitle.isNotEmpty()) {
-                    InfoItem(
-                        content = bookInformation.subtitle,
-                        titleStyle = titleStyle,
-                        contentStyle = contentStyle,
-                    )
-                }
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_id),
-                    content = bookInformation.id.toString(),
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.info_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_author),
-                    content = bookInformation.author,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.person_edit_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_publishing_house),
-                    content = bookInformation.publishingHouse,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.text_snippet_24px)
-                )
-
-                val dateFormat = "yyyy-MM-dd"
-                val formatter = DateTimeFormatter.ofPattern(dateFormat)
-                InfoItem(
-                    title = stringResource(R.string.detail_info_updated_on),
-                    content = bookInformation.lastUpdated.format(formatter) + "\n" + if(bookInformation.isComplete) "完结" else "连载中",
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.autorenew_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_tags),
-                    content = bookInformation.tags.joinToString(separator = "，"),
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.tag_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_stats),
-                    content = "${NumberFormat.getInstance().format(bookInformation.wordCount)} 字\n共计 ${bookVolumes.volumes.count()} 卷, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size}} 章节",
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.text_fields_24px)
-                )
-            }
-        }
-    }
-}

@@ -34,7 +34,6 @@ class ScrollContentViewModel(
     )
 
     init {
-        println("ViewModelInit")
         coroutineScope.launch(Dispatchers.IO) {
             settingState.isUsingContinuousScrollingUserData.getFlowWithDefault(false).collect {
                 if (it) {
