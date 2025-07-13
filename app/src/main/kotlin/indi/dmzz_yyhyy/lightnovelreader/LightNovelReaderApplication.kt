@@ -9,6 +9,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogLevel
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LoggerRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

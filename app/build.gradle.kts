@@ -134,6 +134,8 @@ dependencies {
     implementation(libs.swipe)
     // Chart
     implementation(libs.charty)
+    // Potato Auto Proxy
+    implementation(project(":proxy"))
 }
 
 configurations.implementation{

@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("org.dom4j:dom4j:2.1.4")
+    implementation(libs.dom4j)
 }
 
 tasks.test {
