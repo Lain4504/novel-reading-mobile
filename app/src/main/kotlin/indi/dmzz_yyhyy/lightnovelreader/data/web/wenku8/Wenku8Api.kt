@@ -445,11 +445,11 @@ object Wenku8Api: WebBookDataSource {
             navController.navigateToExplorationExpandDestination(tag)
     }
 
-    override fun getCoverUrlInVolume(bookId: Int, volume: Volume): String? {
+    override fun getCoverUrlInVolume(bookId: Int, volume: Volume, volumeChapterContentMap: Map<Int, ChapterContent>): String? {
         return volume.chapters
-            .find { it.title == "插图" }
+            .find { it.title.endsWith("插图") }
             ?.let { chapterInformation ->
-                val chapterContent = getChapterContent(bookId, chapterInformation.id)
+                val chapterContent = volumeChapterContentMap[chapterInformation.id] ?: return null
                 if (chapterContent.isEmpty()) return null
                 chapterContent.content.split("[image]")
                     .filter(String::isNotEmpty)

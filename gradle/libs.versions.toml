@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.7.3"
+androidGradlePlugin = "8.11.1"
 charty = "2.1.0-beta03.2"
 dom4j = "2.1.4"
 kotlin = "2.1.20"

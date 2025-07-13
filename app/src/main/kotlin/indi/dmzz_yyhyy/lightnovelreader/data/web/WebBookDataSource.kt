@@ -123,6 +123,14 @@ interface WebBookDataSource {
     /**
      * 根据卷获取该卷封面的Url, 用于EPUB分卷导出
      * 如无, 则返回null
+     *
+     * @param bookId 书本id
+     * @param volume 需要搜索封面的卷id
+     * @param volumeChapterContentMap 包含搜索卷全部章节的Map, 以章节id为key
      */
-    fun getCoverUrlInVolume(bookId: Int, volume: Volume): String? = null
+    fun getCoverUrlInVolume(
+        bookId: Int,
+        volume: Volume,
+        volumeChapterContentMap: Map<Int, ChapterContent>
+    ): String? = null
 }

@@ -190,6 +190,11 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                 fileUri
             )
             ExportType.VOLUMES -> volumesToEPUB(
+                inputData.getString("selectedVolume")?.split(",")?.map(String::toInt)
+                    ?: return@withContext Result.failure().also {
+                        updateFailureNotification(bookId)
+                        downloadItem.progress = -1f
+                    },
                 bookInformation,
                 bookVolumes,
                 bookContentMap,
@@ -205,6 +210,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
     }
 
     private suspend fun volumesToEPUB(
+        selectedVolume: List<Int>,
         bookInformation: BookInformation,
         bookVolumes: BookVolumes,
         bookContentMap: MutableMap<Int, ChapterContent>,
@@ -217,7 +223,9 @@ class ExportBookToEPUBWork @AssistedInject constructor(
         fileUri: Uri
     ): Result = withContext(Dispatchers.IO) {
         val epubMap = mutableMapOf<String, EpubBuilder>()
+        tasks.add(ImageDownloader.Task(cover, bookInformation.coverUrl))
         for ((currentVolumeIndex, volume) in bookVolumes.volumes.withIndex()) {
+            if (!selectedVolume.contains(volume.volumeId)) continue
             val epub = EpubBuilder().apply {
                 title = volume.volumeTitle
                 modifier = LocalDateTime.now()
@@ -227,7 +235,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                 if (currentVolumeIndex == 0)
                     cover(cover)
                 else {
-                    val url = webBookDataSource.getCoverUrlInVolume(bookId, volume)
+                    val url = webBookDataSource.getCoverUrlInVolume(bookId, volume, bookContentMap)
                     if (url == null) {
                         cover(cover)
                     } else {
@@ -239,8 +247,8 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                 val progressForVolume = (30 * currentVolumeIndex) / volumesCount
                 updateProgressNotification(bookId, 20 + progressForVolume)
                 downloadItem.progress = (20f + progressForVolume) / 100f
-                chapter {
-                    for (chapterInformation in volume.chapters) {
+                for (chapterInformation in volume.chapters) {
+                    chapter {
                         packChapter(chapterInformation, bookContentMap, tempDir, tasks)
                     }
                 }
@@ -268,7 +276,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
             return@withContext Result.failure()
         }
         for (epub in epubMap.entries) {
-            val epubUri = folder.createFile("application/epub+zip", "$epub.epub")?.uri
+            val epubUri = folder.createFile("application/epub+zip", "${bookInformation.title} ${epub.key}.epub")?.uri
             if (epubUri == null) {
                 downloadItem.progress = -1f
                 return@withContext Result.failure()
