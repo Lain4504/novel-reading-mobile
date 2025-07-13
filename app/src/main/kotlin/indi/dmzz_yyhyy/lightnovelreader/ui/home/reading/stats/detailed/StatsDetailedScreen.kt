@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -145,9 +146,11 @@ private fun StatisticsContent(
     val haptic = LocalHapticFeedback.current
 
     LazyColumn(modifier.fillMaxSize()) {
-        item {
+        stickyHeader {
             Box(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .background(colorScheme.background)
+                    .padding(bottom = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 SingleChoiceSegmentedButtonRow {
@@ -168,6 +171,10 @@ private fun StatisticsContent(
                     }
                 }
             }
+        }
+
+        item {
+            Spacer(Modifier.height(12.dp))
         }
 
         val indexes = mapOf(

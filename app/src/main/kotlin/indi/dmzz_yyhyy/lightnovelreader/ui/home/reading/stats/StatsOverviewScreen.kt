@@ -59,6 +59,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarDay
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarMonth
@@ -146,7 +147,7 @@ private fun CalendarBlock(
 
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
         Text(
-            text = stringResource(R.string.activity),
+            text = stringResource(R.string.calendar),
             style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )

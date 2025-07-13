@@ -232,6 +232,7 @@
     <string name="view_weekly">週</string>
     <string name="view_monthly">月</string>
     <string name="activity">活動</string>
+    <string name="calendar">日曆</string>
     <string name="activity_first_read">第一次讀了</string>
     <string name="activity_collections">已收藏</string>
     <string name="activity_finished">已讀完</string>
