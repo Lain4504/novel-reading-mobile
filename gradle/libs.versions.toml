@@ -33,6 +33,7 @@ kotlinxCoroutinesCore = "1.10.2"
 [libraries]
 charty = { module = "com.himanshoe:charty", version.ref = "charty" }
 dom4j = { module = "org.dom4j:dom4j", version.ref = "dom4j" }
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 androidx-hilt-common = { module = "androidx.hilt:hilt-common", version.ref = "androidXHilt" }

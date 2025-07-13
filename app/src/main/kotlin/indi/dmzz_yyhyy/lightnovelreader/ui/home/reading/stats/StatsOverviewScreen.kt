@@ -45,6 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +59,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookRecordEntity
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.HeatMapCalendar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarDay
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.calendar.core.CalendarMonth
@@ -81,6 +84,7 @@ fun StatsOverviewScreen(
 ) {
     val uiState = viewModel.uiState
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val haptic = LocalHapticFeedback.current
 
     Scaffold(
         topBar = {
@@ -111,7 +115,11 @@ fun StatsOverviewScreen(
                     item {
                         CalendarBlock(
                             viewModel,
-                            onSelectedDate = { viewModel.selectDate(it) })
+                            onSelectedDate = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                viewModel.selectDate(it)
+                            }
+                        )
                     }
                     item { DailyStatsBlock(uiState, onClickDetailScreen) }
                     item { TotalStatsBlock(uiState) }
@@ -139,7 +147,7 @@ private fun CalendarBlock(
 
     Column(modifier = Modifier.padding(horizontal = 18.dp)) {
         Text(
-            text = stringResource(R.string.activity),
+            text = stringResource(R.string.calendar),
             style = AppTypography.titleMedium,
             fontWeight = FontWeight.W600
         )

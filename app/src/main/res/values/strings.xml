@@ -235,9 +235,11 @@
     <string name="view_weekly">Weekly</string>
     <string name="view_monthly">Monthly</string>
     <string name="activity">Activity</string>
-    <string name="activity_first_read">First Read</string>
-    <string name="activity_collections">Collections</string>
-    <string name="activity_etc"> and more</string>
+    <string name="calendar">Calendar</string>
+    <string name="activity_first_read">Started</string>
+    <string name="activity_collections">Collected</string>
+    <string name="activity_finished">Finished</string>
+    <string name="activity_etc"> and %d more</string>
     <string name="activity_reading_time">Reading Time</string>
     <string name="activity_read">Read</string>
     <string name="n_books">%d Books</string>
@@ -259,7 +261,12 @@
     <string name="cached">Cached</string>
     <string name="cached_false">Not Cached</string>
     <string name="others">Others</string>
-    
+    <string name="unit_hour_clock">h</string>
+    <string name="unit_hours">h&#160;</string>
+    <string name="unit_minutes">m&#160;</string>
+    <string name="unit_seconds">s</string>
+    <string name="detail_of_date">Reading time of %1$s</string>
+
     <!-- Dialogs -->
     <string name="dialog_about_version">Version</string>
     <string name="dialog_delete_bookshelf">Delete Bookshelf</string>
