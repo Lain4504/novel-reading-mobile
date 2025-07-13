@@ -66,8 +66,6 @@ fun LightNovelReaderTheme(
         )
     }
 
-    println("call theme, isDyn=$isDynamicColor isDark=$isDark")
-
     LaunchedEffect(colorScheme, isDark) {
         val window = (view.context as Activity).window
         val backgroundColor = colorScheme.background.toArgb()

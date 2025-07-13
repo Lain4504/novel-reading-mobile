@@ -54,7 +54,7 @@ class ImportDataWork @AssistedInject constructor(
         }
         if (jsonText == null) return Result.failure()
         try {
-            val appUserDataJson = AppUserDataJson.fromJson(jsonText)
+            val appUserDataJson = AppUserDataJson.fromJson(jsonText!!)
             if (appUserDataJson.type == "light novel reader data file")
                 data = appUserDataJson.data.firstOrNull { it.webDataSourceId == webBookDataSource.id }
             if (data == null) {

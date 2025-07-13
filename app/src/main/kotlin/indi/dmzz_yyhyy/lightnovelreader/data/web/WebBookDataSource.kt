@@ -4,13 +4,14 @@ import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import kotlinx.coroutines.flow.Flow
 
 /**
  * LightNovelReader 的网络数据提供源接口，可以通过实现此接口使软件支持新的数据源
- * 版本: 0.3
+ * 版本: 0.4
  */
 interface WebBookDataSource {
     val id: Int
@@ -55,18 +56,18 @@ interface WebBookDataSource {
      * 此函数应当自行实现断线重连等逻辑
      *
      * @param id 书本id
-     * @return 经过格式化后的书本元数据, 如未找到改书则返回null
+     * @return 经过格式化后的书本元数据, getBookInformation.empty()
      */
-    fun getBookInformation(id: Int): BookInformation?
+    fun getBookInformation(id: Int): BookInformation
 
     /**
      * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
      * 此函数应当自行实现断线重连等逻辑
      *
      * @param id 书本id
-     * @return 经过格式化后的书本章节目录数据, 如未找到改书则返回null
+     * @return 经过格式化后的书本章节目录数据, 如未找到改书则返回BookVolumes.empty
      */
-    fun getBookVolumes(id: Int): BookVolumes?
+    fun getBookVolumes(id: Int): BookVolumes
 
     /**
      * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
@@ -74,9 +75,9 @@ interface WebBookDataSource {
      *
      * @param chapterId 章节id
      * @param bookId 章节所属书本id
-     * @return 经过格式化后的书本章节类容录数据, 如未找到改书则返回null
+     * @return 经过格式化后的书本章节类容录数据, 如未找到改书则返回ChapterContent.empty()
      */
-    fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent?
+    fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent
 
     /**
      * 获取探索页面的标题和页面数据源的对应表
@@ -118,4 +119,18 @@ interface WebBookDataSource {
      * 用于处理书本tag的点击跳转事件
      */
     fun progressBookTagClick(tag: String, navController: NavController) {  }
+
+    /**
+     * 根据卷获取该卷封面的Url, 用于EPUB分卷导出
+     * 如无, 则返回null
+     *
+     * @param bookId 书本id
+     * @param volume 需要搜索封面的卷id
+     * @param volumeChapterContentMap 包含搜索卷全部章节的Map, 以章节id为key
+     */
+    fun getCoverUrlInVolume(
+        bookId: Int,
+        volume: Volume,
+        volumeChapterContentMap: Map<Int, ChapterContent>
+    ): String? = null
 }

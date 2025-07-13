@@ -10,10 +10,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -87,7 +84,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.RollingNumber
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import kotlinx.coroutines.delay
@@ -241,8 +237,7 @@ fun Content(
     LaunchedEffect(isRunning) {
         while (isRunning) {
             val now = LocalTime.now()
-            val elapsed = 1
-            accumulateReadingTime(readingScreenUiState.bookId, elapsed)
+            accumulateReadingTime(readingScreenUiState.bookId, 1)
             lastUpdate = now
             delay(1000)
         }
@@ -266,83 +261,63 @@ fun Content(
         }
     }
 
-    AnimatedVisibility(
-        visible =  readingScreenUiState.isLoading,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Loading()
-    }
     Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedVisibility(
-            visible = readingScreenUiState.isLoading,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Loading()
-        }
-        AnimatedVisibility(
-            visible = !readingScreenUiState.isLoading,
-            enter = fadeIn() + scaleIn(initialScale = 0.7f),
-            exit = fadeOut() + scaleOut(targetScale = 0.7f)
-        ) {
-            val isEnableIndicator = settingState.enableTimeIndicator || settingState.enableReadingChapterProgressIndicator || settingState.enableChapterTitleIndicator
-            Box(Modifier.fillMaxSize()) {
-                AnimatedContent(
-                    readingScreenUiState.contentUiState,
-                    label = "ContentAnimate"
-                ) { contentUiState ->
-                    ContentComponent(
-                        uiState = contentUiState,
-                        settingState = settingState,
-                        paddingValues = if (settingState.autoPadding)
-                            with(density) {
+        val isEnableIndicator = settingState.enableTimeIndicator || settingState.enableReadingChapterProgressIndicator || settingState.enableChapterTitleIndicator
+        Box(Modifier.fillMaxSize()) {
+            AnimatedContent(
+                readingScreenUiState.contentUiState,
+                label = "ContentAnimate"
+            ) { contentUiState ->
+                ContentComponent(
+                    uiState = contentUiState,
+                    settingState = settingState,
+                    paddingValues = if (settingState.autoPadding)
+                        with(density) {
+                            PaddingValues(
+                                top = WindowInsets.safeContent.getTop(density).toDp(),
+                                bottom = if (isEnableIndicator) 46.dp else 12.dp,
+                                start = 16.dp,
+                                end = 16.dp
+                            )
+                        }
+                    else PaddingValues(
+                        top = settingState.topPadding.dp,
+                        bottom = if (isEnableIndicator) (settingState.bottomPadding + 38).dp else settingState.bottomPadding.dp,
+                        start = settingState.leftPadding.dp,
+                        end = settingState.rightPadding.dp
+                    ),
+                    changeIsImmersive = onChangeIsImmersive,
+                    onZoomImage = onZoomImage
+                )
+
+            }
+            AnimatedVisibility (
+                modifier = Modifier.align(Alignment.BottomCenter),
+                visible = isEnableIndicator,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Indicator(
+                    Modifier
+                        .padding(
+                            if (settingState.autoPadding)
                                 PaddingValues(
-                                    top = WindowInsets.safeContent.getTop(density).toDp(),
-                                    bottom = if (isEnableIndicator) 46.dp else 12.dp,
+                                    bottom = 8.dp,
                                     start = 16.dp,
                                     end = 16.dp
                                 )
-                            }
-                        else PaddingValues(
-                            top = settingState.topPadding.dp,
-                            bottom = if (isEnableIndicator) (settingState.bottomPadding + 38).dp else settingState.bottomPadding.dp,
-                            start = settingState.leftPadding.dp,
-                            end = settingState.rightPadding.dp
+                            else PaddingValues(
+                                bottom = settingState.bottomPadding.dp,
+                                start = settingState.leftPadding.dp,
+                                end = settingState.rightPadding.dp
+                            )
                         ),
-                        changeIsImmersive = onChangeIsImmersive,
-                        onZoomImage = onZoomImage
-                    )
-
-                }
-                AnimatedVisibility (
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    visible = isEnableIndicator,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
-                ) {
-                    Indicator(
-                        Modifier
-                            .padding(
-                                if (settingState.autoPadding)
-                                    PaddingValues(
-                                        bottom = 8.dp,
-                                        start = 16.dp,
-                                        end = 16.dp
-                                    )
-                                else PaddingValues(
-                                    bottom = settingState.bottomPadding.dp,
-                                    start = settingState.leftPadding.dp,
-                                    end = settingState.rightPadding.dp
-                                )
-                            ),
-                        enableTimeIndicator = settingState.enableTimeIndicator,
-                        enableChapterTitle = settingState.enableChapterTitleIndicator,
-                        chapterTitle = readingScreenUiState.contentUiState.readingChapterContent.title,
-                        enableReadingChapterProgressIndicator = settingState.enableReadingChapterProgressIndicator,
-                        readingChapterProgress = readingScreenUiState.contentUiState.readingProgress,
-                    )
-                }
+                    enableTimeIndicator = settingState.enableTimeIndicator,
+                    enableChapterTitle = settingState.enableChapterTitleIndicator,
+                    chapterTitle = readingScreenUiState.contentUiState.readingChapterContent.title,
+                    enableReadingChapterProgressIndicator = settingState.enableReadingChapterProgressIndicator,
+                    readingChapterProgress = readingScreenUiState.contentUiState.readingProgress,
+                )
             }
         }
         AnimatedVisibility(
@@ -387,7 +362,9 @@ fun Content(
                     }
                 }
                 showChapterSelectorBottomSheet = false
-                selectedVolumeId = readingScreenUiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == readingScreenUiState.contentUiState.readingChapterContent.id } }?.volumeId ?: -1
+                selectedVolumeId =
+                    readingScreenUiState.bookVolumes.volumes.firstOrNull { volume -> volume.chapters.any { it.id == readingScreenUiState.contentUiState.readingChapterContent.id } }?.volumeId
+                        ?: -1
             },
             onClickChapter = onChangeChapter,
             onChangeSelectedVolumeId = {

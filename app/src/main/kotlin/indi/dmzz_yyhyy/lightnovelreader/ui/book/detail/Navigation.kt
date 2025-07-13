@@ -13,12 +13,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import androidx.work.WorkInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportToEpubDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
@@ -34,14 +32,36 @@ fun NavGraphBuilder.bookDetailDestination() {
         val viewModel = hiltViewModel<DetailViewModel>()
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
+        val exportBookToEPUBLauncher = uriLauncher {
+            CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(context, "开始导出书本 ${viewModel.uiState.bookInformation.title}", Toast.LENGTH_SHORT).show()
+                viewModel.exportToEpub(it, bookId, viewModel.uiState.bookInformation.title).collect {
+                    if (it != null)
+                        when (it.state) {
+                            WorkInfo.State.SUCCEEDED -> {
+                                Toast.makeText(context, "成功导出书本 ${viewModel.uiState.bookInformation.title}", Toast.LENGTH_SHORT).show()
+                            }
+                            WorkInfo.State.FAILED -> {
+                                Toast.makeText(context, "导出书本 ${viewModel.uiState.bookInformation.title} 失败", Toast.LENGTH_SHORT).show()
+                            }
+                            else -> {}
+                        }
+                }
+            }
+            navController.popBackStack()
+        }
         viewModel.navController = navController
         LaunchedEffect(bookId) {
             viewModel.init(bookId)
         }
         DetailScreen(
             uiState = viewModel.uiState,
-            onClickExportToEpub = {
-                navController.navigateToExportToEpubDialog(bookId, viewModel.uiState.bookInformation.title)
+            onClickExportToEpub = { settings ->
+                viewModel.exportSettings = settings
+                when (settings.exportType) {
+                    ExportType.BOOK -> createDataFile(viewModel.uiState.bookInformation.title, exportBookToEPUBLauncher)
+                    ExportType.VOLUMES -> selectDirectory(exportBookToEPUBLauncher)
+                }
             },
             onClickBackButton = navController::popBackStackIfResumed,
             onClickChapter = {
@@ -81,46 +101,10 @@ fun NavGraphBuilder.bookDetailDestination() {
             onClickTag = viewModel::onClickTag
         )
     }
-    exportToEpubDialog()
 }
 
 fun NavController.navigateToBookDetailDestination(bookId: Int) {
     navigate(Route.Book.Detail(bookId))
-}
-
-fun NavGraphBuilder.exportToEpubDialog() {
-    dialog<Route.Book.ExportUserDataDialog> { entry ->
-        val navController = LocalNavController.current
-        val viewModel = hiltViewModel<ExportToEpubDialogViewModel>()
-        val context = LocalContext.current
-        val route = entry.toRoute<Route.Book.ExportUserDataDialog>()
-        val bookId = route.bookId
-        val title = route.title
-        val exportToEPUBLauncher = uriLauncher {
-            CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(context, "开始导出书本 $title", Toast.LENGTH_SHORT).show()
-                viewModel.exportToEpub(it, bookId, title).collect {
-                    if (it != null)
-                        when (it.state) {
-                            WorkInfo.State.SUCCEEDED -> {
-                                Toast.makeText(context, "成功导出书本 $title", Toast.LENGTH_SHORT).show()
-                            }
-                            WorkInfo.State.FAILED -> {
-                                Toast.makeText(context, "导出书本 $title 失败", Toast.LENGTH_SHORT).show()
-                            }
-                            else -> {}
-                        }
-                }
-            }
-            navController.popBackStack()
-        }
-        ExportToEpubDialog (
-            onDismissRequest = { navController.popBackStack() },
-            onConfirmation = {
-                createDataFile(title, exportToEPUBLauncher)
-            }
-        )
-    }
 }
 
 @Suppress("DuplicatedCode")
@@ -136,6 +120,12 @@ fun createDataFile(fileName: String, launcher: ManagedActivityResultLauncher<Int
     launcher.launch(Intent.createChooser(intent, "选择一位置"))
 }
 
-fun NavController.navigateToExportToEpubDialog(bookId: Int, title: String) {
-    navigate(Route.Book.ExportUserDataDialog(bookId, title))
+@Suppress("DuplicatedCode")
+fun selectDirectory(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, Intent.ACTION_OPEN_DOCUMENT)
+    }
+    launcher.launch(Intent.createChooser(intent, "选择一位置"))
 }
+

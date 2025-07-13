@@ -217,6 +217,8 @@ class ScrollContentViewModel(
                     bookRepository.getChapterContent(chapterContent.nextChapter, uiState.bookId)
                 }
                 val userReadingData = bookRepository.getUserReadingData(uiState.bookId)
+                if (userReadingData.lastReadChapterId == id)
+                    uiState.readingProgress = userReadingData.lastReadChapterProgress
                 coroutineScope.launch {
                     val itemIndex = uiState.contentList.indexOfFirst { it.id == id }
                     if (itemIndex >= 0) {

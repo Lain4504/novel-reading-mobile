@@ -24,6 +24,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
+import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -41,7 +42,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object Wenku8Api: WebBookDataSource {
-    private val tagList = listOf("校园", "青春", "恋爱", "治愈", "群像",
+    private val tagList = listOf(
+        "校园", "青春", "恋爱", "治愈", "群像",
         "竞技", "音乐", "美食", "旅行", "欢乐向",
         "经营", "职场", "斗智", "脑洞", "宅文化",
         "穿越", "奇幻", "魔法", "异能", "战斗",
@@ -50,7 +52,8 @@ object Wenku8Api: WebBookDataSource {
         "惊悚", "间谍", "末日", "游戏", "大逃杀",
         "青梅竹马", "妹妹", "女儿", "JK", "JC",
         "大小姐", "性转", "伪娘", "人外",
-        "后宫", "百合", "耽美", "NTR", "女性视角")
+        "后宫", "百合", "耽美", "NTR", "女性视角"
+    )
     private var allBookChapterListCacheId: Int = -1
     private var allBookChapterListCache: List<ChapterInformation> = emptyList()
     private val DATA_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -59,6 +62,7 @@ object Wenku8Api: WebBookDataSource {
     private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
     private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
     private var hostIndex = 0
+    private var isLocalIpUnableUse = true
     val host get() =  hosts[hostIndex]
 
     init {
@@ -79,27 +83,39 @@ object Wenku8Api: WebBookDataSource {
 
     override suspend fun isOffLine(): Boolean =
         try {
-            Jsoup.connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString()).get()
-            Jsoup.connect("$host/").get()
+            Jsoup
+                .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
+                .timeout(2000)
+                .let {
+                    if (ProxyPool.enable && !isLocalIpUnableUse)
+                        ProxyPool.apply {
+                            it.proxyGet()
+                        }
+                    else it.get()
+                }
+            Jsoup
+                .connect("$host/")
+                .timeout(2000)
+                .let {
+                    if (ProxyPool.enable && !isLocalIpUnableUse)
+                        ProxyPool.apply {
+                            it.proxyGet()
+                        }
+                    else it.get()
+                }
             false
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            //FIXME
+            e.printStackTrace()
+            if (hostIndex == hosts.size - 1)
+                isLocalIpUnableUse = false
             hostIndex = (hostIndex + 1) % hosts.size
             true
         }
 
-    private fun isAppDataSourceOffLine(): Boolean {
-        try {
-            Jsoup.connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString()).get()
-            return false
-        } catch (_: Exception) {
-            return true
-        }
-    }
-
     override val id: Int = "wenku8".hashCode()
 
     override fun getBookInformation(id: Int): BookInformation {
-        if (isAppDataSourceOffLine()) return BookInformation.empty()
         return wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
             val titleGroup = it
                 .selectFirst("[name=Title]")?.text()
@@ -129,7 +145,6 @@ object Wenku8Api: WebBookDataSource {
     }
 
     override fun getBookVolumes(id: Int): BookVolumes {
-        if (isAppDataSourceOffLine()) return BookVolumes.empty()
         return BookVolumes(wenku8Api("action=book&do=list&aid=$id&t=0")
             ?.select("volume")
             ?.map { element ->
@@ -149,7 +164,6 @@ object Wenku8Api: WebBookDataSource {
     }
 
     override fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent {
-        if (isAppDataSourceOffLine()) return ChapterContent.empty()
         if (allBookChapterListCacheId != bookId) {
             allBookChapterListCacheId = bookId
             allBookChapterListCache = getBookVolumes(bookId).let { bookVolumes ->
@@ -216,7 +230,6 @@ object Wenku8Api: WebBookDataSource {
 
     override fun search(searchType: String, keyword: String): Flow<List<BookInformation>> {
         val searchResult = MutableStateFlow(emptyList<BookInformation>())
-        if (isAppDataSourceOffLine()) return searchResult
         val encodedKeyword = URLEncoder.encode(keyword, "gb2312")
         coroutineScope.launch {
             delay(1)
@@ -430,5 +443,22 @@ object Wenku8Api: WebBookDataSource {
     override fun progressBookTagClick(tag: String, navController: NavController) {
         if (tagList.contains(tag))
             navController.navigateToExplorationExpandDestination(tag)
+    }
+
+    override fun getCoverUrlInVolume(bookId: Int, volume: Volume, volumeChapterContentMap: Map<Int, ChapterContent>): String? {
+        return volume.chapters
+            .find { it.title.endsWith("插图") }
+            ?.let { chapterInformation ->
+                val chapterContent = volumeChapterContentMap[chapterInformation.id] ?: return null
+                if (chapterContent.isEmpty()) return null
+                chapterContent.content.split("[image]")
+                    .filter(String::isNotEmpty)
+                    .forEach { singleText ->
+                        if (singleText.startsWith("http://") || singleText.startsWith("https://")) {
+                            return singleText
+                        }
+                    }
+                return null
+            }
     }
 }

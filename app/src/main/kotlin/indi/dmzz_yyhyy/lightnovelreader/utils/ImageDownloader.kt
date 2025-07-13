@@ -1,9 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.utils
 
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
+import androidx.work.ListenableWorker
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -14,28 +14,23 @@ import java.net.URL
 
 class ImageDownloader(
     private val tasks: List<Task>,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     val onProgress: (Int, Int) -> Unit,
-    onFinished: () -> Unit,
 ) {
     var count = 0
         private set
-    val isDone get() = count == tasks.size
+
     data class Task(val file: File, val url: String)
 
-    init {
+    suspend fun run(): ListenableWorker.Result = withContext(Dispatchers.IO) {
         Log.i("ImageDownloader", "total tasks: ${tasks.size}")
         tasks.forEach {task ->
-            coroutineScope.launch {
-                getImageFromNetByUrl(task.url)?.let { writeImageToDisk(it, task.file) }
-                count++
-                onProgress(count, tasks.size)
-                Log.i("ImageDownloader", "tasks: ${count}/${tasks.size}")
-                if (count == tasks.size) {
-                    onFinished.invoke()
-                }
-            }
+            val image = getImageFromNetByUrl(task.url) ?: return@withContext ListenableWorker.Result.failure()
+            writeImageToDisk(image, task.file)
+            count++
+            onProgress(count, tasks.size)
+            Log.i("ImageDownloader", "tasks: ${count}/${tasks.size}")
         }
+        return@withContext ListenableWorker.Result.success()
     }
 
     private fun writeImageToDisk(data: ByteArray, file: File) {
@@ -56,10 +51,12 @@ class ImageDownloader(
         }
     }
 
-    private fun getImageFromNetByUrl(strUrl: String): ByteArray? {
+    private suspend fun getImageFromNetByUrl(strUrl: String): ByteArray? {
         try {
             val url = URL(strUrl)
-            val conn = url.openConnection() as HttpURLConnection
+            val conn = withContext(Dispatchers.IO) {
+                url.openConnection()
+            } as HttpURLConnection
             conn.requestMethod = "GET"
             conn.connectTimeout = 5 * 1000
             val inStream = conn.inputStream
@@ -67,6 +64,7 @@ class ImageDownloader(
             return btData
         } catch (e: Exception) {
             e.printStackTrace()
+            println(strUrl)
         }
         return null
     }

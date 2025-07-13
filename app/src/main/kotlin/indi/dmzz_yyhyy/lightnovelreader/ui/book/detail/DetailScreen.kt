@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -8,10 +7,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,9 +36,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -67,12 +62,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -88,14 +79,12 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import kotlinx.coroutines.delay
-import java.text.NumberFormat
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
     uiState: DetailUiState,
-    onClickExportToEpub: () -> Unit,
+    onClickExportToEpub: (ExportSettings) -> Unit,
     onClickBackButton: () -> Unit,
     onClickChapter: (Int) -> Unit,
     onClickReadFromStart: () -> Unit,
@@ -105,27 +94,42 @@ fun DetailScreen(
     onClickTag: (String) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showExportBottomSheet by remember { mutableStateOf(false) }
+    var exportSettings by remember { mutableStateOf(ExportSettings()) }
+    val exportBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopBar(
+                bookVolumes = uiState.bookVolumes,
                 onClickBackButton = onClickBackButton,
                 onClickExport = {
-                    onClickExportToEpub.invoke()
+                    showExportBottomSheet = true
                 },
                 scrollBehavior = scrollBehavior
             )
         },
     ) { paddingValues ->
-        Box(Modifier.padding(paddingValues)) {
-            Content(
-                uiState = uiState,
-                onClickChapter = onClickChapter,
-                onClickReadFromStart = onClickReadFromStart,
-                onClickContinueReading = onClickContinueReading,
-                cacheBook = cacheBook,
-                requestAddBookToBookshelf = requestAddBookToBookshelf,
-                onClickTag = onClickTag
+        Content(
+            modifier = Modifier.padding(paddingValues),
+            uiState = uiState,
+            onClickChapter = onClickChapter,
+            onClickReadFromStart = onClickReadFromStart,
+            onClickContinueReading = onClickContinueReading,
+            cacheBook = cacheBook,
+            requestAddBookToBookshelf = requestAddBookToBookshelf,
+            onClickTag = onClickTag
+        )
+        AnimatedVisibility(visible = showExportBottomSheet) {
+
+            ExportBottomSheet(
+                sheetState = exportBottomSheetState,
+                bookVolumes = uiState.bookVolumes,
+                settings = exportSettings,
+                onSettingsChange = { exportSettings = it },
+                onDismissRequest = { showExportBottomSheet = false },
+                onClickExport = onClickExportToEpub
             )
         }
     }
@@ -137,6 +141,7 @@ private val itemVerticalPadding = 8.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
+    modifier: Modifier = Modifier,
     uiState: DetailUiState,
     onClickChapter: (Int) -> Unit,
     onClickReadFromStart: () -> Unit,
@@ -177,7 +182,7 @@ private fun Content(
         exit = fadeOut()
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             state = lazyListState
         ) {
             item {
@@ -317,6 +322,7 @@ private fun Content(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
+    bookVolumes: BookVolumes,
     onClickBackButton: () -> Unit,
     onClickExport: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
@@ -336,7 +342,9 @@ private fun TopBar(
             }
         },
         actions = {
+            println(bookVolumes.volumes)
             IconButton(
+                enabled = bookVolumes.volumes.isNotEmpty(),
                 onClick = onClickExport
             ) {
                 Icon(painterResource(id = R.drawable.file_export_24px), "export to epub")
@@ -756,157 +764,3 @@ private fun VolumeItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-@Composable
-fun BookInfoBottomSheet(
-    bookInformation: BookInformation,
-    bookVolumes: BookVolumes,
-    sheetState: SheetState,
-    isVisible: Boolean,
-    onDismissRequest: () -> Unit,
-) {
-    @Composable
-    fun InfoItem(
-        title: String? = "",
-        content: String,
-        titleStyle: TextStyle,
-        contentStyle: TextStyle,
-        icon: Painter? = null
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.weight(3f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                icon?.let {
-                    Icon(
-                        painter = it,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Text(
-                    text = title!!,
-                    style = titleStyle
-                )
-            }
-
-            Row(
-                modifier = Modifier.weight(7f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val context = LocalContext.current
-                val clipboardManager = LocalClipboardManager.current
-
-                Text(
-                    text = content,
-                    style = contentStyle,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                clipboardManager.setText(AnnotatedString(content))
-                                Toast
-                                    .makeText(context, "内容已复制", Toast.LENGTH_SHORT)
-                                    .show()
-                            },
-                        )
-                )
-            }
-        }
-    }
-
-    AnimatedVisibility(visible = isVisible) {
-        ModalBottomSheet(
-            onDismissRequest = onDismissRequest,
-            sheetState = sheetState
-        ) {
-            val titleStyle = AppTypography.titleMedium.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.W600
-            )
-            val contentStyle = AppTypography.labelLarge.copy(
-                color = MaterialTheme.colorScheme.secondary
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 8.dp)
-            ) {
-                InfoItem(
-                    title = stringResource(R.string.detail_info_title),
-                    content = bookInformation.title,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.title_24px)
-                )
-
-                if (bookInformation.subtitle.isNotEmpty()) {
-                    InfoItem(
-                        content = bookInformation.subtitle,
-                        titleStyle = titleStyle,
-                        contentStyle = contentStyle,
-                    )
-                }
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_id),
-                    content = bookInformation.id.toString(),
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.info_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_author),
-                    content = bookInformation.author,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.person_edit_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_publishing_house),
-                    content = bookInformation.publishingHouse,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.text_snippet_24px)
-                )
-
-                val dateFormat = "yyyy-MM-dd"
-                val formatter = DateTimeFormatter.ofPattern(dateFormat)
-                InfoItem(
-                    title = stringResource(R.string.detail_info_updated_on),
-                    content = bookInformation.lastUpdated.format(formatter) + "\n" + if(bookInformation.isComplete) "完结" else "连载中",
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.autorenew_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_tags),
-                    content = bookInformation.tags.joinToString(separator = "，"),
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.tag_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_stats),
-                    content = "${NumberFormat.getInstance().format(bookInformation.wordCount)} 字\n共计 ${bookVolumes.volumes.count()} 卷, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size}} 章节",
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.text_fields_24px)
-                )
-            }
-        }
-    }
-}

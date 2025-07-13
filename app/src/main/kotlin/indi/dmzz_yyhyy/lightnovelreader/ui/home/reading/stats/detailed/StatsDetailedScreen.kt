@@ -1,9 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -34,8 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -46,24 +43,66 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.DailyBarChart
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.LastNDaysChart
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadTimeStackedBarChart
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyCountChart
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ActivityStatsCard
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.MonthlyReadingTimeStatsCard
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.ReadingDetailStatsCard
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.WeeklyReadingTimeStatsCard
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 import kotlin.math.min
+
+sealed class StatsViewOption(val viewIndex: Int) {
+    abstract fun rangeFor(date: LocalDate): ClosedRange<LocalDate>
+
+    object Daily : StatsViewOption(viewIndex = 0) {
+        override fun rangeFor(date: LocalDate): ClosedRange<LocalDate> {
+            return date..date
+        }
+    }
+
+    object Weekly : StatsViewOption(viewIndex = 1) {
+        override fun rangeFor(date: LocalDate): ClosedRange<LocalDate> {
+            val startOfWeek = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+            val endOfWeek = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+            return startOfWeek..endOfWeek
+        }
+    }
+
+    object Monthly : StatsViewOption(viewIndex = 2) {
+        override fun rangeFor(date: LocalDate): ClosedRange<LocalDate> {
+            val startOfMonth = date.withDayOfMonth(1)
+            val endOfMonth = date.with(TemporalAdjusters.lastDayOfMonth())
+            return startOfMonth..endOfMonth
+        }
+    }
+
+    companion object {
+        fun fromIndex(index: Int): StatsViewOption = when (index) {
+            Daily.viewIndex -> Daily
+            Weekly.viewIndex -> Weekly
+            Monthly.viewIndex -> Monthly
+            else -> throw IllegalArgumentException("invalid viewIndex $index")
+        }
+    }
+}
+
+private operator fun LocalDate.rangeTo(other: LocalDate): ClosedRange<LocalDate> = object : ClosedRange<LocalDate> {
+    override val start: LocalDate = this@rangeTo
+    override val endInclusive: LocalDate = other
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatsDetailedScreen(
     targetDate: LocalDate,
     initialize: (LocalDate) -> Unit,
-    viewModel: StatsDetailedViewModel = hiltViewModel(),
+    viewModel: StatsDetailedViewModel,
     onClickBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
@@ -107,9 +146,11 @@ private fun StatisticsContent(
     val haptic = LocalHapticFeedback.current
 
     LazyColumn(modifier.fillMaxSize()) {
-        item {
+        stickyHeader {
             Box(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .background(colorScheme.background)
+                    .padding(bottom = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 SingleChoiceSegmentedButtonRow {
@@ -132,6 +173,10 @@ private fun StatisticsContent(
             }
         }
 
+        item {
+            Spacer(Modifier.height(12.dp))
+        }
+
         val indexes = mapOf(
             0 to { dailyStatistics(uiState) },
             1 to { weeklyStatistics(uiState) },
@@ -149,256 +194,48 @@ fun StatsCard(
     subTitle: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp, horizontal = 12.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = colorScheme.surfaceContainer,
-        shadowElevation = 2.dp
+    Column(
+        modifier = modifier.padding(horizontal = 16.dp)
     ) {
-        Box(modifier = Modifier.padding(16.dp)) {
-            Column {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = title,
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.W600
+            )
+            if (subTitle != null) {
                 Text(
-                    text = title,
-                    style = AppTypography.titleMedium,
-                    fontWeight = FontWeight.W600
+                    text = subTitle,
+                    style = AppTypography.titleSmall,
+                    color = colorScheme.secondary
                 )
-                if (subTitle != null) {
-                    Text(
-                        text = subTitle,
-                        style = AppTypography.titleSmall,
-                        color = colorScheme.secondary
-                    )
-                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = colorScheme.surfaceContainerLowest
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 content()
             }
         }
-    }
-}
-
-
-@Composable
-fun DailyChart(
-    uiState: StatsDetailedUiState
-) {
-    val books = uiState.targetDateRangeRecordsMap[uiState.selectedDate]
-            ?.map { it.bookId }
-            .orEmpty()
-    val stats = uiState.targetDateRangeStatsMap[uiState.selectedDate]
-    val isActivityVisible = stats?.startedBooks?.isNotEmpty() == true
-            || stats?.finishedBooks?.isNotEmpty() == true
-            || stats?.favoriteBooks?.isNotEmpty() == true
-
-    if (isActivityVisible) {
-        StatsCard(
-            title = stringResource(R.string.activity)
-        ) {
-            val startedBooks = stats.startedBooks
-            val favoriteBooks = stats.favoriteBooks
-            Column {
-                if (startedBooks.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clipToBounds(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 24.dp)
-                                .fillMaxWidth()
-                                .weight(1f, fill = false)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.activity_first_read),
-                                style = AppTypography.titleSmall,
-                                fontWeight = FontWeight.W500
-                            )
-                            val displayedTitles = startedBooks.take(2).mapNotNull { bookId ->
-                                uiState.bookInformationMap[bookId]?.title?.let { title ->
-                                    if (title.length > 10) title.substring(0, 10) + stringResource(R.string.ellipsis) else title
-                                }
-                            }
-                            Text(
-                                text = if (displayedTitles.size == 1) displayedTitles[0]
-                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
-                                style = AppTypography.labelSmall,
-                                maxLines = 2,
-                                color = colorScheme.secondary,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .rotate(4f)
-                                .offset(y = 24.dp)
-                        ) {
-                            BookStack(
-                                uiState = uiState,
-                                books = startedBooks,
-                                count = 5
-                            )
-                        }
-                    }
-                    HorizontalDivider()
-                }
-                if (favoriteBooks.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clipToBounds(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 24.dp)
-                                .fillMaxWidth()
-                                .weight(1f, fill = false)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.activity_collections),
-                                style = AppTypography.titleSmall,
-                                fontWeight = FontWeight.W500
-                            )
-                            val displayedTitles = favoriteBooks.take(2).mapNotNull { bookId ->
-                                uiState.bookInformationMap[bookId]?.title?.let { title ->
-                                    if (title.length > 10) title.substring(0, 10) + stringResource(R.string.ellipsis) else title
-                                }
-                            }
-                            Text(
-                                text = if (displayedTitles.size == 1) displayedTitles[0]
-                                else displayedTitles.joinToString(",\n") + stringResource(R.string.activity_etc),
-                                style = AppTypography.labelSmall,
-                                maxLines = 2,
-                                color = colorScheme.secondary,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .rotate(-3f)
-                                .offset(y = 24.dp)
-                        ) {
-                            BookStack(
-                                uiState = uiState,
-                                books = favoriteBooks,
-                                count = 5
-                            )
-                        }
-                    }
-                    HorizontalDivider()
-                }
-            }
-        }
-    }
-
-    StatsCard(
-        title = stringResource(R.string.activity_reading_time)
-    ) {
-        Column {
-            Spacer(Modifier.height(12.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BookStack(
-                    uiState = uiState,
-                    books = books,
-                    count = 8
-                )
-                Spacer(Modifier.weight(1f))
-            }
-            Spacer(Modifier.height(6.dp))
-            Text(stringResource(R.string.n_books, books.size))
-            Spacer(Modifier.height(12.dp))
-            DailyBarChart(
-                recordList = uiState.targetDateRangeRecordsMap[uiState.selectedDate],
-                bookInformationMap = uiState.bookInformationMap
-            )
-        }
-    }
-}
-
-@Composable
-fun WeeklyItem(
-    uiState: StatsDetailedUiState,
-) {
-    StatsCard(
-        title = stringResource(R.string.reading_details)
-    ) {
-        Box {
-            ReadTimeStackedBarChart(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()
-                    .height(230.dp),
-                bookInformationMap = uiState.bookInformationMap,
-                recordMap = uiState.targetDateRangeRecordsMap,
-                dateRange = uiState.targetDateRange,
-            )
-        }
-
-    }
-
-    StatsCard(
-        title = stringResource(R.string.time_distribution)
-    ) {
-        WeeklyCountChart(
-            dateRange = uiState.targetDateRange,
-            statsMap = uiState.targetDateRangeStatsMap
-        )
-    }
-}
-
-@Composable
-fun MonthlySummaryChart(
-    uiState: StatsDetailedUiState
-) {
-    StatsCard(
-        title = stringResource(R.string.activity_reading_time)
-    ) {
-        Box {
-            LastNDaysChart(
-                dateRange = uiState.targetDateRange,
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()
-                    .height(230.dp),
-                statsMap = uiState.targetDateRangeStatsMap
-            )
-        }
-    }
-
-    StatsCard(
-        title = stringResource(R.string.activity_read)
-    ) {
-        val (startDate, endDate) = uiState.targetDateRange
-
-        val books = uiState.targetDateRangeRecordsMap
-            .filterKeys { it in startDate..endDate }
-            .values
-            .flatten()
-            .map { it.bookId }
-
-        Spacer(Modifier.height(10.dp))
-        BookStack(
-            uiState = uiState,
-            books = books,
-            count = 8
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(stringResource(R.string.n_books, books.size))
+        Spacer(Modifier.height(16.dp))
     }
 }
 
 @Composable
 fun BookStack(
+    modifier: Modifier = Modifier,
     uiState: StatsDetailedUiState,
     books: List<Int>,
     count: Int,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentWidth()
             .padding(end = min(books.size, count).dp * 20)
     ) {
@@ -427,19 +264,34 @@ fun BookStack(
 
 private fun LazyListScope.dailyStatistics(uiState: StatsDetailedUiState) {
     item {
-        DailyChart(uiState)
+        ActivityStatsCard(uiState)
+    }
+    item {
+        ReadingDetailStatsCard(uiState)
     }
 }
 
 private fun LazyListScope.weeklyStatistics(uiState: StatsDetailedUiState) {
     item {
-        WeeklyItem(uiState)
+        ActivityStatsCard(uiState)
+    }
+    item {
+        WeeklyReadingTimeStatsCard(uiState)
+    }
+    item {
+        ReadingDetailStatsCard(uiState)
     }
 }
 
 private fun LazyListScope.monthlyStatistics(uiState: StatsDetailedUiState) {
     item {
-        MonthlySummaryChart(uiState)
+        ActivityStatsCard(uiState)
+    }
+    item {
+        MonthlyReadingTimeStatsCard(uiState)
+    }
+    item {
+        ReadingDetailStatsCard(uiState)
     }
 }
 

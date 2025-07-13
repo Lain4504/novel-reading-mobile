@@ -11,15 +11,15 @@ plugins {
 
 android {
     namespace = "indi.dmzz_yyhyy.lightnovelreader"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         multiDexEnabled = true
         applicationId = "indi.dmzz_yyhyy.lightnovelreader"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*1000+debug版本号(开发需要时迭代, 三位数)
-        versionCode = 1_01_00_032
+        versionCode = 1_01_00_033
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -133,20 +133,22 @@ dependencies {
     // Swipe
     implementation(libs.swipe)
     // Chart
-    implementation(libs.charty)
+    implementation(libs.vico.compose.m3)
+    // Potato Auto Proxy
+    implementation(project(":proxy"))
 }
 
 configurations.implementation{
     exclude(group = "com.intellij", module = "annotations")
 }
 
-task("printVersion") {
+tasks.register("printVersion") {
     doFirst {
         println(android.defaultConfig.versionName)
     }
 }
 
-task("printVersionCode") {
+tasks.register("printVersionCode") {
     doFirst {
         println(android.defaultConfig.versionCode)
     }

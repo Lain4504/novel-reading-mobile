@@ -15,17 +15,23 @@ interface StatsDetailedUiState {
     val targetDateRangeRecordsMap: Map<LocalDate, List<BookRecordEntity>>
     val targetDateRange: Pair<LocalDate, LocalDate>
     var selectedDate: LocalDate
-    val selectedViewIndex: Int
+    var selectedViewIndex: Int
     val isLoading: Boolean
     val bookInformationMap: Map<Int, BookInformation>
 }
 
 class MutableStatsDetailedUiState : StatsDetailedUiState {
-    override var targetDateRangeStatsMap by mutableStateOf(emptyMap<LocalDate, ReadingStatisticsEntity>())
+    override var targetDateRangeStatsMap: Map<LocalDate, ReadingStatisticsEntity> by mutableStateOf(emptyMap())
     override var targetDateRangeRecordsMap: Map<LocalDate, List<BookRecordEntity>> by mutableStateOf(emptyMap())
-    override var targetDateRange by mutableStateOf(Pair(LocalDate.now(), LocalDate.now()))
+    override var targetDateRange: Pair<LocalDate, LocalDate> by mutableStateOf(LocalDate.now() to LocalDate.now())
     override var selectedDate: LocalDate by mutableStateOf(LocalDate.now())
-    override var selectedViewIndex by mutableIntStateOf(0)
-    override var isLoading by mutableStateOf(false)
-    override var bookInformationMap = mutableStateMapOf<Int, BookInformation>()
+    override var selectedViewIndex: Int by mutableIntStateOf(0)
+    override var isLoading: Boolean by mutableStateOf(false)
+    override val bookInformationMap: MutableMap<Int, BookInformation> = mutableStateMapOf()
 }
+
+val StatsDetailedUiState.currentViewOption: StatsViewOption
+    get() = StatsViewOption.fromIndex(selectedViewIndex)
+
+val StatsDetailedUiState.currentDateRange: ClosedRange<LocalDate>
+    get() = StatsViewOption.fromIndex(selectedViewIndex).rangeFor(selectedDate)

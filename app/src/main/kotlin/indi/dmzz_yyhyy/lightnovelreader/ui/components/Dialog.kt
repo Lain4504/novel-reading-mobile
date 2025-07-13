@@ -473,34 +473,6 @@ fun SettingsAboutInfoDialog(
     )
 }
 
-@Composable
-fun ExportToEpubDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-) {
-    AlertDialog (
-        onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(R.string.dialog_export_to_epub)) },
-        text = {
-            Text(stringResource(R.string.dialog_export_to_epub_text))
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onConfirmation
-            ) {
-                Text(stringResource(android.R.string.ok))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest
-            ) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ColorPickerDialog(

@@ -1,10 +1,12 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.book
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
+@Stable
 interface ChapterContent {
     val id: Int
     val title: String
@@ -14,7 +16,7 @@ interface ChapterContent {
 
     fun hasLastChapter(): Boolean = lastChapter > -1
     fun hasNextChapter(): Boolean = nextChapter > -1
-    fun isEmpty() = this.id == -1
+    fun isEmpty() = this.id == -1 || this.content.isBlank()
 
     companion object {
         fun empty(): ChapterContent = MutableChapterContent(-1, "", "")
@@ -50,5 +52,24 @@ class MutableChapterContent(
         this.content = chapterContent.content
         this.lastChapter = chapterContent.lastChapter
         this.nextChapter = chapterContent.nextChapter
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is ChapterContent) {
+            return this.id == other.id &&
+                    this.content == other.content &&
+                    this.lastChapter == other.lastChapter &&
+                    this.nextChapter == other.nextChapter
+        }
+        return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = id
+        result = 31 * result + title.hashCode()
+        result = 31 * result + content.hashCode()
+        result = 31 * result + lastChapter
+        result = 31 * result + nextChapter
+        return result
     }
 }

@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.book
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -7,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.time.LocalDateTime
 
+@Stable
 interface BookInformation {
     val id: Int
     val title: String
@@ -36,7 +38,7 @@ interface BookInformation {
         )
     }
 
-    fun isEmpty() = id == -1
+    fun isEmpty() = id == -1 || title == ""
 
     @Suppress("unused")
     fun toMutable(): MutableBookInformation {

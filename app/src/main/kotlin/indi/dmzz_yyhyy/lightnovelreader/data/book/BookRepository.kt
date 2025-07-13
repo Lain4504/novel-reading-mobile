@@ -92,7 +92,7 @@ class BookRepository @Inject constructor(
             localBookDataSource.getChapterContent(chapterId)?.let(chapterContent::update)
             webBookDataSource.getChapterContent(chapterId, bookId)?.let {
                 if (it.isEmpty()) return@launch
-                chapterContent.update(it)
+                chapterContent.update(it.toMutable().apply { this.content = textProcessingRepository.progressText(this.content) })
                 localBookDataSource.updateChapterContent(it)
             }
             chapterContent.content = textProcessingRepository.progressText(chapterContent.content)

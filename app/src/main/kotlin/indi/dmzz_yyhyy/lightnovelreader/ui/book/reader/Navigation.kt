@@ -24,7 +24,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 fun NavGraphBuilder.bookReaderDestination() {
     composable<Route.Book.Reader> { navBackStackEntry ->
         val navController = LocalNavController.current
-        val viewModel = hiltViewModel<ReaderViewModel>(navBackStackEntry)
+        val viewModel = hiltViewModel<ReaderViewModel>(navController.getBackStackEntry<Route.Book>())
         ReaderScreen(
             readingScreenUiState = viewModel.uiState,
             settingState = viewModel.settingState,
@@ -43,8 +43,7 @@ fun NavGraphBuilder.bookReaderDestination() {
 }
 
 fun NavController.navigateToBookReaderDestination(bookId: Int, chapterId: Int, context: Context) {
-    this.navigate(Route.Book.Reader)
-    val entry = this.getBackStackEntry<Route.Book.Reader>()
+    val entry = this.getBackStackEntry<Route.Book>()
     val viewModel = ViewModelProvider.create(
         entry,
         HiltViewModelFactory(
@@ -54,6 +53,7 @@ fun NavController.navigateToBookReaderDestination(bookId: Int, chapterId: Int, c
     )[ReaderViewModel::class.java]
     viewModel.bookId = bookId
     viewModel.changeChapter(chapterId)
+    this.navigate(Route.Book.Reader)
 }
 
 private fun NavGraphBuilder.colorPickerDialog() {

@@ -1,15 +1,21 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadProgressRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadType
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.work.ExportBookToEPUBWork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -20,9 +26,11 @@ class DetailViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val bookshelfRepository: BookshelfRepository,
     private val webBookDataSource: WebBookDataSource,
-    private val downloadProgressRepository: DownloadProgressRepository
+    private val downloadProgressRepository: DownloadProgressRepository,
+    private val workManager: WorkManager
 ) : ViewModel() {
     private val _uiState = MutableDetailUiState()
+    var exportSettings = ExportSettings()
     var navController: NavController? = null
     val uiState: DetailUiState = _uiState
 
@@ -80,5 +88,27 @@ class DetailViewModel @Inject constructor(
     fun onClickTag(tag: String) {
         if (navController == null) return
         webBookDataSource.progressBookTagClick(tag, navController!!)
+    }
+
+
+    fun exportToEpub(uri: Uri, bookId: Int, title: String): Flow<WorkInfo?> {
+        val workRequest = OneTimeWorkRequestBuilder<ExportBookToEPUBWork>()
+            .setInputData(
+                workDataOf(
+                    "bookId" to bookId,
+                    "uri" to uri.toString(),
+                    "title" to title,
+                    "includeImages" to exportSettings.includeImages,
+                    "exportType" to exportSettings.exportType.name,
+                    "selectedVolume" to exportSettings.selectedVolumeIds.joinToString(",")
+                )
+            )
+            .build()
+        workManager.enqueueUniqueWork(
+            bookId.toString(),
+            ExistingWorkPolicy.KEEP,
+            workRequest
+        )
+        return workManager.getWorkInfoByIdFlow(workRequest.id)
     }
 }
