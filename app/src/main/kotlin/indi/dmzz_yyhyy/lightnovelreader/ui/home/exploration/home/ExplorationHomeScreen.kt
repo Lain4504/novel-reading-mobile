@@ -193,7 +193,6 @@ fun TopBar(
             Text(
                 text = stringResource(id = R.string.nav_explore),
                 style = AppTypography.titleTopBar,
-                fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

@@ -59,6 +59,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.AboutSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DataSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DisplaySettingsList
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.ReadingSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.UpdatesSettingsList
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -75,6 +76,7 @@ fun SettingsScreen(
     onClickExportUserData: () -> Unit,
     onClickDebugMode: () -> Unit,
     onClickThemeSettings: () -> Unit,
+    onClickTextFormatting: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
 ) {
@@ -116,12 +118,20 @@ fun SettingsScreen(
                         )
                     }
                     SettingsCategory(
+                        title = stringResource(R.string.reading_settings),
+                        icon = ImageVector.vectorResource(R.drawable.filled_menu_book_24px)
+                    ) {
+                        ReadingSettingsList(
+                            onClickTheme = onClickThemeSettings,
+                            onClickTextFormatting = onClickTextFormatting
+                        )
+                    }
+                    SettingsCategory(
                         title = stringResource(R.string.display_settings),
                         icon = ImageVector.vectorResource(R.drawable.light_mode_24px)
                     ) {
                         DisplaySettingsList(
-                            settingState = settingState,
-                            onClickThemeSettings = onClickThemeSettings
+                            settingState = settingState
                         )
                     }
                     SettingsCategory(
