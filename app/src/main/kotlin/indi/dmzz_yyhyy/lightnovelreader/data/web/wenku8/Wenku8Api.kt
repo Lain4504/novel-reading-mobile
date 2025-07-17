@@ -77,7 +77,7 @@ object Wenku8Api: WebBookDataSource {
         while(true) {
             offLine = isOffLine()
             emit(offLine)
-            delay(3000)
+            delay(if (offLine) 2000 else 6000)
         }
     }
 
@@ -95,6 +95,7 @@ object Wenku8Api: WebBookDataSource {
                 }
             Jsoup
                 .connect("$host/")
+                .wenku8Cookie()
                 .timeout(2000)
                 .let {
                     if (ProxyPool.enable && !isLocalIpUnableUse)

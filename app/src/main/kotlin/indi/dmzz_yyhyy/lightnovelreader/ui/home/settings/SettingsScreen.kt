@@ -5,8 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,7 +64,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.UpdatesSettingsLis
 fun SettingsScreen(
     controller: NavController,
     selectedRoute: Any,
-    settingState: SettingState?,
+    settingState: SettingState,
     updatePhase: String,
     checkUpdate: () -> Unit,
     importData: (Uri) -> OneTimeWorkRequest,
@@ -93,57 +91,50 @@ fun SettingsScreen(
                 )
             }
         ) {
-            AnimatedVisibility(
-                modifier = Modifier.padding(it),
-                visible = settingState != null,
-                enter = fadeIn(),
-                exit = fadeOut()
+            Column(
+                Modifier
+                    .padding(it)
+                    .verticalScroll(rememberScrollState())
+                    .nestedScroll(pinnedScrollBehavior.nestedScrollConnection)
             ) {
-                settingState!!
-                Column(
-                    Modifier
-                        .verticalScroll(rememberScrollState())
-                        .nestedScroll(pinnedScrollBehavior.nestedScrollConnection)
+                SettingsCategory(
+                    title = stringResource(R.string.app_updates),
+                    icon = ImageVector.vectorResource(R.drawable.deployed_code_update_24px)
                 ) {
-                    SettingsCategory(
-                        title = stringResource(R.string.app_updates),
-                        icon = ImageVector.vectorResource(R.drawable.deployed_code_update_24px)
-                    ) {
-                        UpdatesSettingsList(
-                            updatePhase = updatePhase,
-                            settingState = settingState,
-                            checkUpdate = checkUpdate,
-                        )
-                    }
-                    SettingsCategory(
-                        title = stringResource(R.string.display_settings),
-                        icon = ImageVector.vectorResource(R.drawable.light_mode_24px)
-                    ) {
-                        DisplaySettingsList(
-                            settingState = settingState,
-                            onClickThemeSettings = onClickThemeSettings
-                        )
-                    }
-                    SettingsCategory(
-                        title = stringResource(R.string.data_settings),
-                        icon = ImageVector.vectorResource(R.drawable.hard_disk_24px)
-                    ) {
-                        DataSettingsList(
-                            onClickChangeSource = onClickChangeSource,
-                            onClickExportUserData = onClickExportUserData,
-                            settingState = settingState,
-                            importData = importData,
-                            onClickLogcat = onClickLogcat
-                        )
-                    }
-                    SettingsCategory(
-                        title = stringResource(R.string.about_settings),
-                        icon = ImageVector.vectorResource(R.drawable.info_24px)
-                    ) {
-                        AboutSettingsList(
-                            onClickDebugMode = onClickDebugMode
-                        )
-                    }
+                    UpdatesSettingsList(
+                        updatePhase = updatePhase,
+                        settingState = settingState,
+                        checkUpdate = checkUpdate,
+                    )
+                }
+                SettingsCategory(
+                    title = stringResource(R.string.display_settings),
+                    icon = ImageVector.vectorResource(R.drawable.light_mode_24px)
+                ) {
+                    DisplaySettingsList(
+                        settingState = settingState,
+                        onClickThemeSettings = onClickThemeSettings
+                    )
+                }
+                SettingsCategory(
+                    title = stringResource(R.string.data_settings),
+                    icon = ImageVector.vectorResource(R.drawable.hard_disk_24px)
+                ) {
+                    DataSettingsList(
+                        onClickChangeSource = onClickChangeSource,
+                        onClickExportUserData = onClickExportUserData,
+                        settingState = settingState,
+                        importData = importData,
+                        onClickLogcat = onClickLogcat
+                    )
+                }
+                SettingsCategory(
+                    title = stringResource(R.string.about_settings),
+                    icon = ImageVector.vectorResource(R.drawable.info_24px)
+                ) {
+                    AboutSettingsList(
+                        onClickDebugMode = onClickDebugMode
+                    )
                 }
             }
         }

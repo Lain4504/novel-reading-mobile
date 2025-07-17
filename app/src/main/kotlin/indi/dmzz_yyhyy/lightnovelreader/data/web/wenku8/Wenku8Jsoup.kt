@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8
 
 import android.util.Log
+import indi.dmzz_yyhyy.lightnovelreader.utils.UserAgentGenerator
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionPost
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import org.jsoup.Connection
@@ -8,11 +9,12 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.time.Instant
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 
 fun Connection.wenku8Cookie(): Connection =
-    this.cookie(" Hm_lvt_acfbfe93830e0272a88e1cc73d4d6d0f", "1737964211")
+    this
+        .userAgent(UserAgentGenerator.generate())
+        .cookie(" Hm_lvt_acfbfe93830e0272a88e1cc73d4d6d0f", "1737964211")
         .cookie(" PHPSESSID", "261c62b5dae26868bba643433e859ce6")
         .cookie(
             " jieqiUserInfo",
@@ -27,7 +29,6 @@ fun Connection.wenku8Cookie(): Connection =
         .cookie(" Hm_lvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294365,1739294389,1739294442,1739294467")
         .cookie(" Hm_lpvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294503")
 
-@OptIn(ExperimentalEncodingApi::class)
 fun wenku8Api(request: String): Document? {
     Log.i("Wenku8API", "require to wenku8 with $request")
     return Jsoup

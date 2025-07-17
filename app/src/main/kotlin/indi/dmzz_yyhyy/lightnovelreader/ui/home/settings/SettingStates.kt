@@ -18,6 +18,7 @@ class SettingState(
     val updateChannelKeyUserData = userDataRepository.stringUserData(UserDataPath.Settings.App.UpdateChannel.path)
     val distributionPlatformKeyUserData = userDataRepository.stringUserData(UserDataPath.Settings.App.DistributionPlatform.path)
     val logLevelKeyUserData = userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path)
+    val isUseProxyUserData = userDataRepository.booleanUserData(UserDataPath.Settings.Data.IsUseProxy.path)
 
     val checkUpdate by checkUpdateUserData.asState(true)
     val appLocaleKey by appLocaleKeyUserData.asState("zh-CN")
@@ -25,4 +26,5 @@ class SettingState(
     val updateChannelKey by updateChannelKeyUserData.asState("Development")
     val distributionPlatformKey by distributionPlatformKeyUserData.asState("GitHub")
     val logLevelKey by logLevelKeyUserData.asState("none")
+    val isUseProxy by isUseProxyUserData.asState(false)
 }
