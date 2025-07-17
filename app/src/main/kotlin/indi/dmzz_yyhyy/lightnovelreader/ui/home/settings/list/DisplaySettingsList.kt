@@ -15,17 +15,11 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 
 @Composable
 fun DisplaySettingsList(
-    settingState: SettingState,
-    onClickThemeSettings: () -> Unit
+    settingState: SettingState
 ) {
     val context = LocalContext.current
     val isAboveTiramisu = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-    SettingsClickableEntry(
-        iconRes = R.drawable.format_paint_24px,
-        title = stringResource(R.string.settings_theme),
-        description = stringResource(R.string.settings_theme_desc),
-        onClick = onClickThemeSettings
-    )
+
     SettingsClickableEntry(
         iconRes = R.drawable.language_24px,
         title = stringResource(R.string.settings_app_language),

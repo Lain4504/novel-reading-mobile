@@ -38,7 +38,7 @@
     <string name="offline">离线中</string>
     <string name="offline_desc">当前无法获取在线数据，请刷新重试\n检查源网站连通性，或者换个网络试试</string>
     <!-- Settings -->
-    <string name="app_settings">应用</string>
+    <string name="reading_settings">阅读</string>
     <string name="theme_settings">主题</string>
 
     <string name="app_updates">更新</string>
@@ -84,6 +84,8 @@
     <string name="display_settings">显示</string>
     <string name="settings_theme">主题与纸张</string>
     <string name="settings_theme_desc">设置应用主题和阅读器纸张</string>
+    <string name="settings_text_formatting">文本格式化</string>
+    <string name="settings_text_formatting_desc">根据规则格式化文本内容</string>
     <string name="settings_theme_light_theme">浅色主题</string>
     <string name="settings_theme_light_theme_desc">指定应用在浅色模式下的主题</string>
     <string name="settings_theme_dark_theme">深色主题</string>
@@ -262,6 +264,8 @@
     <string name="unit_minutes">&#160;分钟&#160;</string>
     <string name="unit_seconds">&#160;秒</string>
     <string name="detail_of_date">%1$s 的阅读时长</string>
+    <string name="book_rules">书本规则</string>
+    <string name="text_replacement_rules_title">规则</string>
 
     <!-- Dialogs -->
     <string name="dialog_about_version">版本</string>

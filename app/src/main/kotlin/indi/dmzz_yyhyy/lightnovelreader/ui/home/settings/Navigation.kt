@@ -35,6 +35,9 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSetting
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.settingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.navigateToSettingsLogcatDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.logcat.settingsLogcatDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.editTextFormattingRuleDialog
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.navigateToSettingsTextFormattingManagerDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.settingsTextFormattingNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.settingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
@@ -62,6 +65,7 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
             onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             onClickLogcat = navController::navigateToSettingsLogcatDestination,
+            onClickTextFormatting = navController::navigateToSettingsTextFormattingManagerDestination,
             onClickThemeSettings = navController::navigateToSettingsThemeDestination,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
@@ -69,6 +73,7 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
     }
     sourceChangeDialog()
     exportUserDataDialog()
+    editTextFormattingRuleDialog()
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -80,6 +85,7 @@ fun NavGraphBuilder.settingsNavigation(sharedTransitionScope: SharedTransitionSc
         settingsDebugDestination()
         settingsLogcatDestination()
         settingsThemeDestination()
+        settingsTextFormattingNavigation()
     }
 }
 

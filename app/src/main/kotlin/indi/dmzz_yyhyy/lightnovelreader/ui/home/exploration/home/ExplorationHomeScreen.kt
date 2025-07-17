@@ -9,7 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -193,7 +193,6 @@ fun TopBar(
             Text(
                 text = stringResource(id = R.string.nav_explore),
                 style = AppTypography.titleTopBar,
-                fontWeight = FontWeight.W600,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -284,7 +283,7 @@ fun ExplorationPage(
                     }
                     val lazyRowState = rememberLazyListState()
 
-                    CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+                    CompositionLocalProvider(LocalOverscrollFactory provides null) {
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()

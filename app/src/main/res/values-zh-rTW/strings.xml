@@ -38,7 +38,7 @@
     <string name="offline">離線中</string>
     <string name="offline_desc">目前無法取得線上資料，請重新整理再試\n檢查來源網站連線狀態，或者換個網路試試</string>
     <!-- Settings -->
-    <string name="app_settings">應用程式</string>
+    <string name="reading_settings">閲讀</string>
     <string name="theme_settings">主題</string>
 
     <string name="app_updates">更新</string>
@@ -84,6 +84,8 @@
     <string name="display_settings">顯示</string>
     <string name="settings_theme">主題與紙張</string>
     <string name="settings_theme_desc">設定應用程式主題和閱讀器紙張</string>
+    <string name="settings_text_formatting">文本格式化</string>
+    <string name="settings_text_formatting_desc">根據規則格式化文字內容</string>
     <string name="settings_theme_light_theme">淺色主題</string>
     <string name="settings_theme_light_theme_desc">指定應用程式在淺色模式下的主題</string>
     <string name="settings_theme_dark_theme">深色主題</string>
@@ -262,6 +264,8 @@
     <string name="unit_minutes">&#160;分鐘&#160;</string>
     <string name="unit_seconds">&#160;秒</string>
     <string name="detail_of_date">%1$s 的閱讀時長</string>
+    <string name="book_rules">書本規則</string>
+    <string name="text_replacement_rules_title">規則</string>
 
     <!-- Dialogs -->
     <string name="dialog_about_version">版本</string>

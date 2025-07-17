@@ -53,6 +53,13 @@ object Route {
             @Serializable
             object Logcat
             @Serializable
+            object TextFormatting {
+                @Serializable
+                object Manager
+                @Serializable
+                data class Rules(val bookId: Int)
+            }
+            @Serializable
             object Debug
             @Serializable
             object Theme
@@ -61,6 +68,10 @@ object Route {
         object SourceChangeDialog
         @Serializable
         object ExportUserDataDialog
+        @Serializable
+        data class EditTextFormattingRuleDialog(
+            val ruleId: Int
+        )
     }
     @Serializable
     object Book {
