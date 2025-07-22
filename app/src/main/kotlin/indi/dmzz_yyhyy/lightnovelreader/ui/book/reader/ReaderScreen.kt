@@ -2,6 +2,8 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context.BATTERY_SERVICE
+import android.os.BatteryManager
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -36,7 +39,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
@@ -128,7 +131,7 @@ fun ReaderScreen(
                 )
             }
         },
-        containerColor = if (settingState.backgroundColor.isUnspecified) MaterialTheme.colorScheme.background else settingState.backgroundColor
+        containerColor = if (settingState.backgroundColor.isUnspecified) colorScheme.background else settingState.backgroundColor
     ) { _ ->
         if (settingState.enableBackgroundImage) {
             Image(
@@ -190,10 +193,19 @@ fun Content(
         @Suppress("DEPRECATION")
         controller.apply {
             if (isImmersive) {
-                var visibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                val navbar = (View.SYSTEM_UI_FLAG_LOW_PROFILE or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-                visibility = visibility or navbar
-                window.decorView.systemUiVisibility = visibility
+                if (settingState.batteryIndicatorDisplayMode == "immersed") {
+                    var visibility =
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    val navbar =
+                        View.SYSTEM_UI_FLAG_LOW_PROFILE or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    visibility = visibility or navbar
+                    window.decorView.systemUiVisibility = visibility
+                } else {
+                    val visibility =
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    window.decorView.systemUiVisibility = visibility
+                }
+
             } else {
                 show(WindowInsetsCompat.Type.systemBars())
                 window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -312,6 +324,7 @@ fun Content(
                                 end = settingState.rightPadding.dp
                             )
                         ),
+                    enableBatteryIndicator = settingState.batteryIndicatorDisplayMode == "classic",
                     enableTimeIndicator = settingState.enableTimeIndicator,
                     enableChapterTitle = settingState.enableChapterTitleIndicator,
                     chapterTitle = readingScreenUiState.contentUiState.readingChapterContent.title,
@@ -396,7 +409,7 @@ private fun TopBar(
                             text = it,
                             style = AppTypography.titleTopBar,
                             fontWeight = FontWeight.W400,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = colorScheme.onSurface,
                             maxLines = 1
                         )
                     }
@@ -555,7 +568,9 @@ fun ChapterSelectorBottomSheet(
                             exit = shrinkVertically() + fadeOut()
                         ) {
                             Box(
-                                modifier = Modifier.fillMaxWidth().height(300.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp)
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.align(Alignment.Center)
@@ -588,14 +603,14 @@ fun ChapterSelectorBottomSheet(
                                         text = volume.volumeTitle,
                                         fontWeight = FontWeight.W600,
                                         style = AppTypography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = colorScheme.onSurface
                                     )
                                     Text(
                                         text = stringResource(
                                             R.string.info_volume_chapters_count,
                                             volume.chapters.size
                                         ),
-                                        color = MaterialTheme.colorScheme.secondary,
+                                        color = colorScheme.secondary,
                                         style = AppTypography.labelMedium
                                     )
                                 }
@@ -605,7 +620,7 @@ fun ChapterSelectorBottomSheet(
                                         .scale(0.75f, 0.75f)
                                         .rotate(if (selectedVolumeId == volume.volumeId) -90f else 90f),
                                     painter = painterResource(R.drawable.arrow_forward_ios_24px),
-                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    tint = colorScheme.onSurface,
                                     contentDescription = null
                                 )
                             }
@@ -630,7 +645,7 @@ fun ChapterSelectorBottomSheet(
                                         if (isSelected) {
                                             Icon(
                                                 painter = painterResource(R.drawable.play_arrow_24px),
-                                                tint = MaterialTheme.colorScheme.outline,
+                                                tint = colorScheme.outline,
                                                 contentDescription = null
                                             )
                                             Spacer(Modifier.width(8.dp))
@@ -639,7 +654,7 @@ fun ChapterSelectorBottomSheet(
                                             text = chapter.title,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                             style = AppTypography.titleSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            color = colorScheme.onSurfaceVariant,
                                             maxLines = 2
                                         )
                                     }
@@ -656,6 +671,7 @@ fun ChapterSelectorBottomSheet(
 @Composable
 fun Indicator(
     modifier: Modifier = Modifier,
+    enableBatteryIndicator: Boolean,
     enableTimeIndicator: Boolean,
     enableChapterTitle: Boolean,
     chapterTitle: String,
@@ -672,6 +688,42 @@ fun Indicator(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (enableBatteryIndicator) {
+                val batteryManager = LocalContext.current.getSystemService(BATTERY_SERVICE) as BatteryManager
+                val batLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                RollingNumber(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    number = batLevel,
+                    style = AppTypography.labelMedium.copy(
+                        fontWeight = FontWeight.W500
+                    ),
+                    color = colorScheme.onSurfaceVariant,
+                    length = 3
+                )
+                Text(
+                    text = "%",
+                    style = AppTypography.labelMedium,
+                    fontWeight = FontWeight.W500,
+                    color = colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(4.dp))
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    painter =
+                        when {
+                            (batLevel in 0..15) -> painterResource(R.drawable.battery_android_alert_24px)
+                            (batLevel in 16..35) -> painterResource(R.drawable.battery_android_3_24px)
+                            (batLevel in 36..65) -> painterResource(R.drawable.battery_android_4_24px)
+                            (batLevel in 66..80) -> painterResource(R.drawable.battery_android_5_24px)
+                            (batLevel in 81..95) -> painterResource(R.drawable.battery_android_6_24px)
+                            (batLevel in 96..100) -> painterResource(R.drawable.battery_android_full_24px)
+                            else -> painterResource(R.drawable.battery_android_question_24px)
+                        },
+                    tint = colorScheme.onSurfaceVariant,
+                    contentDescription = null
+                )
+                Spacer(Modifier.width(14.dp))
+            }
             if (enableTimeIndicator) {
                 AnimatedText(
                     modifier = Modifier.align(Alignment.CenterVertically),
@@ -680,9 +732,8 @@ fun Indicator(
                         letterSpacing = 1.sp
                     ),
                     fontWeight = FontWeight.W500,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
-
             }
         }
 
@@ -698,7 +749,7 @@ fun Indicator(
                     text = chapterTitle,
                     textAlign = TextAlign.End,
                     style = AppTypography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -715,14 +766,14 @@ fun Indicator(
                     style = AppTypography.labelMedium.copy(
                         fontWeight = FontWeight.W500
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     length = 3
                 )
                 Text(
                     text = "%",
                     style = AppTypography.labelMedium,
                     fontWeight = FontWeight.W500,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             }
         }

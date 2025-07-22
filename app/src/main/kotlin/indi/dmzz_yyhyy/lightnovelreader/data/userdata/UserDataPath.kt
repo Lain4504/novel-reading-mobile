@@ -28,7 +28,7 @@ sealed class UserDataPath(
         data object IsUsingVolumeKeyFlip : UserDataPath("isUsingVolumeKeyFlip", Reader)
         data object FlipAnime : UserDataPath("flipAnime", Reader)
         data object FastChapterChange : UserDataPath("fastChapterChange", Reader)
-        data object EnableBatteryIndicator : UserDataPath("enableBatteryIndicator", Reader)
+        data object BatteryIndicatorDisplayMode : UserDataPath("batteryIndicatorDisplayMode", Reader)
         data object EnableTimeIndicator : UserDataPath("enableTimeIndicator", Reader)
         data object EnableChapterTitleIndicator : UserDataPath("enableChapterTitleIndicator", Reader)
         data object EnableReadingChapterProgressIndicator : UserDataPath("enableReadingChapterProgressIndicator", Reader)

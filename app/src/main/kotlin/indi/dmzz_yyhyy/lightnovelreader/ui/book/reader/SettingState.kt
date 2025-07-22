@@ -27,7 +27,7 @@ class SettingState(
     val isUsingVolumeKeyFlipUserData = userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingVolumeKeyFlip.path)
     val flipAnimeUserData = userDataRepository.stringUserData(UserDataPath.Reader.FlipAnime.path)
     val fastChapterChangeUserData = userDataRepository.booleanUserData(UserDataPath.Reader.FastChapterChange.path)
-    val enableBatteryIndicatorUserData = userDataRepository.booleanUserData(UserDataPath.Reader.EnableBatteryIndicator.path)
+    val batteryIndicatorDisplayModeUserData = userDataRepository.stringUserData(UserDataPath.Reader.BatteryIndicatorDisplayMode.path)
     val enableTimeIndicatorUserData = userDataRepository.booleanUserData(UserDataPath.Reader.EnableTimeIndicator.path)
     val enableChapterTitleIndicatorUserData = userDataRepository.booleanUserData(
         UserDataPath.Reader.EnableChapterTitleIndicator.path)
@@ -64,7 +64,7 @@ class SettingState(
     val isUsingVolumeKeyFlip by isUsingVolumeKeyFlipUserData.safeAsState(false)
     val flipAnime by flipAnimeUserData.safeAsState(MenuOptions.FlipAnimationOptions.ScrollWithoutShadow)
     val fastChapterChange by fastChapterChangeUserData.safeAsState(false)
-    val enableBatteryIndicator by enableBatteryIndicatorUserData.safeAsState(true)
+    val batteryIndicatorDisplayMode by batteryIndicatorDisplayModeUserData.safeAsState("classic")
     val enableTimeIndicator by enableTimeIndicatorUserData.safeAsState(true)
     val enableChapterTitleIndicator by enableChapterTitleIndicatorUserData.safeAsState(true)
     val enableReadingChapterProgressIndicator by enableReadingChapterProgressIndicatorUserData.safeAsState(true)

@@ -31,4 +31,9 @@
     <!-- Reader Bg Image Display Mode -->
     <string name="key_bg_image_display_mode_loop">循环</string>
     <string name="key_bg_image_display_mode_fixed">固定</string>
+    <!-- Reader Battery Indicator Display Mode -->
+    <string name="key_reader_indicator_battery_display_mode_hidden">隐藏</string>
+    <string name="key_reader_indicator_battery_display_mode_classic">经典</string>
+    <string name="key_reader_indicator_battery_display_mode_immersed">沉浸</string>
+
 </resources>
