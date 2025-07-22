@@ -56,8 +56,8 @@
     <string name="settings_reader_line_spacing">行间距</string>
     <string name="settings_reader_keep_screen_on">保持屏幕常亮</string>
     <string name="settings_reader_keep_screen_on_desc">在阅读时保持屏幕亮起。可能会增加电量消耗</string>
-    <string name="settings_reader_battery_indicator">电池指示器</string>
-    <string name="settings_reader_battery_indicator_desc">在左下角显示当前电池电量</string>
+    <string name="settings_reader_battery_indicator">电池指示器模式</string>
+    <string name="settings_reader_battery_indicator_desc">设置电量指示器的显示模式</string>
     <string name="settings_reader_time_indicator">时间指示器</string>
     <string name="settings_reader_time_indicator_desc">在左下角显示当前时间</string>
     <string name="settings_reader_chapter_indicator">章节指示器</string>

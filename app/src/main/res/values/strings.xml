@@ -60,8 +60,8 @@
     <string name="settings_reader_line_spacing">Line Spacing</string>
     <string name="settings_reader_keep_screen_on">Keep Screen On</string>
     <string name="settings_reader_keep_screen_on_desc">Keep the screen active during reading. This may increase power consumption</string>
-    <string name="settings_reader_battery_indicator">Battery Indicator</string>
-    <string name="settings_reader_battery_indicator_desc">Display the current battery level in the bottom-left corner</string>
+    <string name="settings_reader_battery_indicator">Battery Display Mode</string>
+    <string name="settings_reader_battery_indicator_desc">Set the battery level indicator display mode</string>
     <string name="settings_reader_time_indicator">Time Indicator</string>
     <string name="settings_reader_time_indicator_desc">Display the current time in the bottom-left corner</string>
     <string name="settings_reader_chapter_indicator">Chapter Indicator</string>
