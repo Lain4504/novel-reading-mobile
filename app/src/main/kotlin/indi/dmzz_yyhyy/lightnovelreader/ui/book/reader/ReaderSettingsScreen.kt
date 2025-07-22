@@ -1,3 +1,4 @@
+
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.content.Intent
@@ -22,7 +23,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Tab
@@ -66,7 +67,7 @@ fun SettingsBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = colorScheme.surfaceContainerHigh,
         tonalElevation = 16.dp
     ) {
         var selectedTabIndex by remember { mutableIntStateOf(0) }
@@ -127,7 +128,7 @@ fun ContentSettings(
             state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                .background(colorScheme.surfaceContainerLow)
                 .padding(horizontal = 8.dp, vertical = 12.dp),
             userScrollEnabled = false
         ) { pageIndex ->
@@ -154,7 +155,7 @@ fun TabsRow(
     onTabSelected: (Int) -> Unit
 ) {
     TabRow(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = colorScheme.surfaceContainerHigh,
         selectedTabIndex = selectedTabIndex,
         indicator = { tabPositions ->
             SecondaryIndicator(
@@ -199,6 +200,7 @@ fun LazyListScope.AppearancePage(
 ) {
     item {
         SettingsClickableEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.format_paint_24px,
             title = stringResource(R.string.settings_theme_settings),
             description = stringResource(R.string.settings_theme_settings_desc),
@@ -207,6 +209,7 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.lightbulb_24px,
             title = stringResource(R.string.settings_reader_keep_screen_on),
             description = stringResource(R.string.settings_reader_keep_screen_on_desc),
@@ -216,6 +219,7 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.toolbar_24px,
             title = stringResource(R.string.settings_hide_status_bar),
             description = stringResource(R.string.settings_hide_status_bar_desc),
@@ -225,6 +229,7 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.translate_24px,
             title = stringResource(R.string.settings_trad_conversion),
             description = stringResource(R.string.settings_trad_conversion_desc),
@@ -233,7 +238,19 @@ fun LazyListScope.AppearancePage(
         )
     }
     item {
+        SettingsMenuEntry(
+            modifier = Modifier.animateItem(),
+            iconRes = R.drawable.battery_android_full_24px,
+            title = stringResource(R.string.settings_reader_battery_indicator),
+            description = stringResource(R.string.settings_reader_battery_indicator_desc),
+            options = MenuOptions.ReaderIndicatorBatteryDisplayMode,
+            selectedOptionKey = settingState.batteryIndicatorDisplayMode,
+            stringUserData = settingState.batteryIndicatorDisplayModeUserData
+        )
+    }
+    item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.outline_schedule_24px,
             title = stringResource(R.string.settings_reader_time_indicator),
             description = stringResource(R.string.settings_reader_time_indicator_desc),
@@ -243,6 +260,7 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.contract_24px,
             title = stringResource(R.string.settings_reader_chapter_indicator),
             description = stringResource(R.string.settings_reader_chapter_indicator_desc),
@@ -252,6 +270,7 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.clock_loader_40_24px,
             title = stringResource(R.string.settings_reader_progress_indicator),
             description = stringResource(R.string.settings_reader_progress_indicator_desc),
@@ -264,6 +283,7 @@ fun LazyListScope.AppearancePage(
 fun LazyListScope.ActionPage(settingState: SettingState) {
     item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             iconRes = R.drawable.menu_book_24px,
             title = stringResource(R.string.settings_reader_page_mode),
             description = stringResource(R.string.settings_reader_page_mode_desc),
@@ -337,6 +357,7 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
 fun LazyListScope.PaddingPage(settingState: SettingState) {
     item {
         SettingsSwitchEntry(
+            modifier = Modifier.animateItem(),
             title = stringResource(R.string.settings_reader_auto_margin),
             description = stringResource(R.string.settings_reader_auto_margin_desc),
             checked = settingState.autoPadding,
@@ -346,6 +367,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
+                modifier = Modifier.animateItem(),
                 title = stringResource(R.string.settings_reader_top_margin),
                 unit = "dp",
                 valueRange = 0f..128f,
@@ -357,6 +379,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
+                modifier = Modifier.animateItem(),
                 title = stringResource(R.string.settings_reader_bottom_margin),
                 unit = "dp",
                 valueRange = 0f..128f,
@@ -368,6 +391,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
+                modifier = Modifier.animateItem(),
                 title = stringResource(R.string.settings_reader_left_margin),
                 unit = "dp",
                 valueRange = 0f..128f,
@@ -379,6 +403,7 @@ fun LazyListScope.PaddingPage(settingState: SettingState) {
     if (!settingState.autoPadding) {
         item {
             SettingsSliderEntry(
+                modifier = Modifier.animateItem(),
                 title = stringResource(R.string.settings_reader_right_margin),
                 unit = "dp",
                 valueRange = 0f..128f,

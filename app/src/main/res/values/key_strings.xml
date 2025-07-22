@@ -49,4 +49,8 @@
     <!-- Reader Bg Image Display Mode -->
     <string name="key_bg_image_display_mode_loop">Loop</string>
     <string name="key_bg_image_display_mode_fixed">Fixed</string>
+    <!-- Reader Battery Indicator Display Mode -->
+    <string name="key_reader_indicator_battery_display_mode_hidden">Hidden</string>
+    <string name="key_reader_indicator_battery_display_mode_classic">Classic</string>
+    <string name="key_reader_indicator_battery_display_mode_immersed">Immersed</string>
 </resources>
