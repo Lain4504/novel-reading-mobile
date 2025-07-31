@@ -1,4 +1,4 @@
-**简体中文** | [繁體中文](README_TW.md) | [Русский](README_RU.md)
+[简体中文](README.md) | [繁體中文](README_TW.md) | [English](README_US.md) | **Русский**
 
 <div align="center">
     <h1>LightNovelReader</h1>
