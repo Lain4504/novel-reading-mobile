@@ -24,12 +24,12 @@
     <string name="key_dark_mode_enabled">Override Enabled</string>
     <string name="key_dark_mode_disabled">Override Disabled</string>
     <!-- Log Level -->
-    <string name="key_log_level_none" translatable="false">None</string>
-    <string name="key_log_level_error" translatable="false">Error</string>
-    <string name="key_log_level_warning" translatable="false">Warning</string>
-    <string name="key_log_level_info" translatable="false">Info</string>
-    <string name="key_log_level_debug" translatable="false">Debug</string>
-    <string name="key_log_level_verbose" translatable="false">Verbose</string>
+    <string name="key_log_level_none">None</string>
+    <string name="key_log_level_error">Error</string>
+    <string name="key_log_level_warning">Warning</string>
+    <string name="key_log_level_info">Info</string>
+    <string name="key_log_level_debug">Debug</string>
+    <string name="key_log_level_verbose">Verbose</string>
     <!-- Light Theme Name -->
     <string name="key_light_theme_default">Default</string>
     <!-- Dark Theme Name -->
