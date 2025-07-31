@@ -86,7 +86,6 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.RollingNumber
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import kotlinx.coroutines.delay
@@ -107,7 +106,7 @@ fun ReaderScreen(
     onClickNextChapter: () -> Unit,
     onChangeChapter: (Int) -> Unit,
     onClickThemeSettings: () -> Unit,
-    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
+    onZoomImage: (String) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isImmersive by remember { mutableStateOf(false) }
@@ -170,7 +169,7 @@ fun Content(
     onChangeChapter: (Int) -> Unit,
     onChangeIsImmersive: () -> Unit,
     onClickThemeSettings: () -> Unit,
-    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
+    onZoomImage: (String) -> Unit
 ) {
     val activity = LocalActivity.current as Activity
     val coroutineScope = rememberCoroutineScope()

@@ -136,6 +136,8 @@ dependencies {
     implementation(libs.vico.compose.m3)
     // Potato Auto Proxy
     implementation(project(":proxy"))
+    // Telephoto
+    implementation(libs.zoomable.image.coil)
 }
 
 configurations.implementation{

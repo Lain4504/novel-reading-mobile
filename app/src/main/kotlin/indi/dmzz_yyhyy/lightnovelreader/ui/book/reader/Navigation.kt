@@ -16,7 +16,6 @@ import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.imageview.ImageViewerScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ColorPickerDialog
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
@@ -89,35 +88,17 @@ private fun NavGraphBuilder.imageViewerDialog() {
         val route = entry.toRoute<Route.Book.ImageViewerDialog>()
         ImageViewerScreen(
             imageUrl = route.imageUrl,
-            originalX = route.originalX,
-            originalY = route.originalY,
-            originalWidth = route.originalWidth,
-            originalHeight = route.originalHeight,
-            startX = route.startX,
-            startY = route.startY,
-            startWidth = route.startWidth,
-            startHeight = route.startHeight,
             onDismissRequest = { navController.popBackStack() }
         )
     }
 }
 
 fun NavController.navigateToImageViewerDialog(
-    imageUrl: String,
-    originalLayout: ImageLayoutInfo,
-    startLayout: ImageLayoutInfo
+    imageUrl: String
 ) {
     navigate(
         Route.Book.ImageViewerDialog(
-            imageUrl = imageUrl,
-            originalX = originalLayout.x,
-            originalY = originalLayout.y,
-            originalWidth = originalLayout.width,
-            originalHeight = originalLayout.height,
-            startX = startLayout.x,
-            startY = startLayout.y,
-            startWidth = startLayout.width,
-            startHeight = startLayout.height
+            imageUrl = imageUrl
         )
     )
 }
