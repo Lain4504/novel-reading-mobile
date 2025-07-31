@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">LightNovelReader</string>
-    <string name="language">Русский</string>
+    <string name="language">Русский (Россия)</string>
     <string name="language_translators">Xapitonov</string>
     <!-- Пункты навигации -->
     <string name="nav_reading">Чтение</string>
@@ -246,7 +245,6 @@
     <string name="time_distribution">Распределение времени</string>
     <string name="reading_details">Детали чтения</string>
     <string name="to">по</string>
-    <string name="ellipsis" translatable="false">…</string>
     <string name="heatmap_indicator_less">Меньше</string>
     <string name="heatmap_indicator_more">Больше (%d+)</string>
     <string name="time_range">Просмотрено</string>
