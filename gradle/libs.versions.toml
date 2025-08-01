@@ -28,6 +28,7 @@ junit = "4.13.2"
 swipe = "1.3.0"
 serializationJson = "1.9.0"
 kotlinxCoroutinesCore = "1.10.2"
+zoomableImageCoil = "0.16.0"
 
 [libraries]
 dom4j = { module = "org.dom4j:dom4j", version.ref = "dom4j" }
@@ -69,6 +70,7 @@ junit = { module = "junit:junit", version.ref = "junit" }
 swipe = { module = "me.saket.swipe:swipe", version.ref = "swipe" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serializationJson" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+zoomable-image-coil = { module = "me.saket.telephoto:zoomable-image-coil", version.ref = "zoomableImageCoil" }
 
 [plugins]
 kotlin_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

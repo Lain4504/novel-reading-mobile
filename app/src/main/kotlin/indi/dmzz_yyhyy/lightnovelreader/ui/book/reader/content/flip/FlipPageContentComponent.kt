@@ -50,7 +50,6 @@ import indi.dmzz_yyhyy.lightnovelreader.AppEvent
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
@@ -68,7 +67,7 @@ fun FlipPageContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
+    onZoomImage: (String) -> Unit
 ) {
     SimpleFlipPageTextComponent(
         modifier = modifier,
@@ -87,7 +86,7 @@ private fun SimpleFlipPageTextComponent(
     uiState: FlipPageContentUiState,
     settingState: SettingState,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
+    onZoomImage: (String) -> Unit
 ) {
     val textMeasurer = rememberTextMeasurer()
     val scope = rememberCoroutineScope()
