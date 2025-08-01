@@ -133,34 +133,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        when (keyCode) {
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(AppEvent.KEYCODE_VOLUME_UP))
-                return true
-            }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(AppEvent.KEYCODE_VOLUME_DOWN))
-                return true
-            }
-        }
-        return super.onKeyUp(keyCode, event)
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        when (keyCode) {
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                return isUsingVolumeKeyFlip
-            }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                return isUsingVolumeKeyFlip
-            }
-        }
-        return super.onKeyDown(keyCode, event)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         coroutineScope.cancel()

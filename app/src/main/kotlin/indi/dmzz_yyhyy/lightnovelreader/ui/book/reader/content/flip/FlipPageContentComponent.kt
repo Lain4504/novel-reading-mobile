@@ -1,13 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
@@ -22,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,7 +27,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -45,8 +48,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import indi.dmzz_yyhyy.lightnovelreader.AppEvent
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
@@ -97,6 +98,9 @@ private fun SimpleFlipPageTextComponent(
     var textStyle by remember { mutableStateOf<TextStyle?>(null) }
     var slippedTextList by remember { mutableStateOf(emptyList<String>()) }
     var readingPageFistCharOffset by remember { mutableIntStateOf(0) }
+    val focusRequester = remember { FocusRequester() }
+    val pagerState = uiState.pagerState
+
     fun lastPage(pagerState: PagerState) {
         if (pagerState.currentPage != 0)
             scope.launch {
@@ -150,37 +154,6 @@ private fun SimpleFlipPageTextComponent(
             uiState.updatePageState(PagerState { slippedTextList.size })
         }
     }
-    DisposableEffect(
-        settingState.isUsingVolumeKeyFlip,
-        settingState.flipAnime,
-        settingState.fastChapterChange
-    ) {
-        val localBroadcastManager = LocalBroadcastManager.getInstance(context)
-        val keycodeVolumeUpReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (settingState.isUsingVolumeKeyFlip)
-                    lastPage(uiState.pagerState)
-            }
-        }
-        val keycodeVolumeDownReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (settingState.isUsingVolumeKeyFlip)
-                    nextPage(uiState.pagerState)
-            }
-        }
-        localBroadcastManager.registerReceiver(
-            keycodeVolumeUpReceiver,
-            IntentFilter(AppEvent.KEYCODE_VOLUME_UP)
-        )
-        localBroadcastManager.registerReceiver(
-            keycodeVolumeDownReceiver,
-            IntentFilter(AppEvent.KEYCODE_VOLUME_DOWN)
-        )
-        onDispose {
-            localBroadcastManager.unregisterReceiver(keycodeVolumeUpReceiver)
-            localBroadcastManager.unregisterReceiver(keycodeVolumeDownReceiver)
-        }
-    }
     LocalContext.current.resources.displayMetrics.let { displayMetrics ->
         constraints = Constraints(
             maxWidth = displayMetrics
@@ -216,9 +189,30 @@ private fun SimpleFlipPageTextComponent(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
+
         HorizontalPager(
             state = uiState.pagerState,
             modifier = modifier
+                .focusRequester(focusRequester)
+                .focusable()
+                .onKeyEvent { event ->
+                    if (!settingState.isUsingVolumeKeyFlip) {
+                        false
+                    } else if (event.type == KeyEventType.KeyDown &&
+                        (event.key == Key.VolumeUp || event.key == Key.VolumeDown)) {
+                        if (event.nativeKeyEvent.repeatCount == 0) {
+                            if (event.key == Key.VolumeUp) {
+                                lastPage(uiState.pagerState)
+                            } else {
+                                nextPage(uiState.pagerState)
+                            }
+                        }
+                        true
+                    } else false
+                }
                 .draggable(
                     enabled = settingState.isUsingFlipPage,
                     interactionSource = remember { MutableInteractionSource() },
