@@ -24,7 +24,8 @@ import me.saket.telephoto.zoomable.zoomable
 @Composable
 fun ImageViewerScreen(
     imageUrl: String,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onClickSave: () -> Unit
 ) {
     val zoomableState = rememberZoomableState()
 
@@ -55,6 +56,21 @@ fun ImageViewerScreen(
             Icon(
                 painter = painterResource(R.drawable.close_24px),
                 contentDescription = "close",
+                tint = Color.Black
+            )
+        }
+
+        IconButton(
+            onClick = onClickSave,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .systemBarsPadding()
+                .background(Color.White, CircleShape)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.save_24px),
+                contentDescription = "save",
                 tint = Color.Black
             )
         }

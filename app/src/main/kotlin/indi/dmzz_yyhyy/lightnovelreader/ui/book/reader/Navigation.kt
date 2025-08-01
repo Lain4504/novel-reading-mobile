@@ -1,9 +1,13 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.HiltViewModelFactory
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -18,7 +22,12 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.imageview.ImageViewerScre
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ColorPickerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.saveBitmapAsPng
+import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.urlToBitmap
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 fun NavGraphBuilder.bookReaderDestination() {
     composable<Route.Book.Reader> { navBackStackEntry ->
@@ -86,9 +95,40 @@ private fun NavGraphBuilder.imageViewerDialog() {
     ) { entry ->
         val navController = LocalNavController.current
         val route = entry.toRoute<Route.Book.ImageViewerDialog>()
+
+        val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
+
         ImageViewerScreen(
             imageUrl = route.imageUrl,
-            onDismissRequest = { navController.popBackStack() }
+            onDismissRequest = { navController.popBackStack() },
+            onClickSave = {
+                urlToBitmap(
+                    scope = coroutineScope,
+                    imageURL = route.imageUrl,
+                    context = context,
+                    onSuccess = { bitmap ->
+                        coroutineScope.launch {
+                            val savedName = saveBitmapAsPng(context, bitmap)
+                            withContext(Dispatchers.Main) {
+                                if (savedName != null) {
+                                    Toast.makeText(
+                                        context,
+                                        "已保存到 Pictures/LightNovelReader/$savedName",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    },
+                    onError = { error ->
+                        Log.d("ImageViewer", "Failed to save image: ${error.message}")
+                        Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
         )
     }
 }
