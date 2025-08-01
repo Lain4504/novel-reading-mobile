@@ -302,6 +302,19 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
                 booleanUserData = settingState.isUsingVolumeKeyFlipUserData,
             )
         }
+        item {
+            val steps = listOf(-1f, 0.1f, 0.2f, 0.3f, 0.5f, 0.8f, 1.0f, 2.0f, 4.0f)
+            SettingsSliderEntry(
+                modifier = Modifier.animateItem(),
+                iconRes = R.drawable.timer_24px,
+                title = stringResource(R.string.settings_reader_volume_key_interval),
+                unit = "s",
+                value = settingState.volumeKeyContinuousFlipInterval,
+                valueRange = steps.first()..steps.last(),
+                steps = steps,
+                floatUserData = settingState.volumeKeyContinuousFlipIntervalUserData,
+            )
+        }
     }
     if (!settingState.isUsingFlipPage) {
         item {

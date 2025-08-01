@@ -72,6 +72,7 @@
     <string name="settings_reader_page_mode_desc">Switch between scrolling mode and page turn mode</string>
     <string name="settings_reader_volume_key_control">Volume Key Navigation</string>
     <string name="settings_reader_volume_key_control_desc">Use the volume + key to move to the previous page and the volume - key to move to the next page</string>
+    <string name="settings_reader_volume_key_interval">Key Continuous Flip Interval</string>
     <string name="settings_reader_t2tp">Tap to Turn Pages</string>
     <string name="settings_reader_t2tp_desc">Enable page turning by tapping, and change the menu trigger gesture to vertical swipe</string>
     <string name="settings_reader_page_turn_anim">Page Turn Animation</string>

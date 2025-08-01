@@ -1,12 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader
 
 import android.Manifest.permission.POST_NOTIFICATIONS
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
@@ -16,7 +14,6 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager

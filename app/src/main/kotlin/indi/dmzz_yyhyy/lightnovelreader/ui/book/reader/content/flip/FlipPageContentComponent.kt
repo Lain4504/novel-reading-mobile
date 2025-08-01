@@ -58,6 +58,8 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
@@ -193,6 +195,9 @@ private fun SimpleFlipPageTextComponent(
             focusRequester.requestFocus()
         }
 
+        var volumeJob by remember { mutableStateOf<Job?>(null) }
+        val intervalMs = (settingState.volumeKeyContinuousFlipInterval * 1000).toLong()
+
         HorizontalPager(
             state = uiState.pagerState,
             modifier = modifier
@@ -201,17 +206,36 @@ private fun SimpleFlipPageTextComponent(
                 .onKeyEvent { event ->
                     if (!settingState.isUsingVolumeKeyFlip) {
                         false
-                    } else if (event.type == KeyEventType.KeyDown &&
-                        (event.key == Key.VolumeUp || event.key == Key.VolumeDown)) {
-                        if (event.nativeKeyEvent.repeatCount == 0) {
-                            if (event.key == Key.VolumeUp) {
-                                lastPage(uiState.pagerState)
-                            } else {
-                                nextPage(uiState.pagerState)
+                    } else if (event.key == Key.VolumeUp || event.key == Key.VolumeDown) {
+                        when (event.type) {
+                            KeyEventType.KeyDown -> {
+                                if (event.nativeKeyEvent.repeatCount == 0) {
+                                    if (event.key == Key.VolumeUp) lastPage(uiState.pagerState)
+                                    else nextPage(uiState.pagerState)
+
+                                    if (intervalMs > 0) {
+                                        volumeJob?.cancel()
+                                        volumeJob = scope.launch {
+                                            while (isActive) {
+                                                delay(intervalMs)
+                                                if (event.key == Key.VolumeUp) lastPage(uiState.pagerState)
+                                                else nextPage(uiState.pagerState)
+                                            }
+                                        }
+                                    }
+                                }
+                                true
                             }
+                            KeyEventType.KeyUp -> {
+                                volumeJob?.cancel()
+                                volumeJob = null
+                                true
+                            }
+                            else -> false
                         }
-                        true
-                    } else false
+                    } else {
+                        false
+                    }
                 }
                 .draggable(
                     enabled = settingState.isUsingFlipPage,

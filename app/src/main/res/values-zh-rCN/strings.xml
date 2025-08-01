@@ -68,6 +68,7 @@
     <string name="settings_reader_page_mode_desc">切换滚动模式和翻页模式</string>
     <string name="settings_reader_volume_key_control">音量键翻页</string>
     <string name="settings_reader_volume_key_control_desc">使用音量+键翻到上一页，音量-键翻到下一页</string>
+    <string name="settings_reader_volume_key_interval">按键持续翻页间隔</string>
     <string name="settings_reader_t2tp">点击翻页</string>
     <string name="settings_reader_t2tp_desc">启用点击翻页。垂直滑动以触发菜单</string>
     <string name="settings_reader_page_turn_anim">翻页动画</string>

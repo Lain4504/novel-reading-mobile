@@ -26,6 +26,7 @@ sealed class UserDataPath(
         data object IsUsingClickFlipPage : UserDataPath("isUsingClickFlipPage", Reader)
         data object IsUsingContinuousScrolling : UserDataPath("isUsingContinuousScrolling", Reader)
         data object IsUsingVolumeKeyFlip : UserDataPath("isUsingVolumeKeyFlip", Reader)
+        data object VolumeKeyContinuousFlipInterval : UserDataPath("volumeKeyContinuousFlipInterval", Reader)
         data object FlipAnime : UserDataPath("flipAnime", Reader)
         data object FastChapterChange : UserDataPath("fastChapterChange", Reader)
         data object BatteryIndicatorDisplayMode : UserDataPath("batteryIndicatorDisplayMode", Reader)
