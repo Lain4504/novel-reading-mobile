@@ -99,13 +99,15 @@ fun ExplorationSearchScreen(
                         offset = DpOffset((-12).dp, 0.dp),
                         expanded = dropdownMenuExpanded,
                         onDismissRequest = { dropdownMenuExpanded = false }) {
-                        explorationSearchUiState.searchTypeNameList.forEach {
+                        explorationSearchUiState.searchTypeIdList.forEach {
                             DropdownMenuItem(
                                 text = {
-                                    Text(
-                                        text = it,
-                                        style = AppTypography.labelMedium
-                                    )
+                                    explorationSearchUiState.searchTypeNameMap[it]?.let { it1 ->
+                                        Text(
+                                            text = it1,
+                                            style = AppTypography.labelMedium
+                                        )
+                                    }
                                 },
                                 onClick = {
                                     dropdownMenuExpanded = false

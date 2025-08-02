@@ -19,6 +19,8 @@ object Wenku8AllExplorationPage: ExplorationPageDataSource {
     private var lock = false
     private val explorationBooksRows: MutableStateFlow<List<ExplorationBooksRow>> = MutableStateFlow(emptyList())
 
+    override val title = "全部"
+
     override fun getExplorationPage(): ExplorationPage  {
         if (!lock) {
             lock = true

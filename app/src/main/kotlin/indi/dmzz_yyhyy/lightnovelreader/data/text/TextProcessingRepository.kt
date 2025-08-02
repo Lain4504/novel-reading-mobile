@@ -1,55 +1,55 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.text
 
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
+import indi.dmzz_yyhyy.lightnovelreader.data.format.FormatRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TextProcessingRepository @Inject constructor(
-    userDataRepository: UserDataRepository
+    simplifiedTraditionalProcessor: SimplifiedTraditionalProcessor,
+    formatRepository: FormatRepository
 ) {
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
-    private val processors = mutableSetOf<TextProcessor>()
-    private val _updateFlow = MutableStateFlow(0)
+    private val processors = mutableListOf<TextProcessor>()
 
-    init {
-        coroutineScope.launch {
-            userDataRepository.booleanUserData(UserDataPath.Reader.EnableSimplifiedTraditionalTransform.path).getFlow().collect { enableSimplifiedTraditionalTransform ->
-                if (enableSimplifiedTraditionalTransform == true)
-                    processors.add(SimplifiedTraditionalProcessor)
-                else
-                    processors.remove(SimplifiedTraditionalProcessor)
-                _updateFlow.update { it+1 }
-            }
-        }
+    @Suppress("MemberVisibilityCanBePrivate")
+    fun registerProcessors(processor: TextProcessor) {
+        if (processors.contains(processor)) return
+        processors.add(processor)
     }
 
-    fun processChapterContent(flow: Flow<ChapterContent>): Flow<ChapterContent> {
-        return flow.map { chapterContent ->
-            var text = chapterContent.content
-            processors.forEach {
-                text = it.processor(text)
-            }
-            return@map chapterContent.toMutable().apply {
-                content = text
-            }
-        }
-    }
-
-    fun progressText(text: String): String {
-        var result = text
-        processors.forEach {
-            result = it.processor(text)
+    private fun <T> process(t: T, block: (TextProcessor) -> ((T) -> T)): T {
+        val processors = this.processors
+            .filter { it.enabled }
+        var result = t
+        for (processor in processors) {
+            result = block.invoke(processor).invoke(result)
         }
         return result
+    }
+
+    fun processText(block: () -> String): String = process(block.invoke()) { it::processText }
+    fun processSearchTypeNameMap(block: () -> Map<String, String>): Map<String, String> = process(block.invoke()) { it::processSearchTypeNameMap }
+    fun processSearchTipMap(block: () -> Map<String, String>): Map<String, String> = process(block.invoke()) { it::processSearchTipMap }
+    fun processBookInformation(block: () -> BookInformation): BookInformation = process(block.invoke()) { it::processBookInformation }
+    fun processBookVolumes(block: () -> BookVolumes): BookVolumes = process(block.invoke()) { it::processBookVolumes }
+    fun processChapterContent(bookId: Int, block: () -> ChapterContent): ChapterContent = process(block.invoke()) { processor ->
+        {
+            processor.processChapterContent(bookId, it)
+        }
+    }
+    suspend fun coroutineProcessChapterContent(bookId: Int, block: suspend () -> ChapterContent): ChapterContent = process(block.invoke()) { processor ->
+        {
+            processor.processChapterContent(bookId, it)
+        }
+    }
+    fun processExplorationBooksRow(explorationDisplayBook: ExplorationDisplayBook): ExplorationDisplayBook = process(explorationDisplayBook) { it::processExplorationBooksRow }
+
+    init {
+        registerProcessors(simplifiedTraditionalProcessor)
+        registerProcessors(formatRepository)
     }
 }

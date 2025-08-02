@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,58 +31,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.format.FormattingRule
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.FormattingGroup
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.FormattingRule
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.RegexText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormattingRulesScreen(
-    bookId: Int,
+    rules: List<FormattingRule>,
+    onToggle: (rule: Int) -> Unit,
     onClickBack: () -> Unit,
     onClickAddRule: () -> Unit,
-    onClickEditRule: (ruleId: Int) -> Unit,
-    onClickDeleteRule: (ruleId: Int) -> Unit
+    onClickEditRule: (ruleId: Int) -> Unit
 ) {
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-    val mockData = listOf(
-        FormattingGroup(
-            groupId = -721,
-            rules = listOf(
-                FormattingRule(
-                    name = "FKing 片假名",
-                    isRegex = false,
-                    match = "グーグルクロム",
-                    replacement = "Google Chrome",
-                    isEnabled = true
-                ),
-                FormattingRule(
-                    name = "FKing 片假名！！！",
-                    isRegex = false,
-                    match = "ユコニセン",
-                    replacement = "yukonisen",
-                    isEnabled = true
-                ),
-                FormattingRule(
-                    name = "括号",
-                    isRegex = true,
-                    match = "[\\(（^].*[\\)）]",
-                    replacement = "fucking ykns",
-                    isEnabled = false
-                ),
-                FormattingRule(
-                    name = "asdf",
-                    isRegex = false,
-                    match = "asdasdasdasdasdasdadasdf",
-                    replacement = "sdfsdfsdfsdfsdfsdfsdfasdasd",
-                    isEnabled = true
-                )
-            )
-        ),
-        FormattingGroup(groupId = 1614, rules = emptyList()),
-        FormattingGroup(groupId = 3889, rules = emptyList())
-    )
 
     Scaffold(
         topBar = {
@@ -98,17 +60,13 @@ fun FormattingRulesScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            mockData.forEach { group ->
-                if (group.rules.isNotEmpty()) {
-                    itemsIndexed(group.rules) { index, rule ->
-                        RuleListItem(
-                            rule = rule,
-                            ruleId = index,
-                            onEdit = onClickEditRule,
-                            onToggle = {}
-                        )
-                    }
-                }
+            items(rules) { rule ->
+                RuleListItem(
+                    rule = rule,
+                    ruleId = rule.id!!,
+                    onEdit = onClickEditRule,
+                    onToggle = onToggle
+                )
             }
         }
     }
@@ -161,15 +119,26 @@ private fun RuleListItem(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = rule.match,
-                    style = AppTypography.labelMedium,
-                    color = colorScheme.secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .weight(1f, fill = false)
-                )
+                if (rule.isRegex)
+                    RegexText(
+                        regex = rule.match,
+                        style = AppTypography.labelMedium,
+                        color = colorScheme.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                    )
+                else
+                    Text(
+                        text = rule.match,
+                        style = AppTypography.labelMedium,
+                        color = colorScheme.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                    )
                 Icon(
                     modifier = Modifier
                         .padding(horizontal = 6.dp)

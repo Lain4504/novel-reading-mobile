@@ -1,5 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting
 
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -17,17 +20,34 @@ fun NavGraphBuilder.editTextFormattingRuleDialog() {
     dialog<Route.Main.EditTextFormattingRuleDialog> {
         val navController = LocalNavController.current
         val route = it.toRoute<Route.Main.EditTextFormattingRuleDialog>()
-        val ruleId = route.ruleId
-        EditTextFormattingRuleDialog(
-            onDismissRequest = navController::popBackStack,
-            onConfirmation = { },
-            onDelete = { },
-        )
+        val viewModel = hiltViewModel<EditTextFormattingRuleDialogViewModel>()
+        LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+            viewModel.load(route.bookId, route.ruleId)
+        }
+        viewModel.formattingRule?.let { rule ->
+            EditTextFormattingRuleDialog(
+                rule = rule,
+                matchTextFieldValue = viewModel.matchTextFieldValue,
+                onDismissRequest = navController::popBackStack,
+                onConfirmation = {
+                    viewModel.onConfirmation()
+                    navController.popBackStack()
+                },
+                onDelete = {
+                    viewModel.onDelete()
+                    navController.popBackStack()
+                },
+                onNameChange = viewModel::updateName,
+                onMatchChange = viewModel::updateMatch,
+                onReplacementChange = viewModel::updateReplacement,
+                onIsRegexChange = viewModel::updateIsRegex
+            )
+        }
     }
 }
 
-fun NavController.navigateToEditTextFormattingRuleDialog(ruleId: Int) {
-    navigate(Route.Main.EditTextFormattingRuleDialog(ruleId))
+fun NavController.navigateToEditTextFormattingRuleDialog(bookId: Int, ruleId: Int) {
+    navigate(Route.Main.EditTextFormattingRuleDialog(bookId, ruleId))
 }
 
 fun NavGraphBuilder.settingsTextFormattingNavigation() {
@@ -42,9 +62,12 @@ fun NavGraphBuilder.settingsTextFormattingNavigation() {
 fun NavGraphBuilder.settingsTextFormattingManagerDestination() {
     composable<Route.Main.Settings.TextFormatting.Manager> {
         val navController = LocalNavController.current
+        val viewModel = hiltViewModel<FormattingViewModel>()
         TextFormattingScreen(
             onClickBack = navController::popBackStackIfResumed,
-            onClickGroup = navController::navigateToSettingsTextFormattingRulesDestination
+            onClickGroup = navController::navigateToSettingsTextFormattingRulesDestination,
+            groups = viewModel.formattingGroups,
+            bookInformationMap = viewModel.bookInformationMap
         )
     }
 }

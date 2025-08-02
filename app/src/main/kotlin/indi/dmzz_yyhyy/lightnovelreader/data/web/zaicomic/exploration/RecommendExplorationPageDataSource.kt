@@ -24,6 +24,7 @@ object RecommendExplorationPageDataSource : ExplorationPageDataSource {
     private val explorationBooksRows: MutableStateFlow<List<ExplorationBooksRow>> = MutableStateFlow(emptyList())
     private val explorationPage = ExplorationPage("推荐", explorationBooksRows)
 
+    override val title = "推荐"
     override fun getExplorationPage(): ExplorationPage {
         if (lock) return explorationPage
         lock = true

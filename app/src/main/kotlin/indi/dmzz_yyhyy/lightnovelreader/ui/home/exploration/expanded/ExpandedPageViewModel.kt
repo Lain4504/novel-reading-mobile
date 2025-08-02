@@ -3,8 +3,9 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +16,7 @@ import javax.inject.Inject
 class ExpandedPageViewModel @Inject constructor(
     private val explorationRepository: ExplorationRepository,
     private val bookshelfRepository: BookshelfRepository,
+    private val textProcessingRepository: TextProcessingRepository
 ) : ViewModel() {
     private var expandedPageDataSource: ExplorationExpandedPageDataSource? = null
     private var explorationExpandedPageBookListCollectJob: Job? = null
@@ -28,17 +30,23 @@ class ExpandedPageViewModel @Inject constructor(
         lastExpandedPageDataSourceId = expandedPageDataSourceId
         loadMoreJob?.cancel()
         explorationExpandedPageBookListCollectJob?.cancel()
-        expandedPageDataSource = explorationRepository.getExplorationExpandedPageDataSource(expandedPageDataSourceId)
+        expandedPageDataSource = explorationRepository.explorationExpandedPageDataSourceMap[expandedPageDataSourceId]
         explorationExpandedPageBookListCollectJob = viewModelScope.launch(Dispatchers.IO) {
             expandedPageDataSource?.let { explorationExpandedPageDataSource ->
                 explorationExpandedPageDataSource.refresh()
-                _uiState.pageTitle = explorationExpandedPageDataSource.getTitle()
+                _uiState.pageTitle = textProcessingRepository.processText {
+                    explorationExpandedPageDataSource.getTitle()
+                }
                 _uiState.filters.clear()
                 _uiState.filters.addAll(explorationExpandedPageDataSource.getFilters())
-                explorationExpandedPageDataSource.getResultFlow().collect {
+                explorationExpandedPageDataSource.getResultFlow().collect { result ->
                     _uiState.bookList.clear()
-                    _uiState.bookList.addAll(it)
-                    if (it.isEmpty()) { explorationExpandedPageDataSource.loadMore() }
+                    _uiState.bookList.addAll(
+                        result.map {
+                            textProcessingRepository.processBookInformation { it }
+                        }
+                    )
+                    if (result.isEmpty()) { explorationExpandedPageDataSource.loadMore() }
                 }
             }
         }

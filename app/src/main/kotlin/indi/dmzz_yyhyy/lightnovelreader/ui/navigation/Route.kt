@@ -70,6 +70,7 @@ object Route {
         object ExportUserDataDialog
         @Serializable
         data class EditTextFormattingRuleDialog(
+            val bookId: Int,
             val ruleId: Int
         )
     }

@@ -11,6 +11,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookshelfDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.FormattingRuleDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserReadingDataDao
@@ -20,6 +21,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfBookMeta
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ChapterContentEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ChapterInformationEntity
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.FormattingRuleEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ReadingStatisticsEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserDataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserReadingDataEntity
@@ -36,9 +38,10 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
         BookshelfEntity::class,
         BookshelfBookMetadataEntity::class,
         ReadingStatisticsEntity::class,
-        BookRecordEntity::class
+        BookRecordEntity::class,
+        FormattingRuleEntity::class
     ],
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 abstract class LightNovelReaderDatabase : RoomDatabase() {
@@ -50,6 +53,7 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
     abstract fun bookshelfDao(): BookshelfDao
     abstract fun readingStatisticsDao(): ReadingStatisticsDao
     abstract fun bookRecordDao(): BookRecordDao
+    abstract fun formattingRuleDao(): FormattingRuleDao
 
     companion object {
         @Volatile
@@ -63,7 +67,7 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                         context.applicationContext,
                         LightNovelReaderDatabase::class.java,
                         "light_novel_reader_database")
-                        .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
+                        .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, Migration_12_13)
                         .allowMainThreadQueries()
                         .build()
                     INSTANCE = instance
@@ -173,6 +177,21 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                     total_time INTEGER NOT NULL,
                     first_seen INTEGER NOT NULL,
                     last_seen INTEGER NOT NULL)
+                """)
+            }
+        }
+
+        private val Migration_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                CREATE TABLE formatting_rule (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    book_id INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    is_regex INTEGER NOT NULL,
+                    match TEXT NOT NULL,
+                    replacement TEXT NOT NULL,
+                    is_enabled INTEGER NOT NULL)
                 """)
             }
         }

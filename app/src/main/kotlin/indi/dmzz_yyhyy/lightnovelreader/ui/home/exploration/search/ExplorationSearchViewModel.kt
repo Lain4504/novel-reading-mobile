@@ -3,14 +3,14 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import javax.inject.Inject
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ExplorationSearchViewModel @Inject constructor(
@@ -20,20 +20,16 @@ class ExplorationSearchViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableExplorationSearchUiState()
     private val searchHistoryUserData = userDataRepository.stringListUserData(UserDataPath.Search.History.path)
-    private var searchTypeMap = emptyMap<String, String>()
     private var searchTypeTipMap = emptyMap<String, String>()
     private var searchJob: Job? = null
     val uiState: ExplorationSearchUiState = _uiState
 
     fun init() {
         viewModelScope.launch(Dispatchers.IO) {
-            searchTypeMap = explorationRepository.searchTypeMap
             searchTypeTipMap = explorationRepository.searchTipMap
-            _uiState.searchTypeNameList = explorationRepository.searchTypeNameList.toMutableList()
-            _uiState.searchType = explorationRepository.searchTypeNameList.getOrNull(0)
-                ?.let {
-                    searchTypeMap.getOrDefault(it, "")
-                } ?: ""
+            _uiState.searchTypeNameMap = explorationRepository.searchTypeMap
+            _uiState.searchTypeIdList = explorationRepository.searchTypeIdList.toMutableList()
+            _uiState.searchType = explorationRepository.searchTypeIdList.getOrNull(0) ?: return@launch
             _uiState.searchTip = searchTypeTipMap.getOrDefault(_uiState.searchType, "")
             searchHistoryUserData.getFlow().collect {
                 it?.let {
@@ -48,9 +44,9 @@ class ExplorationSearchViewModel @Inject constructor(
         }
     }
 
-    fun changeSearchType(searchTypeName: String) {
+    fun changeSearchType(searchTypeId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.searchType = searchTypeMap.getOrDefault(searchTypeName, "")
+            _uiState.searchType = searchTypeId
             _uiState.searchTip = searchTypeTipMap.getOrDefault(_uiState.searchType, "")
         }
     }

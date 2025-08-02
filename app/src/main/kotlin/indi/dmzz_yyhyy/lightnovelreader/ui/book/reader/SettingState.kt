@@ -33,8 +33,6 @@ class SettingState(
         UserDataPath.Reader.EnableChapterTitleIndicator.path)
     val enableReadingChapterProgressIndicatorUserData = userDataRepository.booleanUserData(
         UserDataPath.Reader.EnableReadingChapterProgressIndicator.path)
-    val enableSimplifiedTraditionalTransformUserData = userDataRepository.booleanUserData(
-        UserDataPath.Reader.EnableSimplifiedTraditionalTransform.path)
     val autoPaddingUserData = userDataRepository.booleanUserData(UserDataPath.Reader.AutoPadding.path)
     val topPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.TopPadding.path)
     val bottomPaddingUserData = userDataRepository.floatUserData(UserDataPath.Reader.BottomPadding.path)
@@ -68,7 +66,6 @@ class SettingState(
     val enableTimeIndicator by enableTimeIndicatorUserData.safeAsState(true)
     val enableChapterTitleIndicator by enableChapterTitleIndicatorUserData.safeAsState(true)
     val enableReadingChapterProgressIndicator by enableReadingChapterProgressIndicatorUserData.safeAsState(true)
-    val enableSimplifiedTraditionalTransform by enableSimplifiedTraditionalTransformUserData.safeAsState(false)
     val autoPadding by autoPaddingUserData.safeAsState(true)
     val topPadding by topPaddingUserData.safeAsState(12f)
     val bottomPadding by bottomPaddingUserData.safeAsState(12f)

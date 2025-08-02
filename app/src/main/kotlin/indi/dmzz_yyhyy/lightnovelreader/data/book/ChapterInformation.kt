@@ -1,6 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.book
 
-class ChapterInformation(
+data class ChapterInformation(
     val id: Int,
     val title: String
 ) {

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -137,95 +136,98 @@ fun ScrollContentTextComponent(
             state = uiState.lazyListState,
         ) {
             items(
-                items = uiState.contentList,
-                key = { it.id }
-            ) {
-                Column(
-                    Modifier.defaultMinSize(
-                        minHeight = with(density) {
-                            screenHeight.toDp()
-                        }
-                    )
-                ) {
-                    if (settingState.isUsingContinuousScrolling) {
-                        val titleRegex = Regex("^(第[一二三四五六七八九十]+卷)\\s+(.*)")
-                        val matchResult = titleRegex.find(it.title)
+                count = uiState.contentList.size,
+                key = { index -> uiState.contentList.getOrNull(index)?.id ?: -1 } ,
+                contentType = { { null } }
+            ) { index ->
+                uiState.contentList.getOrNull(index)?.let{
+                    Column(
+                        Modifier.defaultMinSize(
+                            minHeight = with(density) {
+                                screenHeight.toDp()
+                            }
+                        )
+                    ) {
+                        if (settingState.isUsingContinuousScrolling) {
+                            val titleRegex = Regex("^(第[一二三四五六七八九十]+卷)\\s+(.*)")
+                            val matchResult = titleRegex.find(it.title)
 
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(vertical = 36.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            if (matchResult != null) {
-                                val (volumeTitle, chapterTitle) = matchResult.destructured
-                                Text(
-                                    text = volumeTitle,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = (settingState.fontSize + 2).sp,
-                                    fontWeight = FontWeight.Medium,
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(vertical = 36.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                if (matchResult != null) {
+                                    val (volumeTitle, chapterTitle) = matchResult.destructured
+                                    Text(
+                                        text = volumeTitle,
+                                        textAlign = TextAlign.Center,
+                                        fontSize = (settingState.fontSize + 2).sp,
+                                        fontWeight = FontWeight.Medium,
+                                        fontFamily = fontFamily,
+                                        color = textColor,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    Text(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 8.dp),
+                                        text = chapterTitle,
+                                        textAlign = TextAlign.Center,
+                                        fontSize = (settingState.fontSize + 6).sp,
+                                        lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
+                                        fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
+                                        fontFamily = fontFamily,
+                                        color = textColor
+                                    )
+                                } else {
+                                    Text(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 8.dp),
+                                        text = it.title,
+                                        textAlign = TextAlign.Center,
+                                        fontSize = (settingState.fontSize + 6).sp,
+                                        lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
+                                        fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
+                                        fontFamily = fontFamily,
+                                        color = textColor
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.width(48.dp),
+                                        color = textColor
+                                    )
+                                }
+                                Spacer(Modifier.height(16.dp))
+                            }
+                        }
+
+                        it.content
+                            .split("[image]")
+                            .filter { it.isNotBlank() }
+                            .forEach {
+                                BaseContentComponent(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .defaultMinSize(
+                                            minHeight = with(density) {
+                                                screenHeight.toDp()
+                                            }
+                                        ),
+                                    text = it,
+                                    fontSize = settingState.fontSize.sp,
+                                    fontLineHeight = settingState.fontLineHeight.sp,
+                                    fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                                     fontFamily = fontFamily,
                                     color = textColor,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                Text(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 8.dp),
-                                    text = chapterTitle,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = (settingState.fontSize + 6).sp,
-                                    lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
-                                    fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
-                                    fontFamily = fontFamily,
-                                    color = textColor
-                                )
-                            } else {
-                                Text(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 8.dp),
-                                    text = it.title,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = (settingState.fontSize + 6).sp,
-                                    lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
-                                    fontWeight = FontWeight((settingState.fontWeigh.toInt() + 100)),
-                                    fontFamily = fontFamily,
-                                    color = textColor
+                                    onZoomImage = onZoomImage
                                 )
                             }
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                HorizontalDivider(
-                                    modifier = Modifier.width(48.dp),
-                                    color = textColor
-                                )
-                            }
-                            Spacer(Modifier.height(16.dp))
-                        }
-                    }
-
-                    it.content
-                        .split("[image]")
-                        .filter { it.isNotBlank() }
-                        .forEach {
-                            BaseContentComponent(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .defaultMinSize(
-                                        minHeight = with(density) {
-                                            screenHeight.toDp()
-                                        }
-                                    ),
-                                text = it,
-                                fontSize = settingState.fontSize.sp,
-                                fontLineHeight = settingState.fontLineHeight.sp,
-                                fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                                fontFamily = fontFamily,
-                                color = textColor,
-                                onZoomImage = onZoomImage
-                            )
                     }
                 }
             }

@@ -225,15 +225,6 @@ fun LazyListScope.AppearancePage(
     }
     item {
         SettingsSwitchEntry(
-            iconRes = R.drawable.translate_24px,
-            title = stringResource(R.string.settings_trad_conversion),
-            description = stringResource(R.string.settings_trad_conversion_desc),
-            checked = settingState.enableSimplifiedTraditionalTransform,
-            booleanUserData = settingState.enableSimplifiedTraditionalTransformUserData,
-        )
-    }
-    item {
-        SettingsSwitchEntry(
             iconRes = R.drawable.outline_schedule_24px,
             title = stringResource(R.string.settings_reader_time_indicator),
             description = stringResource(R.string.settings_reader_time_indicator_desc),

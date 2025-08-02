@@ -114,6 +114,7 @@ fun SettingsScreen(
                     icon = ImageVector.vectorResource(R.drawable.filled_menu_book_24px)
                 ) {
                     ReadingSettingsList(
+                        settingState = settingState,
                         onClickTheme = onClickThemeSettings,
                         onClickTextFormatting = onClickTextFormatting
                     )

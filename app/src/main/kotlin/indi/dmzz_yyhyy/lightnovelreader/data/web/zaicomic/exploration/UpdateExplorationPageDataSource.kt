@@ -23,6 +23,8 @@ object UpdateExplorationPageDataSource : ExplorationPageDataSource {
     private val explorationBooksRows: MutableStateFlow<List<ExplorationBooksRow>> = MutableStateFlow(emptyList())
     private val explorationPage = ExplorationPage("更新", explorationBooksRows)
 
+    override val title = "更新"
+
     override fun getExplorationPage(): ExplorationPage {
         if (lock) return explorationPage
         lock = true

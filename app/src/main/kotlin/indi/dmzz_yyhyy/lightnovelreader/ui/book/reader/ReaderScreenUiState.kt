@@ -22,6 +22,6 @@ class MutableReaderScreenUiState(
 ): ReaderScreenUiState {
     override var bookId by mutableIntStateOf(-1)
     override var userReadingData by mutableStateOf(UserReadingData.empty())
-    override var bookVolumes by mutableStateOf(BookVolumes.empty())
+    override var bookVolumes by mutableStateOf(BookVolumes.empty(-1))
     override var contentUiState by mutableStateOf(contentUiState)
 }

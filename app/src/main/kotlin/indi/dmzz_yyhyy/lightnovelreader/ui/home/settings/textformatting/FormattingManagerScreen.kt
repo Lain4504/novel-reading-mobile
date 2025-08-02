@@ -34,74 +34,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.format.FormattingGroup
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
-import java.time.LocalDateTime
-
-data class FormattingRule(
-    val id: Int? = null,
-    val name: String,
-    val isRegex: Boolean,
-    val match: String,
-    val replacement: String,
-    val isEnabled: Boolean
-)
-
-data class FormattingGroup(
-    val groupId: Int,
-    val rules: List<FormattingRule>
-)
-
-val mockData = listOf(
-    FormattingGroup(
-        groupId = -721,
-        rules = listOf(
-            FormattingRule(
-                name = "FKing 片假名",
-                isRegex = false,
-                match = "グーグルクロム",
-                replacement = "Google Chrome",
-                isEnabled = true
-            ),
-            FormattingRule(
-                name = "FKing 片假名！！！",
-                isRegex = false,
-                match = "ユコニセン",
-                replacement = "yukonisen",
-                isEnabled = true
-            ),
-            FormattingRule(
-                name = "括号",
-                isRegex = true,
-                match = "[\\(（^].*[\\)）]",
-                replacement = "fucking ykns",
-                isEnabled = false
-            ),
-            FormattingRule(
-                name = "asdf",
-                isRegex = false,
-                match = "asdasdasdasdasdasdadasdf",
-                replacement = "sdfsdfsdfsdfsdfsdfsdfasdasd",
-                isEnabled = true
-            )
-        )
-    ),
-    FormattingGroup(
-        groupId = 1614,
-        rules = emptyList()
-    ),
-    FormattingGroup(
-        groupId = 3889,
-        rules = emptyList()
-    )
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFormattingScreen(
     onClickGroup: (Int) -> Unit,
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    groups: List<FormattingGroup>,
+    bookInformationMap: Map<Int, BookInformation>
 ) {
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -118,14 +61,16 @@ fun TextFormattingScreen(
         ) {
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .clickable(onClick = { onClickGroup(-721) })
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = { onClickGroup(-1) })
                         .padding(horizontal = 14.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        modifier = Modifier.size(60.dp)
+                        modifier = Modifier
+                            .size(60.dp)
                             .clip(RoundedCornerShape(6.dp))
                             .background(colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
@@ -148,7 +93,7 @@ fun TextFormattingScreen(
                             maxLines = 1
                         )
                         Text(
-                            text = "/ 个规则",
+                            text = "${groups.firstOrNull { it.id == -1 }?.size ?: "/"} 个规则",
                             style = AppTypography.labelMedium,
                             color = colorScheme.secondary
                         )
@@ -167,31 +112,23 @@ fun TextFormattingScreen(
             }
             item {
                 Text(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp, 8.dp),
                     text = stringResource(R.string.book_rules),
                     style = AppTypography.titleSmall,
                     letterSpacing = 0.5.sp,
                     color = colorScheme.onSurfaceVariant
                 )
             }
-            items(mockData) { group ->
-                Group(
-                    onClickGroup = { onClickGroup(group.groupId) },
-                    formattingGroup = group,
-                    bookInformation = MutableBookInformation(
-                        -1,
-                        "标题",
-                        "",
-                        "",
-                        "作者",
-                        "",
-                        emptyList(),
-                        "",
-                        0,
-                        LocalDateTime.MIN,
-                        false
+            items(groups.filter { it.id != -1 }) { group ->
+                bookInformationMap[group.id]?.let {
+                    Group(
+                        onClickGroup = { onClickGroup(group.id) },
+                        formattingGroup = group,
+                        bookInformation = it
                     )
-                )
+                }
             }
         }
     }
@@ -204,8 +141,9 @@ private fun Group(
     bookInformation: BookInformation
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth()
-            .clickable(onClick = { onClickGroup(formattingGroup.groupId) })
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = { onClickGroup(formattingGroup.id) })
             .padding(horizontal = 14.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -233,19 +171,19 @@ private fun Group(
                 color = colorScheme.primary
             )
             Text(
-                text = "${formattingGroup.rules.size} 个规则",
+                text = "${formattingGroup.size} 个规则",
                 style = AppTypography.labelMedium,
                 color = colorScheme.secondary
             )
         }
         IconButton(
-            onClick = { onClickGroup(formattingGroup.groupId) }
+            onClick = { onClickGroup(formattingGroup.id) }
         ) {
             Icon(
                 modifier = Modifier.size(18.dp),
                 painter = painterResource(R.drawable.arrow_forward_ios_24px),
                 tint = colorScheme.secondary,
-                contentDescription = ""
+                contentDescription = "enter"
             )
         }
     }

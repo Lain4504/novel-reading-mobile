@@ -37,19 +37,19 @@ interface BookVolumesDao {
     suspend fun getVolumeEntity(volumeId: Int): VolumeEntity?
 
     @Query("select * from volume where book_id = :bookId")
-    suspend fun getVolumeEntitiesByBookId(bookId: Int): List<VolumeEntity>?
+    suspend fun getVolumeEntitiesByBookId(bookId: Int): List<VolumeEntity>
 
     @Transaction
     suspend fun getBookVolumes(bookId: Int): BookVolumes? {
-        return getVolumeEntitiesByBookId(bookId)?.let { volumeEntities ->
-            BookVolumes(volumeEntities
-                .sortedBy { it.index }
-                .map { volumeEntity ->
-                    Volume(volumeEntity.volumeId, volumeEntity.volumeTitle, volumeEntity.chapterIds.map {
-                        getChapterInformation(it) ?: ChapterInformation(0, "")
-                })
+        return BookVolumes(
+            bookId,
+            getVolumeEntitiesByBookId(bookId)
+            .sortedBy { it.index }
+            .map { volumeEntity ->
+                Volume(volumeEntity.volumeId, volumeEntity.volumeTitle, volumeEntity.chapterIds.map {
+                    getChapterInformation(it) ?: ChapterInformation(0, "")
             })
-        }
+        })
     }
 
     @Query("delete from volume")

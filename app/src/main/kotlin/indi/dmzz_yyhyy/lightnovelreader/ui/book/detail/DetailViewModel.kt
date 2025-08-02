@@ -14,7 +14,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadProgressRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadType
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ExportBookToEPUBWork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +24,6 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val bookshelfRepository: BookshelfRepository,
-    private val webBookDataSource: WebBookDataSource,
     private val downloadProgressRepository: DownloadProgressRepository,
     private val workManager: WorkManager
 ) : ViewModel() {
@@ -87,7 +85,7 @@ class DetailViewModel @Inject constructor(
 
     fun onClickTag(tag: String) {
         if (navController == null) return
-        webBookDataSource.progressBookTagClick(tag, navController!!)
+        bookRepository.progressBookTagClick(tag, navController!!)
     }
 
 
