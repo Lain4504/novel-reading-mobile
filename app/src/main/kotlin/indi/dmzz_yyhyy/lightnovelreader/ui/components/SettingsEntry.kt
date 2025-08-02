@@ -1,6 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.content.Intent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -52,7 +55,6 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.navigateToSliderValueDialog
-import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
@@ -260,12 +262,32 @@ private fun SettingsSliderEntry(
                 actualSteps[sliderValue.toInt()]
             else value
 
-            AnimatedText(
-                text = "${DecimalFormat("#.#").format(displayValue)}$unit",
-                color = MaterialTheme.colorScheme.primary,
-                style = AppTypography.labelMedium,
-                maxLines = 1
-            )
+            Row(
+                modifier = Modifier
+                    .animateContentSize(
+                        animationSpec = tween(
+                            durationMillis = 250,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+            ) {
+                AnimatedText(
+                    text = "${DecimalFormat("#.#").format(displayValue)}",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = AppTypography.labelMedium,
+                    maxLines = 1
+                )
+
+                Spacer(Modifier.width(1.dp))
+
+                Text(
+                    text = unit,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = AppTypography.labelMedium,
+                    maxLines = 1
+                )
+            }
+
 
             Slider(
                 modifier = Modifier.fillMaxWidth(),
