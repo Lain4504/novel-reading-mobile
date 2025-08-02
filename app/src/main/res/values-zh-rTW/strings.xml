@@ -286,4 +286,7 @@
     <string name="dialog_snap_bookmarks">書籤</string>
     <string name="dialog_snap_bookmarks_text">包括全部書本的書籤資訊</string>
     <string name="dialog_select_data_source_text">選擇使用的資料來源，這將清除快取並切換軟體資料來源。目前的使用者資料不會遺失，並將在下次切換回目前資料來源時還原。</string>
+    <string name="dialog_slider_custom">輸入數值</string>
+    <string name="dialog_slider_custom_illegal_value">請輸入合法的數值</string>
+
 </resources>

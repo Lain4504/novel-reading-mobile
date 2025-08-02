@@ -111,5 +111,9 @@ object Route {
         val bookId: Int
     )
     @Serializable
+    data class SliderValueDialog(
+        val floatUserDataPath: String
+    )
+    @Serializable
     object DownloadManager
 }

@@ -289,5 +289,7 @@
     <string name="dialog_snap_bookmarks">Bookmarks</string>
     <string name="dialog_snap_bookmarks_text">Includes all book bookmarks.</string>
     <string name="dialog_select_data_source_text">Select the data source. This will clear the cache and switch the app\'s data source. Your current user data will remain intact and can be restored upon switching back.</string>
+    <string name="dialog_slider_custom">Enter Value</string>
+    <string name="dialog_slider_custom_illegal_value">Please enter a valid number.</string>
 
 </resources>
