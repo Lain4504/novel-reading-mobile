@@ -32,6 +32,7 @@
     <string name="export_and_share">Share</string>
     <string name="choose_light_bg">Choose Light Background</string>
     <string name="choose_dark_bg">Choose Dark Background</string>
+    <string name="reader_back_press_again">Press back again to exit reading</string>
 
     <!-- Hints -->
     <string name="nothing_here">Nothing Here</string>
@@ -79,6 +80,8 @@
     <string name="settings_reader_page_turn_anim_desc">Configure the page turn animation. When set to "None," fast page turning is enabled</string>
     <string name="settings_reader_quick_chapter_switch">Quick Chapter Switch</string>
     <string name="settings_reader_quick_chapter_switch_desc">Automatically switch chapters when turning pages at the beginning or end of a chapter</string>
+    <string name="settings_reader_back_block_mode">Back Prevention</string>
+    <string name="settings_reader_back_block_mode_desc">Prevent accidental back actions in the reader. If fully blocked, only the top-left back button can be used</string>
     <string name="settings_reader_auto_margin">Auto Margin Adjustment</string>
     <string name="settings_reader_auto_margin_desc">Automatically detect and adjust screen margins. Disable this to set margins manually</string>
     <string name="settings_reader_top_margin">Top Margin</string>

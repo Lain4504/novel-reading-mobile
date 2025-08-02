@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -55,6 +56,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -87,6 +89,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.RollingNumber
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -110,6 +113,31 @@ fun ReaderScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isImmersive by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val backBlockMode = settingState.backBlockMode
+    var lastBackPressTime: Long by remember { mutableLongStateOf(0) }
+
+    BackHandler {
+        when (backBlockMode) {
+            MenuOptions.ReaderBackBlockMode.None -> {
+                onClickBackButton()
+            }
+            MenuOptions.ReaderBackBlockMode.DoublePress -> {
+                val now = System.currentTimeMillis()
+                if (now - lastBackPressTime < 1500) {
+                    onClickBackButton()
+                } else {
+                    lastBackPressTime = now
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.reader_back_press_again),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            MenuOptions.ReaderBackBlockMode.FullyBlocked -> { }
+        }
+    }
     DisposableEffect(Unit) {
         onDispose {
             isImmersive = false

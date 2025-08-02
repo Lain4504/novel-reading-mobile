@@ -291,6 +291,17 @@ fun LazyListScope.ActionPage(settingState: SettingState) {
             booleanUserData = settingState.isUsingFlipPageUserData,
         )
     }
+    item {
+        SettingsMenuEntry(
+            modifier = Modifier.animateItem(),
+            iconRes = R.drawable.block_24px,
+            title = stringResource(R.string.settings_reader_back_block_mode),
+            description = stringResource(R.string.settings_reader_back_block_mode_desc),
+            options = MenuOptions.ReaderBackBlockMode,
+            selectedOptionKey = settingState.backBlockMode,
+            stringUserData = settingState.backBlockModeUserData
+        )
+    }
     if (settingState.isUsingFlipPage) {
         item {
             SettingsSwitchEntry(
