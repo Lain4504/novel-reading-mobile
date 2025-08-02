@@ -16,8 +16,8 @@ interface ExplorationHomeUiState {
 }
 
 class MutableExplorationHomeUiState : ExplorationHomeUiState {
-    override var pageTitles: MutableList<String> by mutableStateOf(mutableListOf())
-    override var selectedPage: Int by mutableIntStateOf(0)
-    override var explorationPageTitle: String by mutableStateOf("")
+    override var pageTitles: List<String> by mutableStateOf(mutableListOf())
+    override var selectedPage by mutableIntStateOf(0)
+    override var explorationPageTitle by mutableStateOf("")
     override var explorationPageBooksRawList: List<ExplorationBooksRow> by mutableStateOf(mutableListOf())
 }

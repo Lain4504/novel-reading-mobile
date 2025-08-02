@@ -12,7 +12,8 @@ interface ExplorationSearchUiState {
     val isLoading: Boolean
     val isLoadingComplete: Boolean
     val historyList: List<String>
-    val searchTypeNameList: List<String>
+    val searchTypeIdList: List<String>
+    val searchTypeNameMap: Map<String, String>
     val searchType: String
     val searchTip: String
     val searchResult: List<BookInformation>
@@ -23,10 +24,11 @@ class MutableExplorationSearchUiState : ExplorationSearchUiState {
     override var isFocused: Boolean by mutableStateOf(true)
     override var isLoading: Boolean by mutableStateOf(true)
     override var isLoadingComplete: Boolean by mutableStateOf(false)
-    override var historyList: MutableList<String> by mutableStateOf(mutableListOf())
-    override var searchTypeNameList: MutableList<String> by mutableStateOf(mutableListOf())
+    override var historyList: List<String> by mutableStateOf(mutableListOf())
+    override var searchTypeIdList: List<String> by mutableStateOf(mutableListOf())
+    override var searchTypeNameMap: Map<String, String> by mutableStateOf(mutableMapOf())
     override var searchType: String by mutableStateOf("")
     override var searchTip: String by mutableStateOf("")
-    override var searchResult: MutableList<BookInformation> by mutableStateOf(mutableListOf())
-    override var allBookshelfBookIds: MutableList<Int> by mutableStateOf(mutableListOf())
+    override var searchResult: List<BookInformation> by mutableStateOf(mutableListOf())
+    override var allBookshelfBookIds: List<Int> by mutableStateOf(mutableListOf())
 }

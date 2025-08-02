@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * LightNovelReader 的网络数据提供源接口，可以通过实现此接口使软件支持新的数据源
- * 版本: 0.4
+ * 版本: 0.4.1
  */
 interface WebBookDataSource {
     val id: Int
@@ -32,12 +32,24 @@ interface WebBookDataSource {
     val isOffLineFlow: Flow<Boolean>
 
     /**
-     * 所有探索页页面的标题
+     * 所有探索页页面数据源的id
      */
-    val explorationPageTitleList: List<String>
+    val explorationPageIdList: List<String>
 
     /**
-     * 搜索类型名称和id的对应表
+     * 获取探索页面数据源的id和页面数据源的对应表
+     * 此函数应当保证主线程安全
+     */
+    val explorationPageDataSourceMap: Map<String, ExplorationPageDataSource>
+
+    /**
+     * 获取各个探索页横栏的展开页的id与展开页数据源的对应表
+     * 此函数应当保证主线程安全
+     */
+    val explorationExpandedPageDataSourceMap: Map<String, ExplorationExpandedPageDataSource>
+
+    /**
+     * 搜索类型id和名称的对应表
      */
     val searchTypeMap: Map<String, String>
 
@@ -47,9 +59,9 @@ interface WebBookDataSource {
     val searchTipMap: Map<String, String>
 
     /**
-     * 搜索类型名称的有序列表
+     * 搜索类型id的有序列表
      */
-    val searchTypeNameList: List<String>
+    val searchTypeIdList: List<String>
 
     /**
      * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
@@ -78,22 +90,6 @@ interface WebBookDataSource {
      * @return 经过格式化后的书本章节类容录数据, 如未找到改书则返回ChapterContent.empty()
      */
     fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent
-
-    /**
-     * 获取探索页面的标题和页面数据源的对应表
-     * 此函数应当保证主线程安全
-     *
-     * @return 探索页面的标题和页面数据源的对应表
-     */
-    suspend fun getExplorationPageMap(): Map<String, ExplorationPageDataSource>
-
-    /**
-     * 获取各个探索页横栏的展开页的id与展开页数据源的对应表
-     * 此函数应当保证主线程安全
-     *
-     * @return 各个探索页横栏的展开页的id与展开页数据源的对应表
-     */
-    fun getExplorationExpandedPageDataSourceMap(): Map<String, ExplorationExpandedPageDataSource>
 
     /**
      * 执行搜索任务

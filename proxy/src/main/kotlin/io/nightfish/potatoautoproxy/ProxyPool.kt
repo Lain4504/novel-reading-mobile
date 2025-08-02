@@ -62,26 +62,33 @@ object ProxyPool {
         return@withContext number
     }
 
-    fun takeProxy(): Proxy {
+    fun takeProxy(): Proxy? {
         if (proxyQueue.size <= TARGET_NUMBER)
             coroutineScope.launch {
                 offerProxies()
             }
-        return proxyQueue.poll()
+        return if (proxyQueue.size >= 1) proxyQueue.poll() else null
     }
 
     fun Connection.proxyGet(): Document {
-        println(proxyQueue)
         return takeProxy().let {
-            this.proxy(it.host, it.port)
-            this.ignoreSSLGet()
+            if (it == null)
+                this.get()
+            else {
+                this.proxy(it.host, it.port)
+                this.ignoreSSLGet()
+            }
         }
     }
 
     fun Connection.proxyPost(): Document {
         return takeProxy().let {
-            this.proxy(it.host, it.port)
-            this.ignoreSSLPost()
+            if (it == null)
+                this.get()
+            else {
+                this.proxy(it.host, it.port)
+                this.ignoreSSLPost()
+            }
         }
     }
 }

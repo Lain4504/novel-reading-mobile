@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationRepository
-import javax.inject.Inject
+import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ExplorationHomeViewModel @Inject constructor(
+    private val textProcessingRepository: TextProcessingRepository,
     private val explorationRepository: ExplorationRepository
 ) : ViewModel() {
     private val _uiState = MutableExplorationHomeUiState()
@@ -26,14 +28,22 @@ class ExplorationHomeViewModel @Inject constructor(
         workingExplorationBooksRowsJob?.cancel()
         _uiState.selectedPage = page
         workingExplorationPageJob = viewModelScope.launch {
-            val explorationPageMap = explorationRepository.getExplorationPageMap()
-            _uiState.pageTitles = explorationRepository.explorationPageTitleList.toMutableList()
+            val selectedId = explorationRepository.explorationPageIdList[page]
+            val explorationPageMap = explorationRepository.explorationPageDataSourceMap
+            _uiState.pageTitles = explorationPageMap.map { it.value.title }
             workingExplorationBooksRowsJob = viewModelScope.launch {
-                explorationPageMap[_uiState.pageTitles[page]]?.getExplorationPage()?.let { explorationPage ->
-                    _uiState.explorationPageTitle = explorationPage.title
-                    explorationPage.rows.collect {
-                        _uiState.explorationPageBooksRawList = it.toMutableList()
-                    }
+                explorationPageMap[selectedId]?.getExplorationPage()?.let { explorationPage ->
+                    _uiState.explorationPageTitle = textProcessingRepository.processText { explorationPage.title }
+                    explorationPage.rows.collect { explorationBooksRows ->
+                        _uiState.explorationPageBooksRawList =
+                            explorationBooksRows.map { explorationBooksRow ->
+                                explorationBooksRow.copy(
+                                    bookList = explorationBooksRow.bookList.map {
+                                        textProcessingRepository.processExplorationBooksRow(it)
+                                    }
+                                )
+                            }
+                        }
                 }
             }
         }

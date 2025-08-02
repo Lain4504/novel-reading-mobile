@@ -57,7 +57,7 @@ object Wenku8Api: WebBookDataSource {
     private var allBookChapterListCacheId: Int = -1
     private var allBookChapterListCache: List<ChapterInformation> = emptyList()
     private val DATA_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    private val explorationExpandedPageDataSourceMap = mutableMapOf<String, ExplorationExpandedPageDataSource>()
+    override val explorationExpandedPageDataSourceMap = mutableMapOf<String, ExplorationExpandedPageDataSource>()
     private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
     private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
@@ -77,7 +77,7 @@ object Wenku8Api: WebBookDataSource {
         while(true) {
             offLine = isOffLine()
             emit(offLine)
-            delay(3000)
+            delay(if (offLine) 2000 else 6000)
         }
     }
 
@@ -95,6 +95,7 @@ object Wenku8Api: WebBookDataSource {
                 }
             Jsoup
                 .connect("$host/")
+                .wenku8Cookie()
                 .timeout(2000)
                 .let {
                     if (ProxyPool.enable && !isLocalIpUnableUse)
@@ -145,7 +146,9 @@ object Wenku8Api: WebBookDataSource {
     }
 
     override fun getBookVolumes(id: Int): BookVolumes {
-        return BookVolumes(wenku8Api("action=book&do=list&aid=$id&t=0")
+        return BookVolumes(
+            id,
+            wenku8Api("action=book&do=list&aid=$id&t=0")
             ?.select("volume")
             ?.map { element ->
                 Volume(
@@ -217,16 +220,14 @@ object Wenku8Api: WebBookDataSource {
             }
     }
 
-    override suspend fun getExplorationPageMap(): Map<String, ExplorationPageDataSource> =
+    override val explorationPageDataSourceMap: Map<String, ExplorationPageDataSource> =
         mapOf(
             Pair("首页", Wenku8HomeExplorationPage),
             Pair("全部", Wenku8AllExplorationPage),
             Pair("分类", Wenku8TagsExplorationPage)
         )
 
-    override val explorationPageTitleList: List<String> = listOf("首页", "全部", "分类")
-
-    override fun getExplorationExpandedPageDataSourceMap(): Map<String, ExplorationExpandedPageDataSource> = explorationExpandedPageDataSourceMap
+    override val explorationPageIdList: List<String> = listOf("首页", "全部", "分类")
 
     override fun search(searchType: String, keyword: String): Flow<List<BookInformation>> {
         val searchResult = MutableStateFlow(emptyList<BookInformation>())
@@ -254,13 +255,13 @@ object Wenku8Api: WebBookDataSource {
         coroutineScope = CoroutineScope(Dispatchers.IO)
     }
 
-    override val searchTypeNameList =
-        listOf("按书名搜索", "按作者名搜索")
+    override val searchTypeIdList =
+        listOf("articlename", "author")
 
     override val searchTypeMap: Map<String, String> =
         mapOf(
-            Pair("按书名搜索", "articlename"),
-            Pair("按作者名搜索", "author"),
+            Pair("articlename", "按书名搜索"),
+            Pair("author", "按作者名搜索"),
         )
 
     override val searchTipMap: Map<String, String> =

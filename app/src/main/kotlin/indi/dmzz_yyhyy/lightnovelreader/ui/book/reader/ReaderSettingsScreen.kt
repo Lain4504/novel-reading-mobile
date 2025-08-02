@@ -228,16 +228,6 @@ fun LazyListScope.AppearancePage(
         )
     }
     item {
-        SettingsSwitchEntry(
-            modifier = Modifier.animateItem(),
-            iconRes = R.drawable.translate_24px,
-            title = stringResource(R.string.settings_trad_conversion),
-            description = stringResource(R.string.settings_trad_conversion_desc),
-            checked = settingState.enableSimplifiedTraditionalTransform,
-            booleanUserData = settingState.enableSimplifiedTraditionalTransformUserData,
-        )
-    }
-    item {
         SettingsMenuEntry(
             modifier = Modifier.animateItem(),
             iconRes = R.drawable.battery_android_full_24px,

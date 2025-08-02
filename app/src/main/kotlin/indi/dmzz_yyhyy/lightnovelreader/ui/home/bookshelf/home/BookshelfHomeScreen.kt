@@ -339,7 +339,6 @@ fun BookshelfHomeScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 fun LazyListScope.UpdatedBooks(
     uiState: BookshelfHomeUiState,
     onClickBook: (Int) -> Unit,

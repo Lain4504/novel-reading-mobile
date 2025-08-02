@@ -21,7 +21,7 @@ interface DetailUiState {
 
 class MutableDetailUiState: DetailUiState {
     override var bookInformation: BookInformation by mutableStateOf(BookInformation.empty())
-    override var bookVolumes: BookVolumes by mutableStateOf(BookVolumes.empty())
+    override var bookVolumes: BookVolumes by mutableStateOf(BookVolumes.empty(-1))
     override var userReadingData: UserReadingData by mutableStateOf(UserReadingData.empty())
     override var isCached: Boolean by mutableStateOf(false)
     override var downloadItem: DownloadItem? by mutableStateOf(null)

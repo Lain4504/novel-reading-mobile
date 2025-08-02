@@ -73,10 +73,12 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.navigateToSettingsTextFormattingRulesDestination
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import kotlinx.coroutines.delay
@@ -95,6 +97,7 @@ fun DetailScreen(
     onClickTag: (String) -> Unit,
     onClickCover: (String) -> Unit
 ) {
+    val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showExportBottomSheet by remember { mutableStateOf(false) }
     var exportSettings by remember { mutableStateOf(ExportSettings()) }
@@ -108,6 +111,9 @@ fun DetailScreen(
                 onClickBackButton = onClickBackButton,
                 onClickExport = {
                     showExportBottomSheet = true
+                },
+                onClickTextFormatting = {
+                    navController.navigateToSettingsTextFormattingRulesDestination(uiState.bookInformation.id)
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -330,6 +336,7 @@ private fun TopBar(
     bookVolumes: BookVolumes,
     onClickBackButton: () -> Unit,
     onClickExport: () -> Unit,
+    onClickTextFormatting: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     TopAppBar(
@@ -347,12 +354,17 @@ private fun TopBar(
             }
         },
         actions = {
-            println(bookVolumes.volumes)
             IconButton(
                 enabled = bookVolumes.volumes.isNotEmpty(),
                 onClick = onClickExport
             ) {
                 Icon(painterResource(id = R.drawable.file_export_24px), "export to epub")
+            }
+            IconButton(
+                enabled = bookVolumes.volumes.isNotEmpty(),
+                onClick = onClickTextFormatting
+            ) {
+                Icon(painterResource(id = R.drawable.find_replace_24px), "text formating")
             }
         },
         navigationIcon = {

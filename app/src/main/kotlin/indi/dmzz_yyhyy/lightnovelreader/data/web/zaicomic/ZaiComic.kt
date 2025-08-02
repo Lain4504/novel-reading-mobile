@@ -7,7 +7,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.exploration.RankingsExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.exploration.RecommendExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.exploration.TypesExplorationPageDataSource
@@ -112,7 +111,7 @@ object ZaiComic : WebBookDataSource {
             ?.let {
                 comicVolumesCacheMap[id] = it
                 it
-            } ?: BookVolumes.empty()
+            } ?: BookVolumes.empty(id)
     }
 
     override fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent {
@@ -147,19 +146,17 @@ object ZaiComic : WebBookDataSource {
         return chapterContent
     }
 
-    override suspend fun getExplorationPageMap(): Map<String, ExplorationPageDataSource> =
-        mapOf(
-            "探索" to RecommendExplorationPageDataSource,
-            "更新" to UpdateExplorationPageDataSource,
-            "分类" to TypesExplorationPageDataSource,
-            "排行" to RankingsExplorationPageDataSource
-        )
+    override val explorationPageDataSourceMap = mapOf(
+        "探索" to RecommendExplorationPageDataSource,
+        "更新" to UpdateExplorationPageDataSource,
+        "分类" to TypesExplorationPageDataSource,
+        "排行" to RankingsExplorationPageDataSource
+    )
 
-    override val explorationPageTitleList: List<String> =
+    override val explorationPageIdList: List<String> =
         listOf("探索", "更新", "分类", "排行")
 
-    override fun getExplorationExpandedPageDataSourceMap(): Map<String, ExplorationExpandedPageDataSource> =
-        mapOf()
+    override val explorationExpandedPageDataSourceMap: Map<String, ExplorationExpandedPageDataSource> = mapOf()
 
     override fun search(searchType: String, keyword: String): Flow<List<BookInformation>> {
         val comicList = MutableStateFlow(listOf<BookInformation>())
@@ -216,7 +213,7 @@ object ZaiComic : WebBookDataSource {
             "name" to "请输入漫画名称"
         )
 
-    override val searchTypeNameList: List<String> = listOf("按漫画名称搜索")
+    override val searchTypeIdList: List<String> = listOf("按漫画名称搜索")
 
     override fun stopAllSearch() {
         searchJob?.cancel()

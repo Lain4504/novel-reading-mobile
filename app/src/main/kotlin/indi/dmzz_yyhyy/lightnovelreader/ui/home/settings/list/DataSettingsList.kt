@@ -17,6 +17,7 @@ import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
@@ -102,6 +103,13 @@ fun DataSettingsList(
         title = stringResource(R.string.settings_select_data_source),
         description = stringResource(R.string.settings_select_data_source_desc),
         onClick = onClickChangeSource
+    )
+    SettingsSwitchEntry(
+        iconRes = R.drawable.wifi_proxy_24px,
+        title = "自动代理",
+        description = "自动从网络上获取代理ip, **但这将导致您所浏览的书本数据可能会被截获**",
+        checked = settingState.isUseProxy,
+        booleanUserData = settingState.isUseProxyUserData
     )
     SettingsClickableEntry(
         iconRes = R.drawable.bug_report_24px,

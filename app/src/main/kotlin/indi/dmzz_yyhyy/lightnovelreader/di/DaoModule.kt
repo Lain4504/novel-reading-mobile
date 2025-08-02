@@ -10,10 +10,10 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookRecordDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookshelfDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.FormattingRuleDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ReadingStatisticsDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserReadingDataDao
-import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import javax.inject.Singleton
 
 @Module
@@ -63,7 +63,7 @@ object DaoModule {
 
     @Provides
     @Singleton
-    fun provideStatisticsRepository(readingStatisticsDao: ReadingStatisticsDao, bookRecordDao: BookRecordDao): StatsRepository {
-        return StatsRepository(readingStatisticsDao, bookRecordDao)
+    fun provideFormattingRuleDao(db: LightNovelReaderDatabase): FormattingRuleDao {
+        return db.formattingRuleDao()
     }
 }

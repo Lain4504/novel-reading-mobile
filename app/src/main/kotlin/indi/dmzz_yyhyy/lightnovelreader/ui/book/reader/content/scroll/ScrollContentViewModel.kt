@@ -69,9 +69,8 @@ class ScrollContentViewModel(
                     if (now - lastWriteReadingProgress < 2500 && newProgress < 1f) return@collect
 
                     lastWriteReadingProgress = now
-                    val currentProgress = newProgress
                     coroutineScope.launch(Dispatchers.IO) {
-                        updateReadingProgress(currentProgress)
+                        updateReadingProgress(newProgress)
                     }
                 }
         }

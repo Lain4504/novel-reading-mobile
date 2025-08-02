@@ -34,6 +34,9 @@ class LightNovelReaderApplication : Application(), Configuration.Provider {
             loggerRepository.logLevel = LogLevel.from(userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path).getOrDefault("none"))
             loggerRepository.startLogging()
         }
+        coroutineScope.launch(Dispatchers.IO) {
+            ProxyPool.enable = userDataRepository.booleanUserData(UserDataPath.Settings.Data.IsUseProxy.path).getOrDefault(false)
+        }
         WorkManager.getInstance(this).cancelAllWork()
     }
 }

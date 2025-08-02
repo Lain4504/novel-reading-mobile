@@ -57,6 +57,7 @@ data class DetailData(
 
     fun toBookVolumes(): BookVolumes =
         BookVolumes(
+            id,
             volumes.mapIndexed { id, comicVolume ->
                 Volume(
                     volumeId = this.id*1000+id,
