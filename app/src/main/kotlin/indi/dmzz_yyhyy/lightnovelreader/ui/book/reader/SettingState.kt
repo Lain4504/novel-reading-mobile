@@ -51,6 +51,7 @@ class SettingState(
     val dynamicColorsKeyUserData = userDataRepository.booleanUserData(UserDataPath.Settings.Display.DynamicColors.path)
     val lightThemeNameUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.LightThemeName.path)
     val darkThemeNameUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkThemeName.path)
+    val blockBackModeUserData = userDataRepository.stringUserData(UserDataPath.Reader.BlockBackMode.path)
 
     val fontSize by fontSizeUserData.safeAsState(15f)
     val fontLineHeight by fontLineHeightUserData.safeAsState(7f)
@@ -86,4 +87,5 @@ class SettingState(
     val dynamicColorsKey by dynamicColorsKeyUserData.asState(false)
     val lightThemeName by lightThemeNameUserData.safeAsState("light_default")
     val darkThemeName by darkThemeNameUserData.safeAsState("dark_default")
+    val blockBackMode by blockBackModeUserData.safeAsState("none")
 }

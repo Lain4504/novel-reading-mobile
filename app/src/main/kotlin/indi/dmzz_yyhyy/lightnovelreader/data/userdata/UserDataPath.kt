@@ -45,6 +45,7 @@ sealed class UserDataPath(
         data object BackgroundColor : UserDataPath("backgroundColor", Reader)
         data object BackgroundImageUri : UserDataPath("backgroundImageUri", Reader)
         data object BackgroundDarkImageUri : UserDataPath("backgroundDarkImageUri", Reader)
+        data object BlockBackMode : UserDataPath("blockBackMode", Reader)
     }
     data object ReadingBooks : UserDataPath("reading_books")
     data object Search: UserDataPath("search") {
