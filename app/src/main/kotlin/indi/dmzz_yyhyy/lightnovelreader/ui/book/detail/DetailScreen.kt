@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -93,7 +94,8 @@ fun DetailScreen(
     onClickContinueReading: () -> Unit,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
-    onClickTag: (String) -> Unit
+    onClickTag: (String) -> Unit,
+    onClickCover: (String) -> Unit
 ) {
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -125,7 +127,8 @@ fun DetailScreen(
             onClickContinueReading = onClickContinueReading,
             cacheBook = cacheBook,
             requestAddBookToBookshelf = requestAddBookToBookshelf,
-            onClickTag = onClickTag
+            onClickTag = onClickTag,
+            onClickCover = onClickCover
         )
         AnimatedVisibility(visible = showExportBottomSheet) {
 
@@ -154,7 +157,8 @@ private fun Content(
     onClickContinueReading: () -> Unit,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
-    onClickTag: (String) -> Unit
+    onClickTag: (String) -> Unit,
+    onClickCover: (String) -> Unit
 ) {
     val infoBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
@@ -200,7 +204,8 @@ private fun Content(
                             translationY = scrolledY * 0.5f
                             previousOffset = lazyListState.firstVisibleItemScrollOffset
                         }
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    onClickCover = onClickCover
                 )
             }
             item {
@@ -375,7 +380,8 @@ private fun TopBar(
 @Composable
 private fun BookCardBlock(
     bookInformation: BookInformation,
-    modifier: Modifier
+    modifier: Modifier,
+    onClickCover: (String) -> Unit
 ) {
     Row(
         modifier = modifier
@@ -384,12 +390,21 @@ private fun BookCardBlock(
             .padding(horizontal = itemHorizontalPadding, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Cover(
-            height = 178.dp,
-            width = 122.dp,
-            url = bookInformation.coverUrl,
-            rounded = 8.dp
-        )
+        Box(
+            modifier = Modifier.wrapContentSize()
+                .clickable(
+                    onClick = {
+                        onClickCover(bookInformation.coverUrl)
+                    }
+                )
+        ) {
+            Cover(
+                height = 178.dp,
+                width = 122.dp,
+                url = bookInformation.coverUrl,
+                rounded = 8.dp
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()

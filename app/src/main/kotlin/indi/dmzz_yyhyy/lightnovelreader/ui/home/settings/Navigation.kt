@@ -21,15 +21,18 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
+import androidx.navigation.toRoute
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportContext
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportUserDataDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.MutableExportContext
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.SliderValueDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SourceChangeDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.wenku8ApiWebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.zaiComicWebDataSourceItem
+import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.SliderValueDialogViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.UpdatesAvailableDialogViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.navigateToSettingsDebugDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug.settingsDebugDestination
@@ -74,6 +77,7 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
     sourceChangeDialog()
     exportUserDataDialog()
     editTextFormattingRuleDialog()
+    sliderValueDialog()
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -121,6 +125,32 @@ private fun NavGraphBuilder.sourceChangeDialog() {
 private fun NavController.navigateToSourceChangeDialog() {
     navigate(Route.Main.SourceChangeDialog)
 }
+
+private fun NavGraphBuilder.sliderValueDialog() {
+    dialog<Route.SliderValueDialog> { entry ->
+        val navController = LocalNavController.current
+        val viewModel = hiltViewModel<SliderValueDialogViewModel>()
+        val route = entry.toRoute<Route.SliderValueDialog>()
+        val value by viewModel.init(route.floatUserDataPath).collectAsState(Float.NaN)
+
+        SliderValueDialog(
+            value = value,
+            onValueChange = { viewModel.setValue(it) },
+            onDismissRequest = { navController.popBackStack() },
+            onConfirmation = {
+                navController.popBackStack()
+            }
+        )
+
+    }
+}
+
+fun NavController.navigateToSliderValueDialog(
+    path: String
+) {
+    navigate(Route.SliderValueDialog(path))
+}
+
 
 private fun NavGraphBuilder.exportUserDataDialog() {
     dialog<Route.Main.ExportUserDataDialog> {

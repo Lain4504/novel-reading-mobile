@@ -5,10 +5,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -16,7 +12,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ZoomableImage
 
 @Composable
@@ -29,23 +24,15 @@ fun BaseContentComponent(
     fontWeight: FontWeight,
     fontFamily: FontFamily?,
     color: Color,
-    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
+    onZoomImage: (String) -> Unit
 ) {
     val trimmed = text.trim()
     if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-        var originalLayout by remember { mutableStateOf<ImageLayoutInfo?>(null) }
 
         ZoomableImage(
             imageUrl = trimmed,
             modifier = imageModifier,
-            onOriginalLayoutReady = { layoutInfo ->
-                originalLayout = layoutInfo
-            },
-            onZoomEnd = { zoomLayout ->
-                originalLayout?.let { orig ->
-                    onZoomImage(trimmed, orig, zoomLayout)
-                }
-            }
+            onZoomEnd = { onZoomImage(trimmed) }
         )
     } else {
         SelectionContainer {

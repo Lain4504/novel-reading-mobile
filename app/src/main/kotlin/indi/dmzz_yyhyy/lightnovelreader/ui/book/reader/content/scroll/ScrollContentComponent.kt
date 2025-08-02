@@ -35,7 +35,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.ImageLayoutInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
@@ -49,7 +48,7 @@ fun ScrollContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
+    onZoomImage: (String) -> Unit
 ) {
     ScrollContentTextComponent(
         modifier = modifier,
@@ -68,7 +67,7 @@ fun ScrollContentTextComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String, ImageLayoutInfo, ImageLayoutInfo) -> Unit
+    onZoomImage: (String) -> Unit
 ) {
     val density = LocalDensity.current
     val screenHeight = LocalContext.current.resources.displayMetrics.heightPixels

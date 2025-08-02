@@ -2,5 +2,5 @@
     <locale android:name="en" />
     <locale android:name="zh-Hans-CN"/>
     <locale android:name="zh-Hant-TW"/>
-<!--    <locale android:name="zh-Hant-HK"/>-->
+    <locale android:name="ru"/>
 </locale-config>

@@ -9,8 +9,8 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic.HOST
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.ZaiComic.getBookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.json.RecommendData
+import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.getImageSize
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
-import indi.dmzz_yyhyy.lightnovelreader.utils.getImageSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +43,7 @@ object RecommendExplorationPageDataSource : ExplorationPageDataSource {
                         if (it.type != 1) return@mapNotNull null
                         val coverSize = getImageSize(it.cover) ?: return@mapNotNull null
                         if (coverSize.width > coverSize.height ) {
-                            val bookInformation = getBookInformation(it.id) ?: return@mapNotNull null
+                            val bookInformation = getBookInformation(it.id)
                             return@mapNotNull ExplorationDisplayBook(
                                 it.id,
                                 it.title,

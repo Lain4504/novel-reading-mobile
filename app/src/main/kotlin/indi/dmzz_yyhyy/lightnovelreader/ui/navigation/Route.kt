@@ -112,15 +112,7 @@ object Route {
         }
         @Serializable
         data class ImageViewerDialog(
-            val imageUrl: String,
-            val originalX: Float,
-            val originalY: Float,
-            val originalWidth: Float,
-            val originalHeight: Float,
-            val startX: Float,
-            val startY: Float,
-            val startWidth: Float,
-            val startHeight: Float
+            val imageUrl: String
         )
 
     }
@@ -129,6 +121,10 @@ object Route {
     @Serializable
     data class AddBookToBookshelfDialog(
         val bookId: Int
+    )
+    @Serializable
+    data class SliderValueDialog(
+        val floatUserDataPath: String
     )
     @Serializable
     object DownloadManager

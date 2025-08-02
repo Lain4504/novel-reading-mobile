@@ -56,8 +56,8 @@
     <string name="settings_reader_line_spacing">行距</string>
     <string name="settings_reader_keep_screen_on">保持螢幕常亮</string>
     <string name="settings_reader_keep_screen_on_desc">在閱讀時保持螢幕亮起。可能會增加電量消耗</string>
-    <string name="settings_reader_battery_indicator">電池指示器</string>
-    <string name="settings_reader_battery_indicator_desc">在左下角顯示目前電池電量</string>
+    <string name="settings_reader_battery_indicator">電池指示器模式</string>
+    <string name="settings_reader_battery_indicator_desc">設定電池電量指示器的顯示模式</string>
     <string name="settings_reader_time_indicator">時間指示器</string>
     <string name="settings_reader_time_indicator_desc">在左下角顯示目前時間</string>
     <string name="settings_reader_chapter_indicator">章節指示器</string>
@@ -68,6 +68,7 @@
     <string name="settings_reader_page_mode_desc">切換捲動模式和翻頁模式</string>
     <string name="settings_reader_volume_key_control">音量鍵翻頁</string>
     <string name="settings_reader_volume_key_control_desc">使用音量+鍵翻到上一頁，音量-鍵翻到下一頁</string>
+    <string name="settings_reader_volume_key_interval">按鍵持續翻頁間隔</string>
     <string name="settings_reader_t2tp">點擊翻頁</string>
     <string name="settings_reader_t2tp_desc">啟用點擊翻頁。垂直滑動以呼叫選單</string>
     <string name="settings_reader_page_turn_anim">翻頁動畫</string>
@@ -285,4 +286,7 @@
     <string name="dialog_snap_bookmarks">書籤</string>
     <string name="dialog_snap_bookmarks_text">包括全部書本的書籤資訊</string>
     <string name="dialog_select_data_source_text">選擇使用的資料來源，這將清除快取並切換軟體資料來源。目前的使用者資料不會遺失，並將在下次切換回目前資料來源時還原。</string>
+    <string name="dialog_slider_custom">輸入數值</string>
+    <string name="dialog_slider_custom_illegal_value">請輸入合法的數值</string>
+
 </resources>

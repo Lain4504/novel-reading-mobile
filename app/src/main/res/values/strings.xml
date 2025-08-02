@@ -60,8 +60,8 @@
     <string name="settings_reader_line_spacing">Line Spacing</string>
     <string name="settings_reader_keep_screen_on">Keep Screen On</string>
     <string name="settings_reader_keep_screen_on_desc">Keep the screen active during reading. This may increase power consumption</string>
-    <string name="settings_reader_battery_indicator">Battery Indicator</string>
-    <string name="settings_reader_battery_indicator_desc">Display the current battery level in the bottom-left corner</string>
+    <string name="settings_reader_battery_indicator">Battery Display Mode</string>
+    <string name="settings_reader_battery_indicator_desc">Set the battery level indicator display mode</string>
     <string name="settings_reader_time_indicator">Time Indicator</string>
     <string name="settings_reader_time_indicator_desc">Display the current time in the bottom-left corner</string>
     <string name="settings_reader_chapter_indicator">Chapter Indicator</string>
@@ -72,6 +72,7 @@
     <string name="settings_reader_page_mode_desc">Switch between scrolling mode and page turn mode</string>
     <string name="settings_reader_volume_key_control">Volume Key Navigation</string>
     <string name="settings_reader_volume_key_control_desc">Use the volume + key to move to the previous page and the volume - key to move to the next page</string>
+    <string name="settings_reader_volume_key_interval">Key Continuous Flip Interval</string>
     <string name="settings_reader_t2tp">Tap to Turn Pages</string>
     <string name="settings_reader_t2tp_desc">Enable page turning by tapping, and change the menu trigger gesture to vertical swipe</string>
     <string name="settings_reader_page_turn_anim">Page Turn Animation</string>
@@ -289,5 +290,7 @@
     <string name="dialog_snap_bookmarks">Bookmarks</string>
     <string name="dialog_snap_bookmarks_text">Includes all book bookmarks.</string>
     <string name="dialog_select_data_source_text">Select the data source. This will clear the cache and switch the app\'s data source. Your current user data will remain intact and can be restored upon switching back.</string>
+    <string name="dialog_slider_custom">Enter Value</string>
+    <string name="dialog_slider_custom_illegal_value">Please enter a valid number.</string>
 
 </resources>

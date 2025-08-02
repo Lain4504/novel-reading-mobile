@@ -17,6 +17,7 @@ import androidx.navigation.toRoute
 import androidx.work.WorkInfo
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToImageViewerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
@@ -98,7 +99,8 @@ fun NavGraphBuilder.bookDetailDestination() {
                 }
             },
             requestAddBookToBookshelf = navController::navigateToAddBookToBookshelfDialog,
-            onClickTag = viewModel::onClickTag
+            onClickTag = viewModel::onClickTag,
+            onClickCover = navController::navigateToImageViewerDialog
         )
     }
 }

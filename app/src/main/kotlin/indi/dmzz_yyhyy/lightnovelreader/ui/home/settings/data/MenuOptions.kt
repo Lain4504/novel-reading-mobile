@@ -128,4 +128,10 @@ sealed class MenuOptions {
         val Default = option("default", R.string.key_default_text)
         val Customize = option("customize", R.string.key_customize_text)
     }
+
+    data object ReaderIndicatorBatteryDisplayMode: MenuOptions() {
+        val Hidden = option("hidden", R.string.key_reader_indicator_battery_display_mode_hidden)
+        val Classic = option("classic", R.string.key_reader_indicator_battery_display_mode_classic)
+        val Immersed = option("immersed", R.string.key_reader_indicator_battery_display_mode_immersed)
+    }
 }

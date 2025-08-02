@@ -1,8 +1,12 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
 import android.content.Intent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +52,9 @@ import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.navigateToSliderValueDialog
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
@@ -154,12 +160,15 @@ fun SettingsSliderEntry(
     value: Float,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
-    floatUserData: FloatUserData
+    floatUserData: FloatUserData,
+    steps: List<Float>? = null
 ) {
+    val navController = LocalNavController.current
     var tempValue by remember { mutableFloatStateOf(value) }
     LaunchedEffect(value) {
         tempValue = value
     }
+
     SettingsSliderEntry(
         iconRes = iconRes,
         modifier = modifier,
@@ -168,8 +177,12 @@ fun SettingsSliderEntry(
         value = tempValue,
         valueRange = valueRange,
         valueFormat = valueFormat,
+        steps = steps,
         onSlideChange = { tempValue = it },
-        onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) }
+        onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) },
+        onLongClick = {
+            navController.navigateToSliderValueDialog(floatUserData.path)
+        }
     )
 }
 
@@ -182,14 +195,31 @@ private fun SettingsSliderEntry(
     value: Float,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
+    steps: List<Float>? = null,
     onSlideChange: (Float) -> Unit,
-    onSliderChangeFinished: () -> Unit
+    onSliderChangeFinished: () -> Unit,
+    onLongClick: () -> Unit
 ) {
+    val actualSteps = steps?.distinct()?.sorted()
+    val sliderValue = if (actualSteps != null) {
+        actualSteps.indexOfFirst { it == value }.takeIf { it >= 0 }?.toFloat()
+            ?: actualSteps.indexOfFirst { it > value }.coerceAtLeast(0).toFloat()
+    } else value
+
+    val sliderRange = if (actualSteps != null) 0f..(actualSteps.lastIndex.toFloat())
+    else valueRange
+
+    val stepsCount = if (actualSteps != null) actualSteps.size - 2 else 0
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .combinedClickable(
+                onClick = { },
+                onLongClick = onLongClick
+            )
             .wrapContentHeight()
             .then(modifier)
             .wrapContentHeight()
@@ -209,7 +239,7 @@ private fun SettingsSliderEntry(
                     modifier = Modifier.size(24.dp),
                     painter = painterResource(iconRes),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = "Icon"
+                    contentDescription = null
                 )
             }
         }
@@ -227,17 +257,52 @@ private fun SettingsSliderEntry(
                 style = AppTypography.labelLarge
             )
             Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "${DecimalFormat("#.#").format(value)}$unit",
-                color = MaterialTheme.colorScheme.primary,
-                style = AppTypography.labelMedium,
-                maxLines = 1
-            )
+
+            val displayValue = if (actualSteps != null)
+                actualSteps[sliderValue.toInt()]
+            else value
+
+            Row(
+                modifier = Modifier
+                    .animateContentSize(
+                        animationSpec = tween(
+                            durationMillis = 250,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+            ) {
+                AnimatedText(
+                    text = "${DecimalFormat("#.#").format(displayValue)}",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = AppTypography.labelMedium,
+                    maxLines = 1
+                )
+
+                Spacer(Modifier.width(1.dp))
+
+                Text(
+                    text = unit,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = AppTypography.labelMedium,
+                    maxLines = 1
+                )
+            }
+
+
             Slider(
                 modifier = Modifier.fillMaxWidth(),
-                value = value,
-                valueRange = valueRange,
-                onValueChange = { onSlideChange(valueFormat(it)) },
+                value = sliderValue,
+                valueRange = sliderRange,
+                steps = stepsCount,
+                onValueChange = { raw ->
+                    val newValue = if (actualSteps != null) {
+                        val index = raw.roundToInt().coerceIn(0, actualSteps.lastIndex)
+                        actualSteps[index]
+                    } else {
+                        valueFormat(raw)
+                    }
+                    onSlideChange(newValue)
+                },
                 onValueChangeFinished = onSliderChangeFinished,
                 colors = SliderDefaults.colors(
                     inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
@@ -246,6 +311,7 @@ private fun SettingsSliderEntry(
         }
     }
 }
+
 
 @Composable
 fun SettingsMenuEntry(
