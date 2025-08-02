@@ -134,4 +134,10 @@ sealed class MenuOptions {
         val Classic = option("classic", R.string.key_reader_indicator_battery_display_mode_classic)
         val Immersed = option("immersed", R.string.key_reader_indicator_battery_display_mode_immersed)
     }
+
+    data object ReaderBackBlockMode: MenuOptions() {
+        val None = option("none", R.string.key_reader_back_block_mode_none)
+        val DoublePress = option("double_press", R.string.key_reader_back_block_mode_double_press)
+        val FullyBlocked = option("blocked", R.string.key_reader_back_block_mode_blocked)
+    }
 }
