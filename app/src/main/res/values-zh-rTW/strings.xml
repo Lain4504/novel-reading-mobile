@@ -30,6 +30,8 @@
     <string name="export_and_share">匯出並分享</string>
     <string name="choose_light_bg">選擇淺色背景</string>
     <string name="choose_dark_bg">選擇深色背景</string>
+    <string name="reader_back_press_again">再次點擊返回以退出閱讀</string>
+
     <!-- Hints -->
     <string name="nothing_here">沒有內容</string>
     <string name="nothing_here_desc_reading">閱讀一些書本後，它們會顯示在這裡</string>
@@ -75,6 +77,8 @@
     <string name="settings_reader_page_turn_anim_desc">設定翻頁動畫，選擇「無」時啟用快速翻頁</string>
     <string name="settings_reader_quick_chapter_switch">快速章節切換</string>
     <string name="settings_reader_quick_chapter_switch_desc">允許在章節的開頭或結尾翻頁時自動切換章節</string>
+    <string name="settings_reader_back_block_mode">阻止返回</string>
+    <string name="settings_reader_back_block_mode_desc">在閱讀器中防止誤觸返回。如果完全阻止，只能使用左上角的返回按鈕</string>
     <string name="settings_reader_auto_margin">自動邊距調整</string>
     <string name="settings_reader_auto_margin_desc">自動偵測並調整螢幕邊距，關閉以手動設定各邊距值</string>
     <string name="settings_reader_top_margin">頂部邊距</string>
