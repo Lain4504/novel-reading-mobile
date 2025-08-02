@@ -64,7 +64,6 @@ class ImageDownloader(
             return btData
         } catch (e: Exception) {
             e.printStackTrace()
-            println(strUrl)
         }
         return null
     }

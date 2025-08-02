@@ -92,7 +92,7 @@ fun LightNovelReaderTheme(
     }
 
     val (language, variant) = appLocale.split("-")
-    LocaleUtil.set(context, language = language, variant = variant)
+    LocaleUtil.set(language = language, variant = variant)
 
     CompositionLocalProvider(LocalAppTheme provides appTheme) {
         MaterialTheme(

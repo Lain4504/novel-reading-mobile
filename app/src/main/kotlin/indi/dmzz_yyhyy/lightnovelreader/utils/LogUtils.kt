@@ -18,7 +18,7 @@ import java.util.regex.Pattern
 import kotlin.system.exitProcess
 
 class LogUtils (
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext @field:ApplicationContext private val context: Context,
     private val loggerRepository: LoggerRepository
 ): Thread.UncaughtExceptionHandler {
     private val logsDir = File(context.cacheDir, "logs")

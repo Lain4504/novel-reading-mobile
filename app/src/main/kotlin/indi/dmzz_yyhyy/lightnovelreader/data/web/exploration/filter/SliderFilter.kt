@@ -7,7 +7,7 @@ abstract class SliderFilter(
     val description: String,
     defaultValue: Float,
     val valueRange: ClosedFloatingPointRange<Float>,
-    @IntRange(from = 0) val steps: Int = 0,
+    @field:IntRange(from = 0) val steps: Int = 0,
     private val onChange: () -> Unit
 ) : Filter() {
     abstract var enabled: Boolean
