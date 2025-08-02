@@ -283,5 +283,7 @@
     <string name="dialog_snap_bookmarks">Закладки</string>
     <string name="dialog_snap_bookmarks_text">Включает все закладки книг.</string>
     <string name="dialog_select_data_source_text">Выберите источник данных. Это очистит кэш и переключит источник данных приложения. Текущие пользовательские данные сохранятся и восстановятся при возврате.</string>
+    <string name="dialog_slider_custom">Введите значение</string>
+    <string name="dialog_slider_custom_illegal_value">Пожалуйста, введите допустимое число</string>
 
 </resources>

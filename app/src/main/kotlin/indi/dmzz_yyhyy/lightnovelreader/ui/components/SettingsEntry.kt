@@ -3,6 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.components
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +49,10 @@ import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.navigateToSliderValueDialog
+import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
@@ -155,8 +159,9 @@ fun SettingsSliderEntry(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
     floatUserData: FloatUserData,
-    steps: List<Float>? = null // ✅ 可选参数
+    steps: List<Float>? = null
 ) {
+    val navController = LocalNavController.current
     var tempValue by remember { mutableFloatStateOf(value) }
     LaunchedEffect(value) {
         tempValue = value
@@ -172,10 +177,12 @@ fun SettingsSliderEntry(
         valueFormat = valueFormat,
         steps = steps,
         onSlideChange = { tempValue = it },
-        onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) }
+        onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) },
+        onLongClick = {
+            navController.navigateToSliderValueDialog(floatUserData.path)
+        }
     )
 }
-
 
 @Composable
 private fun SettingsSliderEntry(
@@ -188,7 +195,8 @@ private fun SettingsSliderEntry(
     valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
     steps: List<Float>? = null,
     onSlideChange: (Float) -> Unit,
-    onSliderChangeFinished: () -> Unit
+    onSliderChangeFinished: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     val actualSteps = steps?.distinct()?.sorted()
     val sliderValue = if (actualSteps != null) {
@@ -206,7 +214,15 @@ private fun SettingsSliderEntry(
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(start = 18.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
+            .combinedClickable(
+                onClick = { },
+                onLongClick = onLongClick
+            )
+            .wrapContentHeight()
+            .then(modifier)
+            .wrapContentHeight()
+            .padding(start = 18.dp, end = 14.dp)
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
