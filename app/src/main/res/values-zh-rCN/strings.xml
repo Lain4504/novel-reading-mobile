@@ -282,5 +282,7 @@
     <string name="dialog_snap_bookmarks">书签</string>
     <string name="dialog_snap_bookmarks_text">包括全部书本的书签信息</string>
     <string name="dialog_select_data_source_text">选择使用的数据源，这将清除缓存并切换软件数据源。当前的用户数据不会丢失，并将在下次切换回当前数据源时恢复。</string>
+    <string name="dialog_slider_custom">输入值</string>
+    <string name="dialog_slider_custom_illegal_value">请输入合法的数值</string>
 
 </resources>
