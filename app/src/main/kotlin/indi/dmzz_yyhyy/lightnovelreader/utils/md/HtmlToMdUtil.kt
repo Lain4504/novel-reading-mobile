@@ -61,8 +61,6 @@ object HtmlToMdUtil {
                 }
             } else if (child is Element) {
                 processElement(child, lines)
-            } else {
-                println()
             }
         }
 

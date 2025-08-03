@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
+import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -17,9 +18,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,6 +36,7 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 
@@ -44,6 +49,8 @@ fun BookInfoBottomSheet(
     isVisible: Boolean,
     onDismissRequest: () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     @Composable
     fun InfoItem(
         title: String? = "",
@@ -81,7 +88,7 @@ fun BookInfoBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val context = LocalContext.current
-                val clipboardManager = LocalClipboardManager.current
+                val clipboard = LocalClipboard.current
 
                 Text(
                     text = content,
@@ -91,9 +98,13 @@ fun BookInfoBottomSheet(
                         .combinedClickable(
                             onClick = {},
                             onLongClick = {
-                                clipboardManager.setText(AnnotatedString(content))
-                                Toast.makeText(context, "内容已复制", Toast.LENGTH_SHORT)
-                                    .show()
+                                coroutineScope.launch {
+                                    val clipData = ClipData.newPlainText("content", content)
+                                    val clipEntry = ClipEntry(clipData = clipData)
+                                    clipboard.setClipEntry(clipEntry = clipEntry)
+                                    Toast.makeText(context, "内容已复制", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
                             },
                         )
                 )

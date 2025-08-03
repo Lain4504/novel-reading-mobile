@@ -27,7 +27,7 @@ import javax.inject.Singleton
 
 @Singleton
 class UpdateCheckRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext @field:ApplicationContext private val context: Context,
     private val userDataRepository: UserDataRepository,
     private val ketch: Ketch
 ) {

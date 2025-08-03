@@ -24,7 +24,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 @Singleton
 class LoggerRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext @field:ApplicationContext private val context: Context,
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val logsDir = File(context.cacheDir, "logs")

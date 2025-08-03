@@ -15,7 +15,6 @@ fun Document.asFormatedXml(): String {
     format.isExpandEmptyElements = false
     val strWtr = StringWriter()
     val xmlWrt = XMLWriter(strWtr, format)
-    println(this.asXML())
     xmlWrt.write(DocumentHelper.parseText(this.asXML()))
     xmlWrt.flush()
     xmlWrt.close()
