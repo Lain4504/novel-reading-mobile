@@ -19,8 +19,7 @@ class SliderValueDialogViewModel @Inject constructor(
 
     fun init(floatUserDataPath: String): Flow<Float> {
         floatUserData = userDataRepository.floatUserData(floatUserDataPath)
-        println(floatUserDataPath)
-        val value = floatUserData!!.getFlowWithDefault(Float.NaN).onEach { println("value got $it") }
+        val value = floatUserData!!.getFlowWithDefault(Float.NaN)
         return value
     }
 
@@ -29,7 +28,6 @@ class SliderValueDialogViewModel @Inject constructor(
             return
         }
         CoroutineScope(Dispatchers.IO).launch {
-            println("SET VALUE $value")
             floatUserData?.asynchronousSet(value)
         }
     }

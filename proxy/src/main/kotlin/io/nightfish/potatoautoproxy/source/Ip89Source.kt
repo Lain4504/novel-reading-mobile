@@ -35,7 +35,6 @@ fun main() {
                 port = it.selectFirst("td:nth-child(2) > div")?.text()?.toInt() ?: return@mapNotNull null
             )
         }
-        .also { println(it) }
         .forEach {
             try {
                 Jsoup
@@ -43,7 +42,6 @@ fun main() {
                     .timeout(4000)
                     .proxy(it.host, it.port)
                     .ignoreSSLGet()
-                println(it)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

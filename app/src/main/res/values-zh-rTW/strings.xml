@@ -189,7 +189,7 @@
     <string name="publishing_house">文庫</string>
     <string name="filter_by_publishing_house">文庫篩選</string>
     <string name="filter_by_publishing_house_desc">根據小說文庫的篩選。</string>
-    <string name="book_info_update_date">%d-%d-%d 更新</string>
+    <string name="book_info_update_date">%1$d-%2$d-%3$d 更新</string>
     <string name="book_info_word_count_kilo">%dK 字</string>
     <string name="name">名稱</string>
     <string name="bookshelf_name">書架名稱</string>

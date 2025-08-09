@@ -9,7 +9,6 @@ import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.FormattingRuleDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.FormattingRuleEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessor
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,11 +24,8 @@ class FormatRepository @Inject constructor(
     private val processorMap = mutableMapOf<Int, SnapshotStateList<FormattingRule>>()
 
     init {
-        println("fuck u！！！！")
         CoroutineScope(Dispatchers.IO).launch {
             formattingRuleDao.getAllBookRuleEntityFlow().collect { formattingRuleEntities ->
-                println("wdasdasad")
-                println(formattingRuleEntities)
                 processorMap.values.forEach { it.clear() }
                 for (formattingRule in formattingRuleEntities) {
                     if (!processorMap.contains(formattingRule.bookId))
@@ -45,7 +41,6 @@ class FormatRepository @Inject constructor(
                         )
                     )
                 }
-                println(processorMap)
             }
         }
     }
@@ -157,7 +152,7 @@ class FormatRepository @Inject constructor(
     fun getStateBookFormattingRules(bookId: Int): List<FormattingRule> {
         if (!processorMap.contains(bookId))
             processorMap[bookId] = mutableStateListOf()
-        return processorMap[bookId]!!.debugPrint()
+        return processorMap[bookId]!!
     }
 
     override fun processText(text: String): String = text
