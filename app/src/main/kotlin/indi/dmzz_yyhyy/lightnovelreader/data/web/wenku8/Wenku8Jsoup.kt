@@ -29,7 +29,7 @@ fun Connection.wenku8Cookie(): Connection =
         .cookie(" Hm_lvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294365,1739294389,1739294442,1739294467")
         .cookie(" Hm_lpvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294503")
 
-fun wenku8Api(request: String): Document? {
+suspend fun wenku8Api(request: String): Document? {
     Log.i("Wenku8API", "require to wenku8 with $request")
     return Jsoup
         .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
