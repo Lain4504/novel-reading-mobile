@@ -15,10 +15,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDesti
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
-import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationExpandDestination() {
@@ -54,5 +51,6 @@ fun NavGraphBuilder.explorationExpandDestination() {
 }
 
 fun NavController.navigateToExplorationExpandDestination(expandedPageDataSourceId: String) {
+    if (!this.isResumed()) return
     navigate(Route.Main.Exploration.Expanded(expandedPageDataSourceId))
 }

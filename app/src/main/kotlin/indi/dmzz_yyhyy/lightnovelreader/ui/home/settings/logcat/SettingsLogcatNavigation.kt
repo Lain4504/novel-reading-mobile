@@ -11,6 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.settingsLogcatDestination() {
@@ -36,6 +37,7 @@ fun NavGraphBuilder.settingsLogcatDestination() {
 
 
 fun NavController.navigateToSettingsLogcatDestination() {
+    if (!this.isResumed()) return
     navigate(Route.Main.Settings.Logcat)
 }
 

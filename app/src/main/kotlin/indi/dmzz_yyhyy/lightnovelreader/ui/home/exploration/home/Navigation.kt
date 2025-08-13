@@ -13,6 +13,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.search.navigateToSearchDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.explorationHomeDestination(sharedTransitionScope: SharedTransitionScope) {
@@ -39,5 +40,6 @@ fun NavGraphBuilder.explorationHomeDestination(sharedTransitionScope: SharedTran
 }
 
 fun NavController.navigateToExplorationHomeDestination() {
+    if (!this.isResumed()) return
     navigate(Route.Main.Exploration.Home)
 }

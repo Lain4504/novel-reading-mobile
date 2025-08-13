@@ -20,6 +20,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDesti
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToImageViewerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
@@ -106,6 +107,7 @@ fun NavGraphBuilder.bookDetailDestination() {
 }
 
 fun NavController.navigateToBookDetailDestination(bookId: Int) {
+    if (!this.isResumed()) return
     navigate(Route.Book.Detail(bookId))
 }
 

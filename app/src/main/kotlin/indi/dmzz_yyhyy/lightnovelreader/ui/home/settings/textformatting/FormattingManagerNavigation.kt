@@ -14,6 +14,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.EditTextFormattingRuleDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.navigateToSettingsTextFormattingRulesDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.settingsTextFormattingRulesDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.editTextFormattingRuleDialog() {
@@ -47,6 +48,7 @@ fun NavGraphBuilder.editTextFormattingRuleDialog() {
 }
 
 fun NavController.navigateToEditTextFormattingRuleDialog(bookId: Int, ruleId: Int) {
+    if (!this.isResumed()) return
     navigate(Route.Main.EditTextFormattingRuleDialog(bookId, ruleId))
 }
 
@@ -73,5 +75,6 @@ fun NavGraphBuilder.settingsTextFormattingManagerDestination() {
 }
 
 fun NavController.navigateToSettingsTextFormattingManagerDestination() {
+    if (!this.isResumed()) return
     navigate(Route.Main.Settings.TextFormatting.Manager)
 }

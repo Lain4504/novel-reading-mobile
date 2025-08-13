@@ -74,9 +74,13 @@ fun LazyListState.isScrollingUp(): State<Boolean> {
 }
 
 fun NavController.popBackStackIfResumed() {
-    if (this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+    if (isResumed()) {
         popBackStack()
     }
+}
+
+fun NavController.isResumed(): Boolean {
+    return this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED
 }
 
 fun quickSelect(list: List<Int>, percentile: Double): Int {
@@ -108,13 +112,6 @@ private fun partition(arr: MutableList<Int>, left: Int, right: Int): Int {
     }
     Collections.swap(arr, i, right)
     return i
-}
-
-fun <K, V> MutableMap<K, V>.putWithLimit(key: K, value: V) {
-    if (size >= 50) {
-        keys.firstOrNull()?.let { remove(it) }
-    }
-    this[key] = value
 }
 
 val homeRoutes = listOf(
