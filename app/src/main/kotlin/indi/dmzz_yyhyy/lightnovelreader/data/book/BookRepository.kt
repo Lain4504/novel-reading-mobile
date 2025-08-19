@@ -33,24 +33,28 @@ class BookRepository @Inject constructor(
     private val textProcessingRepository: TextProcessingRepository,
     private val workManager: WorkManager
 ) {
-    fun getStateBookInformation(id: Int, coroutineScope: CoroutineScope): BookInformation = textProcessingRepository.processBookInformation {
-        val bookInformation = MutableBookInformation.empty()
-        bookInformation.id = id
-        coroutineScope.launch(Dispatchers.IO) {
-            localBookDataSource.getBookInformation(id)?.let(bookInformation::update)
-            webBookDataSource.getBookInformation(id).let {
-                if (it.isEmpty()) return@launch
-                localBookDataSource.updateBookInformation(it)
-                bookInformation.update(textProcessingRepository.processBookInformation { it })
+    fun getStateBookInformation(id: Int, coroutineScope: CoroutineScope): BookInformation =
+        textProcessingRepository.processBookInformation {
+            val bookInformation = MutableBookInformation.empty()
+            bookInformation.id = id
+            coroutineScope.launch(Dispatchers.IO) {
+                localBookDataSource.getBookInformation(id)?.let(bookInformation::update)
+                webBookDataSource.getBookInformation(id).let {
+                    if (it.isEmpty()) return@launch
+                    localBookDataSource.updateBookInformation(it)
+                    bookInformation.update(textProcessingRepository.processBookInformation { it })
+                }
             }
+            return@processBookInformation bookInformation
         }
-        return@processBookInformation bookInformation
-    }
 
     fun getBookInformationFlow(id: Int, coroutineScope: CoroutineScope): Flow<BookInformation> {
-        val bookInformation: MutableStateFlow<BookInformation> = MutableStateFlow(BookInformation.empty(id))
+        val bookInformation: MutableStateFlow<BookInformation> =
+            MutableStateFlow(BookInformation.empty(id))
         coroutineScope.launch(Dispatchers.IO) {
-            bookInformation.update { localBookDataSource.getBookInformation(id) ?: BookInformation.empty(id) }
+            bookInformation.update {
+                localBookDataSource.getBookInformation(id) ?: BookInformation.empty(id)
+            }
             webBookDataSource.getBookInformation(id).let { information ->
                 localBookDataSource.updateBookInformation(information)
                 localBookDataSource.getBookInformation(id)?.let { newInfo ->
@@ -80,29 +84,32 @@ class BookRepository @Inject constructor(
             MutableStateFlow(BookVolumes.empty(id))
 
         coroutineScope.launch(Dispatchers.IO) {
+            bookVolumes.update {
+                localBookDataSource.getBookVolumes(id) ?: BookVolumes.empty(id)
+            }
+            webBookDataSource.getBookVolumes(id).let { newBookVolumes ->
+                localBookDataSource.updateBookVolumes(id, newBookVolumes)
                 bookVolumes.update {
-                    localBookDataSource.getBookVolumes(id) ?: BookVolumes.empty(id)
-                }
-                webBookDataSource.getBookVolumes(id).let { newBookVolumes ->
-                    localBookDataSource.updateBookVolumes(id, newBookVolumes)
-                    bookVolumes.update {
-                        newBookVolumes
-                    }
+                    newBookVolumes
                 }
             }
+        }
 
         return bookVolumes.map {
             textProcessingRepository.processBookVolumes { it }
         }
     }
 
-    fun getStateChapterContent(chapterId: Int, bookId: Int, coroutineScope: CoroutineScope): ChapterContent =
+    fun getStateChapterContent(
+        chapterId: Int,
+        bookId: Int,
+        coroutineScope: CoroutineScope
+    ): ChapterContent =
         textProcessingRepository.processChapterContent(bookId) {
             val chapterContent = MutableChapterContent.empty()
             chapterContent.id = chapterId
             coroutineScope.launch(Dispatchers.IO) {
-                localBookDataSource.getChapterContent(chapterId)?.let(chapterContent::update)
-                webBookDataSource.getChapterContent(chapterId, bookId).let {
+                localBookDataSource.getChapterContent(chapterId)?.let {
                     if (it.isEmpty()) return@launch
                     chapterContent.update(
                         it.toMutable().apply {
@@ -110,12 +117,17 @@ class BookRepository @Inject constructor(
                                 .processChapterContent(bookId) { this }
                                 .content
                         })
-                    localBookDataSource.updateChapterContent(it)
                 }
-                chapterContent.content =
-                    textProcessingRepository
-                        .processChapterContent(bookId) { chapterContent }
-                        .content
+                webBookDataSource.getChapterContent(chapterId, bookId).let {
+                    if (it.isEmpty()) return@launch
+                    localBookDataSource.updateChapterContent(it)
+                    chapterContent.update(
+                        it.toMutable().apply {
+                            this.content = textProcessingRepository
+                                .processChapterContent(bookId) { this }
+                                .content
+                        })
+                }
             }
             return@processChapterContent chapterContent
         }
@@ -135,13 +147,20 @@ class BookRepository @Inject constructor(
             }
         }
 
-    fun getChapterContentFlow(chapterId: Int, bookId: Int, coroutineScope: CoroutineScope): Flow<ChapterContent> {
+    fun getChapterContentFlow(
+        chapterId: Int,
+        bookId: Int,
+        coroutineScope: CoroutineScope
+    ): Flow<ChapterContent> {
         val chapterContent: MutableStateFlow<ChapterContent> =
             MutableStateFlow(
                 ChapterContent.empty().toMutable().apply { id = chapterId }
             )
         coroutineScope.launch(Dispatchers.IO) {
-            localBookDataSource.getChapterContent(chapterId) ?: MutableChapterContent.empty().apply { id = chapterId }
+            chapterContent.update {
+                localBookDataSource.getChapterContent(chapterId) ?: MutableChapterContent.empty()
+                    .apply { id = chapterId }
+            }
             webBookDataSource.getChapterContent(
                 chapterId = chapterId,
                 bookId = bookId
@@ -238,5 +257,6 @@ class BookRepository @Inject constructor(
         return true
     }
 
-    fun progressBookTagClick(tag: String, navController: NavController) = webBookDataSource.progressBookTagClick(tag, navController)
+    fun progressBookTagClick(tag: String, navController: NavController) =
+        webBookDataSource.progressBookTagClick(tag, navController)
 }
