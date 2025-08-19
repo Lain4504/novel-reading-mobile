@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -46,9 +47,8 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -56,11 +56,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
@@ -131,7 +132,6 @@ fun DetailScreen(
             onClickCover = onClickCover
         )
         AnimatedVisibility(visible = showExportBottomSheet) {
-
             ExportBottomSheet(
                 sheetState = exportBottomSheetState,
                 bookVolumes = uiState.bookVolumes,
@@ -166,156 +166,155 @@ private fun Content(
     var hideReadChapters by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
-    var scrolledY by remember { mutableFloatStateOf(0f) }
-    var previousOffset by remember { mutableIntStateOf(0) }
-    var showEmptyPage by remember { mutableStateOf(false) }
-
-    LaunchedEffect(uiState.bookInformation.isEmpty()) {
-        if (uiState.bookInformation.isEmpty()) {
-            delay(140)
-            showEmptyPage = true
-        } else {
-            showEmptyPage = false
+    val scrollOffset by remember {
+        derivedStateOf {
+            lazyListState.firstVisibleItemScrollOffset
         }
     }
 
-    AnimatedVisibility(
-        visible = showEmptyPage,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Loading()
-    }
-    AnimatedVisibility(
-        visible = !uiState.bookInformation.isEmpty(),
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-            state = lazyListState
-        ) {
-            item {
-                BookCardBlock(
-                    bookInformation = uiState.bookInformation,
-                    modifier = Modifier
-                        .graphicsLayer {
-                            scrolledY += lazyListState.firstVisibleItemScrollOffset - previousOffset
-                            translationY = scrolledY * 0.5f
-                            previousOffset = lazyListState.firstVisibleItemScrollOffset
-                        }
-                        .fillMaxWidth(),
-                    onClickCover = onClickCover
-                )
+    Crossfade(targetState = uiState.bookInformation.isEmpty(), label = "") { isEmpty ->
+        if (isEmpty) {
+            var showLoading by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                delay(180)
+                showLoading = true
             }
-            item {
-                TagsBlock(
-                    bookInformation = uiState.bookInformation,
-                    onClickTag = onClickTag
-                )
+            if (showLoading) {
+                Loading()
             }
-            item {
-                QuickOperationsBlock(
-                    uiState = uiState,
-                    onClickAddToBookShelf = { requestAddBookToBookshelf(uiState.bookInformation.id) },
-                    onClickCache = { cacheBook(uiState.bookInformation.id) },
-                    onClickShowInfo = { showInfoBottomSheet = true }
-                )
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                IntroBlock(uiState.bookInformation.description)
-            }
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.detail_contents),
-                        style = AppTypography.titleLarge,
-                        fontWeight = FontWeight.W600
-                    )
-                    AssistChip(
-                        onClick = { hideReadChapters = !hideReadChapters },
-                        label = {
-                            Text(
-                                text = stringResource(
-                                    if (hideReadChapters) R.string.show_read
-                                    else R.string.hide_read))
-                                },
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.scale(0.75f, 0.75f),
-                                painter = painterResource(
-                                    if (hideReadChapters) R.drawable.filled_menu_book_24px
-                                    else R.drawable.done_all_24px
-                                ),
-                                contentDescription = "Toggle Hide Read"
-                            )
-                        },
-                        modifier = Modifier.padding(8.dp)
+        } else {
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                state = lazyListState
+            ) {
+                item {
+                    BookCardBlock(
+                        bookInformation = uiState.bookInformation,
+                        modifier = Modifier
+                            .drawWithContent {
+                                val offsetY = scrollOffset * 0.5f
+                                translate(left = 0f, top = offsetY) {
+                                    this@drawWithContent.drawContent()
+                                }
+                            }.fillMaxWidth(),
+                        onClickCover = onClickCover
                     )
                 }
-            }
-            item {
-                AnimatedVisibility(
-                    visible = uiState.bookVolumes.volumes.isEmpty(),
-                    exit = shrinkVertically()
-                ) {
-                    Box(
+                item {
+                    TagsBlock(
+                        bookInformation = uiState.bookInformation,
+                        onClickTag = onClickTag
+                    )
+                }
+                item {
+                    QuickOperationsBlock(
+                        uiState = uiState,
+                        onClickAddToBookShelf = { requestAddBookToBookshelf(uiState.bookInformation.id) },
+                        onClickCache = { cacheBook(uiState.bookInformation.id) },
+                        onClickShowInfo = { showInfoBottomSheet = true }
+                    )
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    IntroBlock(uiState.bookInformation.description)
+                }
+                item {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(horizontal = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Loading()
+                        Text(
+                            text = stringResource(R.string.detail_contents),
+                            style = AppTypography.titleLarge,
+                            fontWeight = FontWeight.W600
+                        )
+                        AssistChip(
+                            onClick = { hideReadChapters = !hideReadChapters },
+                            label = {
+                                Text(
+                                    text = stringResource(
+                                        if (hideReadChapters) R.string.show_read
+                                        else R.string.hide_read
+                                    )
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    modifier = Modifier.scale(0.75f, 0.75f),
+                                    painter = painterResource(
+                                        if (hideReadChapters) R.drawable.filled_menu_book_24px
+                                        else R.drawable.done_all_24px
+                                    ),
+                                    contentDescription = "Toggle Hide Read"
+                                )
+                            },
+                            modifier = Modifier.padding(8.dp)
+                        )
                     }
                 }
-            }
-
-            items(uiState.bookVolumes.volumes, key = { it.volumeId }) { volume ->
-                VolumeItem(
-                    volume = volume,
-                    hideReadChapters = hideReadChapters,
-                    readCompletedChapterIds = uiState.userReadingData.readCompletedChapterIds,
-                    onClickChapter = onClickChapter,
-                    volumesSize = uiState.bookVolumes.volumes.size,
-                    lastReadingChapterId = uiState.userReadingData.lastReadChapterId
-                )
-            }
-            item {
-                Spacer(Modifier.height(48.dp))
-            }
-        }
-        AnimatedVisibility(
-            visible = lazyListState.canScrollForward && lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(end = 24.dp, bottom = 54.dp)
-            ) {
-                ExtendedFloatingActionButton(
-                    modifier = Modifier.align(Alignment.BottomEnd),
-                    onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
-                    else onClickContinueReading,
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.filled_menu_book_24px),
-                            contentDescription = null
-                        )
-                    },
-                    text = {
-                        Text(if (uiState.userReadingData.lastReadChapterId == -1) stringResource(R.string.start_reading)
-                        else stringResource(id = R.string.continue_reading))
+                item {
+                    AnimatedVisibility(
+                        visible = uiState.bookVolumes.volumes.isEmpty(),
+                        exit = shrinkVertically()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Loading()
+                        }
                     }
-                )
+                }
+
+                items(
+                    uiState.bookVolumes.volumes,
+                    key = { it.volumeId },
+                    contentType = { "volume" }
+                ) { volume ->
+                    VolumeItem(
+                        volume = volume,
+                        hideReadChapters = hideReadChapters,
+                        readCompletedChapterIds = uiState.userReadingData.readCompletedChapterIds,
+                        onClickChapter = onClickChapter,
+                        volumesSize = uiState.bookVolumes.volumes.size,
+                        lastReadingChapterId = uiState.userReadingData.lastReadChapterId
+                    )
+                }
+                item {
+                    Spacer(Modifier.height(48.dp))
+                }
+            }
+            AnimatedVisibility(
+                visible = lazyListState.canScrollForward && lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(end = 24.dp, bottom = 54.dp)
+                ) {
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.align(Alignment.BottomEnd),
+                        onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
+                        else onClickContinueReading,
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.filled_menu_book_24px),
+                                contentDescription = null
+                            )
+                        },
+                        text = {
+                            Text(if (uiState.userReadingData.lastReadChapterId == -1) stringResource(R.string.start_reading)
+                            else stringResource(id = R.string.continue_reading))
+                        }
+                    )
+                }
             }
         }
     }
@@ -484,7 +483,7 @@ private fun BookCardBlock(
 }
 
 @Composable
-    private fun TagsBlock(
+private fun TagsBlock(
     bookInformation: BookInformation,
     onClickTag: (String) -> Unit
 ) {
@@ -530,45 +529,45 @@ private fun BookCardBlock(
 }
 
 @Composable
+fun QuickOperationButton(
+    icon: Painter,
+    title: String,
+    onClick: () -> Unit,
+) {
+    Button(
+        contentPadding = PaddingValues(12.dp),
+        modifier = Modifier
+            .height(72.dp)
+            .fillMaxWidth(),
+        colors = ButtonDefaults.textButtonColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        shape = RoundedCornerShape(0.dp),
+        onClick = onClick
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                modifier = Modifier.size(18.dp),
+                painter = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            AnimatedText(
+                text = title,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
 private fun QuickOperationsBlock(
     uiState: DetailUiState,
     onClickAddToBookShelf: () -> Unit,
     onClickCache: () -> Unit,
     onClickShowInfo: () -> Unit
 ) {
-    @Composable
-    fun QuickOperationButton(
-        icon: Painter,
-        title: String,
-        onClick: () -> Unit,
-    ) {
-        Button(
-            contentPadding = PaddingValues(12.dp),
-            modifier = Modifier
-                .height(72.dp)
-                .fillMaxWidth(),
-            colors = ButtonDefaults.textButtonColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-            shape = RoundedCornerShape(0.dp),
-            onClick = onClick
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    modifier = Modifier.size(18.dp),
-                    painter = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                AnimatedText(
-                    text = title,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
