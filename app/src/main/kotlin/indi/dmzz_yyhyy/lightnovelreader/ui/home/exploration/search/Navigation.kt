@@ -10,6 +10,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDesti
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.explorationSearchDestination() {
@@ -39,5 +40,6 @@ fun NavGraphBuilder.explorationSearchDestination() {
 }
 
 fun NavController.navigateToSearchDestination() {
+    if (!this.isResumed()) return
     navigate(Route.Main.Exploration.Search)
 }

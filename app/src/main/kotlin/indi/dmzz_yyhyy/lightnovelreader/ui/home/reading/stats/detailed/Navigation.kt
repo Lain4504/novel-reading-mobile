@@ -7,11 +7,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 fun NavController.navigateToReadingStatsDetailedDestination(target: Int) {
+    if (!this.isResumed()) return
     navigate(Route.Main.Reading.Stats.Detailed(target))
 }
 

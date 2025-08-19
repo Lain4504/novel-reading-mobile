@@ -9,6 +9,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.navigateToReadingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.detailed.readingStatsDetailedDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.readingStatsNavigation() {
@@ -33,5 +34,6 @@ fun NavGraphBuilder.readingStatsOverviewDestination() {
 }
 
 fun NavController.navigateToReadingStatsDestination() {
+    if (!this.isResumed()) return
     navigate(Route.Main.Reading.Stats)
 }

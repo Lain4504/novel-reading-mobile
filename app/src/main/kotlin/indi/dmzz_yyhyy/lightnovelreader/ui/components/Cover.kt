@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
@@ -21,7 +22,11 @@ import coil.request.ImageRequest
 fun Cover(width: Dp, height: Dp, url: String, rounded: Dp = 8.dp) {
     Box(modifier = Modifier
         .size(width, height)
-        .clip(RoundedCornerShape(rounded))) {
+        .graphicsLayer {
+            shape = RoundedCornerShape(rounded)
+            clip = true
+        }
+    ) {
         Box(
             Modifier
             .size(width, height)

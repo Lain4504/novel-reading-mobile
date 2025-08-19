@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.downloadManager() {
@@ -23,5 +24,6 @@ fun NavGraphBuilder.downloadManager() {
 }
 
 fun NavController.navigateToDownloadManager() {
+    if (!this.isResumed()) return
     navigate(Route.DownloadManager)
 }

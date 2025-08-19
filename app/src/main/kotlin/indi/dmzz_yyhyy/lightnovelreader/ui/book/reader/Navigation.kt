@@ -24,6 +24,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSetting
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.saveBitmapAsPng
 import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.urlToBitmap
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,6 +52,7 @@ fun NavGraphBuilder.bookReaderDestination() {
 }
 
 fun NavController.navigateToBookReaderDestination(bookId: Int, chapterId: Int, context: Context) {
+    if (!this.isResumed()) return
     val entry = this.getBackStackEntry<Route.Book>()
     val viewModel = ViewModelProvider.create(
         entry,
@@ -83,6 +85,7 @@ private fun NavGraphBuilder.colorPickerDialog() {
 }
 
 fun NavController.navigateToColorPickerDialog(colorUserDataPath: String, colors: List<Long>) {
+    if (!this.isResumed()) return
     navigate(Route.Book.ColorPickerDialog(colorUserDataPath, colors.toLongArray()))
 }
 

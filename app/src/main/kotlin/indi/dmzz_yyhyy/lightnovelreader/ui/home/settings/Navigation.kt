@@ -44,6 +44,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.settings
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.settingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -145,9 +146,8 @@ private fun NavGraphBuilder.sliderValueDialog() {
     }
 }
 
-fun NavController.navigateToSliderValueDialog(
-    path: String
-) {
+fun NavController.navigateToSliderValueDialog(path: String) {
+    if (!this.isResumed()) return
     navigate(Route.SliderValueDialog(path))
 }
 

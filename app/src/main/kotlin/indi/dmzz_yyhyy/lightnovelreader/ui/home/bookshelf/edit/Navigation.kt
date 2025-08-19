@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.DeleteBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.bookshelfEditDestination() {
@@ -57,5 +58,6 @@ private fun NavGraphBuilder.deleteBookshelfDialog() {
 }
 
 private fun NavController.navigateToDeleteBookshelfDialog(bookId: Int) {
+    if (!this.isResumed()) return
     navigate(Route.Main.Bookshelf.DeleteBookshelfDialog(bookId))
 }
