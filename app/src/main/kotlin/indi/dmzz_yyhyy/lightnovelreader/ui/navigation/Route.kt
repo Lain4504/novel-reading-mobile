@@ -124,6 +124,7 @@ object Route {
     )
     @Serializable
     data class SliderValueDialog(
+        val value: Float,
         val floatUserDataPath: String
     )
     @Serializable

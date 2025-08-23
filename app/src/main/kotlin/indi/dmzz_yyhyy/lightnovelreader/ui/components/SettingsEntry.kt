@@ -181,7 +181,7 @@ fun SettingsSliderEntry(
         onSlideChange = { tempValue = it },
         onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) },
         onLongClick = {
-            navController.navigateToSliderValueDialog(floatUserData.path)
+            navController.navigateToSliderValueDialog(floatUserData.path, tempValue)
         }
     )
 }
