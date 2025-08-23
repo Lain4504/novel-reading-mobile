@@ -56,12 +56,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
@@ -72,10 +71,10 @@ import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
+import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
@@ -83,6 +82,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.na
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import kotlinx.coroutines.delay
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -164,24 +165,19 @@ private fun Content(
 
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     var hideReadChapters by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
-    val scrollOffset by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemScrollOffset
-        }
+    val scrollOffset by remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
+
+    LaunchedEffect(Unit) {
+        delay(180)
+        showLoading = true
     }
 
     Crossfade(targetState = uiState.bookInformation.isEmpty(), label = "") { isEmpty ->
         if (isEmpty) {
-            var showLoading by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
-                delay(180)
-                showLoading = true
-            }
-            if (showLoading) {
-                Loading()
-            }
+            if (showLoading) Loading()
         } else {
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
@@ -191,12 +187,10 @@ private fun Content(
                     BookCardBlock(
                         bookInformation = uiState.bookInformation,
                         modifier = Modifier
-                            .drawWithContent {
-                                val offsetY = scrollOffset * 0.5f
-                                translate(left = 0f, top = offsetY) {
-                                    this@drawWithContent.drawContent()
-                                }
-                            }.fillMaxWidth(),
+                            .graphicsLayer {
+                                translationY = scrollOffset * 0.5f
+                            }
+                            .fillMaxWidth(),
                         onClickCover = onClickCover
                     )
                 }
@@ -215,7 +209,6 @@ private fun Content(
                     )
                 }
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
                     IntroBlock(uiState.bookInformation.description)
                 }
                 item {
@@ -243,7 +236,7 @@ private fun Content(
                             },
                             leadingIcon = {
                                 Icon(
-                                    modifier = Modifier.scale(0.75f, 0.75f),
+                                    modifier = Modifier.scale(0.75f),
                                     painter = painterResource(
                                         if (hideReadChapters) R.drawable.filled_menu_book_24px
                                         else R.drawable.done_all_24px
@@ -285,12 +278,16 @@ private fun Content(
                         lastReadingChapterId = uiState.userReadingData.lastReadChapterId
                     )
                 }
+
                 item {
                     Spacer(Modifier.height(48.dp))
                 }
             }
+
             AnimatedVisibility(
-                visible = lazyListState.canScrollForward && lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
+                visible = lazyListState.canScrollForward &&
+                        lazyListState.isScrollingUp().value &&
+                        uiState.bookVolumes.volumes.isNotEmpty(),
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -318,16 +315,16 @@ private fun Content(
             }
         }
     }
+
     BookInfoBottomSheet(
         bookInformation = uiState.bookInformation,
         bookVolumes = uiState.bookVolumes,
         sheetState = infoBottomSheetState,
         isVisible = showInfoBottomSheet,
-        onDismissRequest = {
-            showInfoBottomSheet = false
-        }
+        onDismissRequest = { showInfoBottomSheet = false }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -382,6 +379,21 @@ private fun BookCardBlock(
     modifier: Modifier,
     onClickCover: (String) -> Unit
 ) {
+    val updateText = if (bookInformation.isComplete) {
+        stringResource(R.string.book_completed)
+    } else {
+        stringResource(
+            R.string.book_info_update_date,
+            bookInformation.lastUpdated.year,
+            bookInformation.lastUpdated.monthValue,
+            bookInformation.lastUpdated.dayOfMonth
+        )
+    }
+    val wordCountText = stringResource(
+        R.string.book_info_word_count_kilo,
+        NumberFormat.getNumberInstance(Locale.getDefault()).format(bookInformation.wordCount / 1000)
+    )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -411,14 +423,12 @@ private fun BookCardBlock(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
-                modifier = Modifier
-                    .padding(vertical = 4.dp)
-                    .wrapContentHeight(Alignment.CenterVertically),
                 text = bookInformation.title,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.W600,
-                style = AppTypography.titleLarge
+                style = AppTypography.titleLarge,
+                modifier = Modifier.padding(vertical = 4.dp)
             )
             if (bookInformation.subtitle.isNotEmpty()) {
                 Text(
@@ -436,94 +446,88 @@ private fun BookCardBlock(
                 style = AppTypography.labelLarge
             )
             Column {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BookStatusIcon(bookInformation)
-                    Text(
-                        text = if (bookInformation.isComplete)
-                            stringResource(R.string.book_completed)
-                        else stringResource(
-                            R.string.book_info_update_date,
-                            bookInformation.lastUpdated.year,
-                            bookInformation.lastUpdated.monthValue,
-                            bookInformation.lastUpdated.dayOfMonth
-                        ),
-                        maxLines = 1,
-                        style = AppTypography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .padding(top = 2.dp),
-                        painter = painterResource(R.drawable.text_snippet_24px),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.book_info_word_count_kilo,
-                            bookInformation.wordCount / 1000
-                        ),
-                        maxLines = 1,
-                        style = AppTypography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
+                InfoRow(
+                    icon = { BookStatusIcon(bookInformation) },
+                    text = updateText
+                )
+                InfoRow(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.text_snippet_24px),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(top = 2.dp)
+                        )
+                    },
+                    text = wordCountText
+                )
             }
         }
     }
 }
 
 @Composable
+private fun InfoRow(
+    icon: @Composable () -> Unit,
+    text: String
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        icon()
+        Text(
+            text = text,
+            maxLines = 1,
+            style = AppTypography.labelMedium,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
+}
+
+
+@Composable
 private fun TagsBlock(
     bookInformation: BookInformation,
     onClickTag: (String) -> Unit
 ) {
+    val fadingBrush = remember {
+        Brush.horizontalGradient(
+            0.02f to Color.Transparent,
+            0.05f to Color.White,
+            0.95f to Color.White,
+            0.98f to Color.Transparent
+        )
+    }
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
-            .fadingEdge(
-                Brush.horizontalGradient(
-                    0.02f to Color.Transparent,
-                    0.05f to Color.White,
-                    0.95f to Color.White,
-                    0.98f to Color.Transparent
-                )
-            )
-            .padding(vertical = itemVerticalPadding)
-        ,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .fadingEdge(fadingBrush)
+            .padding(vertical = itemVerticalPadding),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 18.dp)
     ) {
-        item {
-            if (bookInformation.publishingHouse.isNotEmpty()) {
-                Spacer(Modifier.width(18.dp))
+        if (bookInformation.publishingHouse.isNotEmpty()) {
+            item(key = "publishingHouse") {
                 SuggestionChip(
-                    label = {
-                        Text(bookInformation.publishingHouse)
-                    },
+                    label = { Text(bookInformation.publishingHouse) },
                     onClick = {}
                 )
-            } else Spacer(Modifier.width(10 .dp))
+            }
         }
-        items(bookInformation.tags) { tag ->
+
+        items(
+            items = bookInformation.tags,
+            key = { it }
+        ) { tag ->
             SuggestionChip(
-                label = {
-                    Text(tag)
-                },
+                label = { Text(tag) },
                 onClick = { onClickTag(tag) }
             )
-        }
-        item {
-            Spacer(Modifier.width(18.dp))
         }
     }
 }
@@ -533,13 +537,16 @@ fun QuickOperationButton(
     icon: Painter,
     title: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Button(
         contentPadding = PaddingValues(12.dp),
-        modifier = Modifier
+        modifier = modifier
             .height(72.dp)
             .fillMaxWidth(),
-        colors = ButtonDefaults.textButtonColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
         shape = RoundedCornerShape(0.dp),
         onClick = onClick
     ) {
@@ -552,10 +559,11 @@ fun QuickOperationButton(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
-            AnimatedText(
+            Text(
                 text = title,
                 color = MaterialTheme.colorScheme.primary,
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -577,46 +585,50 @@ private fun QuickOperationsBlock(
         horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
+        if (uiState.isInBookshelf) {
             QuickOperationButton(
-                icon = if(uiState.isInBookshelf) painterResource(R.drawable.filled_bookmark_add_24px)
-                    else painterResource(R.drawable.bookmark_add_24px),
-                title = if(uiState.isInBookshelf) stringResource(R.string.activity_collections)
-                    else stringResource(R.string.add_to_bookshelf),
-                onClick = onClickAddToBookShelf
+                painterResource(R.drawable.filled_bookmark_add_24px),
+                title = stringResource(R.string.activity_collections),
+                onClick = onClickAddToBookShelf,
+                modifier = Modifier.weight(1f)
+            )
+        } else {
+            QuickOperationButton(
+                icon = painterResource(R.drawable.bookmark_add_24px),
+                title = stringResource(R.string.add_to_bookshelf),
+                onClick = onClickAddToBookShelf,
+                modifier = Modifier.weight(1f)
             )
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
+
+        if (uiState.isCached) {
             QuickOperationButton(
-                icon = if(uiState.isCached) painterResource(R.drawable.filled_cloud_download_24px)
-                else painterResource(R.drawable.cloud_download_24px),
-                title =
-                if (uiState.isCached && (uiState.downloadItem == null || uiState.downloadItem!!.progress == 1f) )
+                icon = painterResource(R.drawable.filled_cloud_download_24px),
+                title = if (uiState.downloadItem == null || uiState.downloadItem!!.progress == 1f)
                     stringResource(R.string.cached)
-                else if(uiState.downloadItem == null) stringResource(R.string.cached_false)
-                else "${(uiState.downloadItem!!.progress*100).toInt()}%",
-                onClick = if(uiState.downloadItem == null) onClickCache else {{}}
+                else
+                    "${(uiState.downloadItem!!.progress * 100).toInt()}%",
+                onClick = { },
+                modifier = Modifier.weight(1f)
             )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
+        } else {
             QuickOperationButton(
-                icon = painterResource(R.drawable.info_24px),
-                title = stringResource(R.string.action_show_info),
-                onClick = onClickShowInfo
+                icon = painterResource(R.drawable.cloud_download_24px),
+                title = if (uiState.downloadItem == null)
+                    stringResource(R.string.cached_false)
+                else
+                    "${(uiState.downloadItem!!.progress * 100).toInt()}%",
+                onClick = if (uiState.downloadItem == null) onClickCache else { {} },
+                modifier = Modifier.weight(1f)
             )
         }
+
+        QuickOperationButton(
+            icon = painterResource(R.drawable.info_24px),
+            title = stringResource(R.string.action_show_info),
+            onClick = onClickShowInfo,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
@@ -632,6 +644,7 @@ private fun IntroBlock(description: String) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
+            modifier = Modifier.padding(vertical = 16.dp),
             text = stringResource(R.string.detail_introduction),
             style = AppTypography.titleLarge,
             fontWeight = FontWeight.W600
@@ -689,16 +702,18 @@ private fun VolumeItem(
     volumesSize: Int,
     lastReadingChapterId: Int
 ) {
-    val readCount = volume.chapters.count { it.id in readCompletedChapterIds }
+    val readIds = remember(readCompletedChapterIds) { readCompletedChapterIds.toSet() }
+    val readCount = volume.chapters.count { it.id in readIds }
     val totalCount = volume.chapters.size
+    val isFullyRead = readCount >= totalCount
+
     var expanded by rememberSaveable {
         mutableStateOf(readCount < totalCount || volumesSize > 8)
     }
-    val isFullyRead = readCount >= totalCount
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+    if (hideReadChapters && isFullyRead) return
+
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .clickable {
@@ -707,14 +722,17 @@ private fun VolumeItem(
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier
-                .weight(5f)
-                .padding(vertical = 6.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(5f)
+                    .padding(vertical = 6.dp)
+            ) {
                 Text(
                     text = volume.volumeTitle,
                     fontWeight = FontWeight.W600,
                     style = AppTypography.titleMedium,
-                    color = if (isFullyRead) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
+                    color = if (isFullyRead) MaterialTheme.colorScheme.secondary
+                    else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = if (isFullyRead) stringResource(R.string.info_reading_finished)
@@ -723,7 +741,6 @@ private fun VolumeItem(
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-            if (hideReadChapters && isFullyRead) return@Row
             Spacer(Modifier.weight(1f))
             Icon(
                 modifier = Modifier
@@ -741,48 +758,18 @@ private fun VolumeItem(
             exit = fadeOut() + shrinkVertically(tween(150))
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                volume.chapters.forEach {
+                volume.chapters.forEach { chapter ->
                     AnimatedVisibility(
-                        visible = !(hideReadChapters && readCompletedChapterIds.contains(it.id)),
+                        visible = !(hideReadChapters && chapter.id in readIds),
                         enter = fadeIn() + expandVertically(tween(150)),
                         exit = fadeOut() + shrinkVertically(tween(150))
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .clickable { onClickChapter(it.id) }
-                                .wrapContentHeight()
-                                .fillMaxWidth()
-                                .padding(
-                                    start = 32.dp,
-                                    end = 32.dp,
-                                    top = 12.dp,
-                                    bottom = if (it.id == lastReadingChapterId) 6.dp else 12.dp
-                                )
-                        ) {
-                            Text(
-                                text = it.title,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                style = AppTypography.titleSmall,
-                                fontWeight =
-                                    if (readCompletedChapterIds.contains(it.id))
-                                        FontWeight.Normal
-                                    else FontWeight.W600,
-                                color =
-                                    if (readCompletedChapterIds.contains(it.id))
-                                        MaterialTheme.colorScheme.secondary
-                                    else MaterialTheme.colorScheme.onSurface
-                            )
-                            if (it.id == lastReadingChapterId) {
-                                Text(
-                                    text = stringResource(R.string.last_read),
-                                    maxLines = 1,
-                                    style = AppTypography.titleSmall,
-                                    fontWeight = FontWeight.W600,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+                        ChapterItem(
+                            chapter = chapter,
+                            isRead = chapter.id in readIds,
+                            isLastRead = chapter.id == lastReadingChapterId,
+                            onClick = { onClickChapter(chapter.id) }
+                        )
                     }
                 }
             }
@@ -790,3 +777,43 @@ private fun VolumeItem(
     }
 }
 
+@Composable
+private fun ChapterItem(
+    chapter: ChapterInformation,
+    isRead: Boolean,
+    isLastRead: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable(onClick = onClick)
+            .padding(
+                start = 32.dp,
+                end = 32.dp,
+                top = 12.dp,
+                bottom = if (isLastRead) 6.dp else 12.dp
+            )
+
+    ) {
+        Text(
+            text = chapter.title,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = AppTypography.titleSmall,
+            fontWeight = if (isRead) FontWeight.Normal else FontWeight.W600,
+            color = if (isRead) MaterialTheme.colorScheme.secondary
+            else MaterialTheme.colorScheme.onSurface
+        )
+        if (isLastRead) {
+            Text(
+                text = stringResource(R.string.last_read),
+                maxLines = 1,
+                style = AppTypography.titleSmall,
+                fontWeight = FontWeight.W600,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
