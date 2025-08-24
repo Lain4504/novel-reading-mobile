@@ -36,7 +36,7 @@
 
     <!-- Hints -->
     <string name="nothing_here">Nothing Here</string>
-    <string name="nothing_here_desc_reading">Once you\'ve read some books, they will show up here.</string>
+    <string name="nothing_here_desc_reading">Once you\'ve read some books, they will show up here.\nGo to the ‘Explore’ page via the navigation bar below to find new books.</string>
     <string name="nothing_here_desc_search">Recent searches will be saved here. Use the search bar to search for something.</string>
     <string name="nothing_here_desc_bookshelf">Click the "Favorite" button to add the book to this bookshelf.</string>
     <string name="offline">Oops</string>
@@ -182,7 +182,6 @@
     <string name="resume_last_reading">Resume Last Reading</string>
     <string name="last_read">Last Read</string>
     <string name="last_read_info">Last Read | %s</string>
-    <string name="navigate_to_explore">Go to \'Explore\'</string>
     <string name="book_completed">Completed</string>
     <string name="book_ongoing">Ongoing</string>
     <string name="initial_letter">Initial Letter</string>

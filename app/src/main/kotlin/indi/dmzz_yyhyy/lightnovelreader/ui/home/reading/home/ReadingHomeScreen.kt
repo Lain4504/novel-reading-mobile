@@ -108,19 +108,43 @@ fun ReadingScreen(
                 )
             }
         ) {
-            Box(Modifier.padding(it)) {
-                ReadingContent(
-                    onClickBook = onClickBook,
-                    onClickContinueReading = onClickContinueReading,
-                    onClickJumpToExploration = onClickJumpToExploration,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    recentReadingBookInformationMap = recentReadingBookInformationMap,
-                    recentReadingUserReadingDataMap = recentReadingUserReadingDataMap,
-                    recentReadingBookIds = recentReadingBookIds,
-                    scrollBehavior = pinnedScrollBehavior
+            var showEmptyPage by remember { mutableStateOf(false) }
+
+            LaunchedEffect(recentReadingBookIds) {
+                if (recentReadingBookIds.isEmpty()) {
+                    delay(140)
+                    showEmptyPage = true
+                } else {
+                    showEmptyPage = false
+                }
+            }
+
+            AnimatedVisibility(
+                modifier = Modifier.padding(it),
+                visible = showEmptyPage,
+                enter = fadeIn(animationSpec = tween(durationMillis = 300)),
+                exit = fadeOut(animationSpec = tween(durationMillis = 300))
+            ) {
+                EmptyPage(
+                    modifier = Modifier.padding(it),
+                    icon = painterResource(R.drawable.empty_90dp),
+                    title = stringResource(R.string.nothing_here),
+                    description = stringResource(R.string.nothing_here_desc_reading),
                 )
             }
+
+            ReadingContent(
+                modifier = Modifier.padding(it),
+                onClickBook = onClickBook,
+                onClickContinueReading = onClickContinueReading,
+                onClickJumpToExploration = onClickJumpToExploration,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                recentReadingBookInformationMap = recentReadingBookInformationMap,
+                recentReadingUserReadingDataMap = recentReadingUserReadingDataMap,
+                recentReadingBookIds = recentReadingBookIds,
+                scrollBehavior = pinnedScrollBehavior
+            )
         }
     }
 }
@@ -128,6 +152,7 @@ fun ReadingScreen(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ReadingContent(
+    modifier: Modifier,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
     onClickJumpToExploration: () -> Unit,
@@ -138,40 +163,9 @@ private fun ReadingContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-    var showEmptyPage by remember { mutableStateOf(false) }
-
-    LaunchedEffect(recentReadingBookIds) {
-        if (recentReadingBookIds.isEmpty()) {
-            delay(140)
-            showEmptyPage = true
-        } else {
-            showEmptyPage = false
-        }
-    }
-
-    AnimatedVisibility(
-        visible = showEmptyPage,
-        enter = fadeIn(animationSpec = tween(durationMillis = 300)),
-        exit = fadeOut(animationSpec = tween(durationMillis = 300))
-    ) {
-        EmptyPage(
-            icon = painterResource(R.drawable.empty_90dp),
-            titleId = R.string.nothing_here,
-            descriptionId = R.string.nothing_here_desc_reading,
-            button = {
-                Button(onClick = onClickJumpToExploration) {
-                    Text(
-                        text = stringResource(id = R.string.navigate_to_explore),
-                        fontWeight = FontWeight.W500,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
-        )
-    }
 
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp)
             .nestedScroll(scrollBehavior.nestedScrollConnection),
