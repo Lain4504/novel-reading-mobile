@@ -52,7 +52,6 @@ fun NavGraphBuilder.bookReaderDestination() {
 }
 
 fun NavController.navigateToBookReaderDestination(bookId: Int, chapterId: Int, context: Context) {
-    if (!this.isResumed()) return
     val entry = this.getBackStackEntry<Route.Book>()
     val viewModel = ViewModelProvider.create(
         entry,
