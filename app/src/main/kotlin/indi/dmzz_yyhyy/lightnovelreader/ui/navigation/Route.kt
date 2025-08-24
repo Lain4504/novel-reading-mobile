@@ -123,6 +123,10 @@ object Route {
         val bookId: Int
     )
     @Serializable
+    data class MarkAllChaptersAsReadDialog(
+        val bookId: Int
+    )
+    @Serializable
     data class SliderValueDialog(
         val value: Float,
         val floatUserDataPath: String

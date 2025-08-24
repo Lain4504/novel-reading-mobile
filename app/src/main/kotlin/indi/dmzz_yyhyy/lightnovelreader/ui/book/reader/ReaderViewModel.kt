@@ -157,4 +157,28 @@ class ReaderViewModel @Inject constructor(
             statsRepository.accumulateBookReadTime(bookId, seconds)
         }
     }
+
+    fun markAllChaptersAsRead() {
+        if (bookId == -1) return
+
+        viewModelScope.launch(Dispatchers.IO) {
+            bookRepository.updateUserReadingData(bookId) { userReadingData ->
+                val allChapterIds = _uiState.bookVolumes.volumes
+                    .flatMap { it.chapters }
+                    .map { it.id }
+
+                userReadingData.apply {
+                    lastReadTime = LocalDateTime.now()
+                    lastReadChapterId = allChapterIds.lastOrNull() ?: -1
+                    lastReadChapterProgress = 1.0f
+                    readCompletedChapterIds.clear()
+                    readCompletedChapterIds.addAll(allChapterIds)
+
+                    val totalChapters = allChapterIds.size
+                    readingProgress = if (totalChapters == 0) 0f else 1f
+                }
+            }
+        }
+    }
+
 }

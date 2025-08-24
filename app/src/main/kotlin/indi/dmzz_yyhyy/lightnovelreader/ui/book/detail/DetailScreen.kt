@@ -32,6 +32,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -96,7 +98,8 @@ fun DetailScreen(
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
     onClickTag: (String) -> Unit,
-    onClickCover: (String) -> Unit
+    onClickCover: (String) -> Unit,
+    onClickMarkAllRead: () -> Unit
 ) {
     val navController = LocalNavController.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -116,6 +119,7 @@ fun DetailScreen(
                 onClickTextFormatting = {
                     navController.navigateToSettingsTextFormattingRulesDestination(uiState.bookInformation.id)
                 },
+                onClickMarkAllRead = onClickMarkAllRead,
                 scrollBehavior = scrollBehavior
             )
         },
@@ -344,8 +348,12 @@ private fun TopBar(
     onClickBackButton: () -> Unit,
     onClickExport: () -> Unit,
     onClickTextFormatting: () -> Unit,
+    onClickMarkAllRead: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
+    val volumesNotEmpty = bookVolumes.volumes.isNotEmpty()
+    var menuExpanded by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = {
             LazyRow {
@@ -362,16 +370,45 @@ private fun TopBar(
         },
         actions = {
             IconButton(
-                enabled = bookVolumes.volumes.isNotEmpty(),
+                enabled = volumesNotEmpty,
                 onClick = onClickExport
             ) {
                 Icon(painterResource(id = R.drawable.file_export_24px), "export to epub")
             }
             IconButton(
-                enabled = bookVolumes.volumes.isNotEmpty(),
+                enabled = volumesNotEmpty,
                 onClick = onClickTextFormatting
             ) {
                 Icon(painterResource(id = R.drawable.find_replace_24px), "text formating")
+            }
+            Box {
+                IconButton(
+                    enabled = volumesNotEmpty,
+                    onClick = { menuExpanded = true }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.more_vert_24px),
+                        contentDescription = "more"
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "全部标为已读",
+                                style = AppTypography.bodyLarge
+                            )
+                        },
+                        onClick = {
+                            menuExpanded = false
+                            onClickMarkAllRead()
+                        }
+                    )
+                }
             }
         },
         navigationIcon = {
@@ -413,7 +450,8 @@ private fun BookCardBlock(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.wrapContentSize()
+            modifier = Modifier
+                .wrapContentSize()
                 .clickable(
                     onClick = {
                         onClickCover(bookInformation.coverUrl)
