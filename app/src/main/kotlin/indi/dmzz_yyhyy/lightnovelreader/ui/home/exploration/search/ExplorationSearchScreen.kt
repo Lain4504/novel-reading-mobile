@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,6 +59,7 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.addToBookshelfAction
@@ -80,7 +82,6 @@ fun ExplorationSearchScreen(
 ) {
     var searchKeyword by rememberSaveable { mutableStateOf("") }
     var searchBarExpanded by rememberSaveable { mutableStateOf(true) }
-    var searchBarRect by remember { mutableStateOf(Rect.Zero) }
     var dropdownMenuExpanded by rememberSaveable { mutableStateOf(false) }
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
         init.invoke()
@@ -122,9 +123,6 @@ fun ExplorationSearchScreen(
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .padding(horizontal = if (!searchBarExpanded) 12.dp else 0.dp)
-                        .onGloballyPositioned { coordinates ->
-                            searchBarRect = coordinates.boundsInParent()
-                        }
                         .semantics { traversalIndex = 0f },
                     inputField = {
                         SearchBarDefaults.InputField(
@@ -277,35 +275,39 @@ fun ExplorationSearchScreen(
                 )
             }
             AnimatedVisibility(
-                visible = !explorationSearchUiState.isLoading && explorationSearchUiState.searchResult.isNotEmpty(),
+                visible = !explorationSearchUiState.isLoading,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(vertical = 3.dp)
-                ) {
-                    item {
-                        AnimatedText(
-                            modifier = Modifier.padding(12.dp),
-                            text = stringResource(
-                                R.string.search_results_title,
-                                searchKeyword,
-                                explorationSearchUiState.searchResult.size,
-                                if (explorationSearchUiState.isLoadingComplete) "" else "..."
-                            ),
-                            style = AppTypography.labelLarge,
-                            fontWeight = FontWeight.W600,
-                            letterSpacing = 0.5.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                println(explorationSearchUiState.isLoading)
+                LazyColumn {
+                    stickyHeader {
+                        Box(
+                            modifier = Modifier.fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(top = 8.dp)
+                        ) {
+                            AnimatedText(
+                                modifier = Modifier.padding(vertical = 12.dp, horizontal = 20.dp),
+                                text = stringResource(
+                                    R.string.search_results_title,
+                                    searchKeyword,
+                                    explorationSearchUiState.searchResult.size,
+                                    if (explorationSearchUiState.isLoadingComplete) "" else "..."
+                                ),
+                                style = AppTypography.bodyMedium,
+                                fontWeight = FontWeight.W600,
+                                letterSpacing = 0.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     items(explorationSearchUiState.searchResult) {
                         val addToBookshelf = addToBookshelfAction.toSwipeAction {
                             requestAddBookToBookshelf(it.id)
                         }
                         BookCardItem(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp).padding(vertical = 3.dp),
                             bookInformation = it,
                             onClick = { onClickBook(it.id) },
                             onLongPress = withHaptic {},
@@ -322,7 +324,7 @@ fun ExplorationSearchScreen(
                             LinearProgressIndicator(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp)
+                                    .padding(vertical = 8.dp, horizontal = 20.dp)
                             )
                         }
                     }
