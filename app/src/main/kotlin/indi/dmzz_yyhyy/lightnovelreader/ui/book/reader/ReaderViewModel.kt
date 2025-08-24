@@ -157,4 +157,5 @@ class ReaderViewModel @Inject constructor(
             statsRepository.accumulateBookReadTime(bookId, seconds)
         }
     }
+
 }

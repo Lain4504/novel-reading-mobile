@@ -56,6 +56,7 @@ fun TextFormattingScreen(
             )
         }
     ) { paddingValues ->
+        val rules = groups.filter { it.id != -1 }
         LazyColumn(
             modifier = Modifier.padding(paddingValues)
         ) {
@@ -93,13 +94,13 @@ fun TextFormattingScreen(
                             maxLines = 1
                         )
                         Text(
-                            text = "${groups.firstOrNull { it.id == -1 }?.size ?: "/"} 个规则",
+                            text = "${groups.firstOrNull { it.id == -1 }?.size ?: "0"} 个规则",
                             style = AppTypography.labelMedium,
                             color = colorScheme.secondary
                         )
                     }
                     IconButton(
-                        onClick = { onClickGroup(-721) }
+                        onClick = { onClickGroup(-1) }
                     ) {
                         Icon(
                             modifier = Modifier.size(18.dp),
@@ -110,18 +111,21 @@ fun TextFormattingScreen(
                     }
                 }
             }
-            item {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp, 8.dp),
-                    text = stringResource(R.string.book_rules),
-                    style = AppTypography.titleSmall,
-                    letterSpacing = 0.5.sp,
-                    color = colorScheme.onSurfaceVariant
-                )
+            if (rules.isNotEmpty()) {
+                item {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp, 8.dp),
+                        text = stringResource(R.string.book_rules),
+                        style = AppTypography.titleSmall,
+                        letterSpacing = 0.5.sp,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                }
             }
-            items(groups.filter { it.id != -1 }) { group ->
+
+            items(rules) { group ->
                 bookInformationMap[group.id]?.let {
                     Group(
                         onClickGroup = { onClickGroup(group.id) },

@@ -229,10 +229,11 @@ fun LogcatScreen(
                             DropdownMenuItem(
                                 text = {
                                     Column {
-                                        Text(stringResource(R.string.log_clear), style = AppTypography.titleMedium)
+                                        Text(stringResource(R.string.log_clear), style = AppTypography.dropDownItem)
+                                        Spacer(Modifier.height(4.dp))
                                         Text(
                                             text = stringResource(R.string.log_clear_desc),
-                                            style = AppTypography.bodyLarge,
+                                            style = AppTypography.labelMedium,
                                             color = MaterialTheme.colorScheme.secondary
                                         )
                                     }
@@ -250,7 +251,7 @@ fun LogcatScreen(
                                     ) {
                                         Text(
                                             stringResource(R.string.auto_scroll),
-                                            style = AppTypography.bodyLarge
+                                            style = AppTypography.dropDownItem
                                         )
                                         Spacer(Modifier.weight(1f))
                                         Switch(
@@ -272,7 +273,7 @@ fun LogcatScreen(
                                     ) {
                                         Text(
                                             text = stringResource(R.string.word_wrap),
-                                            style = AppTypography.bodyLarge
+                                            style = AppTypography.dropDownItem
                                         )
                                         Spacer(Modifier.weight(1f))
                                         Switch(

@@ -1,5 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.debug
 
+import android.os.Looper
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -11,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -28,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +48,7 @@ fun DebugScreen(
                         text = "Debug",
                         style = AppTypography.titleTopBar,
                         fontWeight = FontWeight.W400,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = colorScheme.onSurface,
                         maxLines = 1
                     )
                 },
@@ -58,7 +62,7 @@ fun DebugScreen(
         }
     ) {
         Column(
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(it).padding(horizontal = 16.dp)
         ) {
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
@@ -86,7 +90,9 @@ fun DebugScreen(
                     }
                 }
             )
-            Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Button(
                     modifier = Modifier.align(Alignment.CenterEnd),
                     onClick = {
@@ -99,12 +105,66 @@ fun DebugScreen(
                 }
             }
             Text(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 text = result
             )
-            Button(onClick = {error("crashed")}) {
-                Text("Crash")
+            Text(
+                modifier = Modifier.padding(vertical = 12.dp),
+                text = "崩溃测试",
+                style = AppTypography.labelLarge,
+                fontWeight = FontWeight.W600,
+                maxLines = 1
+            )
+            Column {
+                SettingsClickableEntry(
+                    modifier = Modifier.background(colorScheme.background),
+                    title = "Crash by error()",
+                    description = "error(\"Crashed\")",
+                    onClick = {
+                        error("Crashed")
+                    }
+                )
+                SettingsClickableEntry(
+                    modifier = Modifier.background(colorScheme.background),
+                    title = "Crash by Lopper",
+                    description = "Looper.getMainLooper().quit()",
+                    onClick = {
+                        Looper.getMainLooper().quit()
+                    }
+                )
+
+                @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
+                SettingsClickableEntry(
+                    modifier = Modifier.background(colorScheme.background),
+                    title = "Crash by NPE",
+                    description = "NullPointerException",
+                    onClick = {
+                        val s: String? = null
+                        s!!
+                    }
+                )
+
+                @Suppress("DIVISION_BY_ZERO")
+                SettingsClickableEntry(
+                    modifier = Modifier.background(colorScheme.background),
+                    title = "Crash by divide by zero",
+                    description = "x = 1 / 0",
+                    onClick = {
+                        1 / 0
+                    }
+                )
+
+                SettingsClickableEntry(
+                    modifier = Modifier.background(colorScheme.background),
+                    title = "Crash by RuntimeException",
+                    description = "throw RuntimeException(\"Crashed\")",
+                    onClick = {
+                        throw RuntimeException("Crashed")
+                    }
+                )
             }
+
         }
     }
 }

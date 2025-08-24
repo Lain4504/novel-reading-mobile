@@ -605,7 +605,6 @@ fun SliderValueDialog(
     )
 }
 
-
 @Composable
 fun DeleteBookshelfDialog(
     onDismissRequest: () -> Unit,

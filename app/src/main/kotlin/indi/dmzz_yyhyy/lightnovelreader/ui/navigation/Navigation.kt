@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.bookNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.addBookToBookshelfDialog
+import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.markAllChaptersAsReadDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.updatesAvailableDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.downloadManager
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.homeNavigation
@@ -37,6 +38,7 @@ fun LightNovelReaderNavHost(
                 updatesAvailableDialog()
                 addBookToBookshelfDialog()
                 downloadManager()
+                markAllChaptersAsReadDialog()
             }
         }
     }

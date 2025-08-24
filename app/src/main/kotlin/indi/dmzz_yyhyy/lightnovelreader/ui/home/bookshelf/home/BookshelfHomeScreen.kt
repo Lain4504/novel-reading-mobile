@@ -576,7 +576,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.bookshelf_create_title),
-                            style = AppTypography.bodyLarge
+                            style = AppTypography.dropDownItem
                         )
                     },
                     onClick = onClickCreate
@@ -585,7 +585,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.bookshelf_settings),
-                            style = AppTypography.bodyLarge
+                            style = AppTypography.dropDownItem
                         )
                     },
                     onClick = onClickEdit
@@ -594,7 +594,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.share_bookshelf),
-                            style = AppTypography.bodyLarge
+                            style = AppTypography.dropDownItem
                         )
                     },
                     onClick = onClickShareBookshelf
@@ -603,7 +603,7 @@ fun TopBar(
                     text = {
                         Text(
                             text = stringResource(R.string.import_and_export),
-                            style = AppTypography.bodyLarge
+                            style = AppTypography.dropDownItem
                         )
                     },
                     trailingIcon = {
@@ -637,7 +637,7 @@ fun TopBar(
                 DropdownMenuItem(
                     text = { Text(
                         text = stringResource(R.string.export_to_lnr_file),
-                        style = AppTypography.bodyLarge
+                        style = AppTypography.dropDownItem
                     ) },
                     onClick = {
                         onClickSaveThisBookshelf()
@@ -648,7 +648,7 @@ fun TopBar(
                 DropdownMenuItem(
                     text = { Text(
                         text = stringResource(R.string.export_all_to_lnr_file),
-                        style = AppTypography.bodyLarge
+                        style = AppTypography.dropDownItem
                     ) },
                     onClick = {
                         onClickSaveAllBookshelf()
@@ -659,7 +659,7 @@ fun TopBar(
                 DropdownMenuItem(
                     text = { Text(
                         text = stringResource(R.string.import_from_file),
-                        style = AppTypography.bodyLarge
+                        style = AppTypography.dropDownItem
                     ) },
                     onClick = {
                         onClickImportBookshelf()
