@@ -19,4 +19,6 @@ object AppTypography {
     val labelLarge = TextStyle(fontSize = 16.sp, lineHeight = 20.sp)
     val labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 18.sp)
     val labelSmall = TextStyle(fontSize = 13.sp, lineHeight = 15.sp)
+
+    val dropDownItem = TextStyle(fontSize = 16.sp, lineHeight = 22.sp)
 }

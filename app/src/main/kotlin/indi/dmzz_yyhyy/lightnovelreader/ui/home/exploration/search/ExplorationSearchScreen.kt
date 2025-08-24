@@ -106,7 +106,7 @@ fun ExplorationSearchScreen(
                                     explorationSearchUiState.searchTypeNameMap[it]?.let { it1 ->
                                         Text(
                                             text = it1,
-                                            style = AppTypography.labelMedium
+                                            style = AppTypography.dropDownItem
                                         )
                                     }
                                 },

@@ -427,7 +427,7 @@ fun SettingsMenuEntry(
                                 Text(
                                     modifier = Modifier.padding(vertical = 4.dp),
                                     text = stringResource(option.nameId),
-                                    style = AppTypography.bodyLarge
+                                    style = AppTypography.dropDownItem
                                 )
                             }
                         )

@@ -48,7 +48,7 @@ fun DebugScreen(
                         text = "Debug",
                         style = AppTypography.titleTopBar,
                         fontWeight = FontWeight.W400,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = colorScheme.onSurface,
                         maxLines = 1
                     )
                 },

@@ -400,7 +400,7 @@ private fun TopBar(
                         text = {
                             Text(
                                 text = "全部标为已读",
-                                style = AppTypography.bodyLarge
+                                style = AppTypography.dropDownItem
                             )
                         },
                         onClick = {
