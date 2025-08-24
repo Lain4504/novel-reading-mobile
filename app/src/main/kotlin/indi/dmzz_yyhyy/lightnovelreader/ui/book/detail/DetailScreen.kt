@@ -1,7 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -165,23 +164,35 @@ private fun Content(
 
     var showInfoBottomSheet by remember { mutableStateOf(false) }
     var hideReadChapters by remember { mutableStateOf(false) }
-    var showLoading by remember { mutableStateOf(false) }
+    var showContent by remember { mutableStateOf(false) }
+    val bookIsEmpty = uiState.bookInformation.title.isEmpty()
 
     val lazyListState = rememberLazyListState()
     val scrollOffset by remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
 
     LaunchedEffect(Unit) {
-        delay(180)
-        showLoading = true
+        delay(50)
+        showContent = true
     }
 
-    Crossfade(targetState = uiState.bookInformation.isEmpty(), label = "") { isEmpty ->
-        if (isEmpty) {
-            if (showLoading) Loading()
-        } else {
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = bookIsEmpty,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
+            Box(Modifier.fillMaxSize()) {
+                Loading()
+            }
+        }
+        AnimatedVisibility(
+            visible = showContent && !bookIsEmpty,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
             LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                state = lazyListState
+                state = lazyListState,
+                modifier = Modifier.fillMaxSize()
             ) {
                 item {
                     BookCardBlock(
