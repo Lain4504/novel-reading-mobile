@@ -247,13 +247,14 @@ private fun SimpleFlipPageTextComponent(
                     }
                 )
                 .pointerInput(
+                    settingState.isUsingClickFlipPage,
                     settingState.isUsingFlipPage,
                     settingState.flipAnime,
                     settingState.fastChapterChange
                 ) {
                     detectTapGestures(
                         onTap = {
-                            if (settingState.isUsingFlipPage)
+                            if (settingState.isUsingFlipPage && settingState.isUsingClickFlipPage)
                                 if (it.x <= context.resources.displayMetrics.widthPixels * 0.425) lastPage(
                                     uiState.pagerState
                                 )
