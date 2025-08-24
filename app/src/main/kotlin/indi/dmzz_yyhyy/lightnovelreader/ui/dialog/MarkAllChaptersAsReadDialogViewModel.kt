@@ -40,7 +40,6 @@ class MarkAllChaptersAsReadDialogViewModel @Inject constructor(
                 val allChapterIds = bookVolumes.volumes.flatMap { it.chapters }.map { it.id }
                 userReadingData.apply {
                     lastReadTime = LocalDateTime.now()
-                    lastReadChapterId = allChapterIds.lastOrNull() ?: -1
                     lastReadChapterProgress = 1f
                     readCompletedChapterIds.clear()
                     readCompletedChapterIds.addAll(allChapterIds)
