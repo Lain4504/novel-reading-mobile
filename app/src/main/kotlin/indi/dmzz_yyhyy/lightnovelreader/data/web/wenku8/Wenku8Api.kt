@@ -23,6 +23,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
+import indi.dmzz_yyhyy.lightnovelreader.utils.cache.Cache
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
@@ -63,12 +64,26 @@ object Wenku8Api: WebBookDataSource {
     private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
     private var hostIndex = 0
     private var isLocalIpUnableUse = true
+    private val cache = Cache(
+        timeout = 5 * 60 * 1000
+    )
     val host get() =  hosts[hostIndex]
 
     init {
         coroutineScope.launch {
             offLine = isOffLine()
         }
+    }
+
+    private inline fun <reified T> ifCache(id: Int, block: () -> T): T {
+        val cacheData = cache.getCache<T>(id)
+        println(cacheData)
+        if (cacheData == null) {
+            val data = block.invoke()
+            cache.cache(id, data)
+            return data
+        }
+        return cacheData
     }
 
     override var offLine: Boolean = true
@@ -116,8 +131,8 @@ object Wenku8Api: WebBookDataSource {
 
     override val id: Int = "wenku8".hashCode()
 
-    override suspend fun getBookInformation(id: Int): BookInformation {
-        return wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
+    override suspend fun getBookInformation(id: Int): BookInformation = ifCache(id) {
+        return@ifCache wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
             val titleGroup = it
                 .selectFirst("[name=Title]")?.text()
                 ?.let { it1 -> titleRegex.find(it1)?.groups }
@@ -145,8 +160,8 @@ object Wenku8Api: WebBookDataSource {
         } ?: BookInformation.empty()
     }
 
-    override suspend fun getBookVolumes(id: Int): BookVolumes {
-        return BookVolumes(
+    override suspend fun getBookVolumes(id: Int): BookVolumes = ifCache(id) {
+        return@ifCache BookVolumes(
             id,
             wenku8Api("action=book&do=list&aid=$id&t=0")
             ?.select("volume")
@@ -166,7 +181,7 @@ object Wenku8Api: WebBookDataSource {
         )
     }
 
-    override suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent {
+    override suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent = ifCache(chapterId.hashCode() + bookId.hashCode())  {
         if (allBookChapterListCacheId != bookId) {
             allBookChapterListCacheId = bookId
             allBookChapterListCache = getBookVolumes(bookId).let { bookVolumes ->
@@ -177,7 +192,7 @@ object Wenku8Api: WebBookDataSource {
                 return@let list
             }
         }
-        return wenku8Api("action=book&do=text&aid=$bookId&cid=$chapterId&t=0")
+        return@ifCache wenku8Api("action=book&do=text&aid=$bookId&cid=$chapterId&t=0")
             .let { document ->
                 document
                     ?.wholeText()
