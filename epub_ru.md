@@ -2,7 +2,7 @@
 Это модуль, специально созданный для генерации Epub.
 
 ## Пример
-```
+```kotlin
 import io.nightfish.potatoepub.builder.EpubBuilder
 import io.nightfish.potatoepub.xml.XmlBuilder.Companion.xml
 import java.io.File
