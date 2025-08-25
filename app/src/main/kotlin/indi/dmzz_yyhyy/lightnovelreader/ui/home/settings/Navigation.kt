@@ -132,8 +132,7 @@ private fun NavGraphBuilder.sliderValueDialog() {
         val navController = LocalNavController.current
         val viewModel = hiltViewModel<SliderValueDialogViewModel>()
         val route = entry.toRoute<Route.SliderValueDialog>()
-        val value by viewModel.init(route.floatUserDataPath).collectAsState(Float.NaN)
-
+        val value = route.value
         SliderValueDialog(
             value = value,
             onValueChange = { viewModel.setValue(it) },
@@ -146,9 +145,9 @@ private fun NavGraphBuilder.sliderValueDialog() {
     }
 }
 
-fun NavController.navigateToSliderValueDialog(path: String) {
+fun NavController.navigateToSliderValueDialog(path: String, value: Float) {
     if (!this.isResumed()) return
-    navigate(Route.SliderValueDialog(path))
+    navigate(Route.SliderValueDialog(value, path))
 }
 
 

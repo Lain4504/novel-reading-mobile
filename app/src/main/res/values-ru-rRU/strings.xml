@@ -35,7 +35,7 @@
 
     <!-- Подсказки -->
     <string name="nothing_here">Здесь ничего нет</string>
-    <string name="nothing_here_desc_reading">Прочитав книги, они появятся здесь.</string>
+    <string name="nothing_here_desc_reading">Прочитав книги, они появятся здесь.\nПерейдите на страницу «Исследуйте» через панель навигации ниже, чтобы найти новые книги.</string>
     <string name="nothing_here_desc_search">Последние поиски будут сохранены здесь. Используйте строку поиска.</string>
     <string name="nothing_here_desc_bookshelf">Нажмите кнопку «Избранное», чтобы добавить книгу на полку.</string>
     <string name="offline">Ошибка</string>
@@ -178,7 +178,6 @@
     <string name="resume_last_reading">Продолжить с последнего места</string>
     <string name="last_read">Последнее чтение</string>
     <string name="last_read_info">Последнее чтение | %s</string>
-    <string name="navigate_to_explore">Перейти в раздел «Обзор»</string>
     <string name="book_completed">Завершено</string>
     <string name="book_ongoing">В процессе</string>
     <string name="initial_letter">Первая буква</string>
@@ -188,7 +187,7 @@
     <string name="filter_by_publishing_house">Фильтр по издательству</string>
     <string name="filter_by_publishing_house_desc">Фильтр по издательству книги</string>
     <string name="book_info_update_date">Обновлено %1$d-%2$d-%3$d</string>
-    <string name="book_info_word_count_kilo">%dK слов</string>
+    <string name="book_info_word_count_kilo">%sK слов</string>
     <string name="name">Название</string>
     <string name="bookshelf_name">Название полки</string>
     <string name="bookshelf_name_suggestion">Дайте вашей полке простое имя</string>

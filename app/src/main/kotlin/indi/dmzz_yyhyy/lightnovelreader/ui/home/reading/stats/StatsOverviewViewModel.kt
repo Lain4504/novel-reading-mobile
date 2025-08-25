@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlin.collections.set
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -58,11 +59,7 @@ class StatsOverviewViewModel @Inject constructor(
             val allBookIds = bookRecordsMap.flatMap { it.value.map { record -> record.bookId } }
 
             allBookIds.fastForEach { id ->
-                viewModelScope.launch(Dispatchers.IO) {
-                    bookRepository.getBookInformationFlow(id, viewModelScope).collect {
-                        _uiState.bookInformationMap[it.id] = it
-                    }
-                }
+                _uiState.bookInformationMap[id] = bookRepository.getStateBookInformation(id, viewModelScope)
             }
             selectDate(_uiState.selectedDate)
 
