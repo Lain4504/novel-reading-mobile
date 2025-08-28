@@ -50,6 +50,31 @@ LightNovelReader <sup>*重构版*</sup> 是一款开源的轻小说阅读软件�
 
 为了处理epub的导出问题，我们单独创建了一个epub处理模块，如果您感兴趣，可以看[**这里**](https://github.com/dmzz-yyhyy/LightNovelReader/blob/refactoring/epub.md)
 
+## 贡献
+
+我们欢迎对 LightNovelReader 的贡献！以下是如何参与：
+
+### 开始
+1. Fork 本仓库。
+2. 克隆你的 fork：`git clone https://github.com/your-username/LightNovelReader.git`
+3. 为你的更改创建新分支：`git checkout -b feature/your-feature-name`
+4. 进行更改并测试。
+5. 按照下面的提交指南提交更改。
+6. 推送到你的 fork：`git push origin feature/your-feature-name`
+7. 向 `refactoring` 分支打开 Pull Request。
+
+### 提交指南
+- 保持提交原子化和描述性。
+- 如果你的更改影响版本，请在 `app/build.gradle.kts` 中更新。
+
+### 版本管理
+版本在 `app/build.gradle.kts` 中管理：
+- `versionNameStr`：公共版本（例如 "1.3.1"）。遵循语义化版本（major.minor.patch）。
+- `debugNumber`：开发构建时递增（发布时为 0）。
+- `versionCode`：自动计算为 major*1000000 + minor*10000 + patch*1000 + debugNumber。
+
+发布时，更新 `versionNameStr` 并将 `debugNumber` 重置为 0。
+
 ## License
 
 ```
