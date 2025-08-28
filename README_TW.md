@@ -62,9 +62,6 @@ LightNovelReader <sup>*重構版*</sup> 是一款開源的輕小說閱讀軟體�
 7. 向 `refactoring` 分支打開 Pull Request。
 
 ### 提交指南
-- 使用約定式提交格式：`<type>(<scope>): <description>`
-  - 類型：`feat` (新功能), `fix` (錯誤修復), `docs` (文檔), `style` (格式化), `refactor` (代碼重構), `test` (測試), `chore` (維護)
-  - 示例：`feat: 添加暗色模式支持`
 - 保持提交原子化和描述性。
 - 如果你的更改影響版本，請在 `app/build.gradle.kts` 中更新。
 
