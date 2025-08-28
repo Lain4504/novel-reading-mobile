@@ -62,9 +62,6 @@ We welcome contributions to LightNovelReader! Here's how you can get involved:
 7. Open a Pull Request to the `refactoring` branch.
 
 ### Commit Guidelines
-- Use conventional commit format: `<type>(<scope>): <description>`
-  - Types: `feat` (new feature), `fix` (bug fix), `docs` (documentation), `style` (formatting), `refactor` (code restructuring), `test` (testing), `chore` (maintenance)
-  - Example: `feat: add dark mode support`
 - Keep commits atomic and descriptive.
 - If your change affects the version, update it in `app/build.gradle.kts`.
 
