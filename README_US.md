@@ -7,6 +7,7 @@
     <a><img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white&style=for-the-badge"></a>
     <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526"><img alt="QQ Group" src="https://img.shields.io/badge/QQ讨论群-867785526-brightgreen.svg?logoColor=white&style=for-the-badge"></a>
     <a href="https://discord.gg/bfvPqSWX"><img alt="Discord" src="https://img.shields.io/badge/Discord-JOIN-4285F4.svg?logo=discord&logoColor=white&style=for-the-badge"></a>
+    <a href="https://t.me/lightnoble"><img alt="Discord" src="https://img.shields.io/badge/Telegram-JOIN-188FCA.svg?logo=telegram&logoColor=white&style=for-the-badge"></a>
     <p>Light novel reading application built with Jetpack Compose</p>
     <img src="assets/header.png" alt="drawing" width="80%"/>
 </div>
@@ -35,6 +36,7 @@ Download the latest release from [GitHub Releases](https://github.com/dmzz-yyhyy
 - Found a bug or have a feature idea? Submit it [**here**](https://github.com/dmzz-yyhyy/LightNovelReader/issues/new/choose)
 - Join the QQ discussion group: `867785526` | [**Invitation Link**](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526)
 - Join our Discord server: [**Invitation Link**](https://discord.gg/bfvPqSWX)
+- Join our Telegram group: [**Invitation Link**](https://t.me/lightnoble)
 
 ## Screenshots
 
