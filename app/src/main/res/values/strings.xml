@@ -41,6 +41,12 @@
     <string name="nothing_here_desc_bookshelf">Click the "Favorite" button to add the book to this bookshelf.</string>
     <string name="offline">Oops</string>
     <string name="offline_desc">Please check the availability of the source website and your proxy settings.</string>
+    
+    <!-- Snackbar Hints -->
+    <string name="cache_book_started">Caching started: %1$s</string>
+    <string name="cache_book_running">This book is currently caching</string>
+    <string name="cache_book_finished">Cache completed successfully</string>
+    <string name="cache_book_error">Cache failed</string>
 
     <!-- Settings -->
     <string name="reading_settings">Reading</string>
@@ -129,7 +135,7 @@
     <string name="settings_import_data">Import User Data</string>
     <string name="settings_import_data_desc">Import user data from a selected .lnr file</string>
     <string name="settings_select_data_source">Data Source</string>
-    <string name="settings_select_data_source_desc">Clear cache and switch the app\'s data source. Your current user data will be saved and restored when switching back</string>
+    <string name="settings_select_data_source_desc">Switch the app\'s data source</string>
     <string name="settings_app_logs">App Logs</string>
     <string name="settings_app_logs_desc">View and share application logs for debug purpose</string>
     <string name="settings_app_log_level">Log Level</string>

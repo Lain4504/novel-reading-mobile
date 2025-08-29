@@ -210,7 +210,6 @@ fun Content(
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
     var totalReadingTime by remember { mutableIntStateOf(0) }
     var selectedVolumeId by remember { mutableIntStateOf(-1) }
-    var lastUpdate by remember { mutableStateOf(LocalTime.now()) }
 
     LaunchedEffect(isImmersive) {
         if (!settingState.enableHideStatusBar) return@LaunchedEffect
@@ -275,9 +274,7 @@ fun Content(
 
     LaunchedEffect(isRunning) {
         while (isRunning) {
-            val now = LocalTime.now()
             accumulateReadingTime(readingScreenUiState.bookId, 1)
-            lastUpdate = now
             delay(1000)
         }
     }

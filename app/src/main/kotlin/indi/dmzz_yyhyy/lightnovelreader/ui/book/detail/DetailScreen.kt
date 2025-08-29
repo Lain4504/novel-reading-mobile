@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -40,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -80,6 +82,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.navigateToSettingsTextFormattingRulesDestination
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import kotlinx.coroutines.delay
@@ -102,6 +105,7 @@ fun DetailScreen(
     onClickMarkAllRead: () -> Unit
 ) {
     val navController = LocalNavController.current
+    val lazyListState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showExportBottomSheet by remember { mutableStateOf(false) }
     var exportSettings by remember { mutableStateOf(ExportSettings()) }
@@ -123,17 +127,54 @@ fun DetailScreen(
                 scrollBehavior = scrollBehavior
             )
         },
+        snackbarHost = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.End
+            ) {
+                AnimatedVisibility(
+                    visible = lazyListState.canScrollForward && lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.padding(end = 24.dp, start = 16.dp).padding(vertical = 14.dp),
+                        onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
+                        else onClickContinueReading,
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.filled_menu_book_24px),
+                                contentDescription = null
+                            )
+                        },
+                        text = {
+                            Text(if (uiState.userReadingData.lastReadChapterId == -1) stringResource(R.string.start_reading)
+                            else stringResource(id = R.string.continue_reading))
+                        }
+                    )
+                }
+                AnimatedVisibility(
+                    LocalSnackbarHost.current.currentSnackbarData != null,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    SnackbarHost(
+                        hostState = LocalSnackbarHost.current
+                    )
+                }
+                Spacer(Modifier.height(42.dp))
+            }
+        }
     ) { paddingValues ->
         Content(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
             onClickChapter = onClickChapter,
-            onClickReadFromStart = onClickReadFromStart,
-            onClickContinueReading = onClickContinueReading,
             cacheBook = cacheBook,
             requestAddBookToBookshelf = requestAddBookToBookshelf,
             onClickTag = onClickTag,
-            onClickCover = onClickCover
+            onClickCover = onClickCover,
+            lazyListState = lazyListState
         )
         AnimatedVisibility(visible = showExportBottomSheet) {
             ExportBottomSheet(
@@ -156,9 +197,8 @@ private val itemVerticalPadding = 8.dp
 private fun Content(
     modifier: Modifier = Modifier,
     uiState: DetailUiState,
+    lazyListState: LazyListState,
     onClickChapter: (Int) -> Unit,
-    onClickReadFromStart: () -> Unit,
-    onClickContinueReading: () -> Unit,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
     onClickTag: (String) -> Unit,
@@ -171,7 +211,6 @@ private fun Content(
     var showContent by remember { mutableStateOf(false) }
     val bookIsEmpty = uiState.bookInformation.title.isEmpty()
 
-    val lazyListState = rememberLazyListState()
     val scrollOffset by remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
 
     LaunchedEffect(Unit) {
@@ -298,36 +337,6 @@ private fun Content(
                     Spacer(Modifier.height(48.dp))
                 }
             }
-
-            AnimatedVisibility(
-                visible = lazyListState.canScrollForward &&
-                        lazyListState.isScrollingUp().value &&
-                        uiState.bookVolumes.volumes.isNotEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(end = 24.dp, bottom = 54.dp)
-                ) {
-                    ExtendedFloatingActionButton(
-                        modifier = Modifier.align(Alignment.BottomEnd),
-                        onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
-                        else onClickContinueReading,
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.filled_menu_book_24px),
-                                contentDescription = null
-                            )
-                        },
-                        text = {
-                            Text(if (uiState.userReadingData.lastReadChapterId == -1) stringResource(R.string.start_reading)
-                            else stringResource(id = R.string.continue_reading))
-                        }
-                    )
-                }
-            }
         }
     }
 
@@ -417,7 +426,7 @@ private fun TopBar(
                 Icon(painterResource(id = R.drawable.arrow_back_24px), "back")
             }
         },
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
     )
 }
 

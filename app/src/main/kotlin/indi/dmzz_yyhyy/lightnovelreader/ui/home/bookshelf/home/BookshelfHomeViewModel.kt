@@ -108,11 +108,19 @@ class BookshelfHomeViewModel @Inject constructor(
             val pinnedBookIds = _uiState.selectedBookshelf.pinnedBookIds
             val newPinnedBooksIds = _uiState.selectedBookIds
                 .filter { pinnedBookIds.contains(it) }
+                .toMutableList()
+                .apply {
+                    if (bookId != null && bookId < 0) add(-bookId)
+                }
                 .let { removeList ->
-                    (pinnedBookIds + (if (bookId == null) _uiState.selectedBookIds else listOf(bookId))).toMutableList().apply {
-                        removeAll { removeList.contains(it) }
-                    }
-                }.distinct()
+                    (pinnedBookIds + (if (bookId == null || bookId < 0) _uiState.selectedBookIds else listOf(bookId)))
+                        .toMutableList()
+                        .apply {
+                            removeAll { removeList.contains(it) }
+                        }
+                }
+                .distinct()
+
             bookshelfRepository.updateBookshelf(_uiState.selectedBookshelfId) {
                 it.apply {
                     this.pinnedBookIds = newPinnedBooksIds
@@ -121,6 +129,7 @@ class BookshelfHomeViewModel @Inject constructor(
             disableSelectMode()
         }
     }
+
 
     fun removeSelectedBooks() {
         viewModelScope.launch(Dispatchers.IO) {

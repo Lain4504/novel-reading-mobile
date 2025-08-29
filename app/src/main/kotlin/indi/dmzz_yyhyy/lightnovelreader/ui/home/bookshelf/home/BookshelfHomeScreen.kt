@@ -16,6 +16,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -50,6 +51,8 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
@@ -99,7 +102,11 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.pinAction
+import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
+import indi.dmzz_yyhyy.lightnovelreader.utils.unpinAction
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -234,6 +241,9 @@ fun BookshelfHomeScreen(
                     selectedRoute = selectedRoute,
                     controller = controller
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(LocalSnackbarHost.current)
             }
         ) { paddingValues ->
             Column(
@@ -330,9 +340,9 @@ fun BookshelfHomeScreen(
                         .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
                     state = listState
                 ) {
-                    UpdatedBooks(uiState, onClickBook, changeBookSelectState)
-                    PinnedBooks(uiState, onClickBook, changeBookSelectState, onLongPress)
-                    AllBooks(uiState, onClickBook, changeBookSelectState, onClickPin, onLongPress)
+                    UpdatedBooks(uiState, onClickBook,  changeBookSelectState)
+                    PinnedBooks(uiState, coroutineScope, onClickPin, onClickBook, changeBookSelectState, onLongPress)
+                    AllBooks(uiState, coroutineScope, onClickBook, changeBookSelectState, onClickPin, onLongPress)
                 }
             }
         }
@@ -346,9 +356,8 @@ fun LazyListScope.UpdatedBooks(
 ) {
     val updatedBookIds = uiState.selectedBookshelf.updatedBookIds.reversed()
     if (updatedBookIds.isEmpty()) return
-    stickyHeader {
+    stickyHeader(key = "U") {
         CollapseGroupTitle(
-            modifier = Modifier.animateItem(),
             icon = painterResource(R.drawable.autorenew_24px),
             title = stringResource(
                 R.string.bookshelf_group_title_updated,
@@ -358,22 +367,30 @@ fun LazyListScope.UpdatedBooks(
             onClickExpand = { uiState.updatedExpanded = !uiState.updatedExpanded }
         )
     }
-    items(updatedBookIds) { updatedBookId ->
+
+    items(updatedBookIds, key = { "${uiState.selectedBookshelf.id}U$it" }) { updatedBookId ->
         AnimatedVisibility(
+            modifier = Modifier.animateItem(
+                fadeInSpec = tween(200),
+                fadeOutSpec = null
+            ),
             visible = uiState.updatedExpanded,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            enter = fadeIn(),
+            exit = fadeOut(),
+            label = "${uiState.selectedBookshelf.id}U$updatedBookId"
         ) {
             uiState.bookInformationMap[updatedBookId]?.let {
                 BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 6.dp),
                     bookInformation = it,
-                    selected = uiState.selectedBookIds.contains(it.id),
+                    selected = uiState.selectedBookIds.contains(updatedBookId),
                     latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
                     onClick = {
                         if (!uiState.selectMode)
-                            onClickBook(it.id)
-                        else onSelectedChange(it.id) },
+                            onClickBook(updatedBookId)
+                        else onSelectedChange(updatedBookId) },
                     onLongPress = { }
                 )
             }
@@ -384,15 +401,20 @@ fun LazyListScope.UpdatedBooks(
 @OptIn(ExperimentalFoundationApi::class)
 fun LazyListScope.PinnedBooks(
     uiState: BookshelfHomeUiState,
+    coroutineScope: CoroutineScope,
+    onClickPin: (Int?) -> Unit,
     onClickBook: (Int) -> Unit,
     onSelectedChange: (Int) -> Unit,
     onLongPress: (Int) -> Unit,
 ) {
     val pinnedBookIds = uiState.selectedBookshelf.pinnedBookIds.reversed()
     if (pinnedBookIds.isEmpty()) return
-    stickyHeader {
+    stickyHeader(key = "P") {
         CollapseGroupTitle(
-            modifier = Modifier.animateItem(),
+            modifier = Modifier.animateItem(
+                fadeInSpec = null,
+                fadeOutSpec = null
+            ),
             icon = painterResource(R.drawable.keep_24px),
             title = stringResource(
                 R.string.bookshelf_group_title_pinned,
@@ -402,23 +424,48 @@ fun LazyListScope.PinnedBooks(
             onClickExpand = { uiState.pinnedExpanded = !uiState.pinnedExpanded }
         )
     }
-    items(pinnedBookIds) { pinnedBookId ->
+    items(pinnedBookIds, key = { "${uiState.selectedBookshelf.id}P$it" }) { pinnedBookId ->
+        val hostState = LocalSnackbarHost.current
+        val unpin = unpinAction.toSwipeAction {
+            onClickPin(-pinnedBookId)
+            showSnackbar(
+                coroutineScope = coroutineScope,
+                hostState = hostState,
+                message = "已取消固定: ${uiState.bookInformationMap[pinnedBookId]?.title}",
+                actionLabel = "撤销",
+            ) {
+                when (it) {
+                    SnackbarResult.Dismissed -> { }
+                    SnackbarResult.ActionPerformed -> onClickPin(pinnedBookId)
+                }
+            }
+        }
         AnimatedVisibility(
+            modifier = Modifier.animateItem(
+                fadeInSpec = tween(200),
+                fadeOutSpec = tween(200),
+            ),
             visible = uiState.pinnedExpanded,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            enter = fadeIn(),
+            exit = fadeOut(),
+            label = "${uiState.selectedBookshelf.id}U$pinnedBookId"
         ) {
             uiState.bookInformationMap[pinnedBookId]?.let {
                 BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 6.dp),
                     bookInformation = it,
-                    selected = uiState.selectedBookIds.contains(it.id),
+                    selected = uiState.selectedBookIds.contains(pinnedBookId),
                     onClick = {
                         if (!uiState.selectMode)
-                            onClickBook(it.id)
-                        else onSelectedChange(it.id)
+                            onClickBook(pinnedBookId)
+                        else onSelectedChange(pinnedBookId)
                     },
-                    onLongPress = { onLongPress(it.id) }
+                    onLongPress = { onLongPress(pinnedBookId) },
+                    swipeToLeftActions =
+                        if (uiState.selectMode) emptyList()
+                        else listOf(unpin)
                 )
             }
         }
@@ -428,6 +475,7 @@ fun LazyListScope.PinnedBooks(
 @OptIn(ExperimentalFoundationApi::class)
 fun LazyListScope.AllBooks(
     uiState: BookshelfHomeUiState,
+    coroutineScope: CoroutineScope,
     onClickBook: (Int) -> Unit,
     onSelectedChange: (Int) -> Unit,
     onClickPin: (Int) -> Unit,
@@ -435,9 +483,12 @@ fun LazyListScope.AllBooks(
 ) {
     val allBookIds = uiState.selectedBookshelf.allBookIds.reversed()
     if (allBookIds.isEmpty()) return
-    stickyHeader {
+    stickyHeader(key = "A") {
         CollapseGroupTitle(
-            modifier = Modifier.animateItem(),
+            modifier = Modifier.animateItem(
+                fadeInSpec = null,
+                fadeOutSpec = null
+            ),
             icon = painterResource(R.drawable.outline_bookmark_24px),
             title = stringResource(
                 R.string.bookshelf_group_title_all,
@@ -447,27 +498,48 @@ fun LazyListScope.AllBooks(
             onClickExpand = { uiState.allExpanded = !uiState.allExpanded }
         )
     }
-    items(allBookIds) { bookId ->
+    items(allBookIds, key = { "${uiState.selectedBookshelf.id}A$it" }) { bookId ->
+        val hostState = LocalSnackbarHost.current
         val pin = pinAction.toSwipeAction {
             onClickPin(bookId)
+            showSnackbar(
+                coroutineScope = coroutineScope,
+                hostState = hostState,
+                message = "已固定: ${uiState.bookInformationMap[bookId]?.title}",
+                actionLabel = "撤销",
+            ) {
+                when (it) {
+                    SnackbarResult.Dismissed -> { }
+                    SnackbarResult.ActionPerformed -> onClickPin(-bookId)
+                }
+            }
         }
         AnimatedVisibility(
+            modifier = Modifier.animateItem(
+                fadeInSpec = tween(200),
+                fadeOutSpec = null
+            ),
             visible = uiState.allExpanded,
             enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            exit = fadeOut() + shrinkVertically(),
+            label = "${uiState.selectedBookshelf.id}U$bookId"
         ) {
             uiState.bookInformationMap[bookId]?.let {
                 BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 6.dp),
                     bookInformation = it,
-                    selected = uiState.selectedBookIds.contains(it.id),
+                    selected = uiState.selectedBookIds.contains(bookId),
                     onClick = {
                         if (!uiState.selectMode)
-                            onClickBook(it.id)
-                        else onSelectedChange(it.id)
+                            onClickBook(bookId)
+                        else onSelectedChange(bookId)
                     },
-                    onLongPress = { onLongPress(it.id) },
-                    swipeToLeftActions = if (uiState.selectMode) emptyList() else listOf(pin)
+                    onLongPress = { onLongPress(bookId) },
+                    swipeToLeftActions =
+                        if (uiState.selectMode || uiState.selectedBookshelf.pinnedBookIds.contains(bookId)) emptyList()
+                        else listOf(pin)
                 )
             }
         }

@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -59,6 +60,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DataSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.DisplaySettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.ReadingSettingsList
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.list.UpdatesSettingsList
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -91,6 +93,9 @@ fun SettingsScreen(
                     selectedRoute,
                     controller
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(LocalSnackbarHost.current)
             }
         ) {
             Column(
