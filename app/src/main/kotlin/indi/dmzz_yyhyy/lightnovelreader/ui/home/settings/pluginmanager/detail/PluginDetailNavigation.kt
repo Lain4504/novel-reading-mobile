@@ -1,5 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.pluginmanager.detail
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -17,9 +19,10 @@ fun NavGraphBuilder.settingsPluginManagerDetailDestination() {
         val viewModel = hiltViewModel<PluginManagerViewModel>()
         val pluginId = navBackStackEntry.toRoute<Route.Main.Settings.PluginManager.Detail>().id
         val plugin = viewModel.pluginList.find { it.id == pluginId }
-
+        val enabledPluginList by viewModel.enabledPluginFlow.collectAsState(emptyList())
         PluginDetailScreen(
-            plugin = plugin,
+            enabled = enabledPluginList.contains(pluginId),
+            pluginInfo = plugin,
             onClickBack = navController::popBackStackIfResumed,
             onClickSwitch = viewModel::onClickEnabledSwitch
         )

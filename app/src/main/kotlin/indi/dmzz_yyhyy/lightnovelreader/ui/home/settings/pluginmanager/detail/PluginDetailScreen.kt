@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
@@ -27,20 +26,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginInfo
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.InfoItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.pluginmanager.Plugin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PluginDetailScreen(
-    plugin: Plugin?,
+    enabled: Boolean,
+    pluginInfo: PluginInfo?,
     onClickBack: () -> Unit,
     onClickSwitch: (String) -> Unit
 ) {
@@ -49,13 +48,13 @@ fun PluginDetailScreen(
     Scaffold(
         topBar = {
             TopBar(
-                title = plugin?.name ?: "Plugin",
+                title = pluginInfo?.name ?: "Plugin",
                 onClickBack = onClickBack,
                 scrollBehavior = enterAlwaysScrollBehavior
             )
         }
     ) { paddingValues ->
-        if (plugin == null) {
+        if (pluginInfo == null) {
             EmptyPage(
                 modifier = Modifier.padding(paddingValues),
                 icon = painterResource(id = R.drawable.help_center_24px),
@@ -70,13 +69,14 @@ fun PluginDetailScreen(
         ) {
             item {
                 PluginSwitchBlock(
-                    plugin = plugin,
+                    enabled = enabled,
+                    pluginInfo = pluginInfo,
                     onClickSwitch = onClickSwitch
                 )
             }
             item {
                 PluginInfoBlock(
-                    plugin = plugin
+                    pluginInfo = pluginInfo
                 )
             }
         }
@@ -85,7 +85,8 @@ fun PluginDetailScreen(
 
 @Composable
 private fun PluginSwitchBlock(
-    plugin: Plugin,
+    enabled: Boolean,
+    pluginInfo: PluginInfo,
     onClickSwitch: (String) -> Unit
 ) {
     Card(
@@ -110,9 +111,9 @@ private fun PluginSwitchBlock(
                 .weight(1f)
                 .height(80.dp))
             Switch(
-                checked = plugin.isEnabled,
+                checked = enabled,
                 onCheckedChange = {
-                    onClickSwitch(plugin.id)
+                    onClickSwitch(pluginInfo.id)
                 }
             )
         }
@@ -146,7 +147,7 @@ private fun PluginSwitchBlock(
 
 @Composable
 private fun PluginInfoBlock(
-    plugin: Plugin
+    pluginInfo: PluginInfo
 ) {
     val titleStyle = AppTypography.titleMedium.copy(
         color = colorScheme.onSurface,
@@ -163,7 +164,7 @@ private fun PluginInfoBlock(
     ) {
         Text(
             modifier = Modifier.padding(vertical = 12.dp),
-            text = plugin.description,
+            text = pluginInfo.description,
             style = AppTypography.labelLarge
         )
         HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp))
@@ -171,19 +172,19 @@ private fun PluginInfoBlock(
         Column {
             InfoItem(
                 title = "ID",
-                content = plugin.id,
+                content = pluginInfo.id,
                 titleStyle = titleStyle,
                 contentStyle = contentStyle,
             )
             InfoItem(
                 title = "版本",
-                content = plugin.versionName + " [${plugin.version}]",
+                content = pluginInfo.versionName + " [${pluginInfo.version}]",
                 titleStyle = titleStyle,
                 contentStyle = contentStyle,
             )
             InfoItem(
                 title = "作者",
-                content = plugin.author,
+                content = pluginInfo.author,
                 titleStyle = titleStyle,
                 contentStyle = contentStyle,
             )

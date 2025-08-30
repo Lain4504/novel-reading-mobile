@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import dagger.hilt.android.HiltAndroidApp
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogLevel
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LoggerRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginManager
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import io.nightfish.potatoautoproxy.ProxyPool
@@ -21,6 +22,7 @@ class LightNovelReaderApplication : Application(), Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
     @Inject lateinit var loggerRepository: LoggerRepository
     @Inject lateinit var userDataRepository: UserDataRepository
+    @Inject lateinit var pluginManager: PluginManager
 
     override val workManagerConfiguration: Configuration
         get()  =
@@ -30,6 +32,8 @@ class LightNovelReaderApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        pluginManager.loadAllPlugins()
+        println("loadPlugin")
         coroutineScope.launch(Dispatchers.IO) {
             loggerRepository.logLevel = LogLevel.from(userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path).getOrDefault("none"))
             loggerRepository.startLogging()

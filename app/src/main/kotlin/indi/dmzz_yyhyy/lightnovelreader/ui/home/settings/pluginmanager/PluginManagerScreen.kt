@@ -16,18 +16,15 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -37,27 +34,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginInfo
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
-
-data class Plugin(
-    val isEnabled: Boolean,
-    val isUpdatable: Boolean,
-    val id: String,
-    val name: String,
-    val version: Int,
-    val versionName: String,
-    val author: String,
-    val description: String,
-    val url: String?,
-    val updateUrl: String?
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PluginManagerScreen(
+    enabledPluginList: List<String>,
+    onClickInstall: () -> Unit,
     onClickBack: () -> Unit,
     onClickDetail: (String) -> Unit,
-    pluginList: List<Plugin>
+    onClickDelete: (String) -> Unit,
+    onClickSwitch: (String) -> Unit,
+    pluginInfoList: List<PluginInfo>
 ) {
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -71,7 +60,7 @@ fun PluginManagerScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 modifier = Modifier.padding(end = 12.dp, bottom = 24.dp),
-                onClick = { },
+                onClick = onClickInstall,
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.archive_24px),
@@ -90,10 +79,13 @@ fun PluginManagerScreen(
             item {
                 ThirdPartyPluginTips()
             }
-            items(pluginList) { plugin ->
+            items(pluginInfoList) { plugin ->
                 PluginCard(
-                    plugin = plugin,
-                    onClickDetail = onClickDetail
+                    pluginInfo = plugin,
+                    onClickDetail = onClickDetail,
+                    enabledPluginList = enabledPluginList,
+                    onClickSwitch = onClickSwitch,
+                    onClickDelete = onClickDelete
                 )
             }
             item {
@@ -132,8 +124,11 @@ private fun ThirdPartyPluginTips() {
 
 @Composable
 private fun PluginCard(
-    plugin: Plugin,
-    onClickDetail: (String) -> Unit
+    enabledPluginList: List<String>,
+    pluginInfo: PluginInfo,
+    onClickDetail: (String) -> Unit,
+    onClickSwitch: (String) -> Unit,
+    onClickDelete: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -151,14 +146,16 @@ private fun PluginCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(plugin.name, style = AppTypography.titleMedium)
-                    Text(plugin.versionName, style = AppTypography.labelMedium, color = colorScheme.secondary)
-                    Text("by ${plugin.author}", style = AppTypography.labelMedium, color = colorScheme.secondary)
+                    Text(pluginInfo.name, style = AppTypography.titleMedium)
+                    Text(pluginInfo.versionName, style = AppTypography.labelMedium, color = colorScheme.secondary)
+                    Text("by ${pluginInfo.author}", style = AppTypography.labelMedium, color = colorScheme.secondary)
                 }
                 Spacer(Modifier.weight(1f))
                 Switch(
-                    checked = plugin.isEnabled,
-                    onCheckedChange = null
+                    checked = enabledPluginList.contains(pluginInfo.id),
+                    onCheckedChange = {
+                        onClickSwitch(pluginInfo.id)
+                    }
                 )
             }
             /*HorizontalDivider(Modifier
@@ -169,7 +166,7 @@ private fun PluginCard(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (plugin.isUpdatable) {
+                if (pluginInfo.isUpdatable) {
                     Button(
                         onClick = {},
                     ) {
@@ -184,7 +181,7 @@ private fun PluginCard(
                 }
                 Spacer(Modifier.weight(1f))
                 FilledTonalIconButton(
-                    onClick = {}
+                    onClick = { onClickDelete(pluginInfo.id) }
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.delete_forever_24px),
@@ -193,7 +190,7 @@ private fun PluginCard(
                 }
                 FilledTonalButton(
                     onClick = {
-                        onClickDetail(plugin.id)
+                        onClickDetail(pluginInfo.id)
                     }
                 ) {
                     Text("详情")
@@ -209,7 +206,7 @@ private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onClickBack: () -> Unit
 ) {
-    MediumTopAppBar(
+    TopAppBar(
         title = {
             Text(
                 text = "扩展插件",

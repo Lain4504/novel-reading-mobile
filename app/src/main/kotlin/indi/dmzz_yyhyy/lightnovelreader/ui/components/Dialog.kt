@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebDataSourceItem
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import kotlin.math.round
 
@@ -333,24 +334,6 @@ fun ExportUserDataDialog(
         }
     }
 }
-
-data class WebDataSourceItem(
-    val id: Int,
-    val name: String,
-    val provider: String,
-)
-
-val wenku8ApiWebDataSourceItem = WebDataSourceItem(
-    "wenku8".hashCode(),
-    "Wenku8",
-    "LightNovelReader from wenku8.net"
-)
-
-val zaiComicWebDataSourceItem = WebDataSourceItem(
-    "ZaiComic".hashCode(),
-    "ZaiComic",
-    "LightNovelReader from zaimanhua.com"
-)
 
 @Composable
 fun SourceChangeDialog(

@@ -55,9 +55,6 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -65,6 +62,11 @@ android {
     }
     composeCompiler {
         includeSourceInformation = true
+    }
+    sourceSets {
+        getByName("main") {
+            assets.srcDir("build/generated/assets")
+        }
     }
 }
 
@@ -153,5 +155,11 @@ tasks.register("printVersion") {
 tasks.register("printVersionCode") {
     doFirst {
         println(android.defaultConfig.versionCode)
+    }
+}
+
+tasks.whenTaskAdded {
+    if (name.contains("merge") && name.contains("Assets")) {
+        dependsOn(":plugin:defaultdatasource:copyDexToAssets")
     }
 }
