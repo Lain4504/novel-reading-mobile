@@ -71,6 +71,7 @@ sealed class UserDataPath(
             data object WebDataSourceId : UserDataPath("web_data_source_id", Data)
             data object LogLevel: UserDataPath("log_level", Data)
             data object IsUseProxy: UserDataPath("is_use_proxy", Data)
+            data object BookAutoRefresh: UserDataPath("book_auto_refresh", Data)
         }
         /*data object Reader : UserDataPath("reader", Settings) {
             data object FontSize : LinkUserData(Reader.FontSize)

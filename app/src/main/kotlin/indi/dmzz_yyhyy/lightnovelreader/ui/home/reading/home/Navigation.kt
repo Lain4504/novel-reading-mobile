@@ -11,7 +11,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.navigateToDownloadManager
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.home.navigateToExplorationHomeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.stats.navigateToReadingStatsDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
@@ -20,7 +19,7 @@ fun NavGraphBuilder.readingHomeDestination(sharedTransitionScope: SharedTransiti
     composable<Route.Main.Reading.Home> {
         val navController = LocalNavController.current
         val context = LocalContext.current
-        val parentEntry = remember { navController.getBackStackEntry(Route.Main) }
+        val parentEntry = remember(it) { navController.getBackStackEntry(Route.Main) }
         val readingViewModel = hiltViewModel<ReadingHomeViewModel>(parentEntry)
         ReadingScreen(
             controller = navController,
@@ -35,10 +34,10 @@ fun NavGraphBuilder.readingHomeDestination(sharedTransitionScope: SharedTransiti
                 navController.navigateToBookDetailDestination(bookId)
                 navController.navigateToBookReaderDestination(bookId, chapterId, context)
             },
-            onClickJumpToExploration = navController::navigateToExplorationHomeDestination,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
-            onClickStats = navController::navigateToReadingStatsDestination
+            onClickStats = navController::navigateToReadingStatsDestination,
+            loadBookInfo = readingViewModel::loadBookInfo
         )
     }
 }

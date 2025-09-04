@@ -2,6 +2,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -496,9 +497,10 @@ private fun BookCardBlock(
             )
             Column {
                 InfoRow(
-                    icon = { BookStatusIcon(bookInformation) },
+                    icon = { BookStatusIcon(bookInformation.isComplete) },
                     text = updateText
                 )
+                Spacer(Modifier.height(2.dp))
                 InfoRow(
                     icon = {
                         Icon(
@@ -722,13 +724,14 @@ private fun IntroBlock(description: String) {
             )
         }
         if (overflowed) {
+            val rotation by animateFloatAsState(if (expanded) 0f else 180f)
             Button(
                 modifier = Modifier.align(Alignment.End),
                 colors = ButtonDefaults.textButtonColors().copy(containerColor = Color.Transparent),
                 onClick = { expanded = !expanded }
             ) {
                 Icon(
-                    modifier = Modifier.rotate(if (expanded) 0f else 180f),
+                    modifier = Modifier.rotate(rotation),
                     painter = painterResource(R.drawable.keyboard_arrow_up_24px),
                     contentDescription = "expand",
                     tint = MaterialTheme.colorScheme.primary
@@ -761,6 +764,7 @@ private fun VolumeItem(
     }
 
     if (hideReadChapters && isFullyRead) return
+    val rotation by animateFloatAsState(if (expanded) 90f else 0f)
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -774,7 +778,7 @@ private fun VolumeItem(
             Column(
                 modifier = Modifier
                     .weight(5f)
-                    .padding(vertical = 6.dp)
+                    .padding(vertical = 12.dp)
             ) {
                 Text(
                     text = volume.volumeTitle,
@@ -794,7 +798,7 @@ private fun VolumeItem(
             Icon(
                 modifier = Modifier
                     .size(16.dp)
-                    .rotate(if (expanded) 90f else 0f),
+                    .rotate(rotation),
                 painter = painterResource(id = R.drawable.arrow_forward_ios_24px),
                 contentDescription = "expand"
             )

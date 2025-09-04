@@ -19,6 +19,7 @@ class SettingState(
     val distributionPlatformKeyUserData = userDataRepository.stringUserData(UserDataPath.Settings.App.DistributionPlatform.path)
     val logLevelKeyUserData = userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path)
     val isUseProxyUserData = userDataRepository.booleanUserData(UserDataPath.Settings.Data.IsUseProxy.path)
+    val bookAutoRefreshUserData = userDataRepository.booleanUserData(UserDataPath.Settings.Data.BookAutoRefresh.path)
     val enableSimplifiedTraditionalTransformUserData = userDataRepository.booleanUserData(
         UserDataPath.Reader.EnableSimplifiedTraditionalTransform.path)
 
@@ -29,5 +30,6 @@ class SettingState(
     val distributionPlatformKey by distributionPlatformKeyUserData.asState("GitHub")
     val logLevelKey by logLevelKeyUserData.asState("none")
     val isUseProxy by isUseProxyUserData.asState(false)
+    val bookAutoRefresh by bookAutoRefreshUserData.asState(true)
     val enableSimplifiedTraditionalTransform by enableSimplifiedTraditionalTransformUserData.safeAsState(false)
 }

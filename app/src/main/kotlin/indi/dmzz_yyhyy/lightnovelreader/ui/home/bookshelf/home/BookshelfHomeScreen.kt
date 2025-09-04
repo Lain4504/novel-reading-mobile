@@ -16,16 +16,16 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,10 +35,10 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -59,10 +59,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,11 +82,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -92,6 +94,8 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import indi.dmzz_yyhyy.lightnovelreader.R
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
@@ -99,9 +103,9 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
-import indi.dmzz_yyhyy.lightnovelreader.utils.pinAction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -128,24 +132,36 @@ fun BookshelfHomeScreen(
     importBookshelf: (Uri) -> Unit,
     clearToast: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    sharedTransitionScope: SharedTransitionScope
+    sharedTransitionScope: SharedTransitionScope,
+    getBookInfoFlow: (Int) -> StateFlow<BookInformation>,
+    getBookVolumesFlow: (Int) -> StateFlow<BookVolumes>,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val workManager = WorkManager.getInstance(context)
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val animatedBackgroundColor by animateColorAsState(
-        if (!uiState.selectMode) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainer,
-        label = "TopBarBackgroundColor"
+        if (!uiState.selectMode) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant
     )
     val saveAllBookshelfLauncher = launcher(saveAllBookshelfJsonData)
     val saveThisBookshelfLauncher = launcher(saveBookshelfJsonData)
     val importBookshelfLauncher = launcher(importBookshelf)
 
-    val listState = rememberLazyListState()
+    val onLongPress: (Int) -> Unit = { bookId ->
+        if (!uiState.selectMode) {
+            onClickEnableSelectMode.invoke()
+        }
+        changeBookSelectState(bookId)
+    }
 
     BackHandler(uiState.selectMode) {
         onClickDisableSelectMode()
+    }
+
+    val listState = rememberSaveable(
+        saver = LazyListState.Saver
+    ) {
+        LazyListState()
     }
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
@@ -274,8 +290,7 @@ fun BookshelfHomeScreen(
                                 )
                             }
                         }
-                    }
-                    else {
+                    } else {
                         PrimaryTabRow(
                             selectedTabIndex = uiState.selectedTabIndex
                         ) {
@@ -295,9 +310,20 @@ fun BookshelfHomeScreen(
                         }
                     }
                 }
-
-                var showEmptyPage by remember { mutableStateOf(false) }
                 val allBookIds = uiState.selectedBookshelf.allBookIds
+
+                val updatedIds by remember(uiState.selectedBookshelf.updatedBookIds) {
+                    mutableStateOf(uiState.selectedBookshelf.updatedBookIds.reversed())
+                }
+                val pinnedIds by remember(uiState.selectedBookshelf.pinnedBookIds) {
+                    mutableStateOf(uiState.selectedBookshelf.pinnedBookIds.reversed())
+                }
+                val allIds by remember(uiState.selectedBookshelf.allBookIds) {
+                    mutableStateOf(uiState.selectedBookshelf.allBookIds.reversed())
+                }
+
+                var showEmptyPage by remember { mutableStateOf(allBookIds.isEmpty()) }
+
                 LaunchedEffect(allBookIds) {
                     if (allBookIds.isEmpty()) {
                         delay(140)
@@ -319,188 +345,167 @@ fun BookshelfHomeScreen(
                     )
                 }
 
-                val onLongPress: (Int) -> Unit = { bookId ->
-                    onClickEnableSelectMode.invoke()
-                    changeBookSelectState(bookId)
-                }
-
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
                     state = listState
                 ) {
-                    UpdatedBooks(uiState, onClickBook, changeBookSelectState)
-                    PinnedBooks(uiState, onClickBook, changeBookSelectState, onLongPress)
-                    AllBooks(uiState, onClickBook, changeBookSelectState, onClickPin, onLongPress)
+                    if (updatedIds.isNotEmpty()) {
+                        stickyHeader {
+                            CollapseHeader(
+                                icon = painterResource(R.drawable.autorenew_24px),
+                                title = stringResource(R.string.bookshelf_group_title_updated, updatedIds.size),
+                                expanded = uiState.updatedExpanded,
+                                onToggleExpand = { uiState.updatedExpanded = !uiState.updatedExpanded }
+                            )
+                        }
+
+                        if (uiState.updatedExpanded) {
+                            items(
+                                items = updatedIds,
+                                key = { "updated_$it"}
+                            ) { id ->
+                                val infoFlow = remember(id) { getBookInfoFlow(id) }
+                                val info by infoFlow.collectAsStateWithLifecycle()
+
+                                val volumesFlow = remember(id) { getBookVolumesFlow(id) }
+                                val volumes by volumesFlow.collectAsStateWithLifecycle()
+
+                                val lastChapterTitle by remember(volumes) {
+                                    derivedStateOf {
+                                        if (volumes.volumes.isNotEmpty()) {
+                                            "${volumes.volumes.last().volumeTitle} ${volumes.volumes.last().chapters.last().title}"
+                                        } else null
+                                    }
+                                }
+
+                                BookCardItem(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .padding(bottom = 12.dp),
+                                    bookInformation = info,
+                                    selected = uiState.selectedBookIds.contains(id),
+                                    collected = false,
+                                    onClick = {
+                                        if (!uiState.selectMode) onClickBook(id)
+                                        else changeBookSelectState(id)
+                                    },
+                                    onLongPress = { onLongPress(id) },
+                                    latestChapterTitle = lastChapterTitle ?: uiState.bookLastChapterTitleMap[id]
+                                )
+                            }
+                        }
+                    }
+
+                    if (pinnedIds.isNotEmpty()) {
+                        stickyHeader {
+                            CollapseHeader(
+                                icon = painterResource(R.drawable.keep_24px),
+                                title = stringResource(R.string.bookshelf_group_title_pinned, pinnedIds.size),
+                                expanded = uiState.pinnedExpanded,
+                                onToggleExpand = { uiState.pinnedExpanded = !uiState.pinnedExpanded }
+                            )
+                        }
+                        if (uiState.pinnedExpanded) {
+                                items(
+                                    items = pinnedIds,
+                                    key = { "pinned_$it" }
+                                ) { id ->
+                                    val infoFlow = remember(id) { getBookInfoFlow(id) }
+                                    val info by infoFlow.collectAsStateWithLifecycle()
+
+                                    BookCardItem(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 12.dp),
+                                        bookInformation = info,
+                                        selected = uiState.selectedBookIds.contains(id),
+                                        collected = false,
+                                        onClick = {
+                                            if (!uiState.selectMode) onClickBook(id)
+                                            else changeBookSelectState(id)
+                                        },
+                                        onLongPress = { onLongPress(id) }
+                                    )
+                                }
+                        }
+                    }
+
+                    if (allIds.isNotEmpty()) {
+                        stickyHeader {
+                            CollapseHeader(
+                                icon = painterResource(R.drawable.outline_bookmark_24px),
+                                title = stringResource(R.string.bookshelf_group_title_all, allIds.size),
+                                expanded = uiState.allExpanded,
+                                onToggleExpand = { uiState.allExpanded = !uiState.allExpanded }
+                            )
+                        }
+
+                        if (uiState.allExpanded) {
+                            items(
+                                items = allIds,
+                                key = { "book_$it" }
+                            ) { id ->
+                                val infoFlow = remember(id) { getBookInfoFlow(id) }
+                                val info by infoFlow.collectAsStateWithLifecycle()
+
+                                BookCardItem(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .padding(bottom = 12.dp),
+                                    bookInformation = info,
+                                    selected = uiState.selectedBookIds.contains(id),
+                                    collected = false,
+                                    onClick = {
+                                        if (!uiState.selectMode) onClickBook(id)
+                                        else changeBookSelectState(id)
+                                    },
+                                    onLongPress = { onLongPress(id) }
+                                )
+                            }
+
+
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(vertical = 18.dp),
+                                        text = "${allBookIds.size} 本书",
+                                        style = AppTypography.labelMedium,
+                                        fontWeight = FontWeight.W600,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
+                                Spacer(Modifier.height(20.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-fun LazyListScope.UpdatedBooks(
-    uiState: BookshelfHomeUiState,
-    onClickBook: (Int) -> Unit,
-    onSelectedChange: (Int) -> Unit,
-) {
-    val updatedBookIds = uiState.selectedBookshelf.updatedBookIds.reversed()
-    if (updatedBookIds.isEmpty()) return
-    stickyHeader {
-        CollapseGroupTitle(
-            modifier = Modifier.animateItem(),
-            icon = painterResource(R.drawable.autorenew_24px),
-            title = stringResource(
-                R.string.bookshelf_group_title_updated,
-                updatedBookIds.size
-            ),
-            expanded = uiState.updatedExpanded,
-            onClickExpand = { uiState.updatedExpanded = !uiState.updatedExpanded }
-        )
-    }
-    items(updatedBookIds) { updatedBookId ->
-        AnimatedVisibility(
-            visible = uiState.updatedExpanded,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
-        ) {
-            uiState.bookInformationMap[updatedBookId]?.let {
-                BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
-                    bookInformation = it,
-                    selected = uiState.selectedBookIds.contains(it.id),
-                    latestChapterTitle = uiState.bookLastChapterTitleMap[updatedBookId],
-                    onClick = {
-                        if (!uiState.selectMode)
-                            onClickBook(it.id)
-                        else onSelectedChange(it.id) },
-                    onLongPress = { }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.PinnedBooks(
-    uiState: BookshelfHomeUiState,
-    onClickBook: (Int) -> Unit,
-    onSelectedChange: (Int) -> Unit,
-    onLongPress: (Int) -> Unit,
-) {
-    val pinnedBookIds = uiState.selectedBookshelf.pinnedBookIds.reversed()
-    if (pinnedBookIds.isEmpty()) return
-    stickyHeader {
-        CollapseGroupTitle(
-            modifier = Modifier.animateItem(),
-            icon = painterResource(R.drawable.keep_24px),
-            title = stringResource(
-                R.string.bookshelf_group_title_pinned,
-                pinnedBookIds.size
-            ),
-            expanded = uiState.pinnedExpanded,
-            onClickExpand = { uiState.pinnedExpanded = !uiState.pinnedExpanded }
-        )
-    }
-    items(pinnedBookIds) { pinnedBookId ->
-        AnimatedVisibility(
-            visible = uiState.pinnedExpanded,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
-        ) {
-            uiState.bookInformationMap[pinnedBookId]?.let {
-                BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
-                    bookInformation = it,
-                    selected = uiState.selectedBookIds.contains(it.id),
-                    onClick = {
-                        if (!uiState.selectMode)
-                            onClickBook(it.id)
-                        else onSelectedChange(it.id)
-                    },
-                    onLongPress = { onLongPress(it.id) }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.AllBooks(
-    uiState: BookshelfHomeUiState,
-    onClickBook: (Int) -> Unit,
-    onSelectedChange: (Int) -> Unit,
-    onClickPin: (Int) -> Unit,
-    onLongPress: (Int) -> Unit
-) {
-    val allBookIds = uiState.selectedBookshelf.allBookIds.reversed()
-    if (allBookIds.isEmpty()) return
-    stickyHeader {
-        CollapseGroupTitle(
-            modifier = Modifier.animateItem(),
-            icon = painterResource(R.drawable.outline_bookmark_24px),
-            title = stringResource(
-                R.string.bookshelf_group_title_all,
-                allBookIds.size
-            ),
-            expanded = uiState.allExpanded,
-            onClickExpand = { uiState.allExpanded = !uiState.allExpanded }
-        )
-    }
-    items(allBookIds) { bookId ->
-        val pin = pinAction.toSwipeAction {
-            onClickPin(bookId)
-        }
-        AnimatedVisibility(
-            visible = uiState.allExpanded,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
-        ) {
-            uiState.bookInformationMap[bookId]?.let {
-                BookCardItem(
-                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 6.dp),
-                    bookInformation = it,
-                    selected = uiState.selectedBookIds.contains(it.id),
-                    onClick = {
-                        if (!uiState.selectMode)
-                            onClickBook(it.id)
-                        else onSelectedChange(it.id)
-                    },
-                    onLongPress = { onLongPress(it.id) },
-                    swipeToLeftActions = if (uiState.selectMode) emptyList() else listOf(pin)
-                )
-            }
-        }
-    }
-    item {
-        Box(modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center) {
-            Text(
-                modifier = Modifier.padding(vertical = 18.dp),
-                text = "${allBookIds.size} 本书",
-                style = AppTypography.labelMedium,
-                fontWeight = FontWeight.W600,
-                color = MaterialTheme.colorScheme.outline
-            )
-        }
-    }
-}
-
 @Composable
-fun CollapseGroupTitle(
-    modifier: Modifier = Modifier,
+private fun CollapseHeader(
     icon: Painter,
     title: String,
     expanded: Boolean,
-    onClickExpand: () -> Unit
+    onToggleExpand: () -> Unit
 ) {
     Surface {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(42.dp)
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .height(48.dp)
+                .padding(top = 2.dp)
+                .padding(horizontal = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -508,17 +513,16 @@ fun CollapseGroupTitle(
                 painter = icon,
                 contentDescription = null
             )
-            AnimatedText(
-                modifier = Modifier.weight(2f),
+            Spacer(Modifier.width(8.dp))
+            Text(
                 text = title,
-                style = AppTypography.titleSmall,
-                fontWeight = FontWeight.W600,
-                letterSpacing = 0.5.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f)
             )
-            IconButton(onClickExpand) {
+            val rotation by animateFloatAsState(if (expanded) 0f else 180f)
+            IconButton(onClick = onToggleExpand) {
                 Icon(
-                    modifier = Modifier.rotate(if (expanded) 0f else 180f),
+                    modifier = Modifier.rotate(rotation),
                     painter = painterResource(R.drawable.keyboard_arrow_up_24px),
                     contentDescription = "expand"
                 )

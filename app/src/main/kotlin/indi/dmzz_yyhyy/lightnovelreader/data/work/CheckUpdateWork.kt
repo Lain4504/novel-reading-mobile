@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -17,6 +18,8 @@ import dagger.assisted.AssistedInject
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 
 @HiltWorker
@@ -24,11 +27,19 @@ class CheckUpdateWork @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val webBookDataSource: WebBookDataSource,
+    private val userDataRepository: UserDataRepository,
     private val bookshelfRepository: BookshelfRepository
 ) : CoroutineWorker(appContext, workerParams) {
+
     override suspend fun doWork(): Result {
+        val isAutoRefreshEnabled = userDataRepository
+            .booleanUserData(UserDataPath.Settings.Data.BookAutoRefresh.path)
+            .getOrDefault(true)
+        if (!isAutoRefreshEnabled) return Result.success()
+
         val reminderBookMap = mutableMapOf<Int, BookInformation>()
         bookshelfRepository.getAllBookshelfBooksMetadata().forEach { bookshelfBookMetadata ->
+            Log.d("CheckUpdateWork", "Updating book id=${bookshelfBookMetadata.id}")
             val bookInformation = webBookDataSource.getBookInformation(bookshelfBookMetadata.id)
             val webBookLastUpdate = bookInformation.lastUpdated
             if (webBookLastUpdate.isAfter(bookshelfBookMetadata.lastUpdate)) {

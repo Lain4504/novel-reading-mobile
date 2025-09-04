@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -33,6 +34,7 @@ class DetailViewModel @Inject constructor(
     val uiState: DetailUiState = _uiState
 
     fun init(bookId: Int) {
+        Log.d("DetailViewModel", "Init bookId = $bookId")
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.getBookInformationFlow(bookId, viewModelScope).collect {
                 if (it.id == -1) return@collect

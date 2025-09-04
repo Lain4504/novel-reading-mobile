@@ -77,11 +77,11 @@ fun ReadingScreen(
     recentReadingBookIds: List<Int>,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
-    onClickJumpToExploration: () -> Unit,
     onClickDownloadManager: () -> Unit,
     onClickStats: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    loadBookInfo: (Int) -> Unit
 ) {
     LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         updateReadingBooks()
@@ -137,13 +137,11 @@ fun ReadingScreen(
                 modifier = Modifier.padding(it),
                 onClickBook = onClickBook,
                 onClickContinueReading = onClickContinueReading,
-                onClickJumpToExploration = onClickJumpToExploration,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
                 recentReadingBookInformationMap = recentReadingBookInformationMap,
                 recentReadingUserReadingDataMap = recentReadingUserReadingDataMap,
                 recentReadingBookIds = recentReadingBookIds,
-                scrollBehavior = pinnedScrollBehavior
+                scrollBehavior = pinnedScrollBehavior,
+                loadBookInfo = loadBookInfo
             )
         }
     }
@@ -155,13 +153,11 @@ private fun ReadingContent(
     modifier: Modifier,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
-    onClickJumpToExploration: () -> Unit,
     recentReadingBookInformationMap: Map<Int, BookInformation>,
     recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
     recentReadingBookIds: List<Int>,
     scrollBehavior: TopAppBarScrollBehavior,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope
+    loadBookInfo: (Int) -> Unit
 ) {
 
     LazyColumn(
@@ -169,7 +165,8 @@ private fun ReadingContent(
             .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp)
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         if (recentReadingBookIds.isNotEmpty() && recentReadingUserReadingDataMap[recentReadingBookIds.first()] != null && recentReadingBookInformationMap[recentReadingBookIds.first()] != null) {
             item {
                 Box(
@@ -217,16 +214,25 @@ private fun ReadingContent(
             }
         }
         items(recentReadingBookIds) { id ->
-            if (recentReadingUserReadingDataMap[id] != null && recentReadingBookInformationMap[id] != null)
+            LaunchedEffect(id) {
+                loadBookInfo(id)
+            }
+
+            val info = recentReadingBookInformationMap[id]
+            val userData = recentReadingUserReadingDataMap[id]
+
+            if (info != null && userData != null) {
                 ReadingBookCard(
                     modifier = Modifier.animateItem(),
-                    bookInformation = recentReadingBookInformationMap[id]!!,
-                    userReadingData = recentReadingUserReadingDataMap[id]!!,
-                    onClick = {
-                        onClickBook(recentReadingBookInformationMap[id]!!.id)
-                    }
+                    bookInformation = info,
+                    userReadingData = userData,
+                    onClick = { onClickBook(info.id) }
                 )
+            } else {
+                ReadingBookCardSkeleton()
+            }
         }
+
         item {
             Spacer(Modifier.height(12.dp))
         }
@@ -270,6 +276,24 @@ private fun TopBar(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+private fun ReadingBookCardSkeleton() {
+    Row(
+        modifier = Modifier
+            .height(144.dp)
+            .clip(RoundedCornerShape(12.dp)),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Cover(
+            width = 94.dp,
+            height = 142.dp,
+            url = "",
+            rounded = 8.dp,
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 private fun ReadingBookCard(
     modifier: Modifier = Modifier,
     bookInformation: BookInformation,
@@ -294,6 +318,7 @@ private fun ReadingBookCard(
                 url = bookInformation.coverUrl,
                 rounded = 8.dp,
             )
+            if (bookInformation.isEmpty()) return@Row
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
