@@ -2,12 +2,14 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.reading.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -45,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,6 +58,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.shimmer
+import com.valentinilk.shimmer.unclippedBoundsInWindow
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
@@ -159,12 +166,17 @@ private fun ReadingContent(
     scrollBehavior: TopAppBarScrollBehavior,
     loadBookInfo: (Int) -> Unit
 ) {
+    val shimmerInstance = rememberShimmer(ShimmerBounds.Custom)
 
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .padding(start = 16.dp, end = 16.dp)
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .onGloballyPositioned { layoutCoordinates ->
+                val position = layoutCoordinates.unclippedBoundsInWindow()
+                shimmerInstance.updateBounds(position)
+            },
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (recentReadingBookIds.isNotEmpty() && recentReadingUserReadingDataMap[recentReadingBookIds.first()] != null && recentReadingBookInformationMap[recentReadingBookIds.first()] != null) {
@@ -221,20 +233,88 @@ private fun ReadingContent(
             val info = recentReadingBookInformationMap[id]
             val userData = recentReadingUserReadingDataMap[id]
 
-            if (info != null && userData != null) {
-                ReadingBookCard(
-                    modifier = Modifier.animateItem(),
-                    bookInformation = info,
-                    userReadingData = userData,
-                    onClick = { onClickBook(info.id) }
-                )
-            } else {
-                ReadingBookCardSkeleton()
+            Crossfade(
+                targetState = info != null && userData != null && !info.isEmpty(),
+                label = "ReadingBookCardCrossfade"
+            ) { loaded ->
+                if (loaded && info != null && userData != null) {
+                    ReadingBookCard(
+                        modifier = Modifier.animateItem(),
+                        bookInformation = info,
+                        userReadingData = userData,
+                        onClick = { onClickBook(info.id) }
+                    )
+                } else {
+                    ReadingBookCardSkeleton(
+                        modifier = Modifier.shimmer(shimmerInstance)
+                    )
+                }
             }
         }
 
         item {
             Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+fun ReadingBookCardSkeleton(
+    modifier: Modifier = Modifier
+) {
+    val skeletonColor = colorScheme.surfaceContainerHigh
+    val skeletonRoundedCorner = RoundedCornerShape(4.dp)
+    Row(
+        modifier = modifier
+            .height(144.dp)
+            .padding(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(94.dp, 142.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(skeletonColor)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(start = 12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(top = 3.dp)
+                    .height(40.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.43f)
+                    .height(20.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+
+            )
         }
     }
 }
@@ -276,24 +356,6 @@ private fun TopBar(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ReadingBookCardSkeleton() {
-    Row(
-        modifier = Modifier
-            .height(144.dp)
-            .clip(RoundedCornerShape(12.dp)),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Cover(
-            width = 94.dp,
-            height = 142.dp,
-            url = "",
-            rounded = 8.dp,
-        )
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
 private fun ReadingBookCard(
     modifier: Modifier = Modifier,
     bookInformation: BookInformation,
@@ -318,7 +380,6 @@ private fun ReadingBookCard(
                 url = bookInformation.coverUrl,
                 rounded = 8.dp,
             )
-            if (bookInformation.isEmpty()) return@Row
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -350,7 +411,7 @@ private fun ReadingBookCard(
                         maxLines = 1,
                         style = AppTypography.bodyMedium,
                         fontWeight = FontWeight.W600,
-                        color = MaterialTheme.colorScheme.primary
+                        color = colorScheme.primary
                     )
                 }
                 Text(
@@ -359,7 +420,7 @@ private fun ReadingBookCard(
                     fontWeight = FontWeight.Normal,
                     overflow = TextOverflow.Ellipsis,
                     style = AppTypography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = colorScheme.secondary,
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -374,7 +435,7 @@ private fun ReadingBookCard(
                                 .padding(top = 2.dp, end = 2.dp),
                             painter = painterResource(id = R.drawable.outline_schedule_24px),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
+                            tint = colorScheme.secondary
                         )
                         Text(
                             text = formTime(userReadingData.lastReadTime),
@@ -441,14 +502,14 @@ private fun ReadingHeaderCard(
                         modifier = Modifier.size(18.dp),
                         painter = painterResource(id = R.drawable.filled_menu_book_24px),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary
+                        tint = colorScheme.secondary
                     )
                     Text(
                         text = stringResource(
                             R.string.last_read_info,
                             formTime(userReadingData.lastReadTime)
                         ),
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = colorScheme.secondary,
                         style = AppTypography.labelMedium,
                     )
                 }
@@ -471,7 +532,7 @@ private fun ReadingHeaderCard(
                     text = userReadingData.lastReadChapterTitle,
                     maxLines = 1,
                     style = AppTypography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = colorScheme.primary,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.W600
                 )

@@ -93,6 +93,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.unclippedBoundsInWindow
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
@@ -345,10 +348,16 @@ fun BookshelfHomeScreen(
                     )
                 }
 
+                val shimmerInstance = rememberShimmer(ShimmerBounds.Custom)
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection),
+                        .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection)
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val position = layoutCoordinates.unclippedBoundsInWindow()
+                            shimmerInstance.updateBounds(position)
+                        },
                     state = listState
                 ) {
                     if (updatedIds.isNotEmpty()) {
@@ -393,7 +402,8 @@ fun BookshelfHomeScreen(
                                         else changeBookSelectState(id)
                                     },
                                     onLongPress = { onLongPress(id) },
-                                    latestChapterTitle = lastChapterTitle ?: uiState.bookLastChapterTitleMap[id]
+                                    latestChapterTitle = lastChapterTitle ?: uiState.bookLastChapterTitleMap[id],
+                                    shimmer = shimmerInstance
                                 )
                             }
                         }
@@ -428,7 +438,8 @@ fun BookshelfHomeScreen(
                                             if (!uiState.selectMode) onClickBook(id)
                                             else changeBookSelectState(id)
                                         },
-                                        onLongPress = { onLongPress(id) }
+                                        onLongPress = { onLongPress(id) },
+                                        shimmer = shimmerInstance
                                     )
                                 }
                         }
@@ -464,7 +475,8 @@ fun BookshelfHomeScreen(
                                         if (!uiState.selectMode) onClickBook(id)
                                         else changeBookSelectState(id)
                                     },
-                                    onLongPress = { onLongPress(id) }
+                                    onLongPress = { onLongPress(id) },
+                                    shimmer = shimmerInstance
                                 )
                             }
 

@@ -1,11 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,18 +36,29 @@ import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
+import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 
 @Composable
 fun BookCardContent(
+    modifier: Modifier,
     selected: Boolean,
     collected: Boolean,
-    modifier: Modifier = Modifier,
     bookInformation: BookInformation,
-    latestChapterTitle: String? = null
+    latestChapterTitle: String? = null,
+    onClick: () -> Unit,
+    onLongPress: () -> Unit
 ) {
-    val isEmpty = bookInformation.isEmpty()
 
-    Box(modifier = modifier.fillMaxWidth().height(136.dp)) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(136.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = withHaptic { onLongPress() },
+            )
+    ) {
 
         Row(
             modifier = Modifier
@@ -79,7 +89,7 @@ fun BookCardContent(
                                 .align(Alignment.TopEnd)
                         ) {
                             Badge(
-                                containerColor = MaterialTheme.colorScheme.error,
+                                containerColor = colorScheme.error,
                                 modifier = Modifier.size(12.dp)
                             )
                         }
@@ -87,17 +97,18 @@ fun BookCardContent(
 
                     if (collected) {
                         Box(
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier
+                                .padding(4.dp)
                                 .align(Alignment.TopStart)
                                 .size(20.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .background(colorScheme.secondaryContainer)
                         ) {
                             Icon(
                                 modifier = Modifier.scale(0.75f, 0.75f),
                                 painter = painterResource(R.drawable.filled_bookmark_24px),
                                 contentDescription = "collected_indicator",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -109,7 +120,7 @@ fun BookCardContent(
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        val color = MaterialTheme.colorScheme.primary
+                        val color = colorScheme.primary
                         Canvas(
                             modifier = Modifier.size(36.dp)
                         ) {
@@ -122,95 +133,153 @@ fun BookCardContent(
                             modifier = Modifier
                                 .size(22.dp),
                             painter = painterResource(R.drawable.check_24px),
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = colorScheme.onPrimary,
                             contentDescription = null
                         )
                     }
                 }
             }
 
-            AnimatedVisibility(
-                visible = !isEmpty,
-                enter = fadeIn(),
-                exit = fadeOut()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(start = 12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(start = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                Text(
+                    text = bookInformation.title,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = bookInformation.title,
+                        text = bookInformation.author,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = colorScheme.primary,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    BookStatusIcon(bookInformation.isComplete)
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.book_info_update_date,
+                            bookInformation.lastUpdated.year,
+                            bookInformation.lastUpdated.monthValue,
+                            bookInformation.lastUpdated.dayOfMonth
+                        ),
+                        style = AppTypography.labelMedium
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.book_info_word_count_kilo,
+                            bookInformation.wordCount / 1000
+                        ),
+                        style = AppTypography.labelMedium
+                    )
+                }
+
+                if (latestChapterTitle.isNullOrBlank()) {
+                    Text(
+                        text = bookInformation.description.trim(),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleMedium
+                        style = AppTypography.labelMedium,
+                        color = colorScheme.onSurfaceVariant
                     )
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                } else {
+                    Column {
                         Text(
-                            text = bookInformation.author,
+                            text = "已更新至: ",
+                            style = AppTypography.labelMedium
+                        )
+                        Text(
+                            text = latestChapterTitle,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        BookStatusIcon(bookInformation.isComplete)
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            text = stringResource(
-                                R.string.book_info_update_date,
-                                bookInformation.lastUpdated.year,
-                                bookInformation.lastUpdated.monthValue,
-                                bookInformation.lastUpdated.dayOfMonth
-                            ),
-                            style = AppTypography.labelMedium
-                        )
-                        Text(
-                            text = stringResource(
-                                R.string.book_info_word_count_kilo,
-                                bookInformation.wordCount / 1000
-                            ),
-                            style = AppTypography.labelMedium
-                        )
-                    }
-
-                    if (latestChapterTitle.isNullOrBlank()) {
-                        Text(
-                            text = bookInformation.description.trim(),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
                             style = AppTypography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = colorScheme.primary
                         )
-                    } else {
-                        Column {
-                            Text(
-                                text = "已更新至: ",
-                                style = AppTypography.labelMedium
-                            )
-                            Text(
-                                text = latestChapterTitle,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = AppTypography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+fun BookCardContentSkeleton(modifier: Modifier = Modifier) {
+    val skeletonColor = colorScheme.surfaceContainerHigh
+    val skeletonRoundedCorner = RoundedCornerShape(4.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(136.dp)
+            .padding(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(90.dp, 136.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(skeletonColor)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(start = 12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(28.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+
+            )
+
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.43f)
+                    .height(20.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+
+            )
+
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.75f)
+                    .height(20.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .clip(skeletonRoundedCorner)
+                    .background(skeletonColor)
+            )
+        }
+    }
+}
+
 @Composable
 fun BookStatusIcon(isComplete: Boolean) {
     val painter: Painter = if (isComplete) painterResource(R.drawable.done_all_24px) else painterResource(R.drawable.hourglass_top_24px)
@@ -218,7 +287,7 @@ fun BookStatusIcon(isComplete: Boolean) {
         modifier = Modifier.size(16.dp),
         painter = painter,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.outline
+        tint = colorScheme.outline
     )
 }
 
