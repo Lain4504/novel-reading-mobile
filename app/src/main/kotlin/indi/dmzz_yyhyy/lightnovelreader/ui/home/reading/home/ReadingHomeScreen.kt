@@ -179,7 +179,10 @@ private fun ReadingContent(
             },
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (recentReadingBookIds.isNotEmpty() && recentReadingUserReadingDataMap[recentReadingBookIds.first()] != null && recentReadingBookInformationMap[recentReadingBookIds.first()] != null) {
+        if (recentReadingBookIds.isNotEmpty()
+            && recentReadingUserReadingDataMap[recentReadingBookIds.first()] != null
+            && recentReadingBookInformationMap[recentReadingBookIds.first()] != null
+            ) {
             item {
                 Box(
                     modifier = Modifier

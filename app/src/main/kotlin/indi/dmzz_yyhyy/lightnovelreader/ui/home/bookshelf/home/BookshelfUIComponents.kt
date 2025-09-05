@@ -282,7 +282,9 @@ fun BookCardContentSkeleton(modifier: Modifier = Modifier) {
 
 @Composable
 fun BookStatusIcon(isComplete: Boolean) {
-    val painter: Painter = if (isComplete) painterResource(R.drawable.done_all_24px) else painterResource(R.drawable.hourglass_top_24px)
+    val painter: Painter = if (isComplete)
+        painterResource(R.drawable.done_all_24px)
+    else painterResource(R.drawable.hourglass_top_24px)
     Icon(
         modifier = Modifier.size(16.dp),
         painter = painter,
