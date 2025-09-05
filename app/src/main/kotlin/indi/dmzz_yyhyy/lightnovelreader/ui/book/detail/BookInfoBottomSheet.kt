@@ -24,11 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,6 +48,8 @@ fun BookInfoBottomSheet(
     onDismissRequest: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val clipboard = LocalClipboard.current
 
     @Composable
     fun InfoItem(
@@ -87,8 +87,7 @@ fun BookInfoBottomSheet(
                 modifier = Modifier.weight(7f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val context = LocalContext.current
-                val clipboard = LocalClipboard.current
+
 
                 Text(
                     text = content,

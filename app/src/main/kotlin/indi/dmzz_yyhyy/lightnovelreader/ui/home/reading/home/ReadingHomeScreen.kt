@@ -31,8 +31,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -42,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,9 +73,15 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.LnrSnackbar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
+import indi.dmzz_yyhyy.lightnovelreader.utils.removeFromBookshelfAction
+import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
 import kotlinx.coroutines.delay
+import me.saket.swipe.SwipeAction
+import me.saket.swipe.SwipeableActionsBox
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -86,6 +96,7 @@ fun ReadingScreen(
     onClickContinueReading: (Int, Int) -> Unit,
     onClickDownloadManager: () -> Unit,
     onClickStats: () -> Unit,
+    onRemoveBook: (Int) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     loadBookInfo: (Int) -> Unit
@@ -113,6 +124,11 @@ fun ReadingScreen(
                     selectedRoute = selectedRoute,
                     controller = controller
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(LocalSnackbarHost.current) {
+                    LnrSnackbar(it)
+                }
             }
         ) {
             var showEmptyPage by remember { mutableStateOf(false) }
@@ -144,6 +160,7 @@ fun ReadingScreen(
                 modifier = Modifier.padding(it),
                 onClickBook = onClickBook,
                 onClickContinueReading = onClickContinueReading,
+                onRemoveBook = onRemoveBook,
                 recentReadingBookInformationMap = recentReadingBookInformationMap,
                 recentReadingUserReadingDataMap = recentReadingUserReadingDataMap,
                 recentReadingBookIds = recentReadingBookIds,
@@ -160,6 +177,7 @@ private fun ReadingContent(
     modifier: Modifier,
     onClickBook: (Int) -> Unit,
     onClickContinueReading: (Int, Int) -> Unit,
+    onRemoveBook: (Int) -> Unit,
     recentReadingBookInformationMap: Map<Int, BookInformation>,
     recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
     recentReadingBookIds: List<Int>,
@@ -167,11 +185,11 @@ private fun ReadingContent(
     loadBookInfo: (Int) -> Unit
 ) {
     val shimmerInstance = rememberShimmer(ShimmerBounds.Custom)
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = LocalSnackbarHost.current
 
     LazyColumn(
         modifier = modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .onGloballyPositioned { layoutCoordinates ->
                 val position = layoutCoordinates.unclippedBoundsInWindow()
@@ -188,7 +206,7 @@ private fun ReadingContent(
                     modifier = Modifier
                         .animateItem()
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = 20.dp)
                 ) {
                     Text(
                         modifier = Modifier.padding(vertical = 4.dp),
@@ -202,6 +220,7 @@ private fun ReadingContent(
             }
             item {
                 ReadingHeaderCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     bookInformation = recentReadingBookInformationMap[recentReadingBookIds.first()]!!,
                     userReadingData = recentReadingUserReadingDataMap[recentReadingBookIds.first()]!!,
                     onClickContinueReading = onClickContinueReading
@@ -213,7 +232,7 @@ private fun ReadingContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = 20.dp)
                 ) {
                     Text(
                         modifier = Modifier.padding(vertical = 4.dp),
@@ -242,10 +261,31 @@ private fun ReadingContent(
             ) { loaded ->
                 if (loaded && info != null && userData != null) {
                     ReadingBookCard(
-                        modifier = Modifier.animateItem(),
-                        bookInformation = info,
-                        userReadingData = userData,
-                        onClick = { onClickBook(info.id) }
+                        modifier = Modifier.animateItem()
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 16.dp),
+                        bookInformation = recentReadingBookInformationMap[id]!!,
+                        userReadingData = recentReadingUserReadingDataMap[id]!!,
+                        onClick = {
+                            onClickBook(recentReadingBookInformationMap[id]!!.id)
+                        },
+                        swipeToLeftActions = listOf(
+                            removeFromBookshelfAction.toSwipeAction {
+                                onRemoveBook(id)
+                                showSnackbar(
+                                    coroutineScope = coroutineScope,
+                                    hostState = snackbarHostState,
+                                    message = "已移除: ${recentReadingBookInformationMap[id]?.title}",
+                                    actionLabel = "撤销",
+                                ) {
+                                    when (it) {
+                                        SnackbarResult.Dismissed -> { }
+                                        SnackbarResult.ActionPerformed -> onRemoveBook(-id)
+                                    }
+                                }
+                            }
+                        )
                     )
                 } else {
                     ReadingBookCardSkeleton(
@@ -364,106 +404,114 @@ private fun ReadingBookCard(
     bookInformation: BookInformation,
     userReadingData: UserReadingData,
     onClick: () -> Unit,
+    swipeToRightActions: List<SwipeAction> = listOf(),
+    swipeToLeftActions: List<SwipeAction> = listOf(),
 ) {
-    Box(
-        modifier = modifier
-            .height(144.dp)
-            .clip(RoundedCornerShape(12.dp))
+    SwipeableActionsBox(
+        startActions = swipeToRightActions,
+        endActions = swipeToLeftActions
     ) {
-        Row(
-            modifier = Modifier
-                .combinedClickable(
-                    onClick = onClick
-                )
-                .padding(4.dp),
+        Box(
+            modifier = modifier
+                .height(144.dp)
+                .clip(RoundedCornerShape(12.dp))
         ) {
-            Cover(
-                width = 94.dp,
-                height = 142.dp,
-                url = bookInformation.coverUrl,
-                rounded = 8.dp,
-            )
-            Column(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(start = 12.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-            ) {
-                val textStyle = AppTypography.labelLarge
-                val textLineHeight = textStyle.lineHeight
-                Text(
-                    modifier = Modifier
-                        .height(
-                            with(LocalDensity.current) { (textLineHeight * 2.2f).toDp() }
-                        )
-                        .wrapContentHeight(Alignment.CenterVertically),
-                    text = bookInformation.title,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.W600,
-                    style = AppTypography.labelLarge,
-                    lineHeight = textLineHeight,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = bookInformation.author,
-                        maxLines = 1,
-                        style = AppTypography.bodyMedium,
-                        fontWeight = FontWeight.W600,
-                        color = colorScheme.primary
+                    .combinedClickable(
+                        onClick = onClick
                     )
-                }
-                Text(
-                    text = bookInformation.description.trim(),
-                    maxLines = 2,
-                    fontWeight = FontWeight.Normal,
-                    overflow = TextOverflow.Ellipsis,
-                    style = AppTypography.bodyMedium,
-                    color = colorScheme.secondary,
+                    .padding(4.dp),
+            ) {
+                Cover(
+                    width = 94.dp,
+                    height = 142.dp,
+                    url = bookInformation.coverUrl,
+                    rounded = 8.dp,
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(start = 12.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Row {
-                        Icon(
-                            modifier = Modifier
-                                .size(14.dp)
-                                .align(Alignment.CenterVertically)
-                                .padding(top = 2.dp, end = 2.dp),
-                            painter = painterResource(id = R.drawable.outline_schedule_24px),
-                            contentDescription = null,
-                            tint = colorScheme.secondary
+                    val textStyle = AppTypography.labelLarge
+                    val textLineHeight = textStyle.lineHeight
+                    Text(
+                        modifier = Modifier
+                            .height(
+                                with(LocalDensity.current) { (textLineHeight * 2.2f).toDp() }
+                            )
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        text = bookInformation.title,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.W600,
+                        style = AppTypography.labelLarge,
+                        lineHeight = textLineHeight,
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = bookInformation.author,
+                            maxLines = 1,
+                            style = AppTypography.bodyMedium,
+                            fontWeight = FontWeight.W600,
+                            color = colorScheme.primary
+                        )
+                    }
+                    Text(
+                        text = bookInformation.description.trim(),
+                        maxLines = 2,
+                        fontWeight = FontWeight.Normal,
+                        overflow = TextOverflow.Ellipsis,
+                        style = AppTypography.bodyMedium,
+                        color = colorScheme.secondary,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Row {
+                            Icon(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .align(Alignment.CenterVertically)
+                                    .padding(top = 2.dp, end = 2.dp),
+                                painter = painterResource(id = R.drawable.outline_schedule_24px),
+                                contentDescription = null,
+                                tint = colorScheme.secondary
+                            )
+                            Text(
+                                text = formTime(userReadingData.lastReadTime),
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                style = AppTypography.labelSmall
+                            )
+                        }
+                        Text(
+                            text = stringResource(
+                                R.string.read_progress,
+                                (userReadingData.readingProgress * 100).toInt().toString() + "%"
+                            ),
+                            style = AppTypography.labelSmall
                         )
                         Text(
-                            text = formTime(userReadingData.lastReadTime),
+                            text = stringResource(R.string.read_minutes, (userReadingData.totalReadTime) / 60),
                             modifier = Modifier.align(Alignment.CenterVertically),
                             style = AppTypography.labelSmall
                         )
                     }
-                    Text(
-                        text = stringResource(
-                            R.string.read_progress,
-                            (userReadingData.readingProgress * 100).toInt().toString() + "%"
-                        ),
-                        style = AppTypography.labelSmall
-                    )
-                    Text(
-                        text = stringResource(R.string.read_minutes, (userReadingData.totalReadTime) / 60),
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        style = AppTypography.labelSmall
-                    )
-                }
 
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    progress = { userReadingData.readingProgress }
-                )
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth(),
+                            progress = { userReadingData.readingProgress }
+                        )
+                    }
+                }
             }
         }
     }

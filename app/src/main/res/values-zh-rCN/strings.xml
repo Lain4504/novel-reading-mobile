@@ -39,6 +39,17 @@
     <string name="nothing_here_desc_bookshelf">单击“收藏”按钮，将书本加入此书架</string>
     <string name="offline">离线中</string>
     <string name="offline_desc">当前无法获取在线数据，请刷新重试\n检查源网站连通性，或者换个网络试试</string>
+
+    <!-- Snackbar Hints -->
+    <string name="cache_book_started">开始缓存：%1$s</string>
+    <string name="cache_book_running">此书本正在缓存中</string>
+    <string name="cache_book_finished">缓存成功</string>
+    <string name="cache_book_error">缓存失败</string>
+    <string name="restart_to_apply_changes">重启应用以生效</string>
+    <string name="network_error_message">
+        应用无法从数据源获取信息，这通常是网络问题所致。在提交问题前，请注意：&lt;b&gt;我们无法协助排查具体网络状况&lt;/b&gt;，请先检查您的网络连接。
+    </string>
+
     <!-- Settings -->
     <string name="reading_settings">阅读</string>
     <string name="theme_settings">主题</string>
@@ -125,8 +136,8 @@
     <string name="settings_snap_data_desc">将应用内的用户数据导出为 .lnr 文件</string>
     <string name="settings_import_data">导入数据</string>
     <string name="settings_import_data_desc">从选定的 .lnr 文件导入用户数据</string>
-    <string name="settings_select_data_source">切换数据源</string>
-    <string name="settings_select_data_source_desc">清除缓存并切换软件数据源。当前的用户数据不会丢失，并将在下次切换回当前数据源时恢复</string>
+    <string name="settings_select_data_source">数据源</string>
+    <string name="settings_select_data_source_desc">切换软件数据源</string>
     <string name="settings_app_logs">应用日志</string>
     <string name="settings_app_logs_desc">查看与分享应用日志（调试用途）</string>
     <string name="settings_app_log_level">日志等级</string>

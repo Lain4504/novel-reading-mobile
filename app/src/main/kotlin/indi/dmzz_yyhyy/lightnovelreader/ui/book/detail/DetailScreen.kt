@@ -47,6 +47,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -93,6 +94,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.navigateToSettingsTextFormattingRulesDestination
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import java.text.NumberFormat
@@ -114,6 +116,7 @@ fun DetailScreen(
     onClickMarkAllRead: () -> Unit
 ) {
     val navController = LocalNavController.current
+    val lazyListState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showExportBottomSheet by remember { mutableStateOf(false) }
     var exportSettings by remember { mutableStateOf(ExportSettings()) }
@@ -134,21 +137,18 @@ fun DetailScreen(
                 scrollBehavior = scrollBehavior
             )
         },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = lazyListState.canScrollForward &&
-                        lazyListState.isScrollingUp().value &&
-                        uiState.bookVolumes.volumes.isNotEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
+        snackbarHost = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.End
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(end = 16.dp, bottom = 30.dp)
+                AnimatedVisibility(
+                    visible = lazyListState.canScrollForward && lazyListState.isScrollingUp().value && uiState.bookVolumes.volumes.isNotEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
                 ) {
                     ExtendedFloatingActionButton(
-                        modifier = Modifier.align(Alignment.BottomEnd),
+                        modifier = Modifier.padding(end = 24.dp, start = 16.dp).padding(vertical = 14.dp),
                         onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
                         else onClickContinueReading,
                         icon = {
@@ -163,6 +163,16 @@ fun DetailScreen(
                         }
                     )
                 }
+                AnimatedVisibility(
+                    LocalSnackbarHost.current.currentSnackbarData != null,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    SnackbarHost(
+                        hostState = LocalSnackbarHost.current
+                    )
+                }
+                Spacer(Modifier.height(42.dp))
             }
         }
     ) { paddingValues ->
@@ -342,8 +352,8 @@ private val itemVerticalPadding = 8.dp
 private fun DetailContent(
     modifier: Modifier = Modifier,
     uiState: DetailUiState,
-    onClickChapter: (Int) -> Unit,
     lazyListState: LazyListState,
+    onClickChapter: (Int) -> Unit,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
     onClickTag: (String) -> Unit,
@@ -535,7 +545,7 @@ private fun TopBar(
                 Icon(painterResource(id = R.drawable.arrow_back_24px), "back")
             }
         },
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
     )
 }
 

@@ -52,4 +52,22 @@ class ReadingHomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun removeFromReadingList(bookId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val currentList = readingBooksUserData.getOrDefault(emptyList()).toMutableList()
+
+            if (bookId >= 0) {
+                currentList.remove(bookId)
+            } else {
+                val restoredId = -bookId
+                if (!currentList.contains(restoredId)) {
+                    currentList.add(0, restoredId)
+                }
+            }
+
+            readingBooksUserData.set(currentList)
+            updateReadingBooks()
+        }
+    }
 }

@@ -24,12 +24,14 @@ fun EmptyPage(
     icon: Painter,
     titleId: Int,
     descriptionId: Int,
+    content: @Composable (() -> Unit)? = null
 ) {
     EmptyPage(
         modifier = modifier,
         icon = icon,
         title = stringResource(titleId),
         description = stringResource(descriptionId),
+        content = content
     )
 }
 
@@ -39,6 +41,7 @@ fun EmptyPage(
     icon: Painter,
     title: String,
     description: String,
+    content: @Composable (() -> Unit)? = null
 ) {
     Box(modifier.fillMaxSize()) {
         Column(
@@ -64,6 +67,10 @@ fun EmptyPage(
                 style = AppTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.secondary,
             )
+            content?.let {
+                Spacer(Modifier.height(12.dp))
+                it()
+            }
         }
     }
 }

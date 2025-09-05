@@ -16,10 +16,10 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.readingHomeDestination(sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Main.Reading.Home> {
+    composable<Route.Main.Reading.Home> { entry ->
         val navController = LocalNavController.current
         val context = LocalContext.current
-        val parentEntry = remember(it) { navController.getBackStackEntry(Route.Main) }
+        val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val readingViewModel = hiltViewModel<ReadingHomeViewModel>(parentEntry)
         ReadingScreen(
             controller = navController,
@@ -37,7 +37,8 @@ fun NavGraphBuilder.readingHomeDestination(sharedTransitionScope: SharedTransiti
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onClickStats = navController::navigateToReadingStatsDestination,
-            loadBookInfo = readingViewModel::loadBookInfo
+            loadBookInfo = readingViewModel::loadBookInfo,
+            onRemoveBook = readingViewModel::removeFromReadingList
         )
     }
 }

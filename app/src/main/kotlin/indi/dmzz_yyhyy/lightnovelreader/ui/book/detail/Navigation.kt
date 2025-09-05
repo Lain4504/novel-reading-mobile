@@ -15,14 +15,17 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import androidx.work.WorkInfo
+import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToImageViewerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToAddBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.navigateToMarkAllChaptersAsReadDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
+import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +57,8 @@ fun NavGraphBuilder.bookDetailDestination() {
             navController.popBackStack()
         }
         viewModel.navController = navController
+        val snackbarHostState = LocalSnackbarHost.current
+
         LaunchedEffect(bookId) {
             viewModel.init(bookId)
         }
@@ -84,17 +89,42 @@ fun NavGraphBuilder.bookDetailDestination() {
                     navController.navigateToBookReaderDestination(bookId, viewModel.uiState.userReadingData.lastReadChapterId, context)
                 }
             },
-            cacheBook = {
+            cacheBook = { bookId ->
                 coroutineScope.launch {
-                    viewModel.cacheBook(it).collect {
+                    viewModel.cacheBook(bookId).collect {
                         if (it == null) {
-                            Toast.makeText(context, "此书本正在缓存中", Toast.LENGTH_SHORT).show()
+                            showSnackbar(
+                                coroutineScope = coroutineScope,
+                                hostState = snackbarHostState,
+                                message = context.getString(
+                                    R.string.cache_book_started,
+                                    viewModel.uiState.bookInformation.title
+                                )
+                            ) { }
                             return@collect
                         }
                         when (it.state) {
-                            WorkInfo.State.SUCCEEDED -> Toast.makeText(context, "缓存成功", Toast.LENGTH_SHORT).show()
-                            WorkInfo.State.FAILED -> Toast.makeText(context, "缓存书本失败", Toast.LENGTH_SHORT).show()
-                            WorkInfo.State.RUNNING -> Toast.makeText(context, "此书本正在缓存中", Toast.LENGTH_SHORT).show()
+                            WorkInfo.State.SUCCEEDED -> {
+                                showSnackbar(
+                                    coroutineScope = coroutineScope,
+                                    hostState = snackbarHostState,
+                                    message = context.getString(R.string.cache_book_finished)
+                                ) { }
+                            }
+                            WorkInfo.State.FAILED -> {
+                                showSnackbar(
+                                    coroutineScope = coroutineScope,
+                                    hostState = snackbarHostState,
+                                    message = context.getString(R.string.cache_book_error)
+                                ) { }
+                            }
+                            WorkInfo.State.RUNNING -> {
+                                showSnackbar(
+                                    coroutineScope = coroutineScope,
+                                    hostState = snackbarHostState,
+                                    message = context.getString(R.string.cache_book_running)
+                                ) { }
+                            }
                             else -> {}
                         }
                     }
