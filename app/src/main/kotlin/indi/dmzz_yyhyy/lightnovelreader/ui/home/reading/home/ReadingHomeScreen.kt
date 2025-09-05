@@ -288,7 +288,9 @@ private fun ReadingContent(
                     )
                 } else {
                     ReadingBookCardSkeleton(
-                        modifier = Modifier.shimmer(shimmerInstance)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .shimmer(shimmerInstance)
                     )
                 }
             }
