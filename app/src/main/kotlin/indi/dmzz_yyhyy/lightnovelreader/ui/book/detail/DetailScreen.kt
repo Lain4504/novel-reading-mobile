@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -117,6 +118,7 @@ fun DetailScreen(
     var showExportBottomSheet by remember { mutableStateOf(false) }
     var exportSettings by remember { mutableStateOf(ExportSettings()) }
     val exportBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val lazyListState = rememberLazyListState()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -132,6 +134,37 @@ fun DetailScreen(
                 scrollBehavior = scrollBehavior
             )
         },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = lazyListState.canScrollForward &&
+                        lazyListState.isScrollingUp().value &&
+                        uiState.bookVolumes.volumes.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(end = 16.dp, bottom = 30.dp)
+                ) {
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.align(Alignment.BottomEnd),
+                        onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
+                        else onClickContinueReading,
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.filled_menu_book_24px),
+                                contentDescription = null
+                            )
+                        },
+                        text = {
+                            Text(if (uiState.userReadingData.lastReadChapterId == -1) stringResource(R.string.start_reading)
+                            else stringResource(id = R.string.continue_reading))
+                        }
+                    )
+                }
+            }
+        }
     ) { paddingValues ->
         val bookIsEmpty = uiState.bookInformation.title.isEmpty()
         val infoBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -149,8 +182,7 @@ fun DetailScreen(
                     modifier = Modifier.padding(paddingValues),
                     uiState = uiState,
                     onClickChapter = onClickChapter,
-                    onClickReadFromStart = onClickReadFromStart,
-                    onClickContinueReading = onClickContinueReading,
+                    lazyListState = lazyListState,
                     cacheBook = cacheBook,
                     requestAddBookToBookshelf = requestAddBookToBookshelf,
                     onClickTag = onClickTag,
@@ -311,8 +343,7 @@ private fun DetailContent(
     modifier: Modifier = Modifier,
     uiState: DetailUiState,
     onClickChapter: (Int) -> Unit,
-    onClickReadFromStart: () -> Unit,
-    onClickContinueReading: () -> Unit,
+    lazyListState: LazyListState,
     cacheBook: (Int) -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
     onClickTag: (String) -> Unit,
@@ -320,8 +351,6 @@ private fun DetailContent(
     onClickShowInfo: () -> Unit
 ) {
     var hideReadChapters by remember { mutableStateOf(false) }
-
-    val lazyListState = rememberLazyListState()
     val scrollOffset by remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
 
     LazyColumn(
@@ -425,36 +454,6 @@ private fun DetailContent(
 
         item {
             Spacer(Modifier.height(48.dp))
-        }
-    }
-
-    AnimatedVisibility(
-        visible = lazyListState.canScrollForward &&
-                lazyListState.isScrollingUp().value &&
-                uiState.bookVolumes.volumes.isNotEmpty(),
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(end = 24.dp, bottom = 54.dp)
-        ) {
-            ExtendedFloatingActionButton(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
-                else onClickContinueReading,
-                icon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.filled_menu_book_24px),
-                        contentDescription = null
-                    )
-                },
-                text = {
-                    Text(if (uiState.userReadingData.lastReadChapterId == -1) stringResource(R.string.start_reading)
-                    else stringResource(id = R.string.continue_reading))
-                }
-            )
         }
     }
 }
