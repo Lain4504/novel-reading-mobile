@@ -47,7 +47,7 @@
     <string name="cache_book_error">快取失敗</string>
     <string name="restart_to_apply_changes">重新啟動應用程式以套用變更</string>
     <string name="network_error_message">
-        無法從資料來源取得資訊，這通常是網路問題所致。在提交問題前，請注意：我們無法協助排查具體網路狀況，請先檢查您的網路連線。
+        無法從資料來源取得資訊，這通常是網路問題所致。在提交問題前，請知晓：我們無法協助排查具體網路狀況，請先檢查您的網路連線。
     </string>
 
     <!-- Settings -->

@@ -31,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -263,7 +262,7 @@ private fun ReadingContent(
                     ReadingBookCard(
                         modifier = Modifier.animateItem()
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(colorScheme.background)
                             .padding(horizontal = 16.dp),
                         bookInformation = recentReadingBookInformationMap[id]!!,
                         userReadingData = recentReadingUserReadingDataMap[id]!!,
@@ -500,17 +499,19 @@ private fun ReadingBookCard(
                             style = AppTypography.labelSmall
                         )
                         Text(
-                            text = stringResource(R.string.read_minutes, (userReadingData.totalReadTime) / 60),
+                            text = stringResource(
+                                R.string.read_minutes,
+                                (userReadingData.totalReadTime) / 60
+                            ),
                             modifier = Modifier.align(Alignment.CenterVertically),
                             style = AppTypography.labelSmall
                         )
                     }
 
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth(),
-                            progress = { userReadingData.readingProgress }
-                        )
-                    }
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        progress = { userReadingData.readingProgress }
+                    )
                 }
             }
         }
@@ -524,85 +525,83 @@ private fun ReadingHeaderCard(
     userReadingData: UserReadingData,
     onClickContinueReading: (Int, Int) -> Unit
 ) {
-    Box {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(178.dp)
-                .padding(horizontal = 4.dp),
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(178.dp)
+            .padding(horizontal = 4.dp),
+    ) {
+        Box {
+            Cover(
+                height = 178.dp,
+                width = 122.dp,
+                url = bookInformation.coverUrl,
+                rounded = 8.dp
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Box {
-                Cover(
-                    height = 178.dp,
-                    width = 122.dp,
-                    url = bookInformation.coverUrl,
-                    rounded = 8.dp
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    modifier = Modifier.size(18.dp),
+                    painter = painterResource(id = R.drawable.filled_menu_book_24px),
+                    contentDescription = null,
+                    tint = colorScheme.secondary
+                )
+                Text(
+                    text = stringResource(
+                        R.string.last_read_info,
+                        formTime(userReadingData.lastReadTime)
+                    ),
+                    color = colorScheme.secondary,
+                    style = AppTypography.labelMedium,
                 )
             }
-            Column(
+            val textStyle = AppTypography.titleLarge
+            val textLineHeight = textStyle.lineHeight
+            Text(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 16.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
+                    .height(
+                        with(LocalDensity.current) { (textLineHeight * 2.2f).toDp() }
+                    )
+                    .wrapContentHeight(Alignment.CenterVertically),
+                text = bookInformation.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.W700,
+                style = textStyle,
+                lineHeight = textLineHeight,
+            )
+            Text(
+                text = userReadingData.lastReadChapterTitle,
+                maxLines = 1,
+                style = AppTypography.labelMedium,
+                color = colorScheme.primary,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.W600
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(18.dp),
-                        painter = painterResource(id = R.drawable.filled_menu_book_24px),
-                        contentDescription = null,
-                        tint = colorScheme.secondary
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.last_read_info,
-                            formTime(userReadingData.lastReadTime)
-                        ),
-                        color = colorScheme.secondary,
-                        style = AppTypography.labelMedium,
-                    )
-                }
-                val textStyle = AppTypography.titleLarge
-                val textLineHeight = textStyle.lineHeight
-                Text(
-                    modifier = Modifier
-                        .height(
-                            with(LocalDensity.current) { (textLineHeight * 2.2f).toDp() }
-                        )
-                        .wrapContentHeight(Alignment.CenterVertically),
-                    text = bookInformation.title,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.W700,
-                    style = textStyle,
-                    lineHeight = textLineHeight,
-                )
-                Text(
-                    text = userReadingData.lastReadChapterTitle,
-                    maxLines = 1,
-                    style = AppTypography.labelMedium,
-                    color = colorScheme.primary,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.W600
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(
+                Button(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { onClickContinueReading(bookInformation.id, userReadingData.lastReadChapterId) }) {
-                        Text(
-                            text = stringResource(R.string.resume_last_reading),
-                            fontWeight = FontWeight.W600,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    onClick = { onClickContinueReading(bookInformation.id, userReadingData.lastReadChapterId) }) {
+                    Text(
+                        text = stringResource(R.string.resume_last_reading),
+                        fontWeight = FontWeight.W600,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }

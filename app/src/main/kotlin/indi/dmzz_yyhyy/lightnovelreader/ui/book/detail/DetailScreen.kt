@@ -116,7 +116,6 @@ fun DetailScreen(
     onClickMarkAllRead: () -> Unit
 ) {
     val navController = LocalNavController.current
-    val lazyListState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showExportBottomSheet by remember { mutableStateOf(false) }
     var exportSettings by remember { mutableStateOf(ExportSettings()) }

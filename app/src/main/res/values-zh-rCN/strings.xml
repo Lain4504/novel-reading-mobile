@@ -47,7 +47,7 @@
     <string name="cache_book_error">缓存失败</string>
     <string name="restart_to_apply_changes">重启应用以生效</string>
     <string name="network_error_message">
-        应用无法从数据源获取信息，这通常是网络问题所致。在提交问题前，请注意：&lt;b&gt;我们无法协助排查具体网络状况&lt;/b&gt;，请先检查您的网络连接。
+        应用无法从数据源获取信息，这通常是网络问题所致。在提交问题前，请知晓：我们无法协助排查具体网络状况，请先检查您的网络连接。
     </string>
 
     <!-- Settings -->
