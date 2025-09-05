@@ -34,7 +34,7 @@ class CheckUpdateWork @AssistedInject constructor(
     override suspend fun doWork(): Result {
         val isAutoRefreshEnabled = userDataRepository
             .booleanUserData(UserDataPath.Settings.Data.BookAutoRefresh.path)
-            .getOrDefault(true)
+            .getOrDefault(false)
         if (!isAutoRefreshEnabled) return Result.success()
 
         val reminderBookMap = mutableMapOf<Int, BookInformation>()

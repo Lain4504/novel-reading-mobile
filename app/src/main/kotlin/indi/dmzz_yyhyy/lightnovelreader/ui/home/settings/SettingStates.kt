@@ -30,6 +30,6 @@ class SettingState(
     val distributionPlatformKey by distributionPlatformKeyUserData.asState("GitHub")
     val logLevelKey by logLevelKeyUserData.asState("none")
     val isUseProxy by isUseProxyUserData.asState(false)
-    val bookAutoRefresh by bookAutoRefreshUserData.asState(true)
+    val bookAutoRefresh by bookAutoRefreshUserData.asState(false)
     val enableSimplifiedTraditionalTransform by enableSimplifiedTraditionalTransformUserData.safeAsState(false)
 }
