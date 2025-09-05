@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,15 +55,18 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
+import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
+import androidx.compose.ui.platform.LocalResources
 
 @Composable
 fun FlipPageContentComponent(
@@ -70,7 +75,9 @@ fun FlipPageContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    onClickPrevChapter: () -> Unit,
+    onClickNextChapter: () -> Unit
 ) {
     SimpleFlipPageTextComponent(
         modifier = modifier,
@@ -78,7 +85,9 @@ fun FlipPageContentComponent(
         uiState = uiState,
         settingState = settingState,
         changeIsImmersive = changeIsImmersive,
-        onZoomImage = onZoomImage
+        onZoomImage = onZoomImage,
+        onClickNextChapter = onClickNextChapter,
+        onClickPrevChapter = onClickPrevChapter
     )
 }
 
@@ -89,7 +98,9 @@ private fun SimpleFlipPageTextComponent(
     uiState: FlipPageContentUiState,
     settingState: SettingState,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    onClickPrevChapter: () -> Unit,
+    onClickNextChapter: () -> Unit
 ) {
     val textMeasurer = rememberTextMeasurer()
     val scope = rememberCoroutineScope()
@@ -101,28 +112,62 @@ private fun SimpleFlipPageTextComponent(
     var slippedTextList by remember { mutableStateOf(emptyList<String>()) }
     var readingPageFistCharOffset by remember { mutableIntStateOf(0) }
     val focusRequester = remember { FocusRequester() }
-    val pagerState = uiState.pagerState
+    val snackbarHostState = LocalSnackbarHost.current
 
     fun lastPage(pagerState: PagerState) {
-        if (pagerState.currentPage != 0)
+        if (pagerState.currentPage != 0) {
             scope.launch {
-                if (settingState.flipAnime != MenuOptions.FlipAnimationOptions.None)
+                if (settingState.flipAnime != MenuOptions.FlipAnimationOptions.None) {
                     pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                else
+                } else {
                     pagerState.scrollToPage(pagerState.currentPage - 1)
+                }
             }
-        else if (settingState.fastChapterChange && slippedTextList.isNotEmpty()) uiState.loadLastChapter.invoke()
+        } else if (settingState.fastChapterChange && slippedTextList.isNotEmpty()) {
+            uiState.loadLastChapter.invoke()
+        } else {
+            scope.launch {
+                showSnackbar(
+                    coroutineScope = scope,
+                    hostState = snackbarHostState,
+                    duration = SnackbarDuration.Short,
+                    message = "已经是第一页了",
+                    actionLabel = "上一章"
+                ) {
+                    if (it == SnackbarResult.ActionPerformed) {
+                        onClickPrevChapter()
+                    }
+                }
+            }
+        }
     }
 
     fun nextPage(pagerState: PagerState) {
-        if (pagerState.currentPage + 1 < pagerState.pageCount)
+        if (pagerState.currentPage + 1 < pagerState.pageCount) {
             scope.launch {
-                if (settingState.flipAnime != MenuOptions.FlipAnimationOptions.None)
+                if (settingState.flipAnime != MenuOptions.FlipAnimationOptions.None) {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                else
+                } else {
                     pagerState.scrollToPage(pagerState.currentPage + 1)
+                }
             }
-        else if (settingState.fastChapterChange && slippedTextList.isNotEmpty()) uiState.loadNextChapter.invoke()
+        } else if (settingState.fastChapterChange && slippedTextList.isNotEmpty()) {
+            uiState.loadNextChapter.invoke()
+        } else {
+            scope.launch {
+                showSnackbar(
+                    coroutineScope = scope,
+                    hostState = snackbarHostState,
+                    duration = SnackbarDuration.Short,
+                    message = "已经是最后一页了",
+                    actionLabel = "下一章"
+                ) {
+                    if (it == SnackbarResult.ActionPerformed) {
+                        onClickNextChapter()
+                    }
+                }
+            }
+        }
     }
 
     LaunchedEffect(
@@ -156,7 +201,7 @@ private fun SimpleFlipPageTextComponent(
             uiState.updatePageState(PagerState { slippedTextList.size })
         }
     }
-    LocalContext.current.resources.displayMetrics.let { displayMetrics ->
+    LocalResources.current.displayMetrics.let { displayMetrics ->
         constraints = Constraints(
             maxWidth = displayMetrics
                 .widthPixels

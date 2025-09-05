@@ -14,7 +14,7 @@ interface ChapterContent {
     val lastChapter: Int
     val nextChapter: Int
 
-    fun hasLastChapter(): Boolean = lastChapter > -1
+    fun hasPrevChapter(): Boolean = lastChapter > -1
     fun hasNextChapter(): Boolean = nextChapter > -1
     fun isEmpty() = this.id == -1 || this.content.isBlank()
 
