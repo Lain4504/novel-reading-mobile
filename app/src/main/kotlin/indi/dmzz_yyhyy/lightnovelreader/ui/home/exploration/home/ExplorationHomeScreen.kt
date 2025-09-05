@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -72,6 +73,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.LnrSnackbar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.ExplorationScreen
@@ -120,7 +122,9 @@ fun ExplorationHomeScreen(
                 )
             },
             snackbarHost = {
-                SnackbarHost(LocalSnackbarHost.current)
+                SnackbarHost(LocalSnackbarHost.current) {
+                    LnrSnackbar(it)
+                }
             }
         ) { paddingValues ->
             ExplorationScreen(

@@ -47,6 +47,11 @@
     <string name="cache_book_running">This book is currently caching</string>
     <string name="cache_book_finished">Cache completed successfully</string>
     <string name="cache_book_error">Cache failed</string>
+    <string name="restart_to_apply_changes">Restart the app to apply changes</string>
+    <string name="network_error_message">
+        The app is currently unable to retrieve data from the source. This is usually caused by a network issue, and we are unable to troubleshoot network problems. Please check your connection first.
+    </string>
+
 
     <!-- Settings -->
     <string name="reading_settings">Reading</string>

@@ -66,6 +66,7 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.LnrSnackbar
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
@@ -117,9 +118,9 @@ fun ReadingScreen(
                 )
             },
             snackbarHost = {
-                SnackbarHost(
-                    hostState = LocalSnackbarHost.current,
-                )
+                SnackbarHost(LocalSnackbarHost.current) {
+                    LnrSnackbar(it)
+                }
             }
         ) {
             var showEmptyPage by remember { mutableStateOf(false) }
