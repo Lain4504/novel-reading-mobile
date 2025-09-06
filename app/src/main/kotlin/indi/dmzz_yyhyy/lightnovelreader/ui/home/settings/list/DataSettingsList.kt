@@ -115,13 +115,6 @@ fun DataSettingsList(
         checked = settingState.isUseProxy,
         booleanUserData = settingState.isUseProxyUserData
     )
-    SettingsSwitchEntry(
-        iconRes = R.drawable.autorenew_24px,
-        title = "自动刷新",
-        description = "允许自动检查书本信息与内容更新",
-        checked = settingState.bookAutoRefresh,
-        booleanUserData = settingState.bookAutoRefreshUserData
-    )
     SettingsClickableEntry(
         iconRes = R.drawable.bug_report_24px,
         title = stringResource(R.string.settings_app_logs),

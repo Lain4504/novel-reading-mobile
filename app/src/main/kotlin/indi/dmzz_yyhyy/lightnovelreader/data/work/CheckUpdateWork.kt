@@ -21,24 +21,20 @@ import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import kotlinx.coroutines.delay
 
 @HiltWorker
 class CheckUpdateWork @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val webBookDataSource: WebBookDataSource,
-    private val userDataRepository: UserDataRepository,
     private val bookshelfRepository: BookshelfRepository
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val isAutoRefreshEnabled = userDataRepository
-            .booleanUserData(UserDataPath.Settings.Data.BookAutoRefresh.path)
-            .getOrDefault(false)
-        if (!isAutoRefreshEnabled) return Result.success()
-
         val reminderBookMap = mutableMapOf<Int, BookInformation>()
         bookshelfRepository.getAllBookshelfBooksMetadata().forEach { bookshelfBookMetadata ->
+            delay(3000)
             Log.d("CheckUpdateWork", "Updating book id=${bookshelfBookMetadata.id}")
             val bookInformation = webBookDataSource.getBookInformation(bookshelfBookMetadata.id)
             val webBookLastUpdate = bookInformation.lastUpdated
