@@ -65,7 +65,7 @@ class FlipPageContentViewModel(
     }
 
     override fun loadLastChapter() {
-        if (!uiState.readingChapterContent.hasLastChapter()) return
+        if (!uiState.readingChapterContent.hasPrevChapter()) return
         changeChapter(
             id = uiState.readingChapterContent.lastChapter
         )

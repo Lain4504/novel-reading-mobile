@@ -43,7 +43,6 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var updateCheckRepository: UpdateCheckRepository
     @Inject lateinit var workManager: WorkManager
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    private var isUsingVolumeKeyFlip = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,11 +87,6 @@ class MainActivity : ComponentActivity() {
             }
         }
         coroutineScope.launch(Dispatchers.IO) {
-            userDataRepository.booleanUserData(UserDataPath.Reader.IsUsingVolumeKeyFlip.path).getFlow().collect {
-                it?.let { isUsingVolumeKeyFlip = it }
-            }
-        }
-        coroutineScope.launch(Dispatchers.IO) {
             userDataRepository.stringUserData(UserDataPath.Settings.Display.LightThemeName.path).getFlow().collect {
                 it?.let { lightThemeName = it }
             }
@@ -109,6 +103,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             coroutineScope.launch(Dispatchers.IO) {
                 userDataRepository.booleanUserData(UserDataPath.Settings.Display.DynamicColors.path).getFlow().collect {

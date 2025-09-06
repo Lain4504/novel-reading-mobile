@@ -11,6 +11,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadItem
 
 @State
 interface DetailUiState {
+    val isLoading: Boolean
     val bookInformation: BookInformation
     val bookVolumes: BookVolumes
     val userReadingData: UserReadingData
@@ -20,6 +21,7 @@ interface DetailUiState {
 }
 
 class MutableDetailUiState: DetailUiState {
+    override var isLoading: Boolean by mutableStateOf(true)
     override var bookInformation: BookInformation by mutableStateOf(BookInformation.empty())
     override var bookVolumes: BookVolumes by mutableStateOf(BookVolumes.empty(-1))
     override var userReadingData: UserReadingData by mutableStateOf(UserReadingData.empty())

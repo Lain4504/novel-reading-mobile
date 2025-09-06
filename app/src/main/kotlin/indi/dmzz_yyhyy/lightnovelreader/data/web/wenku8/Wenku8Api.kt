@@ -77,7 +77,6 @@ object Wenku8Api: WebBookDataSource {
 
     private inline fun <reified T> ifCache(id: Int, block: () -> T): T {
         val cacheData = cache.getCache<T>(id)
-        println(cacheData)
         if (cacheData == null) {
             val data = block.invoke()
             cache.cache(id, data)

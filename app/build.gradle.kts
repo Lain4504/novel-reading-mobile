@@ -20,8 +20,8 @@ android {
         minSdk = 24
         targetSdk = 36
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*1000+debug版本号(开发需要时迭代, 三位数)
-        versionCode = 1_01_02_004
-        versionName = "1.1.2"
+        versionCode = 1_01_03_006
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -29,10 +29,12 @@ android {
         }
     }
 
+    @Suppress("UnstableApiUsage")
     buildTypes {
         release {
             isShrinkResources = true
             isMinifyEnabled = true
+            vcsInfo.include = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -43,6 +45,7 @@ android {
             applicationIdSuffix = ".debug"
             isDebuggable = true
             isJniDebuggable = true
+            vcsInfo.include = false
             setProperty("archivesBaseName", "LightNovelReader-${defaultConfig.versionCode}")
         }
     }
@@ -138,6 +141,9 @@ dependencies {
     implementation(project(":proxy"))
     // Telephoto
     implementation(libs.zoomable.image.coil)
+    // Shimmer
+    implementation(libs.compose.shimmer)
+
 }
 
 configurations.implementation{

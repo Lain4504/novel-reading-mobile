@@ -18,15 +18,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,9 +42,12 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
+import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
+import kotlinx.coroutines.launch
 
 @Composable
 fun ScrollContentComponent(
@@ -48,7 +56,9 @@ fun ScrollContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    onClickPrevChapter: () -> Unit,
+    onClickNextChapter: () -> Unit
 ) {
     ScrollContentTextComponent(
         modifier = modifier,
@@ -56,7 +66,9 @@ fun ScrollContentComponent(
         settingState = settingState,
         paddingValues = paddingValues,
         changeIsImmersive = changeIsImmersive,
-        onZoomImage = onZoomImage
+        onZoomImage = onZoomImage,
+        onClickPrevChapter = onClickPrevChapter,
+        onClickNextChapter = onClickNextChapter
     )
 }
 
@@ -67,14 +79,86 @@ fun ScrollContentTextComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    onClickPrevChapter: () -> Unit,
+    onClickNextChapter: () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = LocalSnackbarHost.current
     val density = LocalDensity.current
-    val screenHeight = LocalContext.current.resources.displayMetrics.heightPixels
+    val screenHeight = LocalResources.current.displayMetrics.heightPixels
     val textColor = readerTextColor(settingState)
     val fontFamily = rememberReaderFontFamily(settingState)
+    val listState = uiState.lazyListState
+
+    LaunchedEffect(listState) {
+        var atTop = false
+        var atBottom = false
+
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (!scrolling) {
+                    val layoutInfo = listState.layoutInfo
+                    val totalCount = layoutInfo.totalItemsCount
+                    val firstIndex = listState.firstVisibleItemIndex
+                    val firstOffset = listState.firstVisibleItemScrollOffset
+                    val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
+
+                    val isAtTop = firstIndex == 0 && firstOffset == 0
+                    val isAtBottom = lastVisible != null &&
+                            lastVisible.index == totalCount - 1 &&
+                            (lastVisible.offset + lastVisible.size) <= layoutInfo.viewportEndOffset
+
+                    when {
+                        isAtTop -> {
+                            if (atTop) {
+                                coroutineScope.launch {
+                                    showSnackbar(
+                                        coroutineScope = coroutineScope,
+                                        hostState = snackbarHostState,
+                                        duration = SnackbarDuration.Short,
+                                        message = "已经到顶了",
+                                        actionLabel = "上一章"
+                                    ) {
+                                        if (it == SnackbarResult.ActionPerformed) {
+                                            onClickPrevChapter()
+                                        }
+                                    }
+                                }
+                            }
+                            atTop = true
+                            atBottom = false
+                        }
+                        isAtBottom -> {
+                            if (atBottom) {
+                                coroutineScope.launch {
+                                    showSnackbar(
+                                        coroutineScope = coroutineScope,
+                                        hostState = snackbarHostState,
+                                        duration = SnackbarDuration.Short,
+                                        message = "已经到底了",
+                                        actionLabel = "下一章"
+                                    ) {
+                                        if (it == SnackbarResult.ActionPerformed) {
+                                            onClickNextChapter()
+                                        }
+                                    }
+                                }
+                            }
+                            atBottom = true
+                            atTop = false
+                        }
+                        else -> {
+                            atTop = false
+                            atBottom = false
+                        }
+                    }
+                }
+            }
+    }
+
+
     if (settingState.enableBackgroundImage && settingState.backgroundImageDisplayMode == MenuOptions.ReaderBgImageDisplayModeOptions.Loop) {
-        // FIXME: why twice?
         Image(
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,7 +216,7 @@ fun ScrollContentTextComponent(
                 .onGloballyPositioned {
                     uiState.setLazyColumnSize(it.size)
                 },
-            state = uiState.lazyListState,
+            state = listState,
         ) {
             items(
                 count = uiState.contentList.size,

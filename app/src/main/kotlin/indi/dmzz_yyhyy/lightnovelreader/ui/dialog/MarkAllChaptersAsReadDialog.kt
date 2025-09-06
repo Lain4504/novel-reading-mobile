@@ -43,7 +43,6 @@ fun MarkAllChaptersAsReadDialog(
     onConfirmation: () -> Unit,
     volumesList: List<Int>
 ) {
-    println(volumesList)
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text("标为已读") },

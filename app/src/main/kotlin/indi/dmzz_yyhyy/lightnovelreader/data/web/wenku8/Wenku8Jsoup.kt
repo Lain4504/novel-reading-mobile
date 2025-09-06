@@ -4,7 +4,12 @@ import android.util.Log
 import indi.dmzz_yyhyy.lightnovelreader.utils.UserAgentGenerator
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionPost
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -12,7 +17,8 @@ import java.time.Instant
 import kotlin.io.encoding.Base64
 import kotlin.random.Random
 
-private var requestCount = 0
+private val requestLimiter = Semaphore(3)
+private val pendingJobs = Channel<Unit>(capacity = 25, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
 fun Connection.wenku8Cookie(): Connection =
     this
@@ -33,26 +39,36 @@ fun Connection.wenku8Cookie(): Connection =
         .cookie(" Hm_lpvt_d72896ddbf8d27c750e3b365ea2fc902", "1739294503")
 
 suspend fun wenku8Api(request: String): Document? {
-    while (requestCount > 3) {
-        delay(500)
+    if (!pendingJobs.trySend(Unit).isSuccess) {
+        Log.w("Wenku8API", "request dropped: $request")
     }
-    requestCount++
-    Log.i("Wenku8API", "require to wenku8 with $request")
-    delay(Random.Default.nextLong(500, 800))
-    return Jsoup
-        .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
-        .data(
-            "request", Base64.encode(request.toByteArray()),
-            "timetoken", Instant.now().toEpochMilli().toString(),
-            "appver", "1.21"
-        )
-        .autoReconnectionPost()
-        ?.outputSettings(
-            Document.OutputSettings()
-                .prettyPrint(false)
-                .syntax(Document.OutputSettings.Syntax.xml)
-        ).also {
-            if (it == null) delay(10000)
-            requestCount--
+
+    return try {
+        requestLimiter.withPermit {
+            delay(Random.Default.nextLong(500, 800))
+            Log.i("Wenku8API", "request to wenku8 with $request")
+
+            withTimeoutOrNull(15_000L) {
+                val doc = Jsoup
+                    .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
+                    .data(
+                        "request", Base64.encode(request.toByteArray()),
+                        "timetoken", Instant.now().toEpochMilli().toString(),
+                        "appver", "1.21"
+                    )
+                    .autoReconnectionPost()
+
+                doc?.outputSettings(
+                    Document.OutputSettings()
+                        .prettyPrint(false)
+                        .syntax(Document.OutputSettings.Syntax.xml)
+                )
+                doc
+            }.also {
+                if (it == null) Log.w("Wenku8API", "request timeout: $request")
+            }
         }
+    } finally {
+        pendingJobs.tryReceive().getOrNull()
+    }
 }
