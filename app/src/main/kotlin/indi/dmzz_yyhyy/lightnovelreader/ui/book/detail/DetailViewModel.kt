@@ -39,6 +39,7 @@ class DetailViewModel @Inject constructor(
             bookRepository.getBookInformationFlow(bookId, viewModelScope).collect {
                 if (it.id == -1) return@collect
                 _uiState.bookInformation = it
+                _uiState.isLoading = false
                 val bookshelfBookMetadata = bookshelfRepository.getBookshelfBookMetadata(bookId) ?: return@collect
                 bookshelfBookMetadata.bookShelfIds.forEach { bookshelfId ->
                     bookshelfRepository.deleteBookFromBookshelfUpdatedBookIds(bookshelfId, bookId)

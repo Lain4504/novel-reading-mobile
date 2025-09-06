@@ -18,7 +18,7 @@ fun Loading() {
     ) {
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(50.dp).align(Alignment.Center)
+            modifier = Modifier.size(46.dp).align(Alignment.Center)
         )
     }
 }

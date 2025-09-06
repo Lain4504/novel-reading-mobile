@@ -123,6 +123,7 @@ fun ReaderScreen(
     BackHandler {
         when (backBlockMode) {
             MenuOptions.ReaderBackBlockMode.None -> {
+                isImmersive = false
                 onClickBackButton()
             }
             MenuOptions.ReaderBackBlockMode.DoublePress -> {
@@ -164,7 +165,7 @@ fun ReaderScreen(
         snackbarHost = {
             Box {
                 SnackbarHost(LocalSnackbarHost.current) {
-                    LnrSnackbar(it, modifier = Modifier.padding(bottom = 48.dp).align(Alignment.TopCenter))
+                    LnrSnackbar(it, modifier = Modifier.padding(bottom = 56.dp).align(Alignment.TopCenter))
                 }
             }
         },
