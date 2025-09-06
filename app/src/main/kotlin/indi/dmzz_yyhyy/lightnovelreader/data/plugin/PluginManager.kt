@@ -33,16 +33,22 @@ class PluginManager @Inject constructor(
                     appContext.cacheDir.resolve("plugin").let { dir ->
                         if (!dir.exists()) dir.mkdir()
                         appContext.cacheDir.resolve("plugin/$path").let { file ->
-                            file.createNewFile()
-                            file.outputStream().use { outputStream ->
-                                pluginInputStream.copyTo(outputStream)
+                            if (!file.exists()) {
+                                file.createNewFile()
+                                file.outputStream().use { outputStream ->
+                                    pluginInputStream.copyTo(outputStream)
+                                }
+                                file.setReadOnly()
+                            } else {
+                                file.setReadable(true, true)
+                                file.setReadOnly()
                             }
                         }
                         loadPlugin(appContext.cacheDir.resolve("plugin/$path"), ignorePluginInfo = true)
                     }
                 }
-
             }
+
         appContext.dataDir.resolve("plugin")
             .also(File::mkdir)
             .listFiles { it.name.endsWith(".dex") }
