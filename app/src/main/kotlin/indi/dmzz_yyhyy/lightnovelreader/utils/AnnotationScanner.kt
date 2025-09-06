@@ -6,7 +6,7 @@ import dalvik.system.DexClassLoader
 import dalvik.system.DexFile
 import java.lang.reflect.Field
 
-
+@Suppress("DEPRECATION")
 object AnnotationScanner {
     private const val TAG = "AnnotationScanner"
 
@@ -34,13 +34,10 @@ object AnnotationScanner {
             for (dexElement in dexElements) {
                 val dexFileField = findField(dexElement, "dexFile")
                 val dexFile = dexFileField.get(dexElement) as DexFile
-                @Suppress("DEPRECATION") val classNames = dexFile.entries()
+                val classNames = dexFile.entries()
                 while (classNames.hasMoreElements()) {
                     val className = classNames.nextElement()
-                    if (className == null || className.isEmpty() || !className.contains(".")) {
-                        continue
-                    }
-
+                    if (className == null || className.isEmpty() || !className.contains(".")) continue
                     try {
                         val clazz = classLoader.loadClass(className)
                         if (clazz.isAnnotationPresent(annotationClass)) {

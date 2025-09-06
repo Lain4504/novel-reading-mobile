@@ -58,7 +58,7 @@ class PluginManagerViewModel @Inject constructor(
                     }
                 }
             }
-            val id = pluginManager.loadPlugin(pluginFile, forceLoad = true)
+            val id = pluginManager.loadPlugin(pluginFile)
             if (id == null) {
                 viewModelScope.launch {
                     Toast

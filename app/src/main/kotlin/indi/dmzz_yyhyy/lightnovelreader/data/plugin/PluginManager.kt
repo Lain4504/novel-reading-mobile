@@ -8,6 +8,8 @@ import dalvik.system.DexClassLoader
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
 import java.io.File
 import javax.inject.Inject
@@ -23,40 +25,56 @@ class PluginManager @Inject constructor(
     private val pluginPathMap = mutableMapOf<String, File>()
     val allPluginInfo: SnapshotStateList<PluginInfo> = _allPluginInfo
     private val enabledPluginsUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.EnabledPlugins.path)
-    private val enabledPlugins = enabledPluginsUserData.getOrDefault(emptyList())
+    private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic)
+    private val defaultPlugins = listOf<LightNovelReaderPlugin>()
 
     fun loadAllPlugins() {
-        appContext.assets.list("")
-            ?.filter { it.endsWith(".dex") }
-            ?.forEach { path ->
-                appContext.assets.open(path).use { pluginInputStream ->
-                    appContext.cacheDir.resolve("plugin").let { dir ->
-                        if (!dir.exists()) dir.mkdir()
-                        appContext.cacheDir.resolve("plugin/$path").let { file ->
-                            file.createNewFile()
-                            file.outputStream().use { outputStream ->
-                                pluginInputStream.copyTo(outputStream)
-                            }
-                        }
-                        loadPlugin(appContext.cacheDir.resolve("plugin/$path"), ignorePluginInfo = true)
-                    }
-                }
-
-            }
+        defaultWebDataSources.forEach(webBookDataSourceManager::loadWebDataSourceClass)
+        defaultPlugins.forEach(::loadPlugin)
         appContext.dataDir.resolve("plugin")
             .also(File::mkdir)
             .listFiles { it.name.endsWith(".dex") }
             ?.forEach(::loadPlugin)
     }
 
-    fun loadPlugin(path: File, ignorePluginInfo: Boolean = false, forceLoad: Boolean = false): String? {
+    fun loadPlugin(plugin: LightNovelReaderPlugin): String? {
+        var id: String?
+        val annotation = plugin.javaClass.getAnnotation(Plugin::class.java)
+        if (annotation != null) {
+            id = plugin.javaClass.`package`?.name ?: return null
+            val info = PluginInfo(
+                isUpdatable = false,
+                id = id,
+                name = annotation.name,
+                version = annotation.version,
+                versionName = annotation.versionName,
+                author = annotation.author,
+                description = annotation.description,
+                updateUrl = annotation.updateUrl
+            )
+            if (!_allPluginInfo.contains(info)) _allPluginInfo.add(info)
+            return id
+        }
+        return null
+    }
+
+    fun loadPlugin(path: File): String? {
         val classLoader = DexClassLoader(
             path.path,
             appContext.cacheDir.resolve("plugin/optimizedDirectory").path,
             null,
-            this::class.java.classLoader
+            appContext.classLoader
         )
-        var loadable = false
+        return loadPlugin(
+            classLoader
+        ).also {
+            if (it != null) {
+                pluginPathMap[it] = path
+            }
+        }
+    }
+
+    fun loadPlugin(classLoader: DexClassLoader): String? {
         var id: String? = null
         AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java)
             .map {
@@ -68,35 +86,17 @@ class PluginManager @Inject constructor(
             .map { it as LightNovelReaderPlugin }
             .firstOrNull()
             ?.also {
-                val annotation = it.javaClass.getAnnotation(Plugin::class.java)
-                if (annotation != null) {
-                    id = it.javaClass.`package`?.name ?: return null
-                    val info = PluginInfo(
-                        isUpdatable = false,
-                        id = id,
-                        name = annotation.name,
-                        version = annotation.version,
-                        versionName = annotation.versionName,
-                        author = annotation.author,
-                        description = annotation.description,
-                        updateUrl = annotation.updateUrl
-                    )
-                    if (!_allPluginInfo.contains(info)) _allPluginInfo.add(info)
-                    if (!enabledPlugins.contains(id) && !forceLoad) return id
-                    loadable = true
-                }
+                id = loadPlugin(it)
+                if (!enabledPluginsUserData.getOrDefault(emptyList()).contains(id)) return id
             }
             ?.let(LightNovelReaderPlugin::onLoad)
-        if (loadable || ignorePluginInfo)
-            webBookDataSourceManager.loadWebDataSourcesFromPackages(classLoader)
-        if (id != null)
-            pluginPathMap[id] = path
+        webBookDataSourceManager.loadWebDataSourcesFromClassLoader(classLoader)
         return id
     }
 
-    fun loadPlugin(id: String, ignorePluginInfo: Boolean = false, forceLoad: Boolean = false) {
+    fun loadPlugin(id: String) {
         val path = pluginPathMap[id] ?: return
-        loadPlugin(path, ignorePluginInfo, forceLoad)
+        loadPlugin(path)
     }
 
     fun unloadPlugin(id: String) {

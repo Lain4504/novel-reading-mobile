@@ -1,7 +1,10 @@
+
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    id("com.gradleup.shadow") version "8.3.0"
 }
 
 android {
@@ -18,25 +21,59 @@ android {
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        compileOptions {
+            jvmToolchain(17)
+        }
     }
 }
 
+val shadow by configurations.register("shadowRuntime")
+
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
-    implementation(project(":app"))
-    implementation(project(":proxy"))
-    implementation(libs.jsoup)
-    implementation(libs.gson)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.navigation.runtime.ktx)
+    compileOnly(project(":proxy"))
+    compileOnly(project(":app"))
+    compileOnly(libs.androidx.navigation.runtime.ktx)
+    compileOnly(libs.gson)
+    compileOnly(libs.jsoup)
+    compileOnly(libs.kotlinx.coroutines.core)
+}
+
+/*
+tasks.register<ShadowJar>("margeShadowJar") {
+    dependsOn(":plugin:defaultdatasource:assemble")
+    dependsOn(":plugin:defaultdatasource:resolveRuntimeClasspath")
+    configurations = listOf(shadow)
+    project.configurations.asMap["implementation"]?.dependencies?.let { implementation ->
+        val api = project.configurations.asMap["api"]?.dependencies
+        implementation.forEach {
+            if (it is DefaultProjectDependency) return@forEach
+            api?.add(it)
+        }
+    }
+    exclude("org.jetbrains.annotations.*")
+    from(layout.buildDirectory.dir("tmp/kotlin-classes/release"))
+    minimize()
+}
+
+tasks.register("resolveRuntimeClasspath") {
+    dependsOn(":plugin:defaultdatasource:assemble")
+    rootProject.allprojects {
+        if (!name.contains("app") && !name.contains("defaultdatasource")) return@allprojects
+        val releaseRuntimeClasspath = configurations.findByName("releaseRuntimeClasspath")
+        configurations.maybeRegister("runtimeClasspath") {
+            extendsFrom(releaseRuntimeClasspath)
+        }
+    }
 }
 
 tasks.register<Exec>("jarToDexWithD8") {
     dependsOn(":plugin:defaultdatasource:assemble")
-
     val sdkDir = project.android.sdkDirectory
     val buildToolsVersion by extra { "${project.android.compileSdk}.0.0" }
     val buildToolsDir by extra { "$sdkDir\\build-tools\\$buildToolsVersion" }
@@ -71,3 +108,4 @@ tasks.register<Copy>("copyDexToAssets") {
     into(project(":app").layout.buildDirectory.dir("generated/assets"))
     rename("classes", "defaultdatasource")
 }
+*/

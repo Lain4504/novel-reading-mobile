@@ -27,7 +27,6 @@
 -dontwarn org.kxml2.io.**
 -dontwarn android.content.res.**
 -dontwarn org.slf4j.impl.StaticLoggerBinder
-
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 -keep,allowobfuscation,allowshrinking class indi.dmzz_yyhyy.lightnovelreader.data.json.** { *; }
 -keep,allowobfuscation,allowshrinking class indi.dmzz_yyhyy.lightnovelreader.data.web.zaicomic.** { *; }
@@ -59,10 +58,14 @@
 -keepclassmembers class indi.dmzz_yyhyy.lightnovelreader.** {
     *** Companion;
 }
+-keep class indi.dmzz_yyhyy.lightnovelreader.data.** { *; }
+-keep class indi.dmzz_yyhyy.lightnovelreader.utils.** { *; }
+-keep class indi.dmzz_yyhyy.lightnovelreader.R$* { *; }
+-keep class io.nightfish.* { *; }
 -keepclasseswithmembers class indi.dmzz_yyhyy.lightnovelreader.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
-
+-keep class indi.dmzz_yyhyy.lightnovelreader.defaultplugin.** { *; }
 -dontwarn org.dom4j.**
 -keep class org.dom4j.**{*;}
 -keep interface org.dom4j.** { *; }

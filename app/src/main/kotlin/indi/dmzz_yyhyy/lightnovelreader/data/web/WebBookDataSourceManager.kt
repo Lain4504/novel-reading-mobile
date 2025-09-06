@@ -16,25 +16,27 @@ class WebBookDataSourceManager @Inject constructor (
     val webDataSourceItems: List<WebDataSourceItem> = _webDataSourceItems
     private val webBookDataSources = mutableListOf<WebBookDataSource>()
 
-    fun loadWebDataSourcesFromPackages(classLoader: DexClassLoader) {
+    fun loadWebDataSourcesFromClassLoader(classLoader: DexClassLoader) {
         AnnotationScanner.findAnnotatedClasses(classLoader, WebDataSource::class.java)
             .forEach {
                 val instance =
                     try { it.getDeclaredField("INSTANCE").get(null) }
                     catch (_: NoSuchFieldException) { null }
                         ?: it.getDeclaredConstructor().newInstance()
-                if (instance is WebBookDataSource) {
-                    webBookDataSources.add(instance)
-                    val info = it.getAnnotationsByType(WebDataSource::class.java)
-                    _webDataSourceItems.add(
-                        WebDataSourceItem(
-                            instance.id,
-                            info.first().name,
-                            info.first().provider,
-                        )
-                    )
-                }
+                if (instance is WebBookDataSource) loadWebDataSourceClass(instance)
             }
+    }
+
+    fun loadWebDataSourceClass(instance: WebBookDataSource) {
+        webBookDataSources.add(instance)
+        val info = instance.javaClass.getAnnotationsByType(WebDataSource::class.java)
+        _webDataSourceItems.add(
+            WebDataSourceItem(
+                instance.id,
+                info.first().name,
+                info.first().provider,
+            )
+        )
     }
 
     fun unLoadWebDataSourcesFromPackages(classLoader: DexClassLoader) {

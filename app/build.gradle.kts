@@ -145,7 +145,7 @@ dependencies {
 configurations.implementation{
     exclude(group = "com.intellij", module = "annotations")
 }
-
+/*
 tasks.register("printVersion") {
     doFirst {
         println(android.defaultConfig.versionName)
@@ -162,4 +162,4 @@ tasks.whenTaskAdded {
     if (name.contains("merge") && name.contains("Assets")) {
         dependsOn(":plugin:defaultdatasource:copyDexToAssets")
     }
-}
+}*/

@@ -1,8 +1,11 @@
 [versions]
 androidGradlePlugin = "8.12.2"
 dom4j = "2.2.0"
+fatAar = "1.3.8"
+fatAarAndroid = "1.4.5"
 kotlin = "2.2.10"
 kotlinComposeCompilerPlugin = "2.1.20"
+kotlinStdlib = "2.2.10"
 ksp = "2.2.10-2.0.2"
 vico = "2.1.3"
 hilt = "2.57.1"
@@ -33,6 +36,9 @@ navigationRuntimeKtx = "2.9.3"
 
 [libraries]
 dom4j = { module = "org.dom4j:dom4j", version.ref = "dom4j" }
+fat-aar = { module = "com.github.kezong:fat-aar", version.ref = "fatAar" }
+fat-aar-android = { module = "com.github.shenghua-ok:fat-aar-android", version.ref = "fatAarAndroid" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
@@ -82,3 +88,4 @@ android_application = { id = "com.android.application", version.ref = "androidGr
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 google_dagger_hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google_ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+android-fusedlibrary = { id = "com.android.fused-library", version.ref = "androidGradlePlugin" }

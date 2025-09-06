@@ -25,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.Filter
 import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SingleChoiceFilter
@@ -65,8 +64,8 @@ fun Filter.Component(dialog: (@Composable () -> Unit) -> Unit) {
                         FilterChipsDialog(
                             enable = displayDialog,
                             selected = selected,
-                            title = stringResource(this@Component.dialogTitleId),
-                            description = stringResource(this@Component.descriptionId),
+                            title = this@Component.dialogTitle,
+                            description = this@Component.description,
                             onSelectedChange = {
                                 selected = it
                                 enabled = it != this@Component.getDefaultChoice()
