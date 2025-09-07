@@ -20,6 +20,8 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
+import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import kotlinx.coroutines.launch
 
@@ -29,6 +31,8 @@ fun DataSettingsList(
     onClickExportUserData: () -> Unit,
     importData: (Uri) -> OneTimeWorkRequest,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = LocalSnackbarHost.current
     val context = LocalContext.current
     val workManager = WorkManager.getInstance(context)
     val scope = rememberCoroutineScope()
@@ -102,7 +106,34 @@ fun DataSettingsList(
         description = stringResource(R.string.settings_select_data_source_desc),
         onClick = onClickChangeSource
     )
-
+    SettingsSwitchEntry(
+        iconRes = R.drawable.wifi_proxy_24px,
+        title = "自动代理",
+        description = "自动从网络上获取代理ip, **但这将导致您所浏览的书本数据可能会被截获**",
+        checked = settingState.isUseProxy,
+        booleanUserData = settingState.isUseProxyUserData
+    )
+    SettingsClickableEntry(
+        iconRes = R.drawable.bug_report_24px,
+        title = stringResource(R.string.settings_app_logs),
+        description = stringResource(R.string.settings_app_logs_desc),
+        onClick = onClickLogcat
+    )
+    SettingsMenuEntry(
+        iconRes = R.drawable.bug_report_24px,
+        title = stringResource(R.string.settings_app_log_level),
+        description = stringResource(R.string.settings_app_log_level_desc),
+        options = MenuOptions.LogLevelOptions,
+        selectedOptionKey = settingState.logLevelKey,
+        onOptionChange = { option ->
+            settingState.logLevelKeyUserData.asynchronousSet(option)
+            showSnackbar(
+                coroutineScope = coroutineScope,
+                hostState = snackbarHostState,
+                message = context.getString(R.string.restart_to_apply_changes)
+            ) { }
+        }
+    )
 }
 
 fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {

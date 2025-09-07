@@ -27,12 +27,32 @@ fun ContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    onClickPrevChapter: () -> Unit,
+    onClickNextChapter: () -> Unit
 ) {
     uiState.let { contentUiState ->
         when(contentUiState) {
-            is FlipPageContentUiState -> FlipPageContentComponent(modifier, contentUiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
-            is ScrollContentUiState -> ScrollContentComponent(modifier, contentUiState, settingState, paddingValues, changeIsImmersive, onZoomImage)
+            is FlipPageContentUiState -> FlipPageContentComponent(
+                modifier,
+                contentUiState,
+                settingState,
+                paddingValues,
+                changeIsImmersive,
+                onZoomImage,
+                onClickPrevChapter,
+                onClickNextChapter
+            )
+            is ScrollContentUiState -> ScrollContentComponent(
+                modifier,
+                contentUiState,
+                settingState,
+                paddingValues,
+                changeIsImmersive,
+                onZoomImage,
+                onClickPrevChapter,
+                onClickNextChapter
+            )
             is PreviewContentUiState -> {
                 Box(
                     modifier = Modifier.padding(paddingValues),

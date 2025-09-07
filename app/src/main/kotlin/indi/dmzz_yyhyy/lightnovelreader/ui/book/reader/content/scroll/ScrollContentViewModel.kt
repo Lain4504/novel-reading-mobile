@@ -90,12 +90,12 @@ class ScrollContentViewModel(
                     lazyColumnSize.height != 0 &&
                     itemInfo.offset <= -lazyColumnSize.height &&
                     !uiState.readingChapterContent.isEmpty() &&
-                    uiState.readingChapterContent.hasLastChapter()
+                    uiState.readingChapterContent.hasPrevChapter()
                 ) {
                     if (uiState.contentList.getOrNull(uiState.contentList.size - 1)?.id == uiState.readingChapterContent.nextChapter)
                         uiState.contentList.removeAt(uiState.contentList.size - 1)
                     uiState.readingContentId = uiState.readingChapterContent.lastChapter
-                    if (uiState.readingChapterContent.hasLastChapter())
+                    if (uiState.readingChapterContent.hasPrevChapter())
                         uiState.contentList.add(
                             0,
                             bookRepository.getStateChapterContent(
@@ -123,7 +123,7 @@ class ScrollContentViewModel(
                     if (uiState.contentList.getOrNull(0)?.id == uiState.readingChapterContent.lastChapter)
                         uiState.contentList.removeAt(0)
                     uiState.readingContentId = uiState.readingChapterContent.nextChapter
-                    if (uiState.readingChapterContent.hasLastChapter())
+                    if (uiState.readingChapterContent.hasPrevChapter())
                         uiState.contentList.add(
                             bookRepository.getStateChapterContent(
                                 uiState.readingChapterContent.nextChapter,
@@ -160,7 +160,7 @@ class ScrollContentViewModel(
     }
 
     override fun loadLastChapter() {
-        if (!uiState.readingChapterContent.hasLastChapter()) return
+        if (!uiState.readingChapterContent.hasPrevChapter()) return
         coroutineScope.launch {
             changeChapter(
                 id = uiState.readingChapterContent.lastChapter
@@ -198,7 +198,7 @@ class ScrollContentViewModel(
                     chapterContent.nextChapter == uiState.readingChapterContent.nextChapter
                 ) return@collect
                 uiState.contentList.clear()
-                if (chapterContent.hasLastChapter() && isUsingContinuousScrollingUserData) {
+                if (chapterContent.hasPrevChapter() && isUsingContinuousScrollingUserData) {
                     uiState.contentList.add(
                         bookRepository.getStateChapterContent(
                             chapterContent.lastChapter,

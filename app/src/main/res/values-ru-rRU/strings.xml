@@ -41,6 +41,12 @@
     <string name="offline">Ошибка</string>
     <string name="offline_desc">Проверьте доступность сайта и настройки прокси.</string>
 
+    <!-- Snackbar Hints -->
+    <string name="cache_book_started">Начало кэширования: %1$s</string>
+    <string name="cache_book_running">Эта книга сейчас кэшируется</string>
+    <string name="cache_book_finished">Кэширование завершено успешно</string>
+    <string name="cache_book_error">Ошибка кэширования</string>
+
     <!-- Настройки -->
     <string name="theme_settings">Тема</string>
     <string name="app_settings">Приложение</string>

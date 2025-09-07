@@ -9,12 +9,17 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.lifecycle.HiltViewModel
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.MutableBookshelf
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ImportDataWork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,7 +32,12 @@ class BookshelfHomeViewModel @Inject constructor(
     private val _uiState = MutableBookshelfHomeUiState()
     val uiState: BookshelfHomeUiState = _uiState
 
+    private val bookInfoStateFlows = mutableMapOf<Int, StateFlow<BookInformation>>()
+    private val bookVolumesStateFlows = mutableMapOf<Int, StateFlow<BookVolumes>>()
+
     fun load() {
+        if (_uiState.bookshelfList.isNotEmpty()) return
+
         viewModelScope.launch(Dispatchers.IO) {
             viewModelScope.coroutineContext.cancelChildren()
             _uiState.bookshelfList = bookshelfRepository.getAllBookshelfIds().map(::getBookshelf)
@@ -38,6 +48,27 @@ class BookshelfHomeViewModel @Inject constructor(
         }
     }
 
+    fun getBookInfoStateFlow(id: Int): StateFlow<BookInformation> {
+        return bookInfoStateFlows.getOrPut(id) {
+            bookRepository.getBookInformationFlow(id, viewModelScope)
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
+                    initialValue = BookInformation.empty(id)
+                )
+        }
+    }
+
+    fun getBookVolumesStateFlow(id: Int): StateFlow<BookVolumes> {
+        return bookVolumesStateFlows.getOrPut(id) {
+            bookRepository.getBookVolumesFlow(id, viewModelScope)
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
+                    initialValue = BookVolumes.empty(id)
+                )
+        }
+    }
     private fun getBookshelf(id: Int): MutableBookshelf {
         val bookshelfFlow = bookshelfRepository.getBookshelfFlow(id)
         val mutableBookshelf = MutableBookshelf().apply { this.id = id }
@@ -52,18 +83,16 @@ class BookshelfHomeViewModel @Inject constructor(
                 mutableBookshelf.allBookIds = oldMutableBookshelf.allBookIds
                 mutableBookshelf.pinnedBookIds = oldMutableBookshelf.pinnedBookIds
                 mutableBookshelf.updatedBookIds = oldMutableBookshelf.updatedBookIds
-                oldMutableBookshelf.allBookIds.forEach {
-                    viewModelScope.launch(Dispatchers.IO) {
-                        bookRepository.getBookInformationFlow(it, viewModelScope).collect {
-                            _uiState.bookInformationMap[it.id] = it
-                        }
-                    }
-                }
+
                 oldMutableBookshelf.updatedBookIds.forEach { bookId ->
                     viewModelScope.launch(Dispatchers.IO) {
                         bookRepository.getBookVolumesFlow(bookId, viewModelScope).collect {
-                            if (it.volumes.isNotEmpty())
-                                _uiState.bookLastChapterTitleMap[bookId] = "${it.volumes.last().volumeTitle} ${it.volumes.last().chapters.last().title}"
+                            if (it.volumes.isNotEmpty()) {
+                                viewModelScope.launch(Dispatchers.Main) {
+                                    _uiState.bookLastChapterTitleMap[bookId] =
+                                        "${it.volumes.last().volumeTitle} ${it.volumes.last().chapters.last().title}"
+                                }
+                            }
                         }
                     }
                 }
@@ -108,11 +137,19 @@ class BookshelfHomeViewModel @Inject constructor(
             val pinnedBookIds = _uiState.selectedBookshelf.pinnedBookIds
             val newPinnedBooksIds = _uiState.selectedBookIds
                 .filter { pinnedBookIds.contains(it) }
+                .toMutableList()
+                .apply {
+                    if (bookId != null && bookId < 0) add(-bookId)
+                }
                 .let { removeList ->
-                    (pinnedBookIds + (if (bookId == null) _uiState.selectedBookIds else listOf(bookId))).toMutableList().apply {
-                        removeAll { removeList.contains(it) }
-                    }
-                }.distinct()
+                    (pinnedBookIds + (if (bookId == null || bookId < 0) _uiState.selectedBookIds else listOf(bookId)))
+                        .toMutableList()
+                        .apply {
+                            removeAll { removeList.contains(it) }
+                        }
+                }
+                .distinct()
+
             bookshelfRepository.updateBookshelf(_uiState.selectedBookshelfId) {
                 it.apply {
                     this.pinnedBookIds = newPinnedBooksIds
@@ -121,6 +158,7 @@ class BookshelfHomeViewModel @Inject constructor(
             disableSelectMode()
         }
     }
+
 
     fun removeSelectedBooks() {
         viewModelScope.launch(Dispatchers.IO) {

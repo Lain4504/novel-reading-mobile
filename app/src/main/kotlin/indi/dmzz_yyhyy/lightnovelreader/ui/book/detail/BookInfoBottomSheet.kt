@@ -24,11 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,46 +38,56 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InfoItem(
-    title: String? = "",
-    content: String,
-    titleStyle: TextStyle,
-    contentStyle: TextStyle,
-    icon: Painter? = null
+fun BookInfoBottomSheet(
+    bookInformation: BookInformation,
+    bookVolumes: BookVolumes,
+    sheetState: SheetState,
+    isVisible: Boolean,
+    onDismissRequest: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val clipboard = LocalClipboard.current
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    @Composable
+    fun InfoItem(
+        title: String? = "",
+        content: String,
+        titleStyle: TextStyle,
+        contentStyle: TextStyle,
+        icon: Painter? = null
     ) {
         Row(
-            modifier = Modifier.weight(3f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            icon?.let {
-                Icon(
-                    painter = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+            Row(
+                modifier = Modifier.weight(3f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                icon?.let {
+                    Icon(
+                        painter = it,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Text(
+                    text = title!!,
+                    style = titleStyle
                 )
             }
-            Text(
-                text = title!!,
-                style = titleStyle
-            )
-        }
 
-        Row(
-            modifier = Modifier.weight(7f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val context = LocalContext.current
-            val clipboard = LocalClipboard.current
+            Row(
+                modifier = Modifier.weight(7f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
 
             Text(
                 text = content,

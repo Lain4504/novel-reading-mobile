@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,21 +24,50 @@ class ReadingHomeViewModel @Inject constructor(
     private val readingBooksUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
     var recentReadingBookIds: List<Int> by mutableStateOf(listOf())
         private set
-    private val _recentReadingBookInformationMap: SnapshotStateMap<Int, BookInformation> = mutableStateMapOf()
-    private val _recentReadingUserReadingDataMap: SnapshotStateMap<Int, UserReadingData> = mutableStateMapOf()
+    private val _recentReadingBookInformationMap = mutableStateMapOf<Int, BookInformation>()
+    private val _recentReadingUserReadingDataMap = mutableStateMapOf<Int, UserReadingData>()
     val recentReadingBookInformationMap: Map<Int, BookInformation> = _recentReadingBookInformationMap
     val recentReadingUserReadingDataMap: Map<Int, UserReadingData> = _recentReadingUserReadingDataMap
+    private val requestedIds = mutableSetOf<Int>()
 
     fun updateReadingBooks() {
         viewModelScope.launch(Dispatchers.IO) {
-            recentReadingBookIds = readingBooksUserData.getOrDefault(emptyList()).reversed()
-                .mapNotNull { if (it == -1) null else it  }
-            recentReadingBookIds.forEach {
-                _recentReadingBookInformationMap[it] = bookRepository.getStateBookInformation(it, viewModelScope)
+            recentReadingBookIds = readingBooksUserData
+                .getOrDefault(emptyList())
+                .reversed()
+                .filter { it != -1 }
+        }
+    }
+
+    fun loadBookInfo(id: Int) {
+        if (requestedIds.contains(id)) return
+        requestedIds.add(id)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val info = bookRepository.getStateBookInformation(id, viewModelScope)
+            val userData = bookRepository.getStateUserReadingData(id, viewModelScope)
+            viewModelScope.launch(Dispatchers.Main) {
+                _recentReadingBookInformationMap[id] = info
+                _recentReadingUserReadingDataMap[id] = userData
             }
-            recentReadingBookIds.forEach {
-                _recentReadingUserReadingDataMap[it] = bookRepository.getStateUserReadingData(it, viewModelScope)
+        }
+    }
+
+    fun removeFromReadingList(bookId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val currentList = readingBooksUserData.getOrDefault(emptyList()).toMutableList()
+
+            if (bookId >= 0) {
+                currentList.remove(bookId)
+            } else {
+                val restoredId = -bookId
+                if (!currentList.contains(restoredId)) {
+                    currentList.add(0, restoredId)
+                }
             }
+
+            readingBooksUserData.set(currentList)
+            updateReadingBooks()
         }
     }
 }

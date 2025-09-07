@@ -29,10 +29,12 @@ android {
         }
     }
 
+    @Suppress("UnstableApiUsage")
     buildTypes {
         release {
             isShrinkResources = true
             isMinifyEnabled = true
+            vcsInfo.include = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -43,6 +45,7 @@ android {
             applicationIdSuffix = ".debug"
             isDebuggable = true
             isJniDebuggable = true
+            vcsInfo.include = false
             setProperty("archivesBaseName", "LightNovelReader-${defaultConfig.versionCode}")
         }
     }
@@ -62,11 +65,6 @@ android {
     }
     composeCompiler {
         includeSourceInformation = true
-    }
-    sourceSets {
-        getByName("main") {
-            assets.srcDir("build/generated/assets")
-        }
     }
 }
 
@@ -140,12 +138,15 @@ dependencies {
     implementation(project(":proxy"))
     // Telephoto
     implementation(libs.zoomable.image.coil)
+    // Shimmer
+    implementation(libs.compose.shimmer)
+
 }
 
 configurations.implementation{
     exclude(group = "com.intellij", module = "annotations")
 }
-/*
+
 tasks.register("printVersion") {
     doFirst {
         println(android.defaultConfig.versionName)
@@ -157,9 +158,3 @@ tasks.register("printVersionCode") {
         println(android.defaultConfig.versionCode)
     }
 }
-
-tasks.whenTaskAdded {
-    if (name.contains("merge") && name.contains("Assets")) {
-        dependsOn(":plugin:defaultdatasource:copyDexToAssets")
-    }
-}*/

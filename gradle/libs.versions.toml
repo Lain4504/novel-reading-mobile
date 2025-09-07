@@ -35,6 +35,7 @@ zoomableImageCoil = "0.16.0"
 navigationRuntimeKtx = "2.9.3"
 
 [libraries]
+compose-shimmer = { module = "com.valentinilk.shimmer:compose-shimmer", version.ref = "composeShimmer" }
 dom4j = { module = "org.dom4j:dom4j", version.ref = "dom4j" }
 fat-aar = { module = "com.github.kezong:fat-aar", version.ref = "fatAar" }
 fat-aar-android = { module = "com.github.shenghua-ok:fat-aar-android", version.ref = "fatAarAndroid" }

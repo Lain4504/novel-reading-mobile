@@ -53,3 +53,8 @@ val pinAction = BaseSwipeAction(
     iconRes = R.drawable.keep_24px,
     backgroundColor = Color(0xff007AFF)
 )
+
+val unpinAction = BaseSwipeAction(
+    iconRes = R.drawable.keep_24px,
+    backgroundColor = Color(0xffE74C3C)
+)

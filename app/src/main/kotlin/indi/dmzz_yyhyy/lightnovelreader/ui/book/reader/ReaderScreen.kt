@@ -46,6 +46,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.SheetValue.PartiallyExpanded
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -88,8 +89,10 @@ import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.LnrSnackbar
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.RollingNumber
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -105,7 +108,7 @@ fun ReaderScreen(
     onClickBackButton: () -> Unit,
     accumulateReadTime: (Int, Int) -> Unit,
     updateTotalReadingTime: (Int, Int) -> Unit,
-    onClickLastChapter: () -> Unit,
+    onClickPrevChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChangeChapter: (Int) -> Unit,
     onClickThemeSettings: () -> Unit,
@@ -120,6 +123,7 @@ fun ReaderScreen(
     BackHandler {
         when (backBlockMode) {
             MenuOptions.ReaderBackBlockMode.None -> {
+                isImmersive = false
                 onClickBackButton()
             }
             MenuOptions.ReaderBackBlockMode.DoublePress -> {
@@ -158,6 +162,13 @@ fun ReaderScreen(
                 )
             }
         },
+        snackbarHost = {
+            Box {
+                SnackbarHost(LocalSnackbarHost.current) {
+                    LnrSnackbar(it, modifier = Modifier.padding(bottom = 56.dp).align(Alignment.TopCenter))
+                }
+            }
+        },
         containerColor = if (settingState.backgroundColor.isUnspecified) colorScheme.background else settingState.backgroundColor
     ) { _ ->
         if (settingState.enableBackgroundImage) {
@@ -174,7 +185,7 @@ fun ReaderScreen(
             settingState = settingState,
             accumulateReadingTime = accumulateReadTime,
             updateTotalReadingTime = updateTotalReadingTime,
-            onClickLastChapter = onClickLastChapter,
+            onClickPrevChapter = onClickPrevChapter,
             onClickNextChapter = onClickNextChapter,
             onChangeChapter = onChangeChapter,
             onChangeIsImmersive = { isImmersive = !isImmersive },
@@ -192,7 +203,7 @@ fun Content(
     settingState: SettingState,
     updateTotalReadingTime: (Int, Int) -> Unit,
     accumulateReadingTime: (Int, Int) -> Unit,
-    onClickLastChapter: () -> Unit,
+    onClickPrevChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onChangeChapter: (Int) -> Unit,
     onChangeIsImmersive: () -> Unit,
@@ -210,7 +221,6 @@ fun Content(
     var showChapterSelectorBottomSheet by remember { mutableStateOf(false) }
     var totalReadingTime by remember { mutableIntStateOf(0) }
     var selectedVolumeId by remember { mutableIntStateOf(-1) }
-    var lastUpdate by remember { mutableStateOf(LocalTime.now()) }
 
     LaunchedEffect(isImmersive) {
         if (!settingState.enableHideStatusBar) return@LaunchedEffect
@@ -275,9 +285,7 @@ fun Content(
 
     LaunchedEffect(isRunning) {
         while (isRunning) {
-            val now = LocalTime.now()
             accumulateReadingTime(readingScreenUiState.bookId, 1)
-            lastUpdate = now
             delay(1000)
         }
     }
@@ -326,7 +334,9 @@ fun Content(
                         end = settingState.rightPadding.dp
                     ),
                     changeIsImmersive = onChangeIsImmersive,
-                    onZoomImage = onZoomImage
+                    onZoomImage = onZoomImage,
+                    onClickPrevChapter = onClickPrevChapter,
+                    onClickNextChapter = onClickNextChapter
                 )
 
             }
@@ -368,7 +378,7 @@ fun Content(
         ) {
             BottomBar(
                 chapterContent = readingScreenUiState.contentUiState.readingChapterContent,
-                onClickLastChapter = onClickLastChapter,
+                onClickPrevChapter = onClickPrevChapter,
                 onClickNextChapter = onClickNextChapter,
                 onClickSettings = { showSettingsBottomSheet = true },
                 onClickChapterSelector = { showChapterSelectorBottomSheet = true },
@@ -450,7 +460,7 @@ private fun TopBar(
 @Composable
 private fun BottomBar(
     chapterContent: ChapterContent,
-    onClickLastChapter: () -> Unit,
+    onClickPrevChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
     onClickSettings: () -> Unit,
     onClickChapterSelector: () -> Unit
@@ -465,12 +475,12 @@ private fun BottomBar(
             Spacer(Modifier.width(4.dp))
 
             IconButton(
-                onClick = onClickLastChapter,
-                enabled = chapterContent.hasLastChapter()
+                onClick = onClickPrevChapter,
+                enabled = chapterContent.hasPrevChapter()
             ) {
                 Icon(
                     painter = painterResource(R.drawable.arrow_back_24px),
-                    contentDescription = "lastChapter"
+                    contentDescription = "prevChapter"
                 )
             }
 
