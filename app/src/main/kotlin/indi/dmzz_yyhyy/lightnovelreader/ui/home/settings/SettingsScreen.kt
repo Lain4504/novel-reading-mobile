@@ -141,7 +141,8 @@ fun SettingsScreen(
                     DataSettingsList(
                         onClickChangeSource = onClickChangeSource,
                         onClickExportUserData = onClickExportUserData,
-                        importData = importData,
+                        settingState = settingState,
+                        importData = importData
                     )
                 }
                 SettingsCategory(
@@ -154,7 +155,6 @@ fun SettingsScreen(
                         onClickPluginManager = onClickPluginManager
                     )
                 }
-
                 SettingsCategory(
                     title = stringResource(R.string.about_settings),
                     icon = ImageVector.vectorResource(R.drawable.info_24px)

@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BookInfoBottomSheet(
     bookInformation: BookInformation,
@@ -89,37 +89,28 @@ fun BookInfoBottomSheet(
             ) {
 
 
-            Text(
-                text = content,
-                style = contentStyle,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .combinedClickable(
-                        onClick = {},
-                        onLongClick = {
-                            coroutineScope.launch {
-                                val clipData = ClipData.newPlainText("content", content)
-                                val clipEntry = ClipEntry(clipData = clipData)
-                                clipboard.setClipEntry(clipEntry = clipEntry)
-                                Toast.makeText(context, "内容已复制", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        },
-                    )
-            )
+                Text(
+                    text = content,
+                    style = contentStyle,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .combinedClickable(
+                            onClick = {},
+                            onLongClick = {
+                                coroutineScope.launch {
+                                    val clipData = ClipData.newPlainText("content", content)
+                                    val clipEntry = ClipEntry(clipData = clipData)
+                                    clipboard.setClipEntry(clipEntry = clipEntry)
+                                    Toast.makeText(context, "内容已复制", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                            },
+                        )
+                )
+            }
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-@Composable
-fun BookInfoBottomSheet(
-    bookInformation: BookInformation,
-    bookVolumes: BookVolumes,
-    sheetState: SheetState,
-    isVisible: Boolean,
-    onDismissRequest: () -> Unit,
-) {
     AnimatedVisibility(visible = isVisible) {
         ModalBottomSheet(
             onDismissRequest = onDismissRequest,
