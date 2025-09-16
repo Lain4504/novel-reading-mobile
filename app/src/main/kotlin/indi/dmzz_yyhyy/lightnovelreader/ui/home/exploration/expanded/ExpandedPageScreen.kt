@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -79,7 +80,12 @@ fun ExpandedPageScreen(
     val scope = rememberCoroutineScope()
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isRefreshing by remember{ mutableStateOf(false) }
-    LifecycleEventEffect(Lifecycle.Event.ON_START) { init.invoke(expandedPageDataSourceId) }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        init.invoke(expandedPageDataSourceId)
+    }
+
+    val listState = rememberLazyListState()
+
     Scaffold(
         topBar = {
             TopBar(
@@ -112,11 +118,11 @@ fun ExpandedPageScreen(
                 }
             ) {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .nestedScroll(enterAlwaysScrollBehavior.nestedScrollConnection)
-                        .background(MaterialTheme.colorScheme.surface)
-                    ,
+                        .background(MaterialTheme.colorScheme.surface),
                     contentPadding = PaddingValues(vertical = 3.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -157,7 +163,11 @@ fun ExpandedPageScreen(
                             )
                         }
                     }
-                    itemsIndexed(explorationExpandedPageUiState.bookList) { index, bookInformation ->
+
+                    items(
+                        items = explorationExpandedPageUiState.bookList,
+                        key = { it.id }
+                    ) { bookInformation ->
                         val addToBookshelf = addToBookshelfAction.toSwipeAction {
                             requestAddBookToBookshelf(bookInformation.id)
                         }
@@ -171,14 +181,20 @@ fun ExpandedPageScreen(
                             ),
                             swipeToRightActions = listOf(addToBookshelf)
                         )
-                        val bookList = explorationExpandedPageUiState.bookList
-                        LaunchedEffect(bookList.size) {
-                            if (bookList.isNotEmpty() && bookList.size - index <= 3) {
-                                loadMore()
-                            }
-                        }
                     }
                 }
+            }
+        }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+        }.collect { lastVisibleIndex ->
+            val size = explorationExpandedPageUiState.bookList.size
+            if (size > 0 && lastVisibleIndex >= size - 3) {
+                loadMore()
             }
         }
     }
