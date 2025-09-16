@@ -355,15 +355,15 @@ object Wenku8Api: WebBookDataSource {
             expandedPageDataSource = HomeBookExpandPageDataSource(
                 title = "轻小说列表",
                 filtersBuilder = {
-                    val choicesMap = mapOf(
-                        Pair("任意", ""),
-                        Pair("0~9", "1")
-                    )
                     listOf(
                         IsCompletedSwitchFilter { this.refresh() },
-                        FirstLetterSingleChoiceFilter {
-                            this.arg = choicesMap[it.trim()] ?: it.trim()
-                            if (this.arg != "") this.arg += "&initial="
+                        FirstLetterSingleChoiceFilter { choice ->
+                            val arg = when (choice) {
+                                "任意" -> ""
+                                "0~9" -> "&initial=1"
+                                else -> "&initial=${choice}"
+                            }
+                            this.arg = arg
                             this.refresh()
                         },
                         PublishingHouseSingleChoiceFilter { this.refresh() },
@@ -377,15 +377,15 @@ object Wenku8Api: WebBookDataSource {
             expandedPageDataSource = HomeBookExpandPageDataSource(
                 title = "完结全本",
                 filtersBuilder = {
-                    val choicesMap = mapOf(
-                        Pair("任意", ""),
-                        Pair("0~9", "1")
-                    )
                     listOf(
                         IsCompletedSwitchFilter { this.refresh() },
-                        FirstLetterSingleChoiceFilter {
-                            this.arg = choicesMap[it.trim()] ?: it.trim()
-                            if (this.arg != "") this.arg += "&initial="
+                        FirstLetterSingleChoiceFilter { choice ->
+                            val arg = when (choice) {
+                                "任意" -> ""
+                                "0~9" -> "&initial=1"
+                                else -> "&initial=${choice}"
+                            }
+                            this.arg = arg
                             this.refresh()
                         },
                         PublishingHouseSingleChoiceFilter { this.refresh() },
@@ -408,15 +408,15 @@ object Wenku8Api: WebBookDataSource {
                     baseUrl = "$host/modules/article/toplist.php",
                     title = nameMap[id] ?: "",
                     filtersBuilder = {
-                        val choicesMap = mapOf(
-                            Pair("任意", ""),
-                            Pair("0~9", "1")
-                        )
                         listOf(
                             IsCompletedSwitchFilter { this.refresh() },
-                            FirstLetterSingleChoiceFilter {
-                                this.arg = choicesMap[it.trim()] ?: it.trim()
-                                if (this.arg != "") this.arg += "&initial="
+                            FirstLetterSingleChoiceFilter { choice ->
+                                val arg = when (choice) {
+                                    "任意" -> ""
+                                    "0~9" -> "&initial=1"
+                                    else -> "&initial=${choice}"
+                                }
+                                this.arg = arg
                                 this.refresh()
                             },
                             PublishingHouseSingleChoiceFilter { this.refresh() },
