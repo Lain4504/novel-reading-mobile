@@ -67,7 +67,7 @@ object ProxyPool {
             coroutineScope.launch {
                 offerProxies()
             }
-        return if (proxyQueue.size >= 1) proxyQueue.poll() else null
+        return if (proxyQueue.isNotEmpty()) proxyQueue.poll() else null
     }
 
     fun Connection.proxyGet(): Document {
