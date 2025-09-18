@@ -96,7 +96,7 @@ object Wenku8Api: WebBookDataSource {
         while (currentCoroutineContext().isActive) {
             val offline = isOffLine()
             emit(offline)
-            delay(if (offline) 2000 else 10000)
+            delay(if (offline) 3000 else 10000)
         }
     }
 
@@ -104,8 +104,8 @@ object Wenku8Api: WebBookDataSource {
         try {
             Jsoup
                 .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
-                .headers(randomUAHeadersJsoup())
-                .timeout(2000)
+                .userAgent("wenku8")
+                .timeout(3000)
                 .let {
                     if (ProxyPool.enable && !isLocalIpUnableUse)
                         ProxyPool.apply {
@@ -126,10 +126,11 @@ object Wenku8Api: WebBookDataSource {
                 }
             false
         } catch (e: UnknownHostException) {
-            Log.w("Network", "DNS probe failed. ${e.message}")
+            Log.e("Wenku8Api", "DNS probe failed. ${e.message}")
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("Wenku8Api", "${e.message}")
+            Log.d("Wenku8Api", "An error occurred", e)
             if (hostIndex == hosts.size - 1) {
                 isLocalIpUnableUse = false
             }
