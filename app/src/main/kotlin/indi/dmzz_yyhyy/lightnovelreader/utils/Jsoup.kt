@@ -43,13 +43,11 @@ private suspend fun autoReconnection(
         else return block.invoke()
     } catch (e: HttpStatusException) {
         Log.e("Network", "failed to get data from ${e.url}, last reconnection times: $reconnectTime")
-        e.printStackTrace()
         retry(reconnectTime, reconnectDelay) {
             autoReconnection(reconnectTime - 1, reconnectDelay, isUesProxy, block, block2)
         }
     } catch (e: SocketException) {
-        Log.e("Network", "failed to get data, last reconnection times: $reconnectTime")
-        e.printStackTrace()
+        Log.e("Network", "failed to get data from ${e.cause}, last reconnection times: $reconnectTime")
         retry(reconnectTime, reconnectDelay) {
             autoReconnection(reconnectTime - 1, reconnectDelay, isUesProxy, block, block2)
         }
