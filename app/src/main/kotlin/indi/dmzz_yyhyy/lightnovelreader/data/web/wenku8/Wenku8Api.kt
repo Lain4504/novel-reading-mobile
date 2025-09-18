@@ -25,11 +25,11 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.
 import indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
 import indi.dmzz_yyhyy.lightnovelreader.utils.cache.Cache
-import indi.dmzz_yyhyy.lightnovelreader.utils.randomUAHeadersJsoup
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import java.net.URLEncoder
@@ -67,12 +68,11 @@ object Wenku8Api: WebBookDataSource {
     private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
     private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
-    private var hostIndex = 0
     private var isLocalIpUnableUse = true
     private val cache = Cache(
         timeout = 5 * 60 * 1000
     )
-    val host get() =  hosts[hostIndex]
+    var host  =  hosts[0]
 
     init {
         coroutineScope.launch {
@@ -93,50 +93,115 @@ object Wenku8Api: WebBookDataSource {
     override var offLine: Boolean = true
 
     override val isOffLineFlow = flow {
+        emit(offLine)
         while (currentCoroutineContext().isActive) {
-            val offline = isOffLine()
-            emit(offline)
-            delay(if (offline) 3000 else 10000)
+            offLine = isOffLine()
+            if (offLine)
+                offLine = isOffLine()
+            emit(offLine)
+            delay(if (offLine) 3000 else 100000)
         }
     }
 
-    override suspend fun isOffLine(): Boolean =
+    private suspend fun tryOrFalse(block: () -> Unit): Boolean = withContext(Dispatchers.IO) {
         try {
-            Jsoup
-                .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
-                .userAgent("wenku8")
-                .timeout(3000)
-                .let {
-                    if (ProxyPool.enable && !isLocalIpUnableUse)
-                        ProxyPool.apply {
-                            it.proxyGet()
-                        }
-                    else it.get()
-                }
-            Jsoup
-                .connect("$host/")
-                .wenku8Cookie()
-                .timeout(2000)
-                .let {
-                    if (ProxyPool.enable && !isLocalIpUnableUse)
-                        ProxyPool.apply {
-                            it.proxyGet()
-                        }
-                    else it.get()
-                }
-            false
+            block.invoke()
+            return@withContext false
         } catch (e: UnknownHostException) {
             Log.e("Wenku8Api", "DNS probe failed. ${e.message}")
             true
         } catch (e: Exception) {
             Log.e("Wenku8Api", "${e.message}")
             Log.d("Wenku8Api", "An error occurred", e)
-            if (hostIndex == hosts.size - 1) {
-                isLocalIpUnableUse = false
-            }
-            hostIndex = (hostIndex + 1) % hosts.size
-            true
+            return@withContext true
         }
+    }
+
+    override suspend fun isOffLine(): Boolean = withContext(Dispatchers.IO) {
+        Jsoup
+            .connect("$host/")
+            .wenku8Cookie()
+            .timeout(2000)
+            .let {
+                if (ProxyPool.enable && !isLocalIpUnableUse)
+                    ProxyPool.apply {
+                        it.proxyGet()
+                    }
+                else it.get()
+            }
+        val isApiOffLine =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
+                        .userAgent("wenku8")
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }
+            }
+        val isWebOffline1 =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(hosts[0])
+                        .wenku8Cookie()
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }.also {
+                    if (!it)
+                        host = hosts[0]
+                }
+            }
+        val isWebOffline2 =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(hosts[1])
+                        .wenku8Cookie()
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }.also {
+                    if (!it)
+                        host = hosts[1]
+                }
+            }
+
+        val isWebOffline3 =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(hosts[2])
+                        .wenku8Cookie()
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }.also {
+                    if (!it)
+                        host = hosts[2]
+                }
+            }
+
+        return@withContext isApiOffLine.await() || (isWebOffline1.await() && isWebOffline2.await() && isWebOffline3.await())
+    }
 
     override val id: Int = "wenku8".hashCode()
 

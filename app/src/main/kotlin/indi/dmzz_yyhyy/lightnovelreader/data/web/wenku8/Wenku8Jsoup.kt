@@ -1,8 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8
 
 import android.util.Log
+import indi.dmzz_yyhyy.lightnovelreader.utils.UserAgentGenerator
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionPost
-import indi.dmzz_yyhyy.lightnovelreader.utils.randomUAHeadersJsoup
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -21,7 +21,8 @@ private val requestLimiter = Semaphore(3)
 private val pendingJobs = Channel<Unit>(capacity = 25, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
 fun Connection.wenku8Cookie(): Connection =
-    this.userAgent("wenku8")
+    this
+        .userAgent(UserAgentGenerator.generate())
         .cookies(wenku8Cookies())
 
 fun wenku8Cookies(): Map<String, String> = mapOf(
@@ -48,7 +49,6 @@ suspend fun wenku8Api(request: String): Document? {
             withTimeoutOrNull(15_000L) {
                 val doc = Jsoup
                     .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
-                    .wenku8Cookie()
                     .userAgent("wenku8")
                     .data(
                         "request", Base64.encode(request.toByteArray()),
