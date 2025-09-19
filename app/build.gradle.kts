@@ -20,8 +20,8 @@ android {
         minSdk = 24
         targetSdk = 36
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*1000+debug版本号(开发需要时迭代, 三位数)
-        versionCode = 1_01_04_005
-        versionName = "1.1.4d"
+        versionCode = 1_01_04_006
+        versionName = "1.1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
