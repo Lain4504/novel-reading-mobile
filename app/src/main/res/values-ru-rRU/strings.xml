@@ -1,7 +1,7 @@
 <resources>
+    <string name="app_name" translatable="false">LightNovelReader</string>
     <string name="language">Русский (Россия)</string>
     <string name="language_translators">Xapitonov</string>
-    <!-- Пункты навигации -->
     <string name="nav_reading">Чтение</string>
     <string name="nav_bookshelf">Полка</string>
     <string name="nav_bookshelf_select_mode">Выбрать полку (%d)</string>
@@ -11,20 +11,18 @@
     <string name="nav_explore_categories">Категории</string>
     <string name="nav_settings">Настройки</string>
     <string name="nav_statistics">Статистика</string>
-
-    <!-- Операции -->
-    <string name="cancel">Отменить</string>
+    <string name="cancel">Отмена</string>
     <string name="apply">Применить</string>
     <string name="decline">Отклонить</string>
     <string name="manual_download">Вручную</string>
-    <string name="follow_system">Использовать системные настройки</string>
+    <string name="follow_system">Следовать системе</string>
     <string name="enabled">Включено</string>
     <string name="disabled">Отключено</string>
     <string name="install_update">Установить обновление</string>
     <string name="unspecified">Не указано</string>
     <string name="ignore">Игнорировать</string>
     <string name="ignore_version">Игнорировать версию</string>
-    <string name="switch_and_restart">Переключить и перезапустить</string>
+    <string name="switch_and_restart">Сменить и перезапустить</string>
     <string name="show_read">Показать прочитанное</string>
     <string name="hide_read">Скрыть прочитанное</string>
     <string name="export_to_file">Экспорт в файл</string>
@@ -32,35 +30,31 @@
     <string name="choose_light_bg">Выбрать светлый фон</string>
     <string name="choose_dark_bg">Выбрать тёмный фон</string>
     <string name="reader_back_press_again">Нажмите назад ещё раз, чтобы выйти из чтения</string>
-
-    <!-- Подсказки -->
     <string name="nothing_here">Здесь ничего нет</string>
-    <string name="nothing_here_desc_reading">Прочитав книги, они появятся здесь.\nПерейдите на страницу «Исследуйте» через панель навигации ниже, чтобы найти новые книги.</string>
+    <string name="nothing_here_desc_reading">Прочитав книги, они появятся здесь.</string>
     <string name="nothing_here_desc_search">Последние поиски будут сохранены здесь. Используйте строку поиска.</string>
-    <string name="nothing_here_desc_bookshelf">Нажмите кнопку «Избранное», чтобы добавить книгу на полку.</string>
-    <string name="offline">Ошибка</string>
+    <string name="nothing_here_desc_bookshelf">Нажмите кнопку «На полку», чтобы добавить книгу в коллекцию.</string>
+    <string name="offline">Ой</string>
     <string name="offline_desc">Проверьте доступность сайта и настройки прокси.</string>
-
-    <!-- Snackbar Hints -->
-    <string name="cache_book_started">Начало кэширования: %1$s</string>
+    <string name="cache_book_started">Началось кэширование: %1$s</string>
     <string name="cache_book_running">Эта книга сейчас кэшируется</string>
-    <string name="cache_book_finished">Кэширование завершено успешно</string>
-    <string name="cache_book_error">Ошибка кэширования</string>
-
-    <!-- Настройки -->
+    <string name="cache_book_finished">Кэширование успешно завершено</string>
+    <string name="cache_book_error">Не удалось кэшировать</string>
+    <string name="restart_to_apply_changes">Перезапустите приложение для применения изменений</string>
+    <string name="network_error_message">
+        В данный момент приложение не может получить данные с источника. Обычно это связано с проблемой сети. Пожалуйста, проверьте ваше подключение.
+    </string>
+    <string name="reading_settings">Чтение</string>
     <string name="theme_settings">Тема</string>
-
     <string name="app_updates">Обновления</string>
     <string name="settings_auto_check_updates">Авто-проверка обновлений</string>
     <string name="settings_auto_check_updates_desc">Включить автоматическую проверку обновлений при запуске</string>
-    <string name="settings_update_channel">Канал обновлений</string>
-    <string name="settings_update_channel_desc">Выберите предпочитаемый канал обновлений.</string>
+    <string name="settings_update_channel">Канал обновления</string>
+    <string name="settings_update_channel_desc">Выберите предпочитаемый канал обновления.</string>
     <string name="settings_get_updates">Проверить обновления</string>
     <string name="settings_get_updates_desc">Проверить и установить последнюю версию.</string>
     <string name="settings_distribution_platform">Платформа распространения</string>
-    <string name="settings_distribution_platform_settings_desc"><!--зарезервировано--></string>
-
-    <string name="reader_settings">Настройки читалки</string>
+    <string name="reader_settings">Настройки чтения</string>
     <string name="settings_reader_font_size">Размер шрифта</string>
     <string name="settings_reader_line_spacing">Межстрочный интервал</string>
     <string name="settings_reader_keep_screen_on">Держать экран включённым</string>
@@ -68,11 +62,11 @@
     <string name="settings_reader_battery_indicator">Индикатор батареи</string>
     <string name="settings_reader_battery_indicator_desc">Настройте отображение уровня заряда батареи.</string>
     <string name="settings_reader_time_indicator">Индикатор времени</string>
-    <string name="settings_reader_time_indicator_desc">Показывать текущее время в левом нижнем углу.</string>
+    <string name="settings_reader_time_indicator_desc">Отображать текущее время в левом нижнем углу.</string>
     <string name="settings_reader_chapter_indicator">Индикатор главы</string>
-    <string name="settings_reader_chapter_indicator_desc">Показывать название текущей главы в правом нижнем углу.</string>
+    <string name="settings_reader_chapter_indicator_desc">Отобразить название текущей главы в правом нижнем углу.</string>
     <string name="settings_reader_progress_indicator">Индикатор прогресса</string>
-    <string name="settings_reader_progress_indicator_desc">Показывать прогресс чтения в правом нижнем углу.</string>
+    <string name="settings_reader_progress_indicator_desc">Отображать прогресс чтения в правом нижнем углу.</string>
     <string name="settings_reader_page_mode">Режим перелистывания</string>
     <string name="settings_reader_page_mode_desc">Переключение между прокруткой и перелистыванием страниц.</string>
     <string name="settings_reader_volume_key_control">Управление кнопками громкости</string>
@@ -92,10 +86,11 @@
     <string name="settings_reader_bottom_margin">Нижнее поле</string>
     <string name="settings_reader_left_margin">Левое поле</string>
     <string name="settings_reader_right_margin">Правое поле</string>
-
     <string name="display_settings">Отображение</string>
     <string name="settings_theme">Тема и бумага</string>
     <string name="settings_theme_desc">Настройте тему приложения и текстуру бумаги</string>
+    <string name="settings_text_formatting">Форматирование текста</string>
+    <string name="settings_text_formatting_desc">Форматирование текстового содержимого на основе правил</string>
     <string name="settings_theme_light_theme">Светлая тема</string>
     <string name="settings_theme_light_theme_desc">Установить светлую тему.</string>
     <string name="settings_theme_dark_theme">Тёмная тема</string>
@@ -103,15 +98,15 @@
     <string name="settings_theme_dynamic_colors">Динамичные цвета</string>
     <string name="settings_theme_dynamic_colors_desc_unavailable">Применять системные динамические цвета</string>
     <string name="settings_theme_dynamic_colors_desc">Применять системные динамические цвета (требуется Android 12+)</string>
-    <string name="settings_app_language">Язык</string>
+    <string name="settings_app_language">Язык интерфейса</string>
     <string name="settings_app_language_desc">Выберите язык приложения</string>
     <string name="settings_app_language_desc_unavailable">Выбор языка приложения (требуется Android 13+)</string>
-    <string name="settings_characters_variant">Вариант китайских иероглифов</string>
+    <string name="settings_characters_variant">Вариант письма</string>
     <string name="settings_characters_variant_desc">Выберите вариант иероглифов для разных регионов</string>
     <string name="paper_settings">Бумага</string>
     <string name="settings_theme_bg_image">Фоновое изображение</string>
-    <string name="settings_theme_bg_image_desc">Настройте фон читателя</string>
-    <string name="settings_theme_bg_image_built_in">Встроенный</string>
+    <string name="settings_theme_bg_image_desc">Настройте фон для чтения</string>
+    <string name="settings_theme_bg_image_built_in">Встроенный фон</string>
     <string name="settings_theme_bg_image_built_in_desc">Крафтовая бумага</string>
     <string name="settings_theme_bg_image_custom">Пользовательский</string>
     <string name="settings_theme_bg_display_mode">Режим отображения фона</string>
@@ -124,10 +119,9 @@
     <string name="settings_theme_text_font">Шрифт текста</string>
     <string name="settings_theme_text_font_desc">Используйте встроенные или пользовательские шрифты</string>
     <string name="settings_theme_text_font_weight">Толщина шрифта</string>
-
     <string name="data_settings">Данные</string>
     <string name="settings_snap_data">Снимок данных пользователя</string>
-    <string name="settings_snap_data_desc">Создайте снимок текущих данных пользователя в формате .lnr</string>
+    <string name="settings_snap_data_desc">Создать снимок текущих данных пользователя в формате .lnr</string>
     <string name="settings_import_data">Импорт данных пользователя</string>
     <string name="settings_import_data_desc">Импорт данных пользователя из выбранного файла .lnr</string>
     <string name="settings_select_data_source">Источник данных</string>
@@ -136,14 +130,13 @@
     <string name="settings_app_logs_desc">Просмотр и отправка логов для отладки</string>
     <string name="settings_app_log_level">Уровень логирования</string>
     <string name="settings_app_log_level_desc">Выберите уровень фильтрации логов (требуется перезагрузка приложения)</string>
-
     <string name="about_settings">О приложении</string>
-    <string name="settings_debug_tools">Инструменты отладки</string>
+    <string name="settings_debug_tools">Средства отладки</string>
     <string name="settings_debug_tools_desc">Утилиты для отладки</string>
     <string name="settings_about_source_code"><![CDATA[Исходный код: %1$s<br/>Сообщить об ошибках и запросить функции: %2$s]]></string>
     <string name="settings_about_oss">LightNovelReader — подарок всем любителям ранобэ в мире.</string>
     <string name="settings_github_repo">Репозиторий GitHub</string>
-    <string name="settings_github_repo_desc">Заслужите звезду репозитория, чтобы помочь нам привлечь больше пользователей</string>
+    <string name="settings_github_repo_desc">Поставьте звезду нашему репозиторию, чтобы помочь нам привлечь больше пользователей</string>
     <string name="settings_communication">Связь</string>
     <string name="settings_communication_desc">Присоединяйтесь к нашей группе QQ для обсуждений и отзывов</string>
     <string name="settings_statistics">Статистика</string>
@@ -152,25 +145,23 @@
     <string name="item_view_details">Просмотр деталей</string>
     <string name="settings_auto_cache">Автокэш</string>
     <string name="settings_auto_cache_desc">Автоматически кэшировать содержимое новых книг</string>
-    <string name="settings_book_update_reminder">Уведомления об обновлениях книги</string>
+    <string name="settings_book_update_reminder">Дать знать об обновлениях книги</string>
     <string name="settings_book_update_reminder_desc">Проверять обновления книг и уведомлять в фоне</string>
     <string name="settings_delete_bookshelf">Удалить полку</string>
     <string name="settings_delete_bookshelf_desc">Безвозвратно удалить эту полку</string>
-    <string name="appearance_settings">Внешний вид</string>
-    <string name="control_settings">Управление</string>
-    <string name="margin_settings">Поля</string>
+    <string name="appearance_settings">	Облик</string>
+    <string name="control_settings">	Управление</string>
+    <string name="margin_settings">	Поля</string>
     <string name="settings_theme_settings">Настройки темы…</string>
-    <string name="settings_theme_settings_desc">Настройте параметры читателя и бумаги</string>
+    <string name="settings_theme_settings_desc">Настройки чтения и бумаги</string>
     <string name="settings_hide_status_bar">Скрыть строку состояния</string>
-    <string name="settings_hide_status_bar_desc">Скрыть системную строку состояния и навигационную панель в полноэкранном режиме</string>
-    <string name="settings_trad_conversion">Конвертация в традиционные иероглифы</string>
+    <string name="settings_hide_status_bar_desc">Скрывать системные панели состояния и навигации в режиме полного погружения в чтение</string>
+    <string name="settings_trad_conversion">Перейти на традиционный китайский</string>
     <string name="settings_trad_conversion_desc">Преобразовать упрощённый китайский в традиционный</string>
     <string name="settings_continous_scrolling">Непрерывная прокрутка</string>
-    <string name="settings_continous_scrolling_desc">Плавное переключение между главами при прокрутке</string>
-
-    <!-- Интерфейс -->
-    <string name="detail_introduction">Введение</string>
-    <string name="detail_contents">Содержание</string>
+    <string name="settings_continous_scrolling_desc">Плавный переход между главами при прокрутке</string>
+    <string name="detail_introduction">Аннотация</string>
+    <string name="detail_contents">Оглавление</string>
     <string name="detail_title">Детали</string>
     <string name="changelog">История изменений</string>
     <string name="recent_reads">Недавние чтения (%d)</string>
@@ -181,7 +172,7 @@
     <string name="search_history_clear">Очистить всё</string>
     <string name="start_reading">Начать чтение</string>
     <string name="continue_reading">Продолжить чтение</string>
-    <string name="resume_last_reading">Продолжить с последнего места</string>
+    <string name="resume_last_reading">Читать дальше</string>
     <string name="last_read">Последнее чтение</string>
     <string name="last_read_info">Последнее чтение | %s</string>
     <string name="book_completed">Завершено</string>
@@ -193,7 +184,7 @@
     <string name="filter_by_publishing_house">Фильтр по издательству</string>
     <string name="filter_by_publishing_house_desc">Фильтр по издательству книги</string>
     <string name="book_info_update_date">Обновлено %1$d-%2$d-%3$d</string>
-    <string name="book_info_word_count_kilo">%sK слов</string>
+    <string name="book_info_word_count_kilo">%dK слов</string>
     <string name="name">Название</string>
     <string name="bookshelf_name">Название полки</string>
     <string name="bookshelf_name_suggestion">Дайте вашей полке простое имя</string>
@@ -202,11 +193,11 @@
     <string name="bookshelf_create_title">Создать полку</string>
     <string name="bookshelf_book_count">Всего: %d книг</string>
     <string name="share_bookshelf">Поделиться полкой</string>
-    <string name="import_and_export">Импорт и экспорт…</string>
-    <string name="export_to_lnr_file">Экспорт в файл .lnr</string>
-    <string name="export_all_to_lnr_file">Экспорт всех в файл .lnr</string>
-    <string name="import_from_file">Импорт из файла</string>
-    <string name="add_to_bookshelf">Избранное</string>
+    <string name="import_and_export">Импорт/экспорт…</string>
+    <string name="export_to_lnr_file">Экспорт этой полки в файл .lnr</string>
+    <string name="export_all_to_lnr_file">Экспорт всех полок в файл .lnr</string>
+    <string name="import_from_file">Импорт из файла .lnr</string>
+    <string name="add_to_bookshelf">На полку</string>
     <string name="action_cache">Кэш</string>
     <string name="action_show_info">Информация</string>
     <string name="expand">Развернуть</string>
@@ -228,24 +219,24 @@
     <string name="log_clear_desc">Логи также удалятся при очистке кэша приложения</string>
     <string name="auto_scroll">Автопрокрутка</string>
     <string name="word_wrap">Перенос слов</string>
-    <string name="log_shared">Поделённые логи</string>
+    <string name="log_shared">Логи поделены</string>
     <string name="log_crash">Сбой приложения</string>
     <string name="log_empty_list">Список логов пуст</string>
-    <string name="detail_info_title">Заголовок</string>
-    <string name="detail_info_id">ID</string>
+    <string name="detail_info_title">Название</string>
+    <string name="detail_info_id">ID-книги</string>
     <string name="detail_info_author">Автор</string>
     <string name="detail_info_publishing_house">Издатель</string>
     <string name="detail_info_updated_on">Обновлено</string>
     <string name="detail_info_tags">Теги</string>
-    <string name="detail_info_stats">Статистика</string>
+    <string name="detail_info_stats">Сводка</string>
     <string name="view_daily">Ежедневно</string>
     <string name="view_weekly">Еженедельно</string>
     <string name="view_monthly">Ежемесячно</string>
     <string name="activity">Активность</string>
     <string name="calendar">Календарь</string>
     <string name="activity_first_read">Начал читать</string>
-    <string name="activity_collections">Добавлено в коллекцию</string>
-    <string name="activity_finished">Закончил</string>
+    <string name="activity_collections">Уже на полке</string>
+    <string name="activity_finished">Завершено</string>
     <string name="activity_etc"> и ещё %d</string>
     <string name="activity_reading_time">Время чтения</string>
     <string name="activity_read">Прочитано</string>
@@ -253,6 +244,7 @@
     <string name="time_distribution">Распределение времени</string>
     <string name="reading_details">Детали чтения</string>
     <string name="to">по</string>
+    <string name="ellipsis" translatable="false">…</string>
     <string name="heatmap_indicator_less">Меньше</string>
     <string name="heatmap_indicator_more">Больше (%d+)</string>
     <string name="time_range">Просмотрено</string>
@@ -272,8 +264,8 @@
     <string name="unit_minutes">м&#160;</string>
     <string name="unit_seconds">с</string>
     <string name="detail_of_date">Время чтения %1$s</string>
-
-    <!-- Диалоги -->
+    <string name="book_rules">Правила книги</string>
+    <string name="text_replacement_rules_title">Правила</string>
     <string name="dialog_about_version">Версия</string>
     <string name="dialog_delete_bookshelf">Удалить полку</string>
     <string name="dialog_delete_bookshelf_text">Вы уверены, что хотите удалить эту полку? Она будет потеряна навсегда! (Очень надолго!)</string>
@@ -284,7 +276,7 @@
     <string name="dialog_snap_user_data_text">Выберите данные для экспорта</string>
     <string name="dialog_snap_bookshelf">Полка</string>
     <string name="dialog_snap_bookshelf_text">Включает информацию о полках и книгах.</string>
-    <string name="dialog_snap_reading_data">Данные чтения</string>
+    <string name="dialog_snap_reading_data">Данные о чтении</string>
     <string name="dialog_snap_reading_data_text">Включает историю чтения, прогресс и статистику.</string>
     <string name="dialog_snap_settings">Настройки</string>
     <string name="dialog_snap_settings_text">Включает настройки приложения и читалки.</string>
@@ -293,5 +285,4 @@
     <string name="dialog_select_data_source_text">Выберите источник данных. Это очистит кэш и переключит источник данных приложения. Текущие пользовательские данные сохранятся и восстановятся при возврате.</string>
     <string name="dialog_slider_custom">Введите значение</string>
     <string name="dialog_slider_custom_illegal_value">Пожалуйста, введите допустимое число</string>
-
 </resources>
