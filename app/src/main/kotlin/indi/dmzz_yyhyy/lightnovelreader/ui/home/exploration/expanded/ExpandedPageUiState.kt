@@ -20,6 +20,6 @@ interface ExpandedPageUiState {
 class MutableExpandedPageUiState : ExpandedPageUiState {
     override var pageTitle: String by mutableStateOf("")
     override var filters: SnapshotStateList<Filter> = mutableStateListOf()
-    override var bookList: SnapshotStateList<BookInformation> = mutableStateListOf()
-    override var allBookshelfBookIds: SnapshotStateList<Int> = mutableStateListOf()
+    override var bookList: List<BookInformation> by mutableStateOf(emptyList())
+    override var allBookshelfBookIds: List<Int> by mutableStateOf(emptyList())
 }
