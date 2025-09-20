@@ -31,11 +31,19 @@ LightNovelReader <sup>*重構版*</sup> 是一款開源的輕小說閱讀軟體�
 
 從 [GitHub Releases](https://github.com/dmzz-yyhyy/LightNovelReader/releases/latest) 下載最新發布版。要體驗最新的功能與錯誤修復，請從 [Actions](https://github.com/dmzz-yyhyy/LightNovelReader/actions) 下載最新建置。
 
+## 外掛程式開發與自訂資料來源
+
+您可以為LightNovelReader新增自訂的資料來源與插件
+
+您可以從[範例外掛程式](https://github.com/dmzz-yyhyy/LightNovelReaderPlguin-Template)開始
+
+歡迎各位開發者進行開發!
+
 ## 支援
 
 - 在 [**此處**](https://github.com/dmzz-yyhyy/LightNovelReader/issues/new/choose) 提交一個錯誤回報或新功能請求
 - 歡迎加入 QQ 討論群：`867785526` | [**邀請連結**](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526)
-- 歡迎加入 Discord 伺服器：[**邀請連結**](https://discord.gg/bfvPqSWX)
+- 歡迎加入 Discord 伺服器：[**邀請連結**](https://discord.gg/fCxRfsFS)
 - 歡迎加入 Telegram 討論群組：[**邀請連結**](https://t.me/lightnoble)
 
 ## 軟體截圖
