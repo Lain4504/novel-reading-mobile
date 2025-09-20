@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8
 
 
+import android.util.Log
 import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8AllExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8HomeExplorationPage
@@ -29,15 +30,18 @@ import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import java.net.URLEncoder
+import java.net.UnknownHostException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -93,10 +97,10 @@ object Wenku8Api: WebBookDataSource {
     override var offLine: Boolean = true
 
     override val isOffLineFlow = flow {
-        while(true) {
-            offLine = isOffLine()
-            emit(offLine)
-            delay(if (offLine) 2000 else 6000)
+        while (currentCoroutineContext().isActive) {
+            val offline = isOffLine()
+            emit(offline)
+            delay(if (offline) 2000 else 10000)
         }
     }
 
@@ -124,11 +128,14 @@ object Wenku8Api: WebBookDataSource {
                     else it.get()
                 }
             false
+        } catch (e: UnknownHostException) {
+            Log.w("Network", "DNS probe failed. ${e.message}")
+            true
         } catch (e: Exception) {
-            //FIXME
             e.printStackTrace()
-            if (hostIndex == hosts.size - 1)
+            if (hostIndex == hosts.size - 1) {
                 isLocalIpUnableUse = false
+            }
             hostIndex = (hostIndex + 1) % hosts.size
             true
         }
@@ -360,15 +367,15 @@ object Wenku8Api: WebBookDataSource {
             expandedPageDataSource = HomeBookExpandPageDataSource(
                 title = "轻小说列表",
                 filtersBuilder = {
-                    val choicesMap = mapOf(
-                        Pair("任意", ""),
-                        Pair("0~9", "1")
-                    )
                     listOf(
                         IsCompletedSwitchFilter { this.refresh() },
-                        FirstLetterSingleChoiceFilter {
-                            this.arg = choicesMap[it.trim()] ?: it.trim()
-                            if (this.arg != "") this.arg += "&initial="
+                        FirstLetterSingleChoiceFilter { choice ->
+                            val arg = when (choice) {
+                                "任意" -> ""
+                                "0~9" -> "&initial=1"
+                                else -> "&initial=${choice}"
+                            }
+                            this.arg = arg
                             this.refresh()
                         },
                         PublishingHouseSingleChoiceFilter { this.refresh() },
@@ -382,15 +389,15 @@ object Wenku8Api: WebBookDataSource {
             expandedPageDataSource = HomeBookExpandPageDataSource(
                 title = "完结全本",
                 filtersBuilder = {
-                    val choicesMap = mapOf(
-                        Pair("任意", ""),
-                        Pair("0~9", "1")
-                    )
                     listOf(
                         IsCompletedSwitchFilter { this.refresh() },
-                        FirstLetterSingleChoiceFilter {
-                            this.arg = choicesMap[it.trim()] ?: it.trim()
-                            if (this.arg != "") this.arg += "&initial="
+                        FirstLetterSingleChoiceFilter { choice ->
+                            val arg = when (choice) {
+                                "任意" -> ""
+                                "0~9" -> "&initial=1"
+                                else -> "&initial=${choice}"
+                            }
+                            this.arg = arg
                             this.refresh()
                         },
                         PublishingHouseSingleChoiceFilter { this.refresh() },
@@ -413,15 +420,15 @@ object Wenku8Api: WebBookDataSource {
                     baseUrl = "$host/modules/article/toplist.php",
                     title = nameMap[id] ?: "",
                     filtersBuilder = {
-                        val choicesMap = mapOf(
-                            Pair("任意", ""),
-                            Pair("0~9", "1")
-                        )
                         listOf(
                             IsCompletedSwitchFilter { this.refresh() },
-                            FirstLetterSingleChoiceFilter {
-                                this.arg = choicesMap[it.trim()] ?: it.trim()
-                                if (this.arg != "") this.arg += "&initial="
+                            FirstLetterSingleChoiceFilter { choice ->
+                                val arg = when (choice) {
+                                    "任意" -> ""
+                                    "0~9" -> "&initial=1"
+                                    else -> "&initial=${choice}"
+                                }
+                                this.arg = arg
                                 this.refresh()
                             },
                             PublishingHouseSingleChoiceFilter { this.refresh() },

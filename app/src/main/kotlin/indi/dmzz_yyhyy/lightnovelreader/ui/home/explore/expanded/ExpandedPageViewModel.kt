@@ -10,6 +10,7 @@ import io.nightfish.lightnovelreader.api.web.explore.ExploreExpandedPageDataSour
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,30 +31,40 @@ class ExpandedPageViewModel @Inject constructor(
         lastExpandedPageDataSourceId = expandedPageDataSourceId
         loadMoreJob?.cancel()
         explorationExpandedPageBookListCollectJob?.cancel()
+
         expandedPageDataSource = exploreRepository.exploreExpandedPageDataSourceMap[expandedPageDataSourceId]
-        explorationExpandedPageBookListCollectJob = viewModelScope.launch(Dispatchers.IO) {
-            expandedPageDataSource?.let { explorationExpandedPageDataSource ->
-                explorationExpandedPageDataSource.refresh()
-                _uiState.pageTitle = textProcessingRepository.processText {
-                    explorationExpandedPageDataSource.getTitle()
+
+        explorationExpandedPageBookListCollectJob = viewModelScope.launch {
+            expandedPageDataSource?.let { dataSource ->
+                withContext(Dispatchers.IO) { dataSource.refresh() }
+                val processedTitle = withContext(Dispatchers.IO) {
+                    textProcessingRepository.processText { dataSource.getTitle() }
                 }
+                val filters = withContext(Dispatchers.IO) { dataSource.getFilters() }
+                _uiState.pageTitle = processedTitle
                 _uiState.filters.clear()
-                _uiState.filters.addAll(explorationExpandedPageDataSource.getFilters())
-                explorationExpandedPageDataSource.getResultFlow().collect { result ->
-                    _uiState.bookList.clear()
-                    _uiState.bookList.addAll(
-                        result.map {
-                            textProcessingRepository.processBookInformation { it }
+                _uiState.filters.addAll(filters)
+
+                dataSource.getResultFlow().collect { rawResult ->
+                    val processedList = withContext(Dispatchers.IO) {
+                        rawResult.map { book ->
+                            textProcessingRepository.processBookInformation { book }
                         }
-                    )
-                    if (result.isEmpty()) { explorationExpandedPageDataSource.loadMore() }
+                    }
+                    _uiState.bookList = processedList
+
+                    if (processedList.isEmpty()) {
+                        withContext(Dispatchers.IO) {
+                            dataSource.loadMore()
+                        }
+                    }
                 }
             }
         }
+
         viewModelScope.launch {
-            bookshelfRepository.getAllBookshelfBookIdsFlow().collect {
-                _uiState.allBookshelfBookIds.clear()
-                _uiState.allBookshelfBookIds.addAll(it)
+            bookshelfRepository.getAllBookshelfBookIdsFlow().collect { ids ->
+                _uiState.allBookshelfBookIds = ids.toList()
             }
         }
     }

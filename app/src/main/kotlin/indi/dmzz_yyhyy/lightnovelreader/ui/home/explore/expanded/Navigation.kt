@@ -19,9 +19,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.exploreExpandDestination() {
-    composable<Route.Main.Exploration.Expanded>(
-
-    ) { entry ->
+    composable<Route.Main.Exploration.Expanded> { entry ->
         val navController = LocalNavController.current
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val exploreViewModel = hiltViewModel<ExploreViewModel>(parentEntry)
