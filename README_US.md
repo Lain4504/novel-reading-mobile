@@ -31,11 +31,19 @@ LightNovelReader <sup>*Refactored Version*</sup> is an open-source app for readi
 
 Download the latest release from [GitHub Releases](https://github.com/dmzz-yyhyy/LightNovelReader/releases/latest). To experience the latest features and bug fixes, download the latest build from [Actions](https://github.com/dmzz-yyhyy/LightNovelReader/actions).
 
+## Plugin Development and Custom Data Sources
+
+You can add custom data sources and plugins to LightNovelReader.
+
+You can start with the [sample plugin](https://github.com/dmzz-yyhyy/LightNovelReaderPlugin-Template)
+
+Developers are welcome to contribute!
+
 ## Support
 
 - Found a bug or have a feature idea? Submit it [**here**](https://github.com/dmzz-yyhyy/LightNovelReader/issues/new/choose)
 - Join the QQ discussion group: `867785526` | [**Invitation Link**](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526)
-- Join our Discord server: [**Invitation Link**](https://discord.gg/bfvPqSWX)
+- Join our Discord server: [**Invitation Link**](https://discord.gg/fCxRfsFS)
 - Join our Telegram group: [**Invitation Link**](https://t.me/lightnoble)
 
 ## Screenshots
