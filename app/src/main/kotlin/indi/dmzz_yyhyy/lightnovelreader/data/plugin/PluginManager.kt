@@ -47,7 +47,10 @@ class PluginManager @Inject constructor(
         appContext.dataDir.resolve("plugin")
             .also(File::mkdir)
             .listFiles()
-            ?.forEach(::loadPlugin)
+            ?.forEach {
+                it.setReadable(true, true)
+                it.setReadOnly()
+            }
     }
 
     fun loadPlugin(plugin: LightNovelReaderPlugin): String? {
