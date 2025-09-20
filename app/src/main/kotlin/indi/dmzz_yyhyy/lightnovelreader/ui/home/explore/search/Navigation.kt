@@ -14,24 +14,24 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.exploreSearchDestination() {
-    composable<Route.Main.Exploration.Search> { entry ->
+    composable<Route.Main.Explore.Search> { entry ->
         val navController = LocalNavController.current
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val exploreViewModel = hiltViewModel<ExploreViewModel>(parentEntry)
-        val explorationSearchViewModel = hiltViewModel<ExplorationSearchViewModel>()
-        ExplorationSearchScreen(
+        val exploreSearchViewModel = hiltViewModel<ExploreSearchViewModel>()
+        ExploreSearchScreen(
             exploreUiState = exploreViewModel.uiState,
-            explorationSearchUiState = explorationSearchViewModel.uiState,
+            exploreSearchUiState = exploreSearchViewModel.uiState,
             refresh = exploreViewModel::refresh,
             requestAddBookToBookshelf = {
                 navController.navigateToAddBookToBookshelfDialog(it)
             },
             onClickBack = { navController.popBackStackIfResumed() },
-            init = explorationSearchViewModel::init,
-            onChangeSearchType = { explorationSearchViewModel.changeSearchType(it) },
-            onSearch = { explorationSearchViewModel.search(it) },
-            onClickDeleteHistory = { explorationSearchViewModel.deleteHistory(it) },
-            onClickClearAllHistory = explorationSearchViewModel::clearAllHistory,
+            init = exploreSearchViewModel::init,
+            onChangeSearchType = { exploreSearchViewModel.changeSearchType(it) },
+            onSearch = { exploreSearchViewModel.search(it) },
+            onClickDeleteHistory = { exploreSearchViewModel.deleteHistory(it) },
+            onClickClearAllHistory = exploreSearchViewModel::clearAllHistory,
             onClickBook = {
                 navController.navigateToBookDetailDestination(it)
             }
@@ -41,5 +41,5 @@ fun NavGraphBuilder.exploreSearchDestination() {
 
 fun NavController.navigateToSearchDestination() {
     if (!this.isResumed()) return
-    navigate(Route.Main.Exploration.Search)
+    navigate(Route.Main.Explore.Search)
 }

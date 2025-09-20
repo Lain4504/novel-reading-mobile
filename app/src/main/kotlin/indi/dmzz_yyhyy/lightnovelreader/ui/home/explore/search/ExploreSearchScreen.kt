@@ -62,9 +62,9 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExplorationSearchScreen(
+fun ExploreSearchScreen(
     exploreUiState: ExploreUiState,
-    explorationSearchUiState: ExplorationSearchUiState,
+    exploreSearchUiState: ExploreSearchUiState,
     refresh: () -> Unit,
     requestAddBookToBookshelf: (Int) -> Unit,
     onClickBack: () -> Unit,
@@ -95,10 +95,10 @@ fun ExplorationSearchScreen(
                         offset = DpOffset((-12).dp, 0.dp),
                         expanded = dropdownMenuExpanded,
                         onDismissRequest = { dropdownMenuExpanded = false }) {
-                        explorationSearchUiState.searchTypeIdList.forEach {
+                        exploreSearchUiState.searchTypeIdList.forEach {
                             DropdownMenuItem(
                                 text = {
-                                    explorationSearchUiState.searchTypeNameMap[it]?.let { it1 ->
+                                    exploreSearchUiState.searchTypeNameMap[it]?.let { it1 ->
                                         Text(
                                             text = it1,
                                             style = AppTypography.dropDownItem
@@ -130,7 +130,7 @@ fun ExplorationSearchScreen(
                             expanded = searchBarExpanded,
                             onExpandedChange = { searchBarExpanded = it },
                             placeholder = { AnimatedText(
-                                text = explorationSearchUiState.searchTip,
+                                text = exploreSearchUiState.searchTip,
                                 style = AppTypography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             ) },
@@ -160,7 +160,7 @@ fun ExplorationSearchScreen(
                     onExpandedChange = { if (!it) onClickBack.invoke() }
                 ) {
                     AnimatedVisibility(
-                        visible = explorationSearchUiState.historyList.isEmpty() || explorationSearchUiState.historyList.all { it.isEmpty() },
+                        visible = exploreSearchUiState.historyList.isEmpty() || exploreSearchUiState.historyList.all { it.isEmpty() },
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -171,7 +171,7 @@ fun ExplorationSearchScreen(
                         )
                     }
                     AnimatedVisibility(
-                        visible = explorationSearchUiState.historyList.isNotEmpty() || !explorationSearchUiState.historyList.any { it.isEmpty() },
+                        visible = exploreSearchUiState.historyList.isNotEmpty() || !exploreSearchUiState.historyList.any { it.isEmpty() },
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
@@ -212,7 +212,7 @@ fun ExplorationSearchScreen(
 
                             Box(Modifier.height(8.dp))
 
-                            explorationSearchUiState.historyList.forEach { history ->
+                            exploreSearchUiState.historyList.forEach { history ->
                                 if (history.isEmpty()) return@forEach
                                 AnimatedContent(
                                     targetState = history,
@@ -262,7 +262,7 @@ fun ExplorationSearchScreen(
             refresh = refresh
         ) {
             AnimatedVisibility(
-                visible = explorationSearchUiState.isLoadingComplete && explorationSearchUiState.searchResult.isEmpty(),
+                visible = exploreSearchUiState.isLoadingComplete && exploreSearchUiState.searchResult.isEmpty(),
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -273,7 +273,7 @@ fun ExplorationSearchScreen(
                 )
             }
             AnimatedVisibility(
-                visible = !explorationSearchUiState.isLoading,
+                visible = !exploreSearchUiState.isLoading,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -289,8 +289,8 @@ fun ExplorationSearchScreen(
                                 text = stringResource(
                                     R.string.search_results_title,
                                     searchKeyword,
-                                    explorationSearchUiState.searchResult.size,
-                                    if (explorationSearchUiState.isLoadingComplete) "" else "..."
+                                    exploreSearchUiState.searchResult.size,
+                                    if (exploreSearchUiState.isLoadingComplete) "" else "..."
                                 ),
                                 style = AppTypography.bodyMedium,
                                 fontWeight = FontWeight.W600,
@@ -299,7 +299,7 @@ fun ExplorationSearchScreen(
                             )
                         }
                     }
-                    items(explorationSearchUiState.searchResult) {
+                    items(exploreSearchUiState.searchResult) {
                         val addToBookshelf = addToBookshelfAction.toSwipeAction {
                             requestAddBookToBookshelf(it.id)
                         }
@@ -308,13 +308,13 @@ fun ExplorationSearchScreen(
                             bookInformation = it,
                             onClick = { onClickBook(it.id) },
                             onLongPress = withHaptic {},
-                            collected = explorationSearchUiState.allBookshelfBookIds.contains(it.id),
+                            collected = exploreSearchUiState.allBookshelfBookIds.contains(it.id),
                             swipeToRightActions = listOf(addToBookshelf)
                         )
                     }
                     item {
                         AnimatedVisibility(
-                            visible = !explorationSearchUiState.isLoadingComplete,
+                            visible = !exploreSearchUiState.isLoadingComplete,
                             enter = fadeIn(),
                             exit = fadeOut()
                         ) {

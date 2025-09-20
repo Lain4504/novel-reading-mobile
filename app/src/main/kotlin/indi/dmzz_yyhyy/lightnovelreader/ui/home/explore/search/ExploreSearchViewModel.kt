@@ -13,16 +13,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ExplorationSearchViewModel @Inject constructor(
+class ExploreSearchViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
     private val bookshelfRepository: BookshelfRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
-    private val _uiState = MutableExplorationSearchUiState()
+    private val _uiState = MutableExploreSearchUiState()
     private val searchHistoryUserData = userDataRepository.stringListUserData(UserDataPath.Search.History.path)
     private var searchTypeTipMap = emptyMap<String, String>()
     private var searchJob: Job? = null
-    val uiState: ExplorationSearchUiState = _uiState
+    val uiState: ExploreSearchUiState = _uiState
 
     fun init() {
         viewModelScope.launch(Dispatchers.IO) {

@@ -68,7 +68,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
@@ -79,14 +78,15 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.ExploreScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.ExploreUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
+import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun ExplorationHomeScreen(
+fun ExploreHomeScreen(
     exploreUiState: ExploreUiState,
-    explorationHomeUiState: ExplorationHomeUiState,
+    exploreHomeUiState: ExploreHomeUiState,
     selectedRoute: Any,
     controller: NavController,
     onClickExpand: (String) -> Unit,
@@ -132,10 +132,10 @@ fun ExplorationHomeScreen(
                 uiState = exploreUiState
             ) {
                 Column {
-                    PrimaryTabRow(selectedTabIndex = explorationHomeUiState.selectedPage) {
-                        explorationHomeUiState.pageTitles.forEachIndexed { index, title ->
+                    PrimaryTabRow(selectedTabIndex = exploreHomeUiState.selectedPage) {
+                        exploreHomeUiState.pageTitles.forEachIndexed { index, title ->
                             Tab(
-                                selected = explorationHomeUiState.selectedPage == index,
+                                selected = exploreHomeUiState.selectedPage == index,
                                 onClick = {
                                     changePage(index)
                                 },
@@ -152,8 +152,8 @@ fun ExplorationHomeScreen(
 
                     var showEmptyPage by remember { mutableStateOf(false) }
 
-                    LaunchedEffect(explorationHomeUiState.explorationPageBooksRawList) {
-                        if (explorationHomeUiState.explorationPageBooksRawList.isEmpty()) {
+                    LaunchedEffect(exploreHomeUiState.explorePageBooksRawList) {
+                        if (exploreHomeUiState.explorePageBooksRawList.isEmpty()) {
                             delay(140)
                             showEmptyPage = true
                         } else {
@@ -169,15 +169,15 @@ fun ExplorationHomeScreen(
                         Loading()
                     }
                     AnimatedContent(
-                        targetState = explorationHomeUiState.explorationPageBooksRawList,
-                        contentKey = { explorationHomeUiState.selectedPage },
+                        targetState = exploreHomeUiState.explorePageBooksRawList,
+                        contentKey = { exploreHomeUiState.selectedPage },
                         transitionSpec = {
                             (fadeIn(initialAlpha = 0.7f)).togetherWith(fadeOut(targetAlpha = 0.7f))
                         },
-                        label = "ExplorationPageBooksRawAnime"
+                        label = "ExplorePageBooksRawAnime"
                     ) {
-                        ExplorationPage(
-                            explorationPageBooksRawList = it,
+                        ExplorePage(
+                            explorePageBooksRawList = it,
                             onClickExpand = onClickExpand,
                             onClickBook = onClickBook,
                             nestedScrollConnection = enterAlwaysScrollBehavior.nestedScrollConnection,
@@ -229,8 +229,8 @@ fun TopBar(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun ExplorationPage(
-    explorationPageBooksRawList: List<ExploreBooksRow>,
+fun ExplorePage(
+    explorePageBooksRawList: List<ExploreBooksRow>,
     onClickExpand: (String) -> Unit,
     onClickBook: (Int) -> Unit,
     nestedScrollConnection: NestedScrollConnection,
@@ -254,7 +254,7 @@ fun ExplorationPage(
         LazyColumn(
             modifier = Modifier.nestedScroll(nestedScrollConnection)
         ) {
-            items(explorationPageBooksRawList) { explorationBooksRow ->
+            items(explorePageBooksRawList) { exploreBooksRow ->
                 Column(
                     modifier = Modifier.animateItem()
                 ) {
@@ -268,16 +268,16 @@ fun ExplorationPage(
                     ) {
                         Text(
                             modifier = Modifier.weight(2f),
-                            text = explorationBooksRow.title,
+                            text = exploreBooksRow.title,
                             style = AppTypography.titleMedium,
                             fontWeight = FontWeight.W600,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        if (explorationBooksRow.expandable) {
+                        if (exploreBooksRow.expandable) {
                             IconButton(
                                 modifier = Modifier.size(40.dp),
                                 onClick = {
-                                    explorationBooksRow.expandedPageDataSourceId?.let {
+                                    exploreBooksRow.expandedPageDataSourceId?.let {
                                         onClickExpand(it)
                                     }
                                 }
@@ -312,12 +312,12 @@ fun ExplorationPage(
                                 Box(modifier = Modifier.width(10.dp))
                             }
 
-                            items(explorationBooksRow.bookList) { explorationDisplayBook ->
+                            items(exploreBooksRow.bookList) { exploreDisplayBook ->
                                 Column(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(10.dp))
                                         .clickable {
-                                            onClickBook(explorationDisplayBook.id)
+                                            onClickBook(exploreDisplayBook.id)
                                         }
                                 ) {
                                     Box(
@@ -326,7 +326,7 @@ fun ExplorationPage(
                                         Cover(
                                             width = 98.dp,
                                             height = 138.dp,
-                                            url = explorationDisplayBook.coverUrl,
+                                            url = exploreDisplayBook.coverUrl,
                                             rounded = 6.dp
                                         )
                                     }
@@ -344,7 +344,7 @@ fun ExplorationPage(
                                                     with(LocalDensity.current) { (titleLineHeight * 2.2f).toDp() }
                                                 )
                                                 .wrapContentHeight(Alignment.Top),
-                                            text = explorationDisplayBook.title,
+                                            text = exploreDisplayBook.title,
                                             style = AppTypography.titleVerySmall.copy(
                                                 letterSpacing = 0.5.sp
                                             ),
@@ -353,9 +353,9 @@ fun ExplorationPage(
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis
                                         )
-                                        if (explorationDisplayBook.author.isNotEmpty()) {
+                                        if (exploreDisplayBook.author.isNotEmpty()) {
                                             Text(
-                                                text = explorationDisplayBook.author,
+                                                text = exploreDisplayBook.author,
                                                 style = AppTypography.titleVerySmall.copy(
                                                     letterSpacing = 0.5.sp
                                                 ),

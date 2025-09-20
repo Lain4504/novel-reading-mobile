@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration
+package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore
 
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.wenku8Cookie
@@ -16,7 +16,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.net.URLEncoder
 
-object Wenku8TagsExplorationPage: ExplorePageDataSource {
+object Wenku8TagsExplorePage: ExplorePageDataSource {
     private var lock = false
     private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())
 
@@ -40,7 +40,7 @@ object Wenku8TagsExplorationPage: ExplorePageDataSource {
                             .wenku8Cookie()
                             .autoReconnectionGet()
                         exploreBooksRows.update {
-                            it + getExplorationBookRow(
+                            it + getExploreBookRow(
                                 soup = soup,
                                 title = url.split("=")[1]
                             )
@@ -52,7 +52,7 @@ object Wenku8TagsExplorationPage: ExplorePageDataSource {
         return ExplorePage("分类", exploreBooksRows)
     }
 
-    private fun getExplorationBookRow(title: String, soup: Document?): ExploreBooksRow {
+    private fun getExploreBookRow(title: String, soup: Document?): ExploreBooksRow {
         soup ?: return ExploreBooksRow(
             "",
             emptyList(),

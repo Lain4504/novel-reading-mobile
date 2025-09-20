@@ -1,15 +1,14 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8
 
-
 import android.util.Log
 import androidx.navigation.NavController
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8AllExplorationPage
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8HomeExplorationPage
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8TagsExplorationPage
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.expanedpage.HomeBookExpandPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.expanded.navigateToExplorationExpandDestination
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.Wenku8AllExplorePage
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.Wenku8HomeExplorePage
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.Wenku8TagsExplorePage
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.expanedpage.HomeBookExpandPageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.expanedpage.filter.FirstLetterSingleChoiceFilter
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.expanedpage.filter.PublishingHouseSingleChoiceFilter
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.expanded.navigateToExploreExpandDestination
 import indi.dmzz_yyhyy.lightnovelreader.utils.MixDataCache
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import io.nightfish.lightnovelreader.api.book.BookInformation
@@ -29,6 +28,7 @@ import io.nightfish.lightnovelreader.api.web.explore.filter.WordCountFilter
 import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import java.net.URLEncoder
@@ -70,12 +71,11 @@ object Wenku8Api: WebBookDataSource {
     private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
     private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
-    private var hostIndex = 0
     private var isLocalIpUnableUse = true
     private val mixDataCache = MixDataCache(
         timeout = 5 * 60 * 1000
     )
-    val host get() =  hosts[hostIndex]
+    var host  =  hosts[0]
 
     init {
         coroutineScope.launch {
@@ -97,48 +97,115 @@ object Wenku8Api: WebBookDataSource {
     override var offLine: Boolean = true
 
     override val isOffLineFlow = flow {
+        emit(offLine)
         while (currentCoroutineContext().isActive) {
-            val offline = isOffLine()
-            emit(offline)
-            delay(if (offline) 2000 else 10000)
+            offLine = isOffLine()
+            if (offLine)
+                offLine = isOffLine()
+            emit(offLine)
+            delay(if (offLine) 3000 else 100000)
         }
     }
 
-    override suspend fun isOffLine(): Boolean =
+    private suspend fun tryOrFalse(block: () -> Unit): Boolean = withContext(Dispatchers.IO) {
         try {
-            Jsoup
-                .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
-                .timeout(2000)
-                .let {
-                    if (ProxyPool.enable && !isLocalIpUnableUse)
-                        ProxyPool.apply {
-                            it.proxyGet()
-                        }
-                    else it.get()
-                }
-            Jsoup
-                .connect("$host/")
-                .wenku8Cookie()
-                .timeout(2000)
-                .let {
-                    if (ProxyPool.enable && !isLocalIpUnableUse)
-                        ProxyPool.apply {
-                            it.proxyGet()
-                        }
-                    else it.get()
-                }
-            false
+            block.invoke()
+            return@withContext false
         } catch (e: UnknownHostException) {
-            Log.w("Network", "DNS probe failed. ${e.message}")
+            Log.e("Wenku8Api", "DNS probe failed. ${e.message}")
             true
         } catch (e: Exception) {
-            e.printStackTrace()
-            if (hostIndex == hosts.size - 1) {
-                isLocalIpUnableUse = false
-            }
-            hostIndex = (hostIndex + 1) % hosts.size
-            true
+            Log.e("Wenku8Api", "${e.message}")
+            Log.d("Wenku8Api", "An error occurred", e)
+            return@withContext true
         }
+    }
+
+    override suspend fun isOffLine(): Boolean = withContext(Dispatchers.IO) {
+        Jsoup
+            .connect("$host/")
+            .wenku8Cookie()
+            .timeout(2000)
+            .let {
+                if (ProxyPool.enable && !isLocalIpUnableUse)
+                    ProxyPool.apply {
+                        it.proxyGet()
+                    }
+                else it.get()
+            }
+        val isApiOffLine =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
+                        .userAgent("wenku8")
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }
+            }
+        val isWebOffline1 =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(hosts[0])
+                        .wenku8Cookie()
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }.also {
+                    if (!it)
+                        host = hosts[0]
+                }
+            }
+        val isWebOffline2 =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(hosts[1])
+                        .wenku8Cookie()
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }.also {
+                    if (!it)
+                        host = hosts[1]
+                }
+            }
+
+        val isWebOffline3 =
+            async {
+                tryOrFalse {
+                    Jsoup
+                        .connect(hosts[2])
+                        .wenku8Cookie()
+                        .let {
+                            if (ProxyPool.enable && !isLocalIpUnableUse)
+                                ProxyPool.apply {
+                                    it.proxyGet()
+                                }
+                            else it.get()
+                        }
+                }.also {
+                    if (!it)
+                        host = hosts[2]
+                }
+            }
+
+        return@withContext isApiOffLine.await() || (isWebOffline1.await() && isWebOffline2.await() && isWebOffline3.await())
+    }
 
     override val id: Int = "wenku8".hashCode()
 
@@ -250,9 +317,9 @@ object Wenku8Api: WebBookDataSource {
 
     override val explorePageDataSourceMap: Map<String, ExplorePageDataSource> =
         mapOf(
-            Pair("首页", Wenku8HomeExplorationPage),
-            Pair("全部", Wenku8AllExplorationPage),
-            Pair("分类", Wenku8TagsExplorationPage)
+            Pair("首页", Wenku8HomeExplorePage),
+            Pair("全部", Wenku8AllExplorePage),
+            Pair("分类", Wenku8TagsExplorePage)
         )
 
     override val explorePageIdList: List<String> = listOf("首页", "全部", "分类")
@@ -358,11 +425,11 @@ object Wenku8Api: WebBookDataSource {
                 }
             }
 
-    private fun registerExplorationExpandedPageDataSource(id: String, expandedPageDataSource: ExploreExpandedPageDataSource) =
+    private fun registerExploreExpandedPageDataSource(id: String, expandedPageDataSource: ExploreExpandedPageDataSource) =
         exploreExpandedPageDataSourceMap.put(id, expandedPageDataSource)
 
     init {
-        registerExplorationExpandedPageDataSource(
+        registerExploreExpandedPageDataSource(
             id = "allBook",
             expandedPageDataSource = HomeBookExpandPageDataSource(
                 title = "轻小说列表",
@@ -384,7 +451,7 @@ object Wenku8Api: WebBookDataSource {
                 }
             )
         )
-        registerExplorationExpandedPageDataSource(
+        registerExploreExpandedPageDataSource(
             id = "allCompletedBook",
             expandedPageDataSource = HomeBookExpandPageDataSource(
                 title = "完结全本",
@@ -414,7 +481,7 @@ object Wenku8Api: WebBookDataSource {
                 Pair("lastupdate", "今日更新"),
                 Pair("postdate", "新书一览"),
             )
-            registerExplorationExpandedPageDataSource(
+            registerExploreExpandedPageDataSource(
                 id = "${id}Book",
                 expandedPageDataSource = HomeBookExpandPageDataSource(
                     baseUrl = "$host/modules/article/toplist.php",
@@ -441,7 +508,7 @@ object Wenku8Api: WebBookDataSource {
             )
         }
         tagList.forEach { tag ->
-            registerExplorationExpandedPageDataSource(
+            registerExploreExpandedPageDataSource(
                 id = tag,
                 expandedPageDataSource = HomeBookExpandPageDataSource(
                     baseUrl = "$host/modules/article/tags.php",
@@ -483,7 +550,7 @@ object Wenku8Api: WebBookDataSource {
 
     override fun progressBookTagClick(tag: String, navController: NavController) {
         if (tagList.contains(tag))
-            navController.navigateToExplorationExpandDestination(tag)
+            navController.navigateToExploreExpandDestination(tag)
     }
 
     override fun getCoverUrlInVolume(bookId: Int, volume: Volume, volumeChapterContentMap: Map<Int, ChapterContent>): String? {

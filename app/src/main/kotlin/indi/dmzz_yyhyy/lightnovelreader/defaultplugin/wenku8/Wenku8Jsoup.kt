@@ -3,7 +3,6 @@ package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8
 import android.util.Log
 import indi.dmzz_yyhyy.lightnovelreader.utils.UserAgentGenerator
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionPost
-import indi.dmzz_yyhyy.lightnovelreader.utils.randomUAHeadersJsoup
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -22,10 +21,11 @@ private val requestLimiter = Semaphore(3)
 private val pendingJobs = Channel<Unit>(capacity = 25, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
 fun Connection.wenku8Cookie(): Connection =
-    this.userAgent(UserAgentGenerator.generate())
-        .cookies(indi.dmzz_yyhyy.lightnovelreader.data.web.wenku8.wenku8Cookie())
+    this
+        .userAgent(UserAgentGenerator.generate())
+        .cookies(wenku8Cookies())
 
-fun wenku8Cookie(): Map<String, String> = mapOf(
+fun wenku8Cookies(): Map<String, String> = mapOf(
     "Hm_lvt_acfbfe93830e0272a88e1cc73d4d6d0f" to "1737964211",
     "PHPSESSID" to "261c62b5dae26868bba643433e859ce6",
     "jieqiUserInfo" to "jieqiUserId%3D1125456%2CjieqiUserName%3Dyyhyy%2CjieqiUserGroup%3D3%2CjieqiUserVip%3D0%2CjieqiUserPassword%3Deb62861281462fd923fb99218735fef0%2CjieqiUserName_un%3Dyyhyy%2CjieqiUserHonor_un%3D%26%23x4E2D%3B%26%23x7EA7%3B%26%23x4F1A%3B%26%23x5458%3B%2CjieqiUserGroupName_un%3D%26%23x666E%3B%26%23x901A%3B%26%23x4F1A%3B%26%23x5458%3B%2CjieqiUserLogin%3D1739294499",
@@ -49,7 +49,7 @@ suspend fun wenku8Api(request: String): Document? {
             withTimeoutOrNull(15_000L) {
                 val doc = Jsoup
                     .connect(update("eNpb85aBtYRBMaOkpMBKXz-xoECvPDUvu9RCLzk_Vz8xL6UoPzNFryCjAAAfiA5Q").toString())
-                    .headers(randomUAHeadersJsoup())
+                    .userAgent("wenku8")
                     .data(
                         "request", Base64.encode(request.toByteArray()),
                         "timetoken", Instant.now().toEpochMilli().toString(),

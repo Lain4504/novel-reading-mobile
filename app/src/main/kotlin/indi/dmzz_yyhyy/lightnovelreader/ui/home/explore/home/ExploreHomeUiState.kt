@@ -8,16 +8,16 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior.State
 import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
 
 @State
-interface ExplorationHomeUiState {
+interface ExploreHomeUiState {
     val pageTitles: List<String>
     val selectedPage: Int
-    val explorationPageTitle: String
-    val explorationPageBooksRawList: List<ExploreBooksRow>
+    val explorePageTitle: String
+    val explorePageBooksRawList: List<ExploreBooksRow>
 }
 
-class MutableExplorationHomeUiState : ExplorationHomeUiState {
+class MutableExploreHomeUiState : ExploreHomeUiState {
     override var pageTitles: List<String> by mutableStateOf(mutableListOf())
     override var selectedPage by mutableIntStateOf(0)
-    override var explorationPageTitle by mutableStateOf("")
-    override var explorationPageBooksRawList: List<ExploreBooksRow> by mutableStateOf(mutableListOf())
+    override var explorePageTitle by mutableStateOf("")
+    override var explorePageBooksRawList: List<ExploreBooksRow> by mutableStateOf(mutableListOf())
 }

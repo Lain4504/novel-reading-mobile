@@ -10,28 +10,28 @@ import androidx.navigation.compose.composable
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.ExploreViewModel
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.expanded.navigateToExplorationExpandDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.expanded.navigateToExploreExpandDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.search.navigateToSearchDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.exploreHomeDestination(sharedTransitionScope: SharedTransitionScope) {
-    composable<Route.Main.Exploration.Home> { entry ->
+    composable<Route.Main.Explore.Home> { entry ->
         val navController = LocalNavController.current
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val exploreViewModel = hiltViewModel<ExploreViewModel>(parentEntry)
-        val explorationHomeViewModel = hiltViewModel<ExplorationHomeViewModel>()
-        ExplorationHomeScreen(
+        val exploreHomeViewModel = hiltViewModel<ExploreHomeViewModel>()
+        ExploreHomeScreen(
             exploreUiState = exploreViewModel.uiState,
-            explorationHomeUiState = explorationHomeViewModel.uiState,
-            onClickExpand = navController::navigateToExplorationExpandDestination,
+            exploreHomeUiState = exploreHomeViewModel.uiState,
+            onClickExpand = navController::navigateToExploreExpandDestination,
             onClickBook = navController::navigateToBookDetailDestination,
-            init = explorationHomeViewModel::init,
-            changePage = explorationHomeViewModel::changePage,
+            init = exploreHomeViewModel::init,
+            changePage = exploreHomeViewModel::changePage,
             onClickSearch = navController::navigateToSearchDestination,
-            refresh = explorationHomeViewModel::refresh,
-            selectedRoute = Route.Main.Exploration,
+            refresh = exploreHomeViewModel::refresh,
+            selectedRoute = Route.Main.Explore,
             controller = navController,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
@@ -39,7 +39,7 @@ fun NavGraphBuilder.exploreHomeDestination(sharedTransitionScope: SharedTransiti
     }
 }
 
-fun NavController.navigateToExplorationHomeDestination() {
+fun NavController.navigateToExploreHomeDestination() {
     if (!this.isResumed()) return
-    navigate(Route.Main.Exploration.Home)
+    navigate(Route.Main.Explore.Home)
 }

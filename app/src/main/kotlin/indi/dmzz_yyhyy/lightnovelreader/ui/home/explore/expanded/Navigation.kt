@@ -19,25 +19,25 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
 
 fun NavGraphBuilder.exploreExpandDestination() {
-    composable<Route.Main.Exploration.Expanded> { entry ->
+    composable<Route.Main.Explore.Expanded> { entry ->
         val navController = LocalNavController.current
         val parentEntry = remember(entry) { navController.getBackStackEntry(Route.Main) }
         val exploreViewModel = hiltViewModel<ExploreViewModel>(parentEntry)
-        val explorationExpandedPageHomeViewModel = hiltViewModel<ExpandedPageViewModel>()
+        val exploreExpandedPageHomeViewModel = hiltViewModel<ExpandedPageViewModel>()
         var dialog : @Composable () -> Unit by remember { mutableStateOf(@Composable {}) }
         ExpandedPageScreen(
             exploreUiState = exploreViewModel.uiState,
-            expandedPageUiState = explorationExpandedPageHomeViewModel.uiState,
+            expandedPageUiState = exploreExpandedPageHomeViewModel.uiState,
             refresh = exploreViewModel::refresh,
             dialog = { newDialog -> dialog = newDialog },
-            expandedPageDataSourceId = entry.toRoute<Route.Main.Exploration.Expanded>().expandedPageDataSourceId,
-            init = explorationExpandedPageHomeViewModel::init,
-            loadMore = explorationExpandedPageHomeViewModel::loadMore,
+            expandedPageDataSourceId = entry.toRoute<Route.Main.Explore.Expanded>().expandedPageDataSourceId,
+            init = exploreExpandedPageHomeViewModel::init,
+            loadMore = exploreExpandedPageHomeViewModel::loadMore,
             requestAddBookToBookshelf = {
                 navController.navigateToAddBookToBookshelfDialog(it)
             },
             onClickBack = {
-                explorationExpandedPageHomeViewModel.clear()
+                exploreExpandedPageHomeViewModel.clear()
                 navController.popBackStackIfResumed()
             },
             onClickBook = {
@@ -48,7 +48,7 @@ fun NavGraphBuilder.exploreExpandDestination() {
     }
 }
 
-fun NavController.navigateToExplorationExpandDestination(expandedPageDataSourceId: String) {
+fun NavController.navigateToExploreExpandDestination(expandedPageDataSourceId: String) {
     if (!this.isResumed()) return
-    navigate(Route.Main.Exploration.Expanded(expandedPageDataSourceId))
+    navigate(Route.Main.Explore.Expanded(expandedPageDataSourceId))
 }

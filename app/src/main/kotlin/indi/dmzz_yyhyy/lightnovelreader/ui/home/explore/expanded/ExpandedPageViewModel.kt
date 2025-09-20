@@ -20,7 +20,7 @@ class ExpandedPageViewModel @Inject constructor(
     private val textProcessingRepository: TextProcessingRepository
 ) : ViewModel() {
     private var expandedPageDataSource: ExploreExpandedPageDataSource? = null
-    private var explorationExpandedPageBookListCollectJob: Job? = null
+    private var exploreExpandedPageBookListCollectJob: Job? = null
     private var loadMoreJob: Job? = null
     private var lastExpandedPageDataSourceId: String = ""
     private val _uiState = MutableExpandedPageUiState()
@@ -30,11 +30,11 @@ class ExpandedPageViewModel @Inject constructor(
         if (expandedPageDataSourceId == lastExpandedPageDataSourceId) return
         lastExpandedPageDataSourceId = expandedPageDataSourceId
         loadMoreJob?.cancel()
-        explorationExpandedPageBookListCollectJob?.cancel()
+        exploreExpandedPageBookListCollectJob?.cancel()
 
         expandedPageDataSource = exploreRepository.exploreExpandedPageDataSourceMap[expandedPageDataSourceId]
 
-        explorationExpandedPageBookListCollectJob = viewModelScope.launch {
+        exploreExpandedPageBookListCollectJob = viewModelScope.launch {
             expandedPageDataSource?.let { dataSource ->
                 withContext(Dispatchers.IO) { dataSource.refresh() }
                 val processedTitle = withContext(Dispatchers.IO) {

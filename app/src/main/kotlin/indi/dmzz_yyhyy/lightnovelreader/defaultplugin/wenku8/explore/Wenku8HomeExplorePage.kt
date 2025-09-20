@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration
+package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore
 
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.wenku8Cookie
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
-object Wenku8HomeExplorationPage: ExplorePageDataSource {
+object Wenku8HomeExplorePage: ExplorePageDataSource {
     private var lock = false
     private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())
 

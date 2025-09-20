@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.expanedpage
+package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.expanedpage
 
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api.getBookInformationListFromBookCards

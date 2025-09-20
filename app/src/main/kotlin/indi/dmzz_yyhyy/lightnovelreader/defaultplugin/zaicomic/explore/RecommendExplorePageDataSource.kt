@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration
+package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.explore
 
 import com.google.gson.reflect.TypeToken
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
-object RecommendExplorationPageDataSource : ExplorePageDataSource {
+object RecommendExplorePageDataSource : ExplorePageDataSource {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var lock = false
     private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())

@@ -2,10 +2,10 @@ package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration.RankingsExplorationPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration.RecommendExplorationPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration.TypesExplorationPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration.UpdateExplorationPageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.explore.RankingsExplorePageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.explore.RecommendExplorePageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.explore.TypesExplorePageDataSource
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.explore.UpdateExplorePageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.ComicChapterComic
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.DataContent
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.DetailData
@@ -152,10 +152,10 @@ object ZaiComic : WebBookDataSource {
     }
 
     override val explorePageDataSourceMap = mapOf(
-        "探索" to RecommendExplorationPageDataSource,
-        "更新" to UpdateExplorationPageDataSource,
-        "分类" to TypesExplorationPageDataSource,
-        "排行" to RankingsExplorationPageDataSource
+        "探索" to RecommendExplorePageDataSource,
+        "更新" to UpdateExplorePageDataSource,
+        "分类" to TypesExplorePageDataSource,
+        "排行" to RankingsExplorePageDataSource
     )
 
     override val explorePageIdList: List<String> =

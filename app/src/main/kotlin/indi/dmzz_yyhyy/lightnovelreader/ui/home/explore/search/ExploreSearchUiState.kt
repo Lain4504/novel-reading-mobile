@@ -7,7 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior.State
 import io.nightfish.lightnovelreader.api.book.BookInformation
 
 @State
-interface ExplorationSearchUiState {
+interface ExploreSearchUiState {
     val isFocused: Boolean
     val isLoading: Boolean
     val isLoadingComplete: Boolean
@@ -20,7 +20,7 @@ interface ExplorationSearchUiState {
     val allBookshelfBookIds: List<Int>
 }
 
-class MutableExplorationSearchUiState : ExplorationSearchUiState {
+class MutableExploreSearchUiState : ExploreSearchUiState {
     override var isFocused: Boolean by mutableStateOf(true)
     override var isLoading: Boolean by mutableStateOf(true)
     override var isLoadingComplete: Boolean by mutableStateOf(false)

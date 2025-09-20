@@ -116,15 +116,15 @@ fun HomeNavigateBar(
             }
         )
         NavigationBarItem(
-            selected = selectedRoute is Route.Main.Exploration,
+            selected = selectedRoute is Route.Main.Explore,
             onClick = {
-                if (selectedRoute !is Route.Main.Exploration) coverNavigate(Route.Main.Exploration)
+                if (selectedRoute !is Route.Main.Explore) coverNavigate(Route.Main.Explore)
             },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
-                        AnimatedImageVector.animatedVectorResource(R.drawable.animated_exploration),
-                        selectedRoute is Route.Main.Exploration
+                        AnimatedImageVector.animatedVectorResource(R.drawable.animated_explore),
+                        selectedRoute is Route.Main.Explore
                     ),
                     contentDescription = null
                 )

@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration
+package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.explore
 
 import com.google.gson.reflect.TypeToken
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
-object UpdateExplorationPageDataSource : ExplorePageDataSource {
+object UpdateExplorePageDataSource : ExplorePageDataSource {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var lock = false
     private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())
@@ -28,24 +28,24 @@ object UpdateExplorationPageDataSource : ExplorePageDataSource {
         if (lock) return explorePage
         lock = true
         scope.launch {
-            exploreBooksRows.update { explorationBooksRowList ->
-                explorationBooksRowList + ExploreBooksRow(
+            exploreBooksRows.update { exploreBooksRowList ->
+                exploreBooksRowList + ExploreBooksRow(
                     title = "全部漫画",
                     bookList = getUpdateBooks(100)
                 )
             }
         }
         scope.launch {
-            exploreBooksRows.update { explorationBooksRowList ->
-                explorationBooksRowList + ExploreBooksRow(
+            exploreBooksRows.update { exploreBooksRowList ->
+                exploreBooksRowList + ExploreBooksRow(
                     title = "原创漫画",
                     bookList = getUpdateBooks(1)
                 )
             }
         }
         scope.launch {
-            exploreBooksRows.update { explorationBooksRowList ->
-                explorationBooksRowList + ExploreBooksRow(
+            exploreBooksRows.update { exploreBooksRowList ->
+                exploreBooksRowList + ExploreBooksRow(
                     title = "译制漫画",
                     bookList = getUpdateBooks(0)
                 )
