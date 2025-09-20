@@ -11,16 +11,17 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.lifecycle.HiltViewModel
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ExportDataWork
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ImportDataWork
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ExportContext
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.MutableExportContext
+import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -36,10 +37,13 @@ class SourceChangeDialogViewModel @Inject constructor(
     private val webBookDataSource: WebBookDataSource,
     private val localBookDataSource: LocalBookDataSource,
     private val bookshelfRepository: BookshelfRepository,
-    private val statsRepository: StatsRepository
+    private val statsRepository: StatsRepository,
+    webBookDataSourceManager: WebBookDataSourceManager
 ) : ViewModel() {
 
     val webBookDataSourceId = webBookDataSource.id
+
+    val webDataSourceItems = webBookDataSourceManager.webDataSourceItems
 
     private fun exportToFile(uri: Uri, exportContext: ExportContext): OneTimeWorkRequest {
         val workRequest = OneTimeWorkRequestBuilder<ExportDataWork>()

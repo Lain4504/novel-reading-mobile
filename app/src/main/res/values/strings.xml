@@ -41,7 +41,7 @@
     <string name="nothing_here_desc_bookshelf">Click the "Favorite" button to add the book to this bookshelf.</string>
     <string name="offline">Oops</string>
     <string name="offline_desc">Please check the availability of the source website and your proxy settings.</string>
-    
+
     <!-- Snackbar Hints -->
     <string name="cache_book_started">Caching started: %1$s</string>
     <string name="cache_book_running">This book is currently caching</string>
@@ -56,7 +56,7 @@
     <!-- Settings -->
     <string name="reading_settings">Reading</string>
     <string name="theme_settings">Theme</string>
-
+    <string name="app_settings">App</string>
     <string name="app_updates">Updates</string>
     <string name="settings_auto_check_updates">Auto Check for Updates</string>
     <string name="settings_auto_check_updates_desc">Enable automatic update checks upon app launch</string>
@@ -305,5 +305,6 @@
     <string name="dialog_select_data_source_text">Select the data source. This will clear the cache and switch the app\'s data source. Your current user data will remain intact and can be restored upon switching back.</string>
     <string name="dialog_slider_custom">Enter Value</string>
     <string name="dialog_slider_custom_illegal_value">Please enter a valid number.</string>
+    <string name="title_dynamicfeature">FuckYou</string>
 
 </resources>

@@ -3,8 +3,8 @@ package indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.ChapterContentEntity
+import io.nightfish.lightnovelreader.api.book.ChapterContent
 
 @Dao
 interface ChapterContentDao {

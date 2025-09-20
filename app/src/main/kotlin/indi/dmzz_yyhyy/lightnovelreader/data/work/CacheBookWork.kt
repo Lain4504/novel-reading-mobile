@@ -12,7 +12,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadProgressRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadType
 import indi.dmzz_yyhyy.lightnovelreader.data.download.MutableDownloadItem
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 
 @HiltWorker
 class CacheBookWork @AssistedInject constructor(
@@ -54,7 +54,6 @@ class CacheBookWork @AssistedInject constructor(
                 if (it.isEmpty()) return Result.failure()
                 localBookDataSource.updateBookInformation(it)
             }
-        count ++
         downloadItem.progress = 1f
         return Result.success()
     }

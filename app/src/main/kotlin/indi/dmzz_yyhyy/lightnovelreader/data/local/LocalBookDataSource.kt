@@ -1,15 +1,15 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.local
 
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableUserReadingData
-import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookVolumesDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.ChapterContentDao
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserReadingDataDao
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.book.MutableChapterContent
+import io.nightfish.lightnovelreader.api.book.MutableUserReadingData
+import io.nightfish.lightnovelreader.api.book.UserReadingData
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton

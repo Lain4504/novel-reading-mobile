@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import io.nightfish.lightnovelreader.api.book.ChapterContent
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 
 interface FlipPageContentUiState: ContentUiState {

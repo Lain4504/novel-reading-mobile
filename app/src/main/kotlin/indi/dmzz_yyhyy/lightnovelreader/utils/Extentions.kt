@@ -115,7 +115,7 @@ private fun partition(arr: MutableList<Int>, left: Int, right: Int): Int {
 }
 
 val homeRoutes = listOf(
-    "Reading.Home", "Bookshelf.Home", "Exploration.Home", "Settings.Home"
+    "Reading.Home", "Bookshelf.Home", "Explore.Home", "Settings.Home"
 )
 
 fun isInMainNavigation(from: NavDestination, to: NavDestination): Boolean {

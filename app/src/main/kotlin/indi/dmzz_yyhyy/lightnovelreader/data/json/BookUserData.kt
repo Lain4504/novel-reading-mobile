@@ -1,7 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.json
 
 import com.google.gson.annotations.SerializedName
-import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
+import io.nightfish.lightnovelreader.api.book.UserReadingData
 import java.time.LocalDateTime
 
 data class BookUserData(

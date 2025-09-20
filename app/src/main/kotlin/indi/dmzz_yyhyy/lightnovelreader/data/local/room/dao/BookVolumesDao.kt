@@ -4,11 +4,11 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.TypeConverters
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterInformation
+import io.nightfish.lightnovelreader.api.book.Volume
 
 @Dao
 interface BookVolumesDao {
@@ -46,9 +46,12 @@ interface BookVolumesDao {
             getVolumeEntitiesByBookId(bookId)
             .sortedBy { it.index }
             .map { volumeEntity ->
-                Volume(volumeEntity.volumeId, volumeEntity.volumeTitle, volumeEntity.chapterIds.map {
-                    getChapterInformation(it) ?: ChapterInformation(0, "")
-            })
+                Volume(
+                    volumeEntity.volumeId,
+                    volumeEntity.volumeTitle,
+                    volumeEntity.chapterIds.map {
+                        getChapterInformation(it) ?: ChapterInformation(0, "")
+                    })
         })
     }
 

@@ -36,7 +36,7 @@ object Route {
             )
         }
         @Serializable
-        object Exploration {
+        object Explore {
             @Serializable
             object Home
             @Serializable
@@ -58,6 +58,15 @@ object Route {
                 object Manager
                 @Serializable
                 data class Rules(val bookId: Int)
+            }
+            @Serializable
+            object PluginManager {
+                @Serializable
+                object Home
+                @Serializable
+                data class Detail(
+                    val id: String
+                )
             }
             @Serializable
             object Debug
@@ -82,11 +91,7 @@ object Route {
         )
         @Serializable
         data object Reader
-        @Serializable
-        data class ExportUserDataDialog(
-            val bookId: Int,
-            val title: String
-        )
+
         @Serializable
         data class ColorPickerDialog(
             val colorUserDataPath: String,

@@ -16,7 +16,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataContent
 import indi.dmzz_yyhyy.lightnovelreader.data.json.AppUserDataJson
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
+import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -56,7 +56,7 @@ class ImportDataWork @AssistedInject constructor(
         }
         if (jsonText == null) return Result.failure()
         try {
-            val appUserDataJson = AppUserDataJson.fromJson(jsonText!!)
+            val appUserDataJson = AppUserDataJson.fromJson(jsonText)
             if (appUserDataJson.type == "light novel reader data file")
                 data = appUserDataJson.data.firstOrNull { it.webDataSourceId == webBookDataSource.id }
             if (data == null) {
