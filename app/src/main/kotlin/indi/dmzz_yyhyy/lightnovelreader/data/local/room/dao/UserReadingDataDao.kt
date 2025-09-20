@@ -3,10 +3,10 @@ package indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
-import indi.dmzz_yyhyy.lightnovelreader.data.book.UserReadingData
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter.dateToString
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.ListConverter.intListToString
+import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.LocalDateTimeConverter.dateToString
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserReadingDataEntity
+import io.nightfish.lightnovelreader.api.book.UserReadingData
 import kotlinx.coroutines.flow.Flow
 
 @Dao

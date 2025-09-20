@@ -2,12 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration.RankingsExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration.RecommendExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration.TypesExplorationPageDataSource
@@ -19,6 +13,12 @@ import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.ListDataCont
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.SearchItem
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.ZaiComicData
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.web.WebBookDataSource
+import io.nightfish.lightnovelreader.api.web.WebDataSource
+import io.nightfish.lightnovelreader.api.web.explore.ExploreExpandedPageDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -151,17 +151,17 @@ object ZaiComic : WebBookDataSource {
         return chapterContent
     }
 
-    override val explorationPageDataSourceMap = mapOf(
+    override val explorePageDataSourceMap = mapOf(
         "探索" to RecommendExplorationPageDataSource,
         "更新" to UpdateExplorationPageDataSource,
         "分类" to TypesExplorationPageDataSource,
         "排行" to RankingsExplorationPageDataSource
     )
 
-    override val explorationPageIdList: List<String> =
+    override val explorePageIdList: List<String> =
         listOf("探索", "更新", "分类", "排行")
 
-    override val explorationExpandedPageDataSourceMap: Map<String, ExplorationExpandedPageDataSource> = mapOf()
+    override val exploreExpandedPageDataSourceMap: Map<String, ExploreExpandedPageDataSource> = mapOf()
 
     override fun search(searchType: String, keyword: String): Flow<List<BookInformation>> {
         val comicList = MutableStateFlow(listOf<BookInformation>())

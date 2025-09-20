@@ -1,14 +1,14 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration
 
 import com.google.gson.reflect.TypeToken
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.DataContent
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.UpdatePageItem
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
+import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
+import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
+import io.nightfish.lightnovelreader.api.explore.ExplorePage
+import io.nightfish.lightnovelreader.api.web.explore.ExplorePageDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,42 +16,42 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
-object UpdateExplorationPageDataSource : ExplorationPageDataSource {
+object UpdateExplorationPageDataSource : ExplorePageDataSource {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var lock = false
-    private val explorationBooksRows: MutableStateFlow<List<ExplorationBooksRow>> = MutableStateFlow(emptyList())
-    private val explorationPage = ExplorationPage("更新", explorationBooksRows)
+    private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())
+    private val explorePage = ExplorePage("更新", exploreBooksRows)
 
     override val title = "更新"
 
-    override fun getExplorationPage(): ExplorationPage {
-        if (lock) return explorationPage
+    override fun getExplorePage(): ExplorePage {
+        if (lock) return explorePage
         lock = true
         scope.launch {
-            explorationBooksRows.update { explorationBooksRowList ->
-                explorationBooksRowList + ExplorationBooksRow(
+            exploreBooksRows.update { explorationBooksRowList ->
+                explorationBooksRowList + ExploreBooksRow(
                     title = "全部漫画",
                     bookList = getUpdateBooks(100)
                 )
             }
         }
         scope.launch {
-            explorationBooksRows.update { explorationBooksRowList ->
-                explorationBooksRowList + ExplorationBooksRow(
+            exploreBooksRows.update { explorationBooksRowList ->
+                explorationBooksRowList + ExploreBooksRow(
                     title = "原创漫画",
                     bookList = getUpdateBooks(1)
                 )
             }
         }
         scope.launch {
-            explorationBooksRows.update { explorationBooksRowList ->
-                explorationBooksRowList + ExplorationBooksRow(
+            exploreBooksRows.update { explorationBooksRowList ->
+                explorationBooksRowList + ExploreBooksRow(
                     title = "译制漫画",
                     bookList = getUpdateBooks(0)
                 )
             }
         }
-        return explorationPage
+        return explorePage
     }
 
     private suspend fun getUpdateBooks(channel: Int) = Jsoup
@@ -65,6 +65,6 @@ object UpdateExplorationPageDataSource : ExplorationPageDataSource {
         }
         .data
         .map {
-            ExplorationDisplayBook(it.id, it.title, "", it.cover)
+            ExploreDisplayBook(it.id, it.title, "", it.cover)
         }
 }

@@ -2,29 +2,29 @@ package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8
 
 
 import androidx.navigation.NavController
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.IsCompletedSwitchFilter
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SingleChoiceFilter
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.WordCountFilter
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8AllExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8HomeExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.Wenku8TagsExplorationPage
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.expanedpage.HomeBookExpandPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.exploration.expanedpage.filter.PublishingHouseSingleChoiceFilter
-import indi.dmzz_yyhyy.lightnovelreader.ui.home.exploration.expanded.navigateToExplorationExpandDestination
+import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.expanded.navigateToExplorationExpandDestination
 import indi.dmzz_yyhyy.lightnovelreader.utils.MixDataCache
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.book.ChapterInformation
+import io.nightfish.lightnovelreader.api.book.MutableBookInformation
+import io.nightfish.lightnovelreader.api.book.MutableChapterContent
+import io.nightfish.lightnovelreader.api.book.Volume
+import io.nightfish.lightnovelreader.api.web.WebBookDataSource
+import io.nightfish.lightnovelreader.api.web.WebDataSource
+import io.nightfish.lightnovelreader.api.web.explore.ExploreExpandedPageDataSource
+import io.nightfish.lightnovelreader.api.web.explore.ExplorePageDataSource
+import io.nightfish.lightnovelreader.api.web.explore.filter.IsCompletedSwitchFilter
+import io.nightfish.lightnovelreader.api.web.explore.filter.SingleChoiceFilter
+import io.nightfish.lightnovelreader.api.web.explore.filter.WordCountFilter
 import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +62,7 @@ object Wenku8Api: WebBookDataSource {
     private var allBookChapterListCacheId: Int = -1
     private var allBookChapterListCache: List<ChapterInformation> = emptyList()
     private val DATA_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    override val explorationExpandedPageDataSourceMap = mutableMapOf<String, ExplorationExpandedPageDataSource>()
+    override val exploreExpandedPageDataSourceMap = mutableMapOf<String, ExploreExpandedPageDataSource>()
     private var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
     private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
     private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
@@ -227,26 +227,28 @@ object Wenku8Api: WebBookDataSource {
                             lastChapter = allBookChapterListCache
                                 .indexOfFirst { it.id == chapterId }
                                 .let {
-                                    if (it == -1) it else allBookChapterListCache.getOrNull(it - 1)?.id ?: -1
+                                    if (it == -1) it else allBookChapterListCache.getOrNull(it - 1)?.id
+                                        ?: -1
                                 },
                             nextChapter = allBookChapterListCache
                                 .indexOfFirst { it.id == chapterId }
                                 .let {
-                                    if (it == -1) it else allBookChapterListCache.getOrNull(it + 1)?.id ?: -1
+                                    if (it == -1) it else allBookChapterListCache.getOrNull(it + 1)?.id
+                                        ?: -1
                                 }
                         )
                     } ?: ChapterContent.empty()
             }
     }
 
-    override val explorationPageDataSourceMap: Map<String, ExplorationPageDataSource> =
+    override val explorePageDataSourceMap: Map<String, ExplorePageDataSource> =
         mapOf(
             Pair("首页", Wenku8HomeExplorationPage),
             Pair("全部", Wenku8AllExplorationPage),
             Pair("分类", Wenku8TagsExplorationPage)
         )
 
-    override val explorationPageIdList: List<String> = listOf("首页", "全部", "分类")
+    override val explorePageIdList: List<String> = listOf("首页", "全部", "分类")
 
     override fun search(searchType: String, keyword: String): Flow<List<BookInformation>> {
         val searchResult = MutableStateFlow(emptyList<BookInformation>())
@@ -257,7 +259,7 @@ object Wenku8Api: WebBookDataSource {
                 "action=search&searchtype=$searchType&searchkey=${
                     URLEncoder.encode(
                         encodedKeyword,
-                        "utf-8"
+                        "utf-8" 
                     )
                 }"
             )
@@ -349,8 +351,8 @@ object Wenku8Api: WebBookDataSource {
                 }
             }
 
-    private fun registerExplorationExpandedPageDataSource(id: String, expandedPageDataSource: ExplorationExpandedPageDataSource) =
-            explorationExpandedPageDataSourceMap.put(id, expandedPageDataSource)
+    private fun registerExplorationExpandedPageDataSource(id: String, expandedPageDataSource: ExploreExpandedPageDataSource) =
+        exploreExpandedPageDataSourceMap.put(id, expandedPageDataSource)
 
     init {
         registerExplorationExpandedPageDataSource(

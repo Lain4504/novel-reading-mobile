@@ -24,6 +24,7 @@ class PluginManagerViewModel @Inject constructor(
 ): ViewModel() {
     private val enabledPluginUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.EnabledPlugins.path)
     val enabledPluginFlow = enabledPluginUserData.getFlowWithDefault(emptyList())
+    val errorPluginUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.ErrorPlugins.path)
     val pluginList = pluginManager.allPluginInfo
 
 
@@ -50,7 +51,7 @@ class PluginManagerViewModel @Inject constructor(
 
     fun installPlugin(uri: Uri) {
         CoroutineScope(Dispatchers.IO).launch {
-            val pluginFile = context.dataDir.resolve("plugin").resolve("${uri.hashCode()}.dex")
+            val pluginFile = context.dataDir.resolve("plugin").resolve("${uri.hashCode()}")
             context.contentResolver.openFileDescriptor(uri, "r")?.use { parcelFileDescriptor ->
                 FileInputStream(parcelFileDescriptor.fileDescriptor).use { plugin ->
                     pluginFile.outputStream().use {
@@ -58,14 +59,23 @@ class PluginManagerViewModel @Inject constructor(
                     }
                 }
             }
-            val id = pluginManager.loadPlugin(pluginFile)
+            errorPluginUserData.update {
+                it + listOf(pluginFile.path)
+            }
+            val id = pluginManager.loadPlugin(pluginFile, forceLoad = true)
             if (id == null) {
                 viewModelScope.launch {
                     Toast
                         .makeText(context, "插件加载失败, 请检查文件合法性", Toast.LENGTH_SHORT)
                         .show()
                 }
+                pluginFile.delete()
                 return@launch
+            }
+            errorPluginUserData.update {
+                it.toMutableList().apply {
+                    remove(pluginFile.path)
+                }
             }
             enabledPluginUserData.update {
                 it.toMutableList().apply {

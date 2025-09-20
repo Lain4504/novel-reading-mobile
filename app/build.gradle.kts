@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+    import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
@@ -140,10 +140,11 @@ dependencies {
     implementation(libs.zoomable.image.coil)
     // Shimmer
     implementation(libs.compose.shimmer)
-
+    // LNR API
+    implementation(project(":api"))
 }
 
-configurations.implementation{
+configurations.implementation {
     exclude(group = "com.intellij", module = "annotations")
 }
 

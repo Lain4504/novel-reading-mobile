@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSource
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
+import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 import javax.inject.Singleton
 
 @Module

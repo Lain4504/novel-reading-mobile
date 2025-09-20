@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.plugin
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -11,6 +12,8 @@ import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
+import io.nightfish.lightnovelreader.api.plugin.LightNovelReaderPlugin
+import io.nightfish.lightnovelreader.api.plugin.Plugin
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,17 +26,27 @@ class PluginManager @Inject constructor(
 ) {
     private val _allPluginInfo = mutableStateListOf<PluginInfo>()
     private val pluginPathMap = mutableMapOf<String, File>()
+    private val pluginClassLoaderMap = mutableMapOf<String, DexClassLoader>()
     val allPluginInfo: SnapshotStateList<PluginInfo> = _allPluginInfo
     private val enabledPluginsUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.EnabledPlugins.path)
+    private val errorPluginsUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.ErrorPlugins.path)
     private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic)
     private val defaultPlugins = listOf<LightNovelReaderPlugin>()
 
     fun loadAllPlugins() {
+        errorPluginsUserData.get()?.forEach { path ->
+            File(path).delete()
+            errorPluginsUserData.update {
+                it.toMutableList().apply {
+                    remove(path)
+                }
+            }
+        }
         defaultWebDataSources.forEach(webBookDataSourceManager::loadWebDataSourceClass)
         defaultPlugins.forEach(::loadPlugin)
         appContext.dataDir.resolve("plugin")
             .also(File::mkdir)
-            .listFiles { it.name.endsWith(".dex") }
+            .listFiles()
             ?.forEach(::loadPlugin)
     }
 
@@ -58,15 +71,20 @@ class PluginManager @Inject constructor(
         return null
     }
 
-    fun loadPlugin(path: File): String? {
+    fun loadPlugin(path: File, forceLoad: Boolean = false): String? {
         val classLoader = DexClassLoader(
             path.path,
             appContext.cacheDir.resolve("plugin/optimizedDirectory").path,
             null,
-            appContext.classLoader
+            this.javaClass.classLoader
         )
+        val packageManager = appContext.packageManager
+        val packageInfo = packageManager.getPackageArchiveInfo(path.path, PackageManager.GET_PERMISSIONS)
+        val scanPackage = packageInfo?.packageName ?: ""
         return loadPlugin(
-            classLoader
+            classLoader,
+            scanPackage,
+            forceLoad
         ).also {
             if (it != null) {
                 pluginPathMap[it] = path
@@ -74,9 +92,9 @@ class PluginManager @Inject constructor(
         }
     }
 
-    fun loadPlugin(classLoader: DexClassLoader): String? {
+    fun loadPlugin(classLoader: DexClassLoader, scanPackage: String = "", forceLoad: Boolean = false): String? {
         var id: String? = null
-        AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java)
+        AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java, scanPackage)
             .map {
                 try { it.getDeclaredField("INSTANCE").get(null) }
                 catch (_: NoSuchFieldException) { null }
@@ -87,10 +105,12 @@ class PluginManager @Inject constructor(
             .firstOrNull()
             ?.also {
                 id = loadPlugin(it)
-                if (!enabledPluginsUserData.getOrDefault(emptyList()).contains(id)) return id
+                if (!enabledPluginsUserData.getOrDefault(emptyList()).contains(id) && !forceLoad) return id
             }
             ?.let(LightNovelReaderPlugin::onLoad)
-        webBookDataSourceManager.loadWebDataSourcesFromClassLoader(classLoader)
+        webBookDataSourceManager.loadWebDataSourcesFromClassLoader(classLoader, scanPackage)
+        if (id != null)
+            pluginClassLoaderMap[id] = classLoader
         return id
     }
 
@@ -100,14 +120,7 @@ class PluginManager @Inject constructor(
     }
 
     fun unloadPlugin(id: String) {
-        val path = pluginPathMap[id] ?: return
-        val classLoader = DexClassLoader(
-            path.path,
-            appContext.cacheDir.resolve("plugin/optimizedDirectory").path,
-            null,
-            this::class.java.classLoader
-        )
-        webBookDataSourceManager.unLoadWebDataSourcesFromPackages(classLoader)
+        pluginClassLoaderMap[id]?.let { webBookDataSourceManager.unloadWebDataSourcesFromClassLoader(it) }
     }
 
     fun deletePlugin(id: String) {

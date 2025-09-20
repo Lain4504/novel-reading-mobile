@@ -1,10 +1,11 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.web
 
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationExpandedPageDataSource
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.web.WebBookDataSource
+import io.nightfish.lightnovelreader.api.web.explore.ExploreExpandedPageDataSource
+import io.nightfish.lightnovelreader.api.web.explore.ExplorePageDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -14,9 +15,9 @@ object EmptyWebDataSource: WebBookDataSource {
 
     override val offLine: Boolean = true
     override val isOffLineFlow: Flow<Boolean> = flow { true }
-    override val explorationPageIdList: List<String> = emptyList()
-    override val explorationPageDataSourceMap: Map<String, ExplorationPageDataSource> = emptyMap()
-    override val explorationExpandedPageDataSourceMap: Map<String, ExplorationExpandedPageDataSource> = emptyMap()
+    override val explorePageIdList: List<String> = emptyList()
+    override val explorePageDataSourceMap: Map<String, ExplorePageDataSource> = emptyMap()
+    override val exploreExpandedPageDataSourceMap: Map<String, ExploreExpandedPageDataSource> = emptyMap()
     override val searchTypeMap: Map<String, String> = emptyMap()
     override val searchTipMap: Map<String, String> = emptyMap()
     override val searchTypeIdList: List<String> = emptyList()

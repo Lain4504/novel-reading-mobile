@@ -61,11 +61,15 @@
 -keep class indi.dmzz_yyhyy.lightnovelreader.data.** { *; }
 -keep class indi.dmzz_yyhyy.lightnovelreader.utils.** { *; }
 -keep class indi.dmzz_yyhyy.lightnovelreader.R$* { *; }
--keep class io.nightfish.* { *; }
+-keep class io.nightfish.** { *; }
 -keepclasseswithmembers class indi.dmzz_yyhyy.lightnovelreader.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 -keep class indi.dmzz_yyhyy.lightnovelreader.defaultplugin.** { *; }
+
+-keep class kotlin.** { *; }
+-keep class kotlinx.** { *; }
+
 -dontwarn org.dom4j.**
 -keep class org.dom4j.**{*;}
 -keep interface org.dom4j.** { *; }

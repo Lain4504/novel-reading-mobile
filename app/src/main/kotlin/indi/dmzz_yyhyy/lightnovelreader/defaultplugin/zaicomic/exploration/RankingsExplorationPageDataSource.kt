@@ -1,19 +1,19 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration
 
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
+import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
+import io.nightfish.lightnovelreader.api.explore.ExplorePage
+import io.nightfish.lightnovelreader.api.web.explore.ExplorePageDataSource
 import kotlinx.coroutines.flow.MutableStateFlow
 
-object RankingsExplorationPageDataSource : ExplorationPageDataSource {
+object RankingsExplorationPageDataSource : ExplorePageDataSource {
     private var lock = false
-    private val explorationBooksRows: MutableStateFlow<List<ExplorationBooksRow>> = MutableStateFlow(emptyList())
-    private val explorationPage = ExplorationPage("排行", explorationBooksRows)
+    private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())
+    private val explorePage = ExplorePage("排行", exploreBooksRows)
 
     override val title = "排行"
 
-    override fun getExplorationPage(): ExplorationPage {
-        if (lock) return explorationPage
-        return explorationPage
+    override fun getExplorePage(): ExplorePage {
+        if (lock) return explorePage
+        return explorePage
     }
 }

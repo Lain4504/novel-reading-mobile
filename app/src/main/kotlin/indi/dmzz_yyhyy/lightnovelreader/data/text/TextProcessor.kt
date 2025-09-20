@@ -1,9 +1,9 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.text
 
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
 
 interface TextProcessor {
     val enabled: Boolean
@@ -36,8 +36,8 @@ interface TextProcessor {
     fun processChapterContent(bookId: Int, chapterContent: ChapterContent): ChapterContent = chapterContent.toMutable().apply {
         this.content = processText(content)
     }
-    fun processExplorationBooksRow(explorationDisplayBook: ExplorationDisplayBook): ExplorationDisplayBook = explorationDisplayBook.copy(
-        title = this.processText(explorationDisplayBook.title),
-        author = this.processText(explorationDisplayBook.author),
+    fun processExploreBooksRow(exploreDisplayBook: ExploreDisplayBook): ExploreDisplayBook = exploreDisplayBook.copy(
+        title = this.processText(exploreDisplayBook.title),
+        author = this.processText(exploreDisplayBook.author),
     )
 }

@@ -20,7 +20,8 @@ object AnnotationScanner {
     @SuppressLint("NewApi")
     fun findAnnotatedClasses(
         classLoader: DexClassLoader,
-        annotationClass: Class<out Annotation?>
+        annotationClass: Class<out Annotation?>,
+        scanPackage: String = "",
     ): MutableList<Class<*>> {
         val result: MutableList<Class<*>> = ArrayList()
 
@@ -37,20 +38,14 @@ object AnnotationScanner {
                 val classNames = dexFile.entries()
                 while (classNames.hasMoreElements()) {
                     val className = classNames.nextElement()
-                    if (className == null || className.isEmpty() || !className.contains(".")) continue
+                    if (className == null || className.isEmpty() || !className.contains(".") || !className.startsWith(scanPackage)) continue
                     try {
                         val clazz = classLoader.loadClass(className)
                         if (clazz.isAnnotationPresent(annotationClass)) {
                             result.add(clazz)
                             Log.d(TAG, "Found annotated class: $className")
                         }
-                    } catch (e: ClassNotFoundException) {
-                        Log.w(TAG, "Class not found: $className", e)
-                    } catch (e: NoClassDefFoundError) {
-                        Log.w(TAG, "Class def not found: $className", e)
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Error loading class: $className", e)
-                    }
+                    } catch (_: Exception) { }
                 }
             }
         } catch (e: Exception) {

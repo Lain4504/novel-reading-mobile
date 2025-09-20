@@ -21,5 +21,4 @@ rootProject.name = "LightNovelReaderRefactoring"
 include(":app")
 include(":epub")
 include(":proxy")
-include(":plugin")
-include(":plugin:defaultdatasource")
+include(":api")

@@ -26,11 +26,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.Filter
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SingleChoiceFilter
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SliderFilter
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.filter.SwitchFilter
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import io.nightfish.lightnovelreader.api.web.explore.filter.Filter
+import io.nightfish.lightnovelreader.api.web.explore.filter.SingleChoiceFilter
+import io.nightfish.lightnovelreader.api.web.explore.filter.SliderFilter
+import io.nightfish.lightnovelreader.api.web.explore.filter.SwitchFilter
 
 @Composable
 fun Filter.Component(dialog: (@Composable () -> Unit) -> Unit) {

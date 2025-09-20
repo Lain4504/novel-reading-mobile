@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader
 
 import android.app.Application
+import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.WorkManager
@@ -29,6 +30,10 @@ class LightNovelReaderApplication : Application(), Configuration.Provider {
         Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+    }
 
     override fun onCreate() {
         super.onCreate()

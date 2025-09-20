@@ -2,44 +2,43 @@ package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration
 
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.DataContent
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.TagTypeItem
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
+import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
+import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
+import io.nightfish.lightnovelreader.api.explore.ExplorePage
+import io.nightfish.lightnovelreader.api.web.explore.ExplorePageDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
-import kotlin.collections.forEach
 
-object TypesExplorationPageDataSource : ExplorationPageDataSource {
+object TypesExplorationPageDataSource : ExplorePageDataSource {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var lock = false
-    private val explorationBooksRows: MutableStateFlow<List<ExplorationBooksRow>> = MutableStateFlow(emptyList())
-    private val explorationPage = ExplorationPage("分类", explorationBooksRows)
+    private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())
+    private val explorePage = ExplorePage("分类", exploreBooksRows)
 
     override val title = "分类"
 
-    override fun getExplorationPage(): ExplorationPage {
-        if (lock) return explorationPage
+    override fun getExplorePage(): ExplorePage {
+        if (lock) return explorePage
         lock = true
         scope.launch {
             getAllTypes().forEach { tagTypeItem ->
-                explorationBooksRows.update {
-                    it + ExplorationBooksRow(
+                exploreBooksRows.update {
+                    it + ExploreBooksRow(
                         tagTypeItem.title,
                         getTagBooks(tagTypeItem.tagId)
                     )
                 }
             }
         }
-        return explorationPage
+        return explorePage
     }
 
     private suspend fun getAllTypes(): List<TagTypeItem> = Jsoup
@@ -67,7 +66,7 @@ object TypesExplorationPageDataSource : ExplorationPageDataSource {
         }
         .data
         .comicList
-        .map { ExplorationDisplayBook(it.id, it.title, "", it.cover) }
+        .map { ExploreDisplayBook(it.id, it.title, "", it.cover) }
 
     private data class ComicList<T> (@SerializedName("comicList") val comicList: List<T>)
 

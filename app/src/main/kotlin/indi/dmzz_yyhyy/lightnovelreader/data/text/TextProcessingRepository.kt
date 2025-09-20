@@ -1,10 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.text
 
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
+import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
 import indi.dmzz_yyhyy.lightnovelreader.data.format.FormatRepository
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterContent
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,7 +46,7 @@ class TextProcessingRepository @Inject constructor(
             processor.processChapterContent(bookId, it)
         }
     }
-    fun processExplorationBooksRow(explorationDisplayBook: ExplorationDisplayBook): ExplorationDisplayBook = process(explorationDisplayBook) { it::processExplorationBooksRow }
+    fun processExploreBooksRow(exploreDisplayBook: ExploreDisplayBook): ExploreDisplayBook = process(exploreDisplayBook) { it::processExploreBooksRow }
 
     init {
         registerProcessors(simplifiedTraditionalProcessor)

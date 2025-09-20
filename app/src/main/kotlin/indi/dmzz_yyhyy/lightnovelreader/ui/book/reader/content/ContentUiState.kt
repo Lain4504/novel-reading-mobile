@@ -1,7 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content
 
 import androidx.compose.runtime.Stable
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
+import io.nightfish.lightnovelreader.api.book.ChapterContent
 
 @Stable
 interface ContentUiState {

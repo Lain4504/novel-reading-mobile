@@ -1,11 +1,11 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json
 
 import com.google.gson.annotations.SerializedName
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.BookVolumes
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableBookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.book.Volume
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.ChapterInformation
+import io.nightfish.lightnovelreader.api.book.MutableBookInformation
+import io.nightfish.lightnovelreader.api.book.Volume
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.TimeZone
@@ -44,14 +44,23 @@ data class DetailData(
             title = title,
             subtitle = "",
             coverUrl = cover,
-            author = try { authors.joinToString(" ") { it.name } } catch (_: NullPointerException) { "" },
+            author = try {
+                authors.joinToString(" ") { it.name }
+            } catch (_: NullPointerException) {
+                ""
+            },
             description = description,
-            tags = try { tags.map { it.name } } catch (_: NullPointerException) { emptyList() },
+            tags = try {
+                tags.map { it.name }
+            } catch (_: NullPointerException) {
+                emptyList()
+            },
             publishingHouse = "",
             wordCount = 0,
             lastUpdated = LocalDateTime.ofInstant(
                 Instant.ofEpochSecond(lastUpdateTime),
-                TimeZone.getDefault().toZoneId()),
+                TimeZone.getDefault().toZoneId()
+            ),
             isComplete = status.any { it.name == "以完结" }
         )
 
@@ -60,7 +69,7 @@ data class DetailData(
             id,
             volumes.mapIndexed { id, comicVolume ->
                 Volume(
-                    volumeId = this.id*1000+id,
+                    volumeId = this.id * 1000 + id,
                     volumeTitle = comicVolume.title,
                     chapters = comicVolume.data
                         .sortedBy { it.order }

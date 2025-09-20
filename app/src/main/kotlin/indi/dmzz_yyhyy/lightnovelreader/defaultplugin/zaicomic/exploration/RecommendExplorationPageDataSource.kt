@@ -1,14 +1,14 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.exploration
 
 import com.google.gson.reflect.TypeToken
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationBooksRow
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationDisplayBook
-import indi.dmzz_yyhyy.lightnovelreader.data.exploration.ExplorationPage
-import indi.dmzz_yyhyy.lightnovelreader.data.web.exploration.ExplorationPageDataSource
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json.RecommendData
 import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.getImageSize
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGetJsonText
+import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
+import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
+import io.nightfish.lightnovelreader.api.explore.ExplorePage
+import io.nightfish.lightnovelreader.api.web.explore.ExplorePageDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,15 +16,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
-object RecommendExplorationPageDataSource : ExplorationPageDataSource {
+object RecommendExplorationPageDataSource : ExplorePageDataSource {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var lock = false
-    private val explorationBooksRows: MutableStateFlow<List<ExplorationBooksRow>> = MutableStateFlow(emptyList())
-    private val explorationPage = ExplorationPage("推荐", explorationBooksRows)
+    private val exploreBooksRows: MutableStateFlow<List<ExploreBooksRow>> = MutableStateFlow(emptyList())
+    private val explorePage = ExplorePage("推荐", exploreBooksRows)
 
     override val title = "推荐"
-    override fun getExplorationPage(): ExplorationPage {
-        if (lock) return explorationPage
+    override fun getExplorePage(): ExplorePage {
+        if (lock) return explorePage
         lock = true
         scope.launch {
             Jsoup
@@ -42,21 +42,21 @@ object RecommendExplorationPageDataSource : ExplorationPageDataSource {
                         val coverSize = getImageSize(it.cover) ?: return@mapNotNull null
                         if (coverSize.width > coverSize.height ) {
                             val bookInformation = ZaiComic.getBookInformation(it.id)
-                            return@mapNotNull ExplorationDisplayBook(
+                            return@mapNotNull ExploreDisplayBook(
                                 it.id,
                                 it.title,
                                 "",
                                 bookInformation.coverUrl
                             )
                         }
-                        ExplorationDisplayBook(it.id, it.title, "", it.cover)
+                        ExploreDisplayBook(it.id, it.title, "", it.cover)
                     }
                     if (books.isEmpty()) return@forEach
-                    explorationBooksRows.update {
-                        it + ExplorationBooksRow(recommendData.title, books)
+                    exploreBooksRows.update {
+                        it + ExploreBooksRow(recommendData.title, books)
                     }
                 }
         }
-        return explorationPage
+        return explorePage
     }
 }

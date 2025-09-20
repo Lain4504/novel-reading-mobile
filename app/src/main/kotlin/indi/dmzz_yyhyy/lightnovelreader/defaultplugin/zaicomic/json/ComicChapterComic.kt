@@ -1,8 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.json
 
 import com.google.gson.annotations.SerializedName
-import indi.dmzz_yyhyy.lightnovelreader.data.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.data.book.MutableChapterContent
+import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.book.MutableChapterContent
 
 data class ComicChapterComic(
     @SerializedName("chapter_id")

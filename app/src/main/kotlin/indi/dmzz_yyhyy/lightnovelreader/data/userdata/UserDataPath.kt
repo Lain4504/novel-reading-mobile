@@ -81,6 +81,7 @@ sealed class UserDataPath(
     data object CompletedDownloadBookList: UserDataPath("completedDownloadBookList")
     data object Plugin: UserDataPath("plugin") {
         data object EnabledPlugins: UserDataPath("enabledPlugins", Plugin)
+        data object ErrorPlugins: UserDataPath("errorPlugins", Plugin)
     }
 }
 
