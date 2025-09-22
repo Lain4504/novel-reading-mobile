@@ -24,6 +24,12 @@ class ExploreSearchViewModel @Inject constructor(
     private var searchJob: Job? = null
     val uiState: ExploreSearchUiState = _uiState
 
+    override fun onCleared() {
+        super.onCleared()
+        explorationRepository.stopAllSearch()
+        searchJob?.cancel()
+    }
+
     fun init() {
         viewModelScope.launch(Dispatchers.IO) {
             searchTypeTipMap = exploreRepository.searchTipMap
