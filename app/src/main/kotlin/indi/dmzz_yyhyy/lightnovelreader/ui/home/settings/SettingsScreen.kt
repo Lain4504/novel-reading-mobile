@@ -126,7 +126,6 @@ fun SettingsScreen(
                 }
                 SettingsCategory(
                     title = stringResource(R.string.app_settings),
-                    icon = ImageVector.vectorResource(R.drawable.settings_applications_24px)
                 ) {
                     AppSettingsList(
                         settingState = settingState,

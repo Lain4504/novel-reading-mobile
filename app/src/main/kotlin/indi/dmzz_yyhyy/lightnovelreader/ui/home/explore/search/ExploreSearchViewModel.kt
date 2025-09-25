@@ -26,7 +26,7 @@ class ExploreSearchViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        explorationRepository.stopAllSearch()
+        exploreRepository.stopAllSearch()
         searchJob?.cancel()
     }
 
