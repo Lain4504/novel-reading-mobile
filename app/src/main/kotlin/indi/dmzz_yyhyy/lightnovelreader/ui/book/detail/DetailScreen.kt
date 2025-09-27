@@ -3,7 +3,6 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -12,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,8 +30,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -60,13 +60,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -84,8 +82,10 @@ import io.nightfish.lightnovelreader.api.book.Volume
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadItem
 import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
+import indi.dmzz_yyhyy.lightnovelreader.ui.components.SwitchChip
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.bookshelf.home.BookStatusIcon
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.navigateToSettingsTextFormattingRulesDestination
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
@@ -93,7 +93,6 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.isScrollingUp
 import java.text.NumberFormat
 import java.util.Locale
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,10 +117,17 @@ fun DetailScreen(
     val lazyListState = rememberLazyListState()
     val volumesEmpty = uiState.bookVolumes.volumes.isEmpty()
 
+    val isCollapsed by remember {
+        derivedStateOf {
+            lazyListState.firstVisibleItemIndex > 0 ||
+                    lazyListState.firstVisibleItemScrollOffset > 650
+        }
+    }
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopBar(
+                title = uiState.bookInformation.title,
                 volumesEmpty = volumesEmpty,
                 onClickBackButton = onClickBackButton,
                 onClickExport = { showExportBottomSheet = true },
@@ -129,7 +135,8 @@ fun DetailScreen(
                     navController.navigateToSettingsTextFormattingRulesDestination(uiState.bookInformation.id)
                 },
                 onClickMarkAllRead = onClickMarkAllRead,
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                isCollapsed = isCollapsed
             )
         },
         snackbarHost = {
@@ -143,7 +150,9 @@ fun DetailScreen(
                     exit = fadeOut()
                 ) {
                     ExtendedFloatingActionButton(
-                        modifier = Modifier.padding(end = 24.dp, start = 16.dp).padding(vertical = 14.dp),
+                        modifier = Modifier
+                            .padding(end = 24.dp, start = 16.dp)
+                            .padding(vertical = 14.dp),
                         onClick = if (uiState.userReadingData.lastReadChapterId == -1) onClickReadFromStart
                         else onClickContinueReading,
                         icon = {
@@ -207,13 +216,15 @@ fun DetailScreen(
                 onClickExport = onClickExportToEpub
             )
         }
-        BookInfoBottomSheet(
-            bookInformation = uiState.bookInformation,
-            bookVolumes = uiState.bookVolumes,
-            sheetState = infoBottomSheetState,
-            isVisible = showInfoBottomSheet,
-            onDismissRequest = { showInfoBottomSheet = false }
-        )
+        AnimatedVisibility(visible = showInfoBottomSheet) {
+            BookInfoBottomSheet(
+                bookInformation = uiState.bookInformation,
+                bookVolumes = uiState.bookVolumes,
+                sheetState = infoBottomSheetState,
+                onDismissRequest = { showInfoBottomSheet = false }
+            )
+        }
+
     }
 }
 
@@ -285,7 +296,7 @@ private fun DetailContentSkeleton(modifier: Modifier = Modifier) {
                 .padding(horizontal = 18.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
 
-        ) {
+            ) {
             repeat(3) {
                 Box(
                     modifier = Modifier
@@ -343,7 +354,6 @@ private fun DetailContent(
     onClickShowInfo: () -> Unit
 ) {
     var hideReadChapters by remember { mutableStateOf(false) }
-    val scrollOffset by remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
 
     LazyColumn(
         state = lazyListState,
@@ -354,7 +364,7 @@ private fun DetailContent(
                 bookInformation = uiState.bookInformation,
                 modifier = Modifier
                     .graphicsLayer {
-                        translationY = scrollOffset * 0.5f
+                        translationY = lazyListState.firstVisibleItemScrollOffset * 0.5f
                     }
                     .fillMaxWidth(),
                 onClickCover = onClickCover
@@ -391,27 +401,12 @@ private fun DetailContent(
                     fontWeight = FontWeight.W600
                 )
                 Spacer(Modifier.width(12.dp))
-                AssistChip(
-                    onClick = { hideReadChapters = !hideReadChapters },
-                    label = {
-                        Text(
-                            text = stringResource(
-                                if (hideReadChapters) R.string.show_read
-                                else R.string.hide_read
-                            )
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            modifier = Modifier.scale(0.75f),
-                            painter = painterResource(
-                                if (hideReadChapters) R.drawable.filled_menu_book_24px
-                                else R.drawable.done_all_24px
-                            ),
-                            contentDescription = "Toggle Hide Read"
-                        )
-                    },
-                    modifier = Modifier.padding(8.dp)
+                SwitchChip(
+                    label = stringResource(R.string.hide_read),
+                    selected = hideReadChapters,
+                    onClick = {
+                        hideReadChapters = !hideReadChapters
+                    }
                 )
             }
         }
@@ -457,24 +452,34 @@ private fun DetailContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
+    title: String,
     volumesEmpty: Boolean,
     onClickBackButton: () -> Unit,
     onClickExport: () -> Unit,
     onClickTextFormatting: () -> Unit,
     onClickMarkAllRead: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior,
+    isCollapsed: Boolean
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+    val detailTitle = stringResource(R.string.detail_title)
 
     TopAppBar(
         title = {
-            Text(
-                text = stringResource(R.string.detail_title),
-                style = AppTypography.titleTopBar,
-                fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
-            )
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AnimatedTextLine(
+                    text = if (isCollapsed) title else detailTitle,
+                    style = AppTypography.titleTopBar,
+                    fontWeight = FontWeight.Normal,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+            }
         },
         actions = {
             IconButton(
@@ -507,7 +512,7 @@ private fun TopBar(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "全部标为已读",
+                                text = stringResource(R.string.mark_all_read),
                                 style = AppTypography.dropDownItem
                             )
                         },
@@ -774,9 +779,7 @@ private fun QuickOperationsBlock(
 @Composable
 private fun IntroBlock(description: String) {
     var expanded by remember { mutableStateOf(false) }
-    var overflowed by remember(description.length) {
-        mutableStateOf(false)
-    }
+    var overflowed by rememberSaveable(description.length) { mutableStateOf(false) }
 
     val fadingBrush = remember {
         Brush.verticalGradient(
@@ -855,33 +858,22 @@ private fun VolumeItem(
     lastReadingChapterId: Int
 ) {
     val readIds = remember(readCompletedChapterIds) { readCompletedChapterIds.toSet() }
-
     val (readCount, totalCount) = remember(volume.volumeId, readIds) {
         val count = volume.chapters.count { it.id in readIds }
         count to volume.chapters.size
     }
-
     val isFullyRead = readCount >= totalCount
     var expanded by rememberSaveable {
         mutableStateOf(readCount < totalCount || volumesSize > 8)
     }
-
-    val rotation by animateFloatAsState(
-        targetValue = if (expanded) 90f else 0f,
-        animationSpec = tween(200),
-        label = "ExpandArrowRotation"
-    )
+    val rotation by animateFloatAsState(targetValue = if (expanded) 90f else 0f, animationSpec = tween(200))
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
-                .clickable { expanded = !expanded }
-                .padding(horizontal = 20.dp),
+            modifier = Modifier.clickable { expanded = !expanded }.padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.weight(5f).padding(vertical = 12.dp)
-            ) {
+            Column(modifier = Modifier.weight(5f).padding(vertical = 12.dp)) {
                 Text(
                     text = volume.volumeTitle,
                     style = AppTypography.titleMedium,
@@ -895,61 +887,31 @@ private fun VolumeItem(
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-
             if (!hideReadChapters || !isFullyRead) {
                 Spacer(Modifier.weight(1f))
                 Icon(
                     modifier = Modifier.size(16.dp).rotate(rotation),
                     painter = painterResource(id = R.drawable.arrow_forward_ios_24px),
-                    contentDescription = "expand"
+                    contentDescription = null
                 )
                 Spacer(Modifier.width(12.dp))
             }
         }
-
-        Column(
-            modifier = Modifier.animateContentSize(
-                animationSpec = tween(250)
-            )
-        ) {
+        Column(modifier = Modifier.animateContentSize(animationSpec = tween(250))) {
             if (expanded) {
                 volume.chapters.forEach { chapter ->
                     val visible = !(hideReadChapters && chapter.id in readIds)
-                    ChapterItem(
-                        chapter = chapter,
-                        isRead = chapter.id in readIds,
-                        isLastRead = chapter.id == lastReadingChapterId,
-                        visible = visible,
-                        onClick = { onClickChapter(chapter.id) }
-                    )
+                    if (visible) {
+                        ChapterItem(
+                            chapter = chapter,
+                            isRead = chapter.id in readIds,
+                            isLastRead = chapter.id == lastReadingChapterId,
+                            onClick = { onClickChapter(chapter.id) }
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun Collapsible(
-    visible: Boolean,
-    animationSpec: AnimationSpec<Float> = tween(durationMillis = 200),
-    content: @Composable () -> Unit
-) {
-    val target = if (visible) 1f else 0f
-    val progress by animateFloatAsState(targetValue = target, animationSpec = animationSpec)
-
-    Box(
-        modifier = Modifier.layout { measurable, constraints ->
-            val placeable = measurable.measure(constraints)
-            val animatedHeight = (placeable.height * progress).roundToInt()
-
-            layout(placeable.width, animatedHeight) {
-                if (animatedHeight > 0) {
-                    placeable.place(0, 0)
-                }
-            }
-        }.graphicsLayer { alpha = progress }
-    ) {
-        content()
     }
 }
 
@@ -958,21 +920,20 @@ private fun ChapterItem(
     chapter: ChapterInformation,
     isRead: Boolean,
     isLastRead: Boolean,
-    visible: Boolean,
     onClick: () -> Unit
 ) {
-    Collapsible(visible = visible) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(
-                    start = 32.dp,
-                    end = 32.dp,
-                    top = 12.dp,
-                    bottom = if (isLastRead) 6.dp else 12.dp
-                )
-        ) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(
+                start = 32.dp,
+                end = 32.dp,
+                top = 12.dp,
+                bottom = if (isLastRead) 6.dp else 12.dp
+            )
+    ) {
+        Column {
             Text(
                 text = chapter.title,
                 maxLines = 2,
