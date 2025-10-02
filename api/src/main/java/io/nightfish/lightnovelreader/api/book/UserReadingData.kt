@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import java.time.LocalDateTime
 
 @Stable
-interface UserReadingData {
+interface UserReadingData: CanBeEmpty {
     val id: Int
     val lastReadTime: LocalDateTime
     val totalReadTime: Int
@@ -20,7 +20,7 @@ interface UserReadingData {
     val lastReadChapterProgress: Float
     val readCompletedChapterIds: List<Int>
 
-    fun isEmpty(): Boolean = id == -1
+    override fun isEmpty(): Boolean = id == -1
 
     companion object {
         fun empty(): UserReadingData = MutableUserReadingData(

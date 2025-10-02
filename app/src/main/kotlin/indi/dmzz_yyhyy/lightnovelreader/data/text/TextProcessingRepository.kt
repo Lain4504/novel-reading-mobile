@@ -1,10 +1,12 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.text
 
-import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
 import indi.dmzz_yyhyy.lightnovelreader.data.format.FormatRepository
 import io.nightfish.lightnovelreader.api.book.BookInformation
 import io.nightfish.lightnovelreader.api.book.BookVolumes
 import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
+import io.nightfish.lightnovelreader.api.text.TextProcessingRepositoryApi
+import io.nightfish.lightnovelreader.api.text.TextProcessor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,11 +14,10 @@ import javax.inject.Singleton
 class TextProcessingRepository @Inject constructor(
     simplifiedTraditionalProcessor: SimplifiedTraditionalProcessor,
     formatRepository: FormatRepository
-) {
+): TextProcessingRepositoryApi {
     private val processors = mutableListOf<TextProcessor>()
 
-    @Suppress("MemberVisibilityCanBePrivate")
-    fun registerProcessors(processor: TextProcessor) {
+    override fun registerProcessors(processor: TextProcessor) {
         if (processors.contains(processor)) return
         processors.add(processor)
     }

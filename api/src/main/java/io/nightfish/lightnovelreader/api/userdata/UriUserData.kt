@@ -1,14 +1,13 @@
-package indi.dmzz_yyhyy.lightnovelreader.data.userdata
+package io.nightfish.lightnovelreader.api.userdata
 
 import android.net.Uri
 import androidx.core.net.toUri
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class UriUserData (
     override val path: String,
-    private val userDataDao: UserDataDao
+    private val userDataDao: UserDataDaoApi
 ) : UserData<Uri>(path) {
     override fun set(value: Uri) {
         userDataDao.update(path, group, "Uri", value.toString())

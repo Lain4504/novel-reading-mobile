@@ -34,7 +34,8 @@ fun ZoomableImage(
     modifier: Modifier = Modifier,
     onZoomEnd: () -> Unit,
     maxScale: Float = 5f,
-    minScale: Float = 1f
+    minScale: Float = 1f,
+    header: Map<String, String>
 ) {
     val coroutineScope = rememberCoroutineScope()
     var scale by remember { mutableFloatStateOf(1f) }
@@ -94,6 +95,11 @@ fun ZoomableImage(
                 .padding(bottom = 8.dp)
                 .align(Alignment.Center),
             model = ImageRequest.Builder(LocalContext.current)
+                .also { builder ->
+                    header.forEach {
+                        builder.addHeader(it.key, it.value)
+                    }
+                }
                 .data(imageUrl)
                 .crossfade(true)
                 .build(),

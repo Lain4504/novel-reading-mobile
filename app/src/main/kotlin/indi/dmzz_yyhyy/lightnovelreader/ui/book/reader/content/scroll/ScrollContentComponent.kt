@@ -58,7 +58,8 @@ fun ScrollContentComponent(
     changeIsImmersive: () -> Unit,
     onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
-    onClickNextChapter: () -> Unit
+    onClickNextChapter: () -> Unit,
+    header: Map<String, String>
 ) {
     ScrollContentTextComponent(
         modifier = modifier,
@@ -68,7 +69,8 @@ fun ScrollContentComponent(
         changeIsImmersive = changeIsImmersive,
         onZoomImage = onZoomImage,
         onClickPrevChapter = onClickPrevChapter,
-        onClickNextChapter = onClickNextChapter
+        onClickNextChapter = onClickNextChapter,
+        header = header
     )
 }
 
@@ -81,7 +83,8 @@ fun ScrollContentTextComponent(
     changeIsImmersive: () -> Unit,
     onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
-    onClickNextChapter: () -> Unit
+    onClickNextChapter: () -> Unit,
+    header: Map<String, String>
 ) {
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = LocalSnackbarHost.current
@@ -308,7 +311,8 @@ fun ScrollContentTextComponent(
                                     fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                                     fontFamily = fontFamily,
                                     color = textColor,
-                                    onZoomImage = onZoomImage
+                                    onZoomImage = onZoomImage,
+                                    header = header
                                 )
                             }
                     }

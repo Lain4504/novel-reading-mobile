@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import java.time.LocalDateTime
 
 @Stable
-interface BookInformation {
+interface BookInformation: CanBeEmpty {
     val id: Int
     val title: String
     val subtitle: String
@@ -39,7 +39,7 @@ interface BookInformation {
         )
     }
 
-    fun isEmpty() = id == -1 || title == ""
+    override fun isEmpty() = id == -1 || title == ""
 
     @Suppress("unused")
     fun toMutable(): MutableBookInformation {

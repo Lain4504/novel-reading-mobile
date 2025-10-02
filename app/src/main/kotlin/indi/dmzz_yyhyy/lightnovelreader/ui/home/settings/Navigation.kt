@@ -15,7 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -160,9 +160,9 @@ private fun NavGraphBuilder.exportUserDataDialog() {
         val workManager = WorkManager.getInstance(context)
         val viewModel = hiltViewModel<ExportUserDataDialogViewModel>()
         var exportContext: ExportContext by remember { mutableStateOf(MutableExportContext()) }
-        val saveDataToFileLauncher = uriLauncher {
+        val saveDataToFileLauncher = uriLauncher { uri ->
             CoroutineScope(Dispatchers.Main).launch {
-                workManager.getWorkInfoByIdFlow(viewModel.exportToFile(it, exportContext).id).collect {
+                workManager.getWorkInfoByIdFlow(viewModel.exportToFile(uri, exportContext).id).collect {
                     when (it?.state) {
                         WorkInfo.State.FAILED -> {
                             Toast.makeText(context, "导出失败", Toast.LENGTH_SHORT).show()

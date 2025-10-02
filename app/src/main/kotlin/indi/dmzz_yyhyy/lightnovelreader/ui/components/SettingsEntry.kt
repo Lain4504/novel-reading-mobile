@@ -1,6 +1,5 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
-import android.content.Intent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -29,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,115 +38,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.BooleanUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.FloatUserData
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.StringUserData
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.navigateToSliderValueDialog
+import io.nightfish.lightnovelreader.api.userdata.FloatUserData
+import io.nightfish.lightnovelreader.api.userdata.StringUserData
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
-
-@Composable
-fun SettingsSwitchEntry(
-    modifier: Modifier = Modifier,
-    iconRes: Int = -1,
-    title: String,
-    description: String,
-    checked: Boolean,
-    booleanUserData: BooleanUserData,
-    disabled: Boolean = false
-) {
-    SettingsSwitchEntry(
-        modifier = modifier,
-        iconRes = iconRes,
-        title = title,
-        description = description,
-        checked = checked,
-        onCheckedChange = booleanUserData::asynchronousSet,
-        disabled = disabled
-    )
-}
-
-@Composable
-fun SettingsSwitchEntry(
-    modifier: Modifier = Modifier,
-    iconRes: Int,
-    title: String,
-    description: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    disabled: Boolean
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .wrapContentHeight()
-            .then(if (!disabled) modifier.clickable { onCheckedChange(!checked) } else modifier)
-            .padding(start = 18.dp, end = 14.dp)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        if (iconRes > 0) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(end = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(iconRes),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = "Icon"
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 4.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = AppTypography.labelLarge
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = description,
-                color = MaterialTheme.colorScheme.secondary,
-                style = AppTypography.labelMedium
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxHeight(),
-            contentAlignment = Alignment.Center
-        ) {
-            Switch(
-                checked = checked,
-                enabled = !disabled,
-                onCheckedChange = if (disabled) null else onCheckedChange
-            )
-        }
-    }
-}
 
 @Composable
 fun SettingsSliderEntry(
@@ -438,104 +338,3 @@ fun SettingsMenuEntry(
     }
 }
 
-@Composable
-fun SettingsClickableEntry(
-    modifier: Modifier = Modifier,
-    iconRes: Int = -1,
-    title: String,
-    description: String,
-    openUrl: String
-) {
-    val context = LocalContext.current
-    SettingsClickableEntry(
-        modifier = modifier,
-        iconRes = iconRes,
-        title = title,
-        description = description,
-        onClick = {
-            openUrl.let { url ->
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                context.startActivity(intent, null)
-            }
-        }
-    )
-}
-
-@Composable
-fun SettingsClickableEntry(
-    modifier: Modifier = Modifier,
-    iconRes: Int = -1,
-    title: String,
-    option: String? = null,
-    trailingContent: (@Composable () -> Unit)? = null,
-    description: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .wrapContentHeight()
-            .then(modifier)
-            .clickable { onClick.invoke() }
-            .padding(start = 18.dp, end = 14.dp)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        if (iconRes > 0) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(end = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(iconRes),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = "Icon"
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 4.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = AppTypography.labelLarge
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = description,
-                color = MaterialTheme.colorScheme.secondary,
-                style = AppTypography.labelMedium
-            )
-            option?.let {
-                AnimatedTextLine(
-                    text = it,
-                    style = AppTypography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-        trailingContent?.let {
-            Box(
-                modifier = Modifier.wrapContentWidth(Alignment.End)
-            ) {
-                Box(Modifier.width(52.dp)) {
-                    it.invoke()
-                }
-            }
-        }
-    }
-}

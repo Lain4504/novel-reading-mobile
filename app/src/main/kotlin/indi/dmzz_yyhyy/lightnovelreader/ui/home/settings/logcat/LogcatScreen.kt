@@ -22,12 +22,12 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -53,8 +53,8 @@ import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogEntry
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogLevel
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -158,7 +158,7 @@ fun LogcatScreen(
                             colors = ExposedDropdownMenuDefaults.textFieldColors(),
                             modifier = Modifier
                                 .menuAnchor(
-                                    type = MenuAnchorType.PrimaryNotEditable,
+                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                                     enabled = true
                                 )
                                 .fillMaxWidth(),

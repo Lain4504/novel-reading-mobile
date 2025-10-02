@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.data.bookshelf
+package io.nightfish.lightnovelreader.api.bookshelf
 
 import java.time.LocalDateTime
 

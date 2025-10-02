@@ -22,14 +22,15 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,14 +47,14 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.book.ChapterContent
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
+import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
+import io.nightfish.lightnovelreader.api.ui.components.SettingsSwitchEntry
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,44 +155,44 @@ fun TabsRow(
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {
-    TabRow(
-        containerColor = colorScheme.surfaceContainerHigh,
-        selectedTabIndex = selectedTabIndex,
-        indicator = { tabPositions ->
+    SecondaryTabRow(
+        selectedTabIndex,
+        Modifier, colorScheme.surfaceContainerHigh,
+        TabRowDefaults.primaryContentColor, {
             SecondaryIndicator(
                 modifier = Modifier
-                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                    .tabIndicatorOffset(selectedTabIndex)
                     .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
             )
-        }
-    ) {
-        tabs.forEachIndexed { index, tab ->
-            Tab(
-                selected = selectedTabIndex == index,
-                onClick = { onTabSelected(index) },
-                modifier = Modifier
-                    .padding(horizontal = 6.dp)
-                    .clip(RoundedCornerShape(6.dp)),
-                content = {
-                    Row(
-                        modifier = Modifier.height(50.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(tab.iconRes),
-                            contentDescription = tab.title,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = tab.title
-                        )
+        },
+        @Composable { HorizontalDivider() }, {
+            tabs.forEachIndexed { index, tab ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { onTabSelected(index) },
+                    modifier = Modifier
+                        .padding(horizontal = 6.dp)
+                        .clip(RoundedCornerShape(6.dp)),
+                    content = {
+                        Row(
+                            modifier = Modifier.height(50.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(tab.iconRes),
+                                contentDescription = tab.title,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = tab.title
+                            )
+                        }
                     }
-                }
-            )
-        }
-    }
+                )
+            }
+        })
 }
 
 fun LazyListScope.AppearancePage(
@@ -452,5 +453,4 @@ class PreviewContentUiState(
     override val loadNextChapter: () -> Unit = {}
     override val loadLastChapter: () -> Unit = {}
     override val changeChapter: (Int) -> Unit = {}
-
 }

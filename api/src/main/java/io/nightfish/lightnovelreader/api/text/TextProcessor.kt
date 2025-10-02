@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.data.text
+package io.nightfish.lightnovelreader.api.text
 
 import io.nightfish.lightnovelreader.api.book.BookInformation
 import io.nightfish.lightnovelreader.api.book.BookVolumes

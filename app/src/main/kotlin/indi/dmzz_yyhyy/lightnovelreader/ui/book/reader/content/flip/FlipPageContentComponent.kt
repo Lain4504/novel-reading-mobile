@@ -41,6 +41,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -50,7 +51,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
@@ -60,13 +60,13 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
-import androidx.compose.ui.platform.LocalResources
 
 @Composable
 fun FlipPageContentComponent(
@@ -77,7 +77,8 @@ fun FlipPageContentComponent(
     changeIsImmersive: () -> Unit,
     onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
-    onClickNextChapter: () -> Unit
+    onClickNextChapter: () -> Unit,
+    header: Map<String, String>
 ) {
     SimpleFlipPageTextComponent(
         modifier = modifier,
@@ -87,7 +88,8 @@ fun FlipPageContentComponent(
         changeIsImmersive = changeIsImmersive,
         onZoomImage = onZoomImage,
         onClickNextChapter = onClickNextChapter,
-        onClickPrevChapter = onClickPrevChapter
+        onClickPrevChapter = onClickPrevChapter,
+        header = header
     )
 }
 
@@ -100,7 +102,8 @@ private fun SimpleFlipPageTextComponent(
     changeIsImmersive: () -> Unit,
     onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
-    onClickNextChapter: () -> Unit
+    onClickNextChapter: () -> Unit,
+    header: Map<String, String>
 ) {
     val textMeasurer = rememberTextMeasurer()
     val scope = rememberCoroutineScope()
@@ -330,7 +333,8 @@ private fun SimpleFlipPageTextComponent(
                     fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                     fontFamily = rememberReaderFontFamily(settingState),
                     color = readerTextColor(settingState),
-                    onZoomImage = onZoomImage
+                    onZoomImage = onZoomImage,
+                    header = header
                 )
             }
         }

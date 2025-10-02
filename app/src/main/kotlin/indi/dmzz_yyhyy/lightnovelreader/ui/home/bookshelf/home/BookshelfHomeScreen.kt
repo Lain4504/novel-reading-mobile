@@ -49,12 +49,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -98,16 +97,16 @@ import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.unclippedBoundsInWindow
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.book.BookInformation
-import io.nightfish.lightnovelreader.api.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.work.SaveBookshelfWork
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.HomeNavigateBar
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -271,13 +270,13 @@ fun BookshelfHomeScreen(
                     exit = shrinkVertically()
                 ) {
                     if (uiState.bookshelfList.size > 4) {
-                        ScrollableTabRow(
+                        SecondaryScrollableTabRow (
                             selectedTabIndex = uiState.selectedTabIndex,
                             edgePadding = 16.dp,
-                            indicator = { tabPositions ->
+                            indicator = {
                                 SecondaryIndicator(
                                     modifier = Modifier
-                                        .tabIndicatorOffset(tabPositions[uiState.selectedTabIndex])
+                                        .tabIndicatorOffset(uiState.selectedTabIndex)
                                         .height(4.dp)
                                         .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
                                         .background(MaterialTheme.colorScheme.secondary),
@@ -761,7 +760,7 @@ fun TopBar(
         },
         windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         scrollBehavior = scrollBehavior,
-        colors = if (uiState.selectMode) TopAppBarDefaults.mediumTopAppBarColors(
+        colors = if (uiState.selectMode) TopAppBarDefaults.topAppBarColors(
             containerColor = backgroundColor,
             scrolledContainerColor = backgroundColor
         ) else TopAppBarDefaults.topAppBarColors()

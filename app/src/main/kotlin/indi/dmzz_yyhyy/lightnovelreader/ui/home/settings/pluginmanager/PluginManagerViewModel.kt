@@ -3,13 +3,15 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.pluginmanager
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginManager
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import io.nightfish.lightnovelreader.api.userdata.UserDataPath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -89,5 +91,10 @@ class PluginManagerViewModel @Inject constructor(
         CoroutineScope(Dispatchers.IO).launch {
             pluginManager.deletePlugin(id)
         }
+    }
+
+    @Composable
+    fun PluginContent(id: String, paddingValues: PaddingValues) {
+        pluginManager.PluginContent(id, paddingValues)
     }
 }

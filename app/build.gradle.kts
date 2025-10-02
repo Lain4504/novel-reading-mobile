@@ -1,4 +1,5 @@
-    import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
@@ -51,8 +52,8 @@ android {
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_19
+        targetCompatibility = JavaVersion.VERSION_19
     }
     buildFeatures {
         compose = true
@@ -70,7 +71,7 @@ android {
 
 tasks.withType<KotlinJvmCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_19)
         freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
@@ -91,6 +92,7 @@ dependencies {
     implementation(libs.compose.material3)
     androidTestImplementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)

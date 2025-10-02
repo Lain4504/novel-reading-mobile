@@ -9,7 +9,7 @@ import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.expanedpage
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.expanedpage.filter.FirstLetterSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.expanedpage.filter.PublishingHouseSingleChoiceFilter
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.expanded.navigateToExploreExpandDestination
-import indi.dmzz_yyhyy.lightnovelreader.utils.MixDataCache
+import indi.dmzz_yyhyy.lightnovelreader.utils.Cache
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import io.nightfish.lightnovelreader.api.book.BookInformation
 import io.nightfish.lightnovelreader.api.book.BookVolumes
@@ -72,7 +72,7 @@ object Wenku8Api: WebBookDataSource {
     private val titleRegex = Regex("(.*) ?[(（](.*)[)）] ?$")
     private val hosts = listOf("https://www.wenku8.cc", "https://www.wenku8.net", "https://www.wenku8.com")
     private var isLocalIpUnableUse = true
-    private val mixDataCache = MixDataCache(
+    private val cache = Cache(
         timeout = 5 * 60 * 1000
     )
     var host  =  hosts[0]
@@ -84,11 +84,10 @@ object Wenku8Api: WebBookDataSource {
     }
 
     private inline fun <reified T> ifCache(id: Int, block: () -> T): T {
-        val cacheData = mixDataCache.getCache<T>(id)
-        println(cacheData)
+        val cacheData = cache.getCache<T>(id)
         if (cacheData == null) {
             val data = block.invoke()
-            mixDataCache.cache(id, data)
+            cache.cache(id, data)
             return data
         }
         return cacheData
@@ -122,17 +121,6 @@ object Wenku8Api: WebBookDataSource {
     }
 
     override suspend fun isOffLine(): Boolean = withContext(Dispatchers.IO) {
-        Jsoup
-            .connect("$host/")
-            .wenku8Cookie()
-            .timeout(2000)
-            .let {
-                if (ProxyPool.enable && !isLocalIpUnableUse)
-                    ProxyPool.apply {
-                        it.proxyGet()
-                    }
-                else it.get()
-            }
         val isApiOffLine =
             async {
                 tryOrFalse {

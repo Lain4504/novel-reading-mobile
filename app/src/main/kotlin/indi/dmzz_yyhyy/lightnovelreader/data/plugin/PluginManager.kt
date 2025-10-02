@@ -2,18 +2,21 @@ package indi.dmzz_yyhyy.lightnovelreader.data.plugin
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dalvik.system.DexClassLoader
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
+import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.bilinovel.BiliNovel
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
 import io.nightfish.lightnovelreader.api.plugin.LightNovelReaderPlugin
 import io.nightfish.lightnovelreader.api.plugin.Plugin
+import io.nightfish.lightnovelreader.api.userdata.UserDataPath
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,16 +25,18 @@ import javax.inject.Singleton
 class PluginManager @Inject constructor(
     @field:ApplicationContext private val appContext: Context,
     private val webBookDataSourceManager: WebBookDataSourceManager,
+    private val pluginInjector: PluginInjector,
     userDataRepository: UserDataRepository
 ) {
     private val _allPluginInfo = mutableStateListOf<PluginInfo>()
     private val pluginPathMap = mutableMapOf<String, File>()
+    private val pluginMap = mutableMapOf<String, LightNovelReaderPlugin>()
     private val pluginClassLoaderMap = mutableMapOf<String, DexClassLoader>()
     val allPluginInfo: SnapshotStateList<PluginInfo> = _allPluginInfo
     private val enabledPluginsUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.EnabledPlugins.path)
     private val errorPluginsUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.ErrorPlugins.path)
-    private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic)
-    private val defaultPlugins = listOf<LightNovelReaderPlugin>()
+    private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic, BiliNovel)
+    private val defaultPlugins = listOf<Class<*>>()
 
     fun loadAllPlugins() {
         errorPluginsUserData.get()?.forEach { path ->
@@ -43,21 +48,20 @@ class PluginManager @Inject constructor(
             }
         }
         defaultWebDataSources.forEach(webBookDataSourceManager::loadWebDataSourceClass)
-        defaultPlugins.forEach(::loadPlugin)
+        defaultPlugins.forEach { getPluginInstance(it)?.let { plugin -> loadPlugin(plugin, forceLoad = true) } }
         appContext.dataDir.resolve("plugin")
             .also(File::mkdir)
             .listFiles()
             ?.forEach {
-                it.setReadable(true, true)
-                it.setReadOnly()
+                loadPlugin(it)
             }
     }
 
-    fun loadPlugin(plugin: LightNovelReaderPlugin): String? {
+    private fun getPluginId(plugin: Class<*>): String? {
         var id: String?
-        val annotation = plugin.javaClass.getAnnotation(Plugin::class.java)
+        val annotation = plugin.getAnnotation(Plugin::class.java)
         if (annotation != null) {
-            id = plugin.javaClass.`package`?.name ?: return null
+            id = plugin.`package`?.name ?: return null
             val info = PluginInfo(
                 isUpdatable = false,
                 id = id,
@@ -74,7 +78,22 @@ class PluginManager @Inject constructor(
         return null
     }
 
+    private fun getPluginInstance(clazz: Class<*>): LightNovelReaderPlugin? {
+        if (!LightNovelReaderPlugin::class.java.isAssignableFrom(clazz)) return null
+        return pluginInjector.providePlugin(clazz)
+    }
+
+    fun loadPlugin(plugin: LightNovelReaderPlugin, forceLoad: Boolean = false) {
+        val id = getPluginId(plugin.javaClass) ?: return
+        if (!enabledPluginsUserData.getOrDefault(emptyList()).contains(id) && !forceLoad) return
+        plugin.apply {
+            onLoad()
+        }
+        pluginMap[id] = plugin
+    }
+
     fun loadPlugin(path: File, forceLoad: Boolean = false): String? {
+        path.setReadOnly()
         val classLoader = DexClassLoader(
             path.path,
             appContext.cacheDir.resolve("plugin/optimizedDirectory").path,
@@ -98,22 +117,21 @@ class PluginManager @Inject constructor(
     fun loadPlugin(classLoader: DexClassLoader, scanPackage: String = "", forceLoad: Boolean = false): String? {
         var id: String? = null
         AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java, scanPackage)
-            .map {
-                try { it.getDeclaredField("INSTANCE").get(null) }
-                catch (_: NoSuchFieldException) { null }
-                    ?: it.getDeclaredConstructor().newInstance()
+            .filter {
+                id = getPluginId(it)
+                id != null
             }
+            .map(::getPluginInstance)
             .filter { it is LightNovelReaderPlugin }
             .map { it as LightNovelReaderPlugin }
             .firstOrNull()
-            ?.also {
-                id = loadPlugin(it)
-                if (!enabledPluginsUserData.getOrDefault(emptyList()).contains(id) && !forceLoad) return id
+            ?.let {
+                loadPlugin(it, forceLoad = forceLoad)
             }
-            ?.let(LightNovelReaderPlugin::onLoad)
         webBookDataSourceManager.loadWebDataSourcesFromClassLoader(classLoader, scanPackage)
-        if (id != null)
+        if (id != null) {
             pluginClassLoaderMap[id] = classLoader
+        }
         return id
     }
 
@@ -123,6 +141,7 @@ class PluginManager @Inject constructor(
     }
 
     fun unloadPlugin(id: String) {
+        pluginMap[id]?.onUnload()
         pluginClassLoaderMap[id]?.let { webBookDataSourceManager.unloadWebDataSourcesFromClassLoader(it) }
     }
 
@@ -134,5 +153,10 @@ class PluginManager @Inject constructor(
             it.toMutableList().apply { remove(id) }
         }
         _allPluginInfo.removeIf { it.id == id }
+    }
+
+    @Composable
+    fun PluginContent(pluginId: String, paddingValues: PaddingValues) {
+        pluginMap[pluginId]?.PageContent(paddingValues)
     }
 }

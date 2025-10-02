@@ -12,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -30,8 +29,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
+import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,24 +133,21 @@ fun DebugScreen(
                     }
                 )
 
-                @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by NPE",
                     description = "NullPointerException",
                     onClick = {
-                        val s: String? = null
-                        s!!
+                        throw NullPointerException()
                     }
                 )
 
-                @Suppress("DIVISION_BY_ZERO")
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by divide by zero",
                     description = "x = 1 / 0",
                     onClick = {
-                        1 / 0
+                        throw ArithmeticException(" / by zero")
                     }
                 )
 

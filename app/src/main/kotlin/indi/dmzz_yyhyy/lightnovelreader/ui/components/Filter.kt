@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import io.nightfish.lightnovelreader.api.web.explore.filter.Filter
 import io.nightfish.lightnovelreader.api.web.explore.filter.SingleChoiceFilter
 import io.nightfish.lightnovelreader.api.web.explore.filter.SliderFilter

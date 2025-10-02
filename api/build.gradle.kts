@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
 }
 
 java {
@@ -23,6 +24,7 @@ android {
 
     buildFeatures {
         buildConfig = false
+        compose = true
     }
 
     compileOptions {
@@ -33,8 +35,11 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.foundation)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.runtime)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(platform(libs.compose.bom))
     implementation(libs.navigation.compose)
+    implementation(libs.compose.material3)
 }

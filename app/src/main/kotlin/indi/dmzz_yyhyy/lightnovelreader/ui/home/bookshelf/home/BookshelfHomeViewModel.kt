@@ -13,7 +13,7 @@ import io.nightfish.lightnovelreader.api.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import io.nightfish.lightnovelreader.api.book.BookVolumes
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.MutableBookshelf
+import io.nightfish.lightnovelreader.api.bookshelf.MutableBookshelf
 import indi.dmzz_yyhyy.lightnovelreader.data.work.ImportDataWork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren

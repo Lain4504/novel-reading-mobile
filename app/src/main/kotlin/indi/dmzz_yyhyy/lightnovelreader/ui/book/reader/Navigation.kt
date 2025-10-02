@@ -9,8 +9,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.navigation.HiltViewModelFactory
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.HiltViewModelFactory
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -19,6 +19,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.imageview.ImageViewerScreen
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.imageview.ImageViewerViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ColorPickerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
@@ -44,7 +45,8 @@ fun NavGraphBuilder.bookReaderDestination() {
             onClickNextChapter = viewModel::nextChapter,
             onChangeChapter = viewModel::changeChapter,
             onClickThemeSettings = navController::navigateToSettingsThemeDestination,
-            onZoomImage = navController::navigateToImageViewerDialog
+            onZoomImage = navController::navigateToImageViewerDialog,
+            header = viewModel.imageHeader
         )
     }
     colorPickerDialog()
@@ -100,6 +102,7 @@ private fun NavGraphBuilder.imageViewerDialog() {
     ) { entry ->
         val navController = LocalNavController.current
         val route = entry.toRoute<Route.Book.ImageViewerDialog>()
+        val viewModel = hiltViewModel<ImageViewerViewModel>()
 
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
@@ -131,9 +134,11 @@ private fun NavGraphBuilder.imageViewerDialog() {
                     onError = { error ->
                         Log.d("ImageViewer", "Failed to save image: ${error.message}")
                         Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show()
-                    }
+                    },
+                    header = viewModel.imageHeader
                 )
-            }
+            },
+            header = viewModel.imageHeader
         )
     }
 }

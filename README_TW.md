@@ -6,7 +6,7 @@
     <a><img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-0095D5.svg?logo=kotlin&logoColor=white&style=for-the-badge"/></a>
     <a><img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white&style=for-the-badge"></a>
     <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526"><img alt="QQ Group" src="https://img.shields.io/badge/QQ讨论群-867785526-brightgreen.svg?logoColor=white&style=for-the-badge"></a>
-    <a href="https://discord.gg/fCxRfsFS"><img alt="Discord" src="https://img.shields.io/badge/Discord-JOIN-4285F4.svg?logo=discord&logoColor=white&style=for-the-badge"></a>
+    <a href="https://discord.gg/pnf4ABmDJt"><img alt="Discord" src="https://img.shields.io/badge/Discord-JOIN-4285F4.svg?logo=discord&logoColor=white&style=for-the-badge"></a>
     <a href="https://t.me/lightnoble"><img alt="Discord" src="https://img.shields.io/badge/Telegram-JOIN-188FCA.svg?logo=telegram&logoColor=white&style=for-the-badge"></a>
     <p>輕小說閱讀軟體，使用 Jetpack Compose 框架開發</p>
     <img src="assets/header.png" alt="drawing" width="80%"/>
@@ -43,7 +43,7 @@ LightNovelReader <sup>*重構版*</sup> 是一款開源的輕小說閱讀軟體�
 
 - 在 [**此處**](https://github.com/dmzz-yyhyy/LightNovelReader/issues/new/choose) 提交一個錯誤回報或新功能請求
 - 歡迎加入 QQ 討論群：`867785526` | [**邀請連結**](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=P__gXIArh5UDBsEq7ttd4WhIYnNh3y1t&authKey=GAsRKEZ%2FwHpzRv19hNJsDnknOc86lYzNIHMPy2Jxt3S3U8f90qestOd760IAj%2F3l&noverify=0&group_code=867785526)
-- 歡迎加入 Discord 伺服器：[**邀請連結**](https://discord.gg/fCxRfsFS)
+- 歡迎加入 Discord 伺服器：[**邀請連結**](https://discord.gg/pnf4ABmDJt)
 - 歡迎加入 Telegram 討論群組：[**邀請連結**](https://t.me/lightnoble)
 
 ## 軟體截圖

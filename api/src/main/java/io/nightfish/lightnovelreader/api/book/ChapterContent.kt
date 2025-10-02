@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 @Stable
-interface ChapterContent {
+interface ChapterContent: CanBeEmpty {
     val id: Int
     val title: String
     val content: String
@@ -16,10 +16,11 @@ interface ChapterContent {
 
     fun hasPrevChapter(): Boolean = lastChapter > -1
     fun hasNextChapter(): Boolean = nextChapter > -1
-    fun isEmpty() = this.id == -1 || this.content.isBlank()
+    override fun isEmpty() = this.id == -1 || this.content.isBlank()
 
     companion object {
-        fun empty(): ChapterContent = MutableChapterContent(-1, "", "")
+        fun empty(): ChapterContent = empty(-1)
+        fun empty(chapterId: Int): ChapterContent = MutableChapterContent(chapterId, "", "")
     }
 
     fun toMutable(): MutableChapterContent {

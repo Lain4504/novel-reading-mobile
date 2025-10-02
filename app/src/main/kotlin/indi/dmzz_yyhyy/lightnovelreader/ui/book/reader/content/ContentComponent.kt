@@ -29,7 +29,8 @@ fun ContentComponent(
     changeIsImmersive: () -> Unit,
     onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
-    onClickNextChapter: () -> Unit
+    onClickNextChapter: () -> Unit,
+    header: Map<String, String>
 ) {
     uiState.let { contentUiState ->
         when(contentUiState) {
@@ -41,7 +42,8 @@ fun ContentComponent(
                 changeIsImmersive,
                 onZoomImage,
                 onClickPrevChapter,
-                onClickNextChapter
+                onClickNextChapter,
+                header = header
             )
             is ScrollContentUiState -> ScrollContentComponent(
                 modifier,
@@ -51,7 +53,8 @@ fun ContentComponent(
                 changeIsImmersive,
                 onZoomImage,
                 onClickPrevChapter,
-                onClickNextChapter
+                onClickNextChapter,
+                header = header
             )
             is PreviewContentUiState -> {
                 Box(
@@ -74,7 +77,8 @@ fun ContentComponent(
                                 fontWeight = FontWeight(settingState.fontWeigh.toInt()),
                                 fontFamily = rememberReaderFontFamily(settingState),
                                 color = readerTextColor(settingState),
-                                onZoomImage = onZoomImage
+                                onZoomImage = onZoomImage,
+                                header = header
                             )
                         }
                 }

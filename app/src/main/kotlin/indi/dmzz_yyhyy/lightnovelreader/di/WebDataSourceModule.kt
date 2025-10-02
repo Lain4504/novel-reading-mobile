@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
-import io.nightfish.lightnovelreader.api.web.WebBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceProvider
 import javax.inject.Singleton
 
 @Module
@@ -13,8 +13,7 @@ import javax.inject.Singleton
 object WebDataSourceModule {
     @Singleton
     @Provides
-    fun provideWebDataSource(webBookDataSourceManager: WebBookDataSourceManager): WebBookDataSource {
-        println("initWebDataSource")
-        return webBookDataSourceManager.getWebDataSource()
+    fun provideWebDataSourceProvider(webBookDataSourceManager: WebBookDataSourceManager): WebBookDataSourceProvider {
+        return webBookDataSourceManager.getWebDataSourceProvider()
     }
 }

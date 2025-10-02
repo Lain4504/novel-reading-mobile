@@ -18,6 +18,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadProgressRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.download.DownloadType
 import indi.dmzz_yyhyy.lightnovelreader.data.download.MutableDownloadItem
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceProvider
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.ExportType
 import indi.dmzz_yyhyy.lightnovelreader.utils.ImageDownloader
 import io.nightfish.lightnovelreader.api.book.BookInformation
@@ -25,7 +26,6 @@ import io.nightfish.lightnovelreader.api.book.BookVolumes
 import io.nightfish.lightnovelreader.api.book.ChapterContent
 import io.nightfish.lightnovelreader.api.book.ChapterInformation
 import io.nightfish.lightnovelreader.api.book.Volume
-import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 import io.nightfish.potatoepub.builder.ChapterBuilder
 import io.nightfish.potatoepub.builder.EpubBuilder
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +39,7 @@ import java.time.LocalDateTime
 class ExportBookToEPUBWork @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val webBookDataSource: WebBookDataSource,
+    private val webBookDataSourceProvider: WebBookDataSourceProvider,
     private val localBookDataSource: LocalBookDataSource,
     private val downloadProgressRepository: DownloadProgressRepository
 ) : CoroutineWorker(appContext, workerParams) {
@@ -125,7 +125,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
             return@withContext Result.failure()
         }
         val tasks = mutableListOf<ImageDownloader.Task>()
-        var bookInformation = webBookDataSource.getBookInformation(bookId)
+        var bookInformation = webBookDataSourceProvider.value.getBookInformation(bookId)
         if (bookInformation.isEmpty()) {
             val localData = localBookDataSource.getBookInformation(bookId)
             if (localData == null || localData.isEmpty()) {
@@ -135,7 +135,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
             }
             else bookInformation = localBookDataSource.getBookInformation(bookId)!!
         }
-        var bookVolumes = webBookDataSource.getBookVolumes(bookId)
+        var bookVolumes = webBookDataSourceProvider.value.getBookVolumes(bookId)
         if (bookVolumes.isEmpty()) {
             val localData = localBookDataSource.getBookVolumes(bookId)
             if (localData == null || localData.isEmpty()) {
@@ -157,7 +157,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
             updateProgressNotification(bookId, progressForVolume)
             downloadItem.progress = progressForVolume / 100f
             volume.chapters.forEach {
-                var chapterContent = webBookDataSource.getChapterContent(it.id, bookId)
+                var chapterContent = webBookDataSourceProvider.value.getChapterContent(it.id, bookId)
                 if (chapterContent.isEmpty()) {
                     val localData = localBookDataSource.getChapterContent(it.id)
                     if (localData == null || localData.isEmpty()) {
@@ -235,7 +235,7 @@ class ExportBookToEPUBWork @AssistedInject constructor(
                 if (currentVolumeIndex == 0)
                     cover(cover)
                 else {
-                    val url = webBookDataSource.getCoverUrlInVolume(bookId, volume, bookContentMap)
+                    val url = webBookDataSourceProvider.value.getCoverUrlInVolume(bookId, volume, bookContentMap)
                     if (url == null) {
                         cover(cover)
                     } else {
