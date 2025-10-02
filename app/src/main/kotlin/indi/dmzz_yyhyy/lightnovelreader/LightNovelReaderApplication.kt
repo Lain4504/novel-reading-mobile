@@ -9,8 +9,8 @@ import dagger.hilt.android.HiltAndroidApp
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LogLevel
 import indi.dmzz_yyhyy.lightnovelreader.data.logging.LoggerRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginManager
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import io.nightfish.lightnovelreader.api.userdata.UserDataPath
 import io.nightfish.potatoautoproxy.ProxyPool
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -17,15 +17,15 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceProvider
 import io.nightfish.lightnovelreader.api.book.BookInformation
-import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 import kotlinx.coroutines.delay
 
 @HiltWorker
 class CheckUpdateWork @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val webBookDataSource: WebBookDataSource,
+    private val webBookDataSourceProvider: WebBookDataSourceProvider,
     private val bookshelfRepository: BookshelfRepository
 ) : CoroutineWorker(appContext, workerParams) {
 
@@ -34,7 +34,7 @@ class CheckUpdateWork @AssistedInject constructor(
         bookshelfRepository.getAllBookshelfBooksMetadata().forEach { bookshelfBookMetadata ->
             delay(3000)
             Log.d("CheckUpdateWork", "Updating book id=${bookshelfBookMetadata.id}")
-            val bookInformation = webBookDataSource.getBookInformation(bookshelfBookMetadata.id)
+            val bookInformation = webBookDataSourceProvider.value.getBookInformation(bookshelfBookMetadata.id)
             val webBookLastUpdate = bookInformation.lastUpdated
             if (webBookLastUpdate.isAfter(bookshelfBookMetadata.lastUpdate)) {
                 bookshelfBookMetadata.bookShelfIds.forEach {

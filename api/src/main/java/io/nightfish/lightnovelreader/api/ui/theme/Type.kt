@@ -1,11 +1,12 @@
-package indi.dmzz_yyhyy.lightnovelreader.theme
+package io.nightfish.lightnovelreader.api.ui.theme
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 object AppTypography {
-    val titleTopBar = TextStyle(fontSize = 22.sp, lineHeight = 18.sp, fontWeight = FontWeight.W600)
+    val titleTopBar =
+        TextStyle(fontSize = 22.sp, lineHeight = 18.sp, fontWeight = FontWeight.Companion.W600)
     val titleSubTopBar = TextStyle(fontSize = 14.sp, lineHeight = 18.sp)
     val titleLarge = TextStyle(fontSize = 19.sp, lineHeight = 26.sp, fontWeight = FontWeight.W600)
     val titleMedium = TextStyle(fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.W600)

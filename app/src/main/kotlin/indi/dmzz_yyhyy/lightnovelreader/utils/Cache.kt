@@ -2,7 +2,7 @@ package indi.dmzz_yyhyy.lightnovelreader.utils
 
 import kotlin.reflect.KClass
 
-class MixDataCache(
+class Cache(
     val maxCountEachType: Int = 10,
     val timeout: Int = 30_000
 ) {
@@ -32,8 +32,10 @@ class MixDataCache(
         if (!cacheMap.contains(tClass)) return null
         val map = cacheMap[tClass] ?: return null
         val data = map[id] ?: return null
-        if (System.currentTimeMillis() - data.time > timeout)
+        if (System.currentTimeMillis() - data.time > timeout) {
             map.remove(id)
+            return null
+        }
         return data.data as T
     }
 }

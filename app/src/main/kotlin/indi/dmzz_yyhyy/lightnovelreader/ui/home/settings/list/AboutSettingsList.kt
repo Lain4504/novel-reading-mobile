@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import indi.dmzz_yyhyy.lightnovelreader.BuildConfig
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsAboutInfoDialog
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
+import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
 
 @Composable
 fun AboutSettingsList(

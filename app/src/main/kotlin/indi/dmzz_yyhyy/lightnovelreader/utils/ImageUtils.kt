@@ -52,12 +52,18 @@ object ImageUtils {
         imageURL: String,
         context: Context,
         onSuccess: (Bitmap) -> Unit,
-        onError: (Throwable) -> Unit
+        onError: (Throwable) -> Unit,
+        header: Map<String, String> = emptyMap()
     ) {
         scope.launch(Dispatchers.IO) {
             try {
                 val loader = ImageLoader(context)
                 val request = ImageRequest.Builder(context)
+                    .also { builder ->
+                        header.forEach {
+                            builder.addHeader(it.key, it.value)
+                        }
+                    }
                     .data(imageURL)
                     .allowHardware(false)
                     .build()

@@ -83,7 +83,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedTextLine
@@ -94,6 +93,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import io.nightfish.lightnovelreader.api.book.BookVolumes
 import io.nightfish.lightnovelreader.api.book.ChapterContent
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -112,7 +112,8 @@ fun ReaderScreen(
     onClickNextChapter: () -> Unit,
     onChangeChapter: (Int) -> Unit,
     onClickThemeSettings: () -> Unit,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    header: Map<String, String>
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isImmersive by remember { mutableStateOf(false) }
@@ -190,7 +191,8 @@ fun ReaderScreen(
             onChangeChapter = onChangeChapter,
             onChangeIsImmersive = { isImmersive = !isImmersive },
             onClickThemeSettings = onClickThemeSettings,
-            onZoomImage = onZoomImage
+            onZoomImage = onZoomImage,
+            header = header
         )
     }
 }
@@ -208,7 +210,8 @@ fun Content(
     onChangeChapter: (Int) -> Unit,
     onChangeIsImmersive: () -> Unit,
     onClickThemeSettings: () -> Unit,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    header: Map<String, String>
 ) {
     val activity = LocalActivity.current as Activity
     val coroutineScope = rememberCoroutineScope()
@@ -333,7 +336,8 @@ fun Content(
                     changeIsImmersive = onChangeIsImmersive,
                     onZoomImage = onZoomImage,
                     onClickPrevChapter = onClickPrevChapter,
-                    onClickNextChapter = onClickNextChapter
+                    onClickNextChapter = onClickNextChapter,
+                    header = header
                 )
 
             }

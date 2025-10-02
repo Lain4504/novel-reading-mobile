@@ -24,7 +24,8 @@ fun BaseContentComponent(
     fontWeight: FontWeight,
     fontFamily: FontFamily?,
     color: Color,
-    onZoomImage: (String) -> Unit
+    onZoomImage: (String) -> Unit,
+    header: Map<String, String>
 ) {
     val trimmed = text.trim()
     if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
@@ -32,7 +33,8 @@ fun BaseContentComponent(
         ZoomableImage(
             imageUrl = trimmed,
             modifier = imageModifier,
-            onZoomEnd = { onZoomImage(trimmed) }
+            onZoomEnd = { onZoomImage(trimmed) },
+            header = header
         )
     } else {
         SelectionContainer {

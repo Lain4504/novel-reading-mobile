@@ -19,11 +19,10 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsClickableEntry
-import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.SettingState
-import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
+import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
+import io.nightfish.lightnovelreader.api.ui.components.SettingsSwitchEntry
 import kotlinx.coroutines.launch
 
 @Composable
@@ -33,8 +32,6 @@ fun DataSettingsList(
     settingState: SettingState,
     importData: (Uri) -> OneTimeWorkRequest,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = LocalSnackbarHost.current
     val context = LocalContext.current
     val workManager = WorkManager.getInstance(context)
     val scope = rememberCoroutineScope()
@@ -53,43 +50,6 @@ fun DataSettingsList(
             }
         }
     }
-    /*
-    var displayExportDialog by remember { mutableStateOf(false) }
-    var displaySourceChangeDialog by remember { mutableStateOf(false) }
-    dialog {
-        var selectedWebDataSourceId by remember { mutableStateOf(webDataSourceId) }
-        if (displaySourceChangeDialog) {
-            SourceChangeDialog(
-                onDismissRequest = {
-                    displaySourceChangeDialog = false
-                    selectedWebDataSourceId = webDataSourceId
-                },
-                onConfirmation = {
-                    displaySourceChangeDialog = false
-                    changeWebDataSource(selectedWebDataSourceId, context)
-                },
-                webDataSourceItems = listOf(wenku8ApiWebDataSourceItem, zaiComicWebDataSourceItem),
-                selectedWebDataSourceId = selectedWebDataSourceId,
-                onClickItem = {
-                    selectedWebDataSourceId = it
-                }
-            )
-        }
-        if (displayExportDialog) {
-            ExportUserDataDialog(
-                onDismissRequest = { displayExportDialog = false },
-                onClickSaveAndSend = {
-                    displayExportDialog = false
-                    exportAndSendToFile(exportContext, context)
-                },
-                onClickSaveToFile = {
-                    displayExportDialog = false
-                    exportContext = it
-                    createDataFile("LightNovelReaderData", saveDataToFileLauncher)
-                }
-            )
-        }
-    }*/
     SettingsClickableEntry(
         modifier = Modifier.background(colorScheme.surfaceContainer),
         painter = painterResource(R.drawable.output_24px),

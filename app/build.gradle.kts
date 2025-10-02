@@ -20,7 +20,7 @@ android {
         minSdk = 24
         targetSdk = 36
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*1000+debug版本号(开发需要时迭代, 三位数)
-        versionCode = 1_02_00_001
+        versionCode = 1_02_00_002
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -94,6 +94,7 @@ dependencies {
     implementation(libs.compose.material3)
     androidTestImplementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
+    implementation(libs.androidx.material.icons.core)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)

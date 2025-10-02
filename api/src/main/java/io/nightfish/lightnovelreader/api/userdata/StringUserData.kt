@@ -1,11 +1,10 @@
-package indi.dmzz_yyhyy.lightnovelreader.data.userdata
+package io.nightfish.lightnovelreader.api.userdata
 
-import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.UserDataDao
 import kotlinx.coroutines.flow.Flow
 
 class StringUserData (
     override val path: String,
-    private val userDataDao: UserDataDao
+    private val userDataDao: UserDataDaoApi
 ) : UserData<String>(path) {
     override fun set(value: String) {
         userDataDao.update(path, group, "String", value)

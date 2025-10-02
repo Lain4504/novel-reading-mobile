@@ -8,8 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.google.android.material.bottomsheet.BottomSheetBehavior.State
 import io.nightfish.lightnovelreader.api.book.BookInformation
-import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.Bookshelf
-import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.MutableBookshelf
+import io.nightfish.lightnovelreader.api.bookshelf.Bookshelf
+import io.nightfish.lightnovelreader.api.bookshelf.MutableBookshelf
 
 @State
 interface BookshelfHomeUiState {

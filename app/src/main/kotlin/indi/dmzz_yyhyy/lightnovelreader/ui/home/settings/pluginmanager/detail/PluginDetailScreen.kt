@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,8 +43,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginInfo
-import indi.dmzz_yyhyy.lightnovelreader.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.launch
 
 
@@ -117,7 +118,8 @@ fun PluginDetailScreen(
     enabled: Boolean,
     pluginInfo: PluginInfo?,
     onClickBack: () -> Unit,
-    onClickSwitch: (String) -> Unit
+    onClickSwitch: (String) -> Unit,
+    pluginContent: @Composable (PaddingValues) -> Unit
 ) {
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -154,6 +156,9 @@ fun PluginDetailScreen(
                 PluginInfoBlock(
                     pluginInfo = pluginInfo
                 )
+            }
+            item {
+                pluginContent.invoke(PaddingValues(vertical = 8.dp, horizontal = 16.dp))
             }
         }
     }

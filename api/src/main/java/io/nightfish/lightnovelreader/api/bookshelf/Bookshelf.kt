@@ -1,12 +1,12 @@
-package indi.dmzz_yyhyy.lightnovelreader.data.bookshelf
+package io.nightfish.lightnovelreader.api.bookshelf
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.google.android.material.bottomsheet.BottomSheetBehavior.State
 
-@State
+@Stable
 interface Bookshelf {
     val id: Int
     val name: String

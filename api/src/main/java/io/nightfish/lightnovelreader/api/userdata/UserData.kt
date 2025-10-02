@@ -1,4 +1,4 @@
-package indi.dmzz_yyhyy.lightnovelreader.data.userdata
+package io.nightfish.lightnovelreader.api.userdata
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

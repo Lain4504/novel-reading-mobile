@@ -25,7 +25,8 @@ import me.saket.telephoto.zoomable.zoomable
 fun ImageViewerScreen(
     imageUrl: String,
     onDismissRequest: () -> Unit,
-    onClickSave: () -> Unit
+    onClickSave: () -> Unit,
+    header: Map<String, String> = emptyMap()
 ) {
     val zoomableState = rememberZoomableState()
 
@@ -39,6 +40,11 @@ fun ImageViewerScreen(
                 .fillMaxSize()
                 .zoomable(state = zoomableState),
             model = ImageRequest.Builder(LocalContext.current)
+                .also { builder ->
+                    header.forEach {
+                        builder.addHeader(it.key, it.value)
+                    }
+                }
                 .data(imageUrl)
                 .crossfade(true)
                 .build(),

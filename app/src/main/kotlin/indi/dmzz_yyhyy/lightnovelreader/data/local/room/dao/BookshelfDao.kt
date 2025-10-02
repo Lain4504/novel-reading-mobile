@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfBookMetadata
+import io.nightfish.lightnovelreader.api.bookshelf.BookshelfBookMetadata
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfBookMetadataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.BookshelfEntity
 import kotlinx.coroutines.flow.Flow

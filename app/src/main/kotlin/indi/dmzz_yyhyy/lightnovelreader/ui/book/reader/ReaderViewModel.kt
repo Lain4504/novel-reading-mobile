@@ -10,11 +10,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.ReadingStatsUpdate
 import indi.dmzz_yyhyy.lightnovelreader.data.statistics.StatsRepository
-import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataPath
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceProvider
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.flip.FlipPageContentViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll.ScrollContentViewModel
+import io.nightfish.lightnovelreader.api.userdata.UserDataPath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,9 +26,11 @@ import javax.inject.Inject
 class ReaderViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
+    webBookDataSourceProvider: WebBookDataSourceProvider,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
     val settingState = SettingState(userDataRepository, viewModelScope)
+    val imageHeader = webBookDataSourceProvider.value.imageHeader
     private var contentViewModel: ContentViewModel by mutableStateOf(ContentViewModel.empty)
     private val _uiState = MutableReaderScreenUiState(contentViewModel.uiState)
     val uiState: ReaderScreenUiState = _uiState

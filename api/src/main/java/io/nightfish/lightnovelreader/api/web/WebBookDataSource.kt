@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * LightNovelReader 的网络数据提供源接口，可以通过实现此接口使软件支持新的数据源
- * 版本: 0.4.1
+ * 版本: 0.4.2
  */
 interface WebBookDataSource {
     val id: Int
@@ -63,6 +63,12 @@ interface WebBookDataSource {
      */
     val searchTypeIdList: List<String>
 
+    /***
+     * 请求插图时的Header
+     */
+    val imageHeader: Map<String, String>
+        get() = emptyMap()
+
     /**
      * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
      * 此函数应当自行实现断线重连等逻辑
@@ -95,7 +101,7 @@ interface WebBookDataSource {
      * 执行搜索任务
      *
      * 应当返回搜索结果的数据流
-     * 并且以空书本元数据[io.nightfish.lightnovelreader.api.book.BookInformation.Companion.empty]作为列表结尾时表示搜索结束
+     * 并且以空书本元数据[BookInformation.Companion.empty]作为列表结尾时表示搜索结束
      * 此函数本身应当保证主线程安全
      *
      * @param searchType 搜索类别

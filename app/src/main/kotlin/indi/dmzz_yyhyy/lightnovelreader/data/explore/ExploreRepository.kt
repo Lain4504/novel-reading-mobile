@@ -1,8 +1,8 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.explore
 
 import indi.dmzz_yyhyy.lightnovelreader.data.text.TextProcessingRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceProvider
 import io.nightfish.lightnovelreader.api.book.BookInformation
-import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,17 +15,17 @@ import javax.inject.Singleton
 
 @Singleton
 class ExploreRepository @Inject constructor(
-    private val webBookDataSource: WebBookDataSource,
+    private val webBookDataSourceProvider: WebBookDataSourceProvider,
     private val processingRepository: TextProcessingRepository
 ) {
     private val searchResultCacheMap = mutableMapOf<String, List<BookInformation>>()
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    val searchTypeIdList = webBookDataSource.searchTypeIdList
-    val searchTypeMap = processingRepository.processSearchTypeNameMap { webBookDataSource.searchTypeMap }
-    val searchTipMap = processingRepository.processSearchTipMap { webBookDataSource.searchTipMap }
-    val explorePageIdList = webBookDataSource.explorePageIdList
-    val explorePageDataSourceMap = webBookDataSource.explorePageDataSourceMap
-    val exploreExpandedPageDataSourceMap = webBookDataSource.exploreExpandedPageDataSourceMap
+    val searchTypeIdList = webBookDataSourceProvider.value.searchTypeIdList
+    val searchTypeMap = processingRepository.processSearchTypeNameMap { webBookDataSourceProvider.value.searchTypeMap }
+    val searchTipMap = processingRepository.processSearchTipMap { webBookDataSourceProvider.value.searchTipMap }
+    val explorePageIdList = webBookDataSourceProvider.value.explorePageIdList
+    val explorePageDataSourceMap = webBookDataSourceProvider.value.explorePageDataSourceMap
+    val exploreExpandedPageDataSourceMap = webBookDataSourceProvider.value.exploreExpandedPageDataSourceMap
 
     fun search(searchType: String, keyword: String): Flow<List<BookInformation>> {
         searchResultCacheMap[searchType + keyword]?.let { searchResult ->
@@ -33,7 +33,7 @@ class ExploreRepository @Inject constructor(
             flow.update { searchResult }
             return flow
         }
-        val flow = webBookDataSource.search(searchType, keyword)
+        val flow = webBookDataSourceProvider.value.search(searchType, keyword)
         coroutineScope.launch {
             flow.collect {
                 if (it.isNotEmpty() && it.last().isEmpty()) {
@@ -42,12 +42,12 @@ class ExploreRepository @Inject constructor(
             }
         }
 
-        return flow.map {
-            it.map {
+        return flow.map { list ->
+            list.map {
                 processingRepository.processBookInformation { it }
             }
         }
     }
 
-    fun stopAllSearch() = webBookDataSource.stopAllSearch()
+    fun stopAllSearch() = webBookDataSourceProvider.value.stopAllSearch()
 }
