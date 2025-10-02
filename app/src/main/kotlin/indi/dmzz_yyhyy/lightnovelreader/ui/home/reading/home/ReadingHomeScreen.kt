@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -183,6 +184,7 @@ private fun ReadingContent(
     scrollBehavior: TopAppBarScrollBehavior,
     loadBookInfo: (Int) -> Unit
 ) {
+    val context = LocalContext.current
     val shimmerInstance = rememberShimmer(ShimmerBounds.Custom)
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = LocalSnackbarHost.current
@@ -275,8 +277,8 @@ private fun ReadingContent(
                                 showSnackbar(
                                     coroutineScope = coroutineScope,
                                     hostState = snackbarHostState,
-                                    message = "已移除: ${recentReadingBookInformationMap[id]?.title}",
-                                    actionLabel = "撤销",
+                                    message = context.getString(R.string.removed_item, recentReadingBookInformationMap[id]?.title),
+                                    actionLabel = context.getString(R.string.undo),
                                 ) {
                                     when (it) {
                                         SnackbarResult.Dismissed -> { }
@@ -480,34 +482,32 @@ private fun ReadingBookCard(
                         Row {
                             Icon(
                                 modifier = Modifier
+                                    .padding(top = 2.dp, end = 2.dp)
                                     .size(14.dp)
-                                    .align(Alignment.CenterVertically)
-                                    .padding(top = 2.dp, end = 2.dp),
+                                    .align(Alignment.CenterVertically),
                                 painter = painterResource(id = R.drawable.outline_schedule_24px),
                                 contentDescription = null,
                                 tint = colorScheme.secondary
                             )
+                            val text = buildString {
+                                append(formTime(userReadingData.lastReadTime))
+                                append(" • ")
+                                append(
+                                    stringResource(
+                                        R.string.read_minutes,
+                                        userReadingData.totalReadTime / 60
+                                    )
+                                )
+                                append(" • ")
+                                append((userReadingData.readingProgress * 100).toInt())
+                                append("%")
+                            }
                             Text(
-                                text = formTime(userReadingData.lastReadTime),
+                                text = text,
                                 modifier = Modifier.align(Alignment.CenterVertically),
                                 style = AppTypography.labelSmall
                             )
                         }
-                        Text(
-                            text = stringResource(
-                                R.string.read_progress,
-                                (userReadingData.readingProgress * 100).toInt().toString() + "%"
-                            ),
-                            style = AppTypography.labelSmall
-                        )
-                        Text(
-                            text = stringResource(
-                                R.string.read_minutes,
-                                (userReadingData.totalReadTime) / 60
-                            ),
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                            style = AppTypography.labelSmall
-                        )
                     }
 
                     LinearProgressIndicator(

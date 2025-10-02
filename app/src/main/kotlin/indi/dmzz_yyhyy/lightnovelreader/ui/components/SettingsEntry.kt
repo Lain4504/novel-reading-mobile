@@ -12,19 +12,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -38,14 +35,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.navigateToSliderValueDialog
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import io.nightfish.lightnovelreader.api.userdata.FloatUserData
 import io.nightfish.lightnovelreader.api.userdata.StringUserData
 import java.text.DecimalFormat
@@ -54,7 +52,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SettingsSliderEntry(
     modifier: Modifier = Modifier,
-    iconRes: Int = -1,
+    painter: Painter? = null,
     title: String,
     unit: String,
     value: Float,
@@ -70,7 +68,7 @@ fun SettingsSliderEntry(
     }
 
     SettingsSliderEntry(
-        iconRes = iconRes,
+        painter = painter,
         modifier = modifier,
         title = title,
         unit = unit,
@@ -89,7 +87,7 @@ fun SettingsSliderEntry(
 @Composable
 private fun SettingsSliderEntry(
     modifier: Modifier = Modifier,
-    iconRes: Int,
+    painter: Painter? = null,
     title: String,
     unit: String,
     value: Float,
@@ -112,51 +110,37 @@ private fun SettingsSliderEntry(
     val stepsCount = if (actualSteps != null) actualSteps.size - 2 else 0
 
     Row(
-        modifier = modifier
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .then(modifier)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .combinedClickable(
-                onClick = { },
+                onClick = {},
                 onLongClick = onLongClick
             )
-            .wrapContentHeight()
-            .then(modifier)
-            .wrapContentHeight()
-            .padding(start = 18.dp, end = 14.dp)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+            .padding(horizontal = 22.dp)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if (iconRes > 0) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(end = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(iconRes),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = null
-                )
-            }
+        painter?.let {
+            Icon(
+                modifier = Modifier.padding(end = 22.dp).size(24.dp),
+                painter = it,
+                tint = colorScheme.onSurfaceVariant,
+                contentDescription = "Icon"
+            )
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 4.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Text(
                 text = title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = AppTypography.labelLarge
+                color = colorScheme.onSurface,
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.Normal
             )
-            Spacer(modifier = Modifier.height(2.dp))
 
             val displayValue = if (actualSteps != null)
                 actualSteps[sliderValue.toInt()]
@@ -173,7 +157,7 @@ private fun SettingsSliderEntry(
             ) {
                 AnimatedText(
                     text = "${DecimalFormat("#.#").format(displayValue)}",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = colorScheme.primary,
                     style = AppTypography.labelMedium,
                     maxLines = 1
                 )
@@ -182,12 +166,11 @@ private fun SettingsSliderEntry(
 
                 Text(
                     text = unit,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = colorScheme.primary,
                     style = AppTypography.labelMedium,
                     maxLines = 1
                 )
             }
-
 
             Slider(
                 modifier = Modifier.fillMaxWidth(),
@@ -205,7 +188,7 @@ private fun SettingsSliderEntry(
                 },
                 onValueChangeFinished = onSliderChangeFinished,
                 colors = SliderDefaults.colors(
-                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                    inactiveTrackColor = colorScheme.primaryContainer,
                 ),
             )
         }
@@ -216,7 +199,7 @@ private fun SettingsSliderEntry(
 @Composable
 fun SettingsMenuEntry(
     modifier: Modifier = Modifier,
-    iconRes: Int = -1,
+    painter: Painter? = null,
     title: String,
     description: String? = null,
     options: MenuOptions,
@@ -225,7 +208,7 @@ fun SettingsMenuEntry(
 ) {
     SettingsMenuEntry(
         modifier = modifier,
-        iconRes = iconRes,
+        painter = painter,
         title = title,
         description = description,
         options = options,
@@ -237,7 +220,7 @@ fun SettingsMenuEntry(
 @Composable
 fun SettingsMenuEntry(
     modifier: Modifier = Modifier,
-    iconRes: Int = -1,
+    painter: Painter? = null,
     title: String,
     description: String? = null,
     options: MenuOptions,
@@ -248,58 +231,45 @@ fun SettingsMenuEntry(
     var selectedOption by remember { mutableStateOf(options.get(selectedOptionKey)) }
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .wrapContentHeight()
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
             .then(modifier)
+            .fillMaxWidth()
             .clickable { expanded = !expanded }
-            .padding(start = 18.dp, end = 14.dp)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+            .padding(horizontal = 22.dp)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if (iconRes > 0) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(end = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(iconRes),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    contentDescription = "Icon"
-                )
-            }
+        painter?.let {
+            Icon(
+                modifier = Modifier.padding(end = 22.dp).size(24.dp),
+                painter = it,
+                tint = colorScheme.onSurfaceVariant,
+                contentDescription = "Icon"
+            )
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 4.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Text(
                 text = title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = AppTypography.labelLarge
+                color = colorScheme.onSurface,
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.Normal
             )
-            Spacer(modifier = Modifier.height(2.dp))
             description?.let {
                 Text(
-                    text = description,
-                    color = MaterialTheme.colorScheme.secondary,
+                    text = it,
+                    color = colorScheme.onSurfaceVariant,
                     style = AppTypography.labelMedium
                 )
             }
             AnimatedTextLine(
                 text = stringResource(selectedOption.nameId),
                 style = AppTypography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = colorScheme.primary
             )
 
             Box(
@@ -314,13 +284,14 @@ fun SettingsMenuEntry(
                     options.optionList.forEach { option ->
                         DropdownMenuItem(
                             modifier = if (option.key == selectedOptionKey)
-                                Modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                Modifier.background(colorScheme.surfaceContainerHighest)
                             else
                                 Modifier,
                             onClick = {
                                 selectedOption = option
                                 onOptionChange(option.key)
-                                expanded = false },
+                                expanded = false
+                            },
                             enabled = true,
                             interactionSource = remember { MutableInteractionSource() },
                             text = {

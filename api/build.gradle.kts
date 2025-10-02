@@ -36,6 +36,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.foundation)
+    implementation(libs.compose.ui.graphics)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.runtime)
     implementation(libs.kotlinx.coroutines.core)

@@ -223,7 +223,7 @@ fun ThemeSettingsList(
     Spacer(Modifier.height(14.dp))
     SettingsSwitchEntry(
         modifier = Modifier.background(colorScheme.background),
-        iconRes = R.drawable.format_color_fill_24px,
+        painter = painterResource(R.drawable.format_color_fill_24px),
         title = stringResource(R.string.settings_theme_dynamic_colors),
         description = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
             stringResource(R.string.settings_theme_dynamic_colors_desc_unavailable)
@@ -235,7 +235,7 @@ fun ThemeSettingsList(
     if (!settingState.dynamicColorsKey) {
         SettingsMenuEntry(
             modifier = Modifier.background(colorScheme.background),
-            iconRes = R.drawable.light_mode_24px,
+            painter = painterResource(R.drawable.light_mode_24px),
             title = stringResource(R.string.settings_theme_light_theme),
             description = stringResource(R.string.settings_theme_light_theme_desc),
             options = MenuOptions.LightThemeNameOptions,
@@ -244,7 +244,7 @@ fun ThemeSettingsList(
         )
         SettingsMenuEntry(
             modifier = Modifier.background(colorScheme.background),
-            iconRes = R.drawable.dark_mode_24px,
+            painter = painterResource(R.drawable.dark_mode_24px),
             title = stringResource(R.string.settings_theme_dark_theme),
             description = stringResource(R.string.settings_theme_dark_theme_desc),
             options = MenuOptions.DarkThemeNameOptions,
@@ -272,7 +272,7 @@ fun ReaderThemeSettingsList(
     )
     SettingsSwitchEntry(
         modifier = Modifier.background(colorScheme.background),
-        iconRes = R.drawable.imagesearch_roller_24px,
+        painter = painterResource(R.drawable.imagesearch_roller_24px),
         title = stringResource(R.string.settings_theme_bg_image),
         description = stringResource(R.string.settings_theme_bg_image_desc),
         checked = settingState.enableBackgroundImage,
@@ -427,7 +427,7 @@ fun ReaderThemeSettingsList(
         SettingsMenuEntry(
             modifier = Modifier.background(colorScheme.background),
             title = stringResource(R.string.settings_theme_bg_display_mode),
-            iconRes = R.drawable.insert_page_break_24px,
+            painter = painterResource(R.drawable.insert_page_break_24px),
             description = stringResource(R.string.settings_theme_bg_display_mode_desc),
             options = MenuOptions.ReaderBgImageDisplayModeOptions,
             selectedOptionKey = settingState.backgroundImageDisplayMode,
@@ -439,7 +439,7 @@ fun ReaderThemeSettingsList(
         val background = colorScheme.background
         SettingsClickableEntry(
             modifier = Modifier.background(colorScheme.background),
-            iconRes = R.drawable.colorize_24px,
+            painter = painterResource(R.drawable.colorize_24px),
             title = stringResource(R.string.settings_theme_bg_color),
             description = stringResource(R.string.settings_theme_bg_color_desc),
             onClick = onClickChangeBackgroundColor,
@@ -477,7 +477,7 @@ fun ReaderThemeSettingsList(
 
     SettingsClickableEntry (
         modifier = Modifier.background(colorScheme.background),
-        iconRes = R.drawable.palette_24px,
+        painter = painterResource(R.drawable.palette_24px),
         title = stringResource(R.string.settings_theme_text_color),
         description = stringResource(R.string.settings_theme_text_color_desc),
         onClick = { onClickChangeTextColor() },
@@ -502,10 +502,9 @@ fun ReaderThemeSettingsList(
     )
     val textMeasurer = rememberTextMeasurer()
     val coroutineScope = rememberCoroutineScope()
-    val content = LocalContext.current
     val launcher = uriLauncher {
         CoroutineScope(Dispatchers.IO).launch {
-            val font = content.filesDir.resolve("readerTextFont")
+            val font = context.filesDir.resolve("readerTextFont")
                 .also {
                     if (it.exists()) {
                         it.delete()
@@ -513,7 +512,7 @@ fun ReaderThemeSettingsList(
                     } else it.createNewFile()
                 }
             try {
-                content.contentResolver.openFileDescriptor(it, "r")
+                context.contentResolver.openFileDescriptor(it, "r")
                     ?.use { parcelFileDescriptor ->
                         FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
                             fileInputStream.readBytes()
@@ -534,8 +533,8 @@ fun ReaderThemeSettingsList(
             } catch (_: Exception) {
                 coroutineScope.launch {
                     Toast.makeText(
-                        content,
-                        "字体文件错误或已损坏, 请您检查后导入",
+                        context,
+                        context.getString(R.string.font_file_error),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -546,7 +545,7 @@ fun ReaderThemeSettingsList(
     }
     SettingsMenuEntry(
         modifier = Modifier.background(colorScheme.background),
-        iconRes = R.drawable.text_fields_24px,
+        painter = painterResource(R.drawable.text_fields_24px),
         title = stringResource(R.string.settings_theme_text_font),
         description = stringResource(R.string.settings_theme_text_font_desc),
         options = MenuOptions.SelectText,
@@ -598,7 +597,7 @@ fun ReaderThemeSettingsList(
     }
     SettingsSliderEntry(
         modifier = Modifier.background(colorScheme.background),
-        iconRes = R.drawable.format_bold_24px,
+        painter = painterResource(R.drawable.format_bold_24px),
         title = stringResource(R.string.settings_theme_text_font_weight),
         unit = "",
         valueRange = 100f..900f,
@@ -608,7 +607,7 @@ fun ReaderThemeSettingsList(
     )
     SettingsSliderEntry(
         modifier = Modifier.background(colorScheme.background),
-        iconRes = R.drawable.format_size_24px,
+        painter = painterResource(R.drawable.format_size_24px),
         title = stringResource(R.string.settings_reader_font_size),
         unit = "sp",
         valueRange = 8f..64f,
@@ -617,7 +616,7 @@ fun ReaderThemeSettingsList(
     )
     SettingsSliderEntry(
         modifier = Modifier.background(colorScheme.background),
-        iconRes = R.drawable.format_line_spacing_24px,
+        painter = painterResource(R.drawable.format_line_spacing_24px),
         title = stringResource(R.string.settings_reader_line_spacing),
         unit = "sp",
         valueRange = 0f..32f,

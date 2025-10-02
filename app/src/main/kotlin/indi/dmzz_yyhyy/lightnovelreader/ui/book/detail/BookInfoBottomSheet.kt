@@ -2,7 +2,6 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.detail
 
 import android.content.ClipData
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +43,6 @@ fun BookInfoBottomSheet(
     bookInformation: BookInformation,
     bookVolumes: BookVolumes,
     sheetState: SheetState,
-    isVisible: Boolean,
     onDismissRequest: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -101,7 +99,7 @@ fun BookInfoBottomSheet(
                                     val clipData = ClipData.newPlainText("content", content)
                                     val clipEntry = ClipEntry(clipData = clipData)
                                     clipboard.setClipEntry(clipEntry = clipEntry)
-                                    Toast.makeText(context, "内容已复制", Toast.LENGTH_SHORT)
+                                    Toast.makeText(context, context.getString(R.string.copied), Toast.LENGTH_SHORT)
                                         .show()
                                 }
                             },
@@ -111,92 +109,95 @@ fun BookInfoBottomSheet(
         }
     }
 
-    AnimatedVisibility(visible = isVisible) {
-        ModalBottomSheet(
-            onDismissRequest = onDismissRequest,
-            sheetState = sheetState
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState
+    ) {
+        val titleStyle = AppTypography.titleMedium.copy(
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.W600
+        )
+        val contentStyle = AppTypography.labelLarge.copy(
+            color = MaterialTheme.colorScheme.secondary
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 8.dp)
         ) {
-            val titleStyle = AppTypography.titleMedium.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.W600
+            InfoItem(
+                title = stringResource(R.string.detail_info_title),
+                content = bookInformation.title,
+                titleStyle = titleStyle,
+                contentStyle = contentStyle,
+                icon = painterResource(R.drawable.title_24px)
             )
-            val contentStyle = AppTypography.labelLarge.copy(
-                color = MaterialTheme.colorScheme.secondary
-            )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 8.dp)
-            ) {
+            if (bookInformation.subtitle.isNotEmpty()) {
                 InfoItem(
-                    title = stringResource(R.string.detail_info_title),
-                    content = bookInformation.title,
+                    content = bookInformation.subtitle,
                     titleStyle = titleStyle,
                     contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.title_24px)
-                )
-
-                if (bookInformation.subtitle.isNotEmpty()) {
-                    InfoItem(
-                        content = bookInformation.subtitle,
-                        titleStyle = titleStyle,
-                        contentStyle = contentStyle,
-                    )
-                }
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_id),
-                    content = bookInformation.id.toString(),
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.info_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_author),
-                    content = bookInformation.author,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.person_edit_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_publishing_house),
-                    content = bookInformation.publishingHouse,
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.text_snippet_24px)
-                )
-
-                val dateFormat = "yyyy-MM-dd"
-                val formatter = DateTimeFormatter.ofPattern(dateFormat)
-                InfoItem(
-                    title = stringResource(R.string.detail_info_updated_on),
-                    content = bookInformation.lastUpdated.format(formatter) + "\n" + if (bookInformation.isComplete) "完结" else "连载中",
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.autorenew_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_tags),
-                    content = bookInformation.tags.joinToString(separator = "，"),
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.tag_24px)
-                )
-
-                InfoItem(
-                    title = stringResource(R.string.detail_info_stats),
-                    content = "${
-                        NumberFormat.getInstance().format(bookInformation.wordCount)
-                    } 字\n共计 ${bookVolumes.volumes.count()} 卷, ${bookVolumes.volumes.sumOf { volume -> volume.chapters.size }} 章节",
-                    titleStyle = titleStyle,
-                    contentStyle = contentStyle,
-                    icon = painterResource(R.drawable.text_fields_24px)
                 )
             }
+
+            InfoItem(
+                title = stringResource(R.string.detail_info_id),
+                content = bookInformation.id.toString(),
+                titleStyle = titleStyle,
+                contentStyle = contentStyle,
+                icon = painterResource(R.drawable.info_24px)
+            )
+
+            InfoItem(
+                title = stringResource(R.string.detail_info_author),
+                content = bookInformation.author,
+                titleStyle = titleStyle,
+                contentStyle = contentStyle,
+                icon = painterResource(R.drawable.person_edit_24px)
+            )
+
+            InfoItem(
+                title = stringResource(R.string.detail_info_publishing_house),
+                content = bookInformation.publishingHouse,
+                titleStyle = titleStyle,
+                contentStyle = contentStyle,
+                icon = painterResource(R.drawable.text_snippet_24px)
+            )
+
+            val dateFormat = "yyyy-MM-dd"
+            val formatter = DateTimeFormatter.ofPattern(dateFormat)
+            InfoItem(
+                title = stringResource(R.string.detail_info_updated_on),
+                content = bookInformation.lastUpdated.format(formatter) + "\n" +
+                        if (bookInformation.isComplete) stringResource(R.string.book_completed)
+                        else stringResource(R.string.book_ongoing),
+                titleStyle = titleStyle,
+                contentStyle = contentStyle,
+                icon = painterResource(R.drawable.autorenew_24px)
+            )
+
+            InfoItem(
+                title = stringResource(R.string.detail_info_tags),
+                content = bookInformation.tags.joinToString(separator = "，"),
+                titleStyle = titleStyle,
+                contentStyle = contentStyle,
+                icon = painterResource(R.drawable.tag_24px)
+            )
+
+            InfoItem(
+                title = stringResource(R.string.detail_info_stats),
+                content = stringResource(
+                    R.string.detail_info_stats_content,
+                    NumberFormat.getInstance().format(bookInformation.wordCount),
+                    bookVolumes.volumes.count(),
+                    bookVolumes.volumes.sumOf { it.chapters.size }
+                ),
+                titleStyle = titleStyle,
+                contentStyle = contentStyle,
+                icon = painterResource(R.drawable.text_fields_24px)
+            )
         }
     }
 }

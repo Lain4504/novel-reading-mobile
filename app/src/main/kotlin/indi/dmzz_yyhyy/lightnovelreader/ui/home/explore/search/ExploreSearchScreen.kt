@@ -203,7 +203,7 @@ fun ExploreSearchScreen(
                                     elevation = ButtonDefaults.buttonElevation(0.dp)
                                 ) {
                                     Text(
-                                        text = stringResource(id = R.string.search_history_clear),
+                                        text = stringResource(id = R.string.clear_all),
                                         style = AppTypography.titleSmall,
                                         fontWeight = FontWeight.W600,
                                     )
