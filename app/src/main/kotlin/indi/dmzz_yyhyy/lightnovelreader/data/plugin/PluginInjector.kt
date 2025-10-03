@@ -1,5 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.plugin
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.bookshelf.BookshelfRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.local.LocalBookDataSource
@@ -20,6 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PluginInjector @Inject constructor(
+    @field:ApplicationContext appContext: Context,
     userDataDataDao: UserDataDao,
     userDataRepository: UserDataRepository,
     webBookDataSourceManager: WebBookDataSourceManager,
@@ -29,6 +32,7 @@ class PluginInjector @Inject constructor(
     bookRepository: BookRepository,
 ) {
     val injectMap = mapOf(
+        Context::class.java to appContext,
         UserDataDaoApi::class.java to userDataDataDao,
         UserDataRepositoryApi::class.java to userDataRepository,
         WebBookDataSourceManagerApi::class.java to webBookDataSourceManager,
