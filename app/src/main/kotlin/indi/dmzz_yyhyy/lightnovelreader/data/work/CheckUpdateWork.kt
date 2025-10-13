@@ -35,7 +35,7 @@ class CheckUpdateWork @AssistedInject constructor(
             delay(3000)
             Log.d("CheckUpdateWork", "Updating book id=${bookshelfBookMetadata.id}")
             if (bookshelfBookMetadata.bookShelfIds.all {
-                !bookshelfRepository.getBookshelf(it).systemUpdateReminder
+                !(bookshelfRepository.getBookshelf(it)?.systemUpdateReminder == true)
             }) return@forEach
             val bookInformation = webBookDataSourceProvider.value.getBookInformation(bookshelfBookMetadata.id)
             val webBookLastUpdate = bookInformation.lastUpdated
