@@ -33,6 +33,9 @@ class CheckUpdateWork @AssistedInject constructor(
         val reminderBookMap = mutableMapOf<Int, BookInformation>()
         bookshelfRepository.getAllBookshelfBooksMetadata().forEach { bookshelfBookMetadata ->
             delay(3000)
+            if (bookshelfBookMetadata.bookShelfIds.all {
+                bookshelfRepository.getBookshelf(it)?.systemUpdateReminder != true
+            }) return@forEach
             Log.d("CheckUpdateWork", "Updating book id=${bookshelfBookMetadata.id}")
             val bookInformation = webBookDataSourceProvider.value.getBookInformation(bookshelfBookMetadata.id)
             val webBookLastUpdate = bookInformation.lastUpdated
