@@ -133,7 +133,7 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     // Potato EPUB
     implementation(project(":epub"))
-    implementation(libs.serialization.json)
+    implementation(libs.kotlinx.serialization.json)
     // Swipe
     implementation(libs.swipe)
     // Chart

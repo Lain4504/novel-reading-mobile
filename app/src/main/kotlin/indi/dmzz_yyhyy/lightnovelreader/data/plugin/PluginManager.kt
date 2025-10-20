@@ -2,6 +2,7 @@ package indi.dmzz_yyhyy.lightnovelreader.data.plugin
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -18,6 +19,7 @@ import io.nightfish.lightnovelreader.api.plugin.LightNovelReaderPlugin
 import io.nightfish.lightnovelreader.api.plugin.Plugin
 import io.nightfish.lightnovelreader.api.userdata.UserDataPath
 import java.io.File
+import java.util.zip.ZipFile
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,9 +40,20 @@ class PluginManager @Inject constructor(
     private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic, BiliNovel)
     private val defaultPlugins = listOf<Class<*>>()
 
+    val pluginsDir = appContext.dataDir.resolve("plugin")
+    fun getPluginDir(name: String) = pluginsDir.resolve(name)
+    fun getPluginFile(pluginDir: File) = pluginDir.resolve("plugin")
+    fun getPluginAssetDir(pluginDir: File) = pluginDir.resolve("asset")
+    fun getPluginLibsDir(pluginDir: File) = pluginDir.resolve("libs")
+
     fun loadAllPlugins() {
         errorPluginsUserData.get()?.forEach { path ->
-            File(path).delete()
+            File(path).also {
+                it.delete()
+                if (it.parentFile?.parentFile == pluginsDir) {
+                    it.parentFile!!.deleteRecursively()
+                }
+            }
             errorPluginsUserData.update {
                 it.toMutableList().apply {
                     remove(path)
@@ -49,11 +62,12 @@ class PluginManager @Inject constructor(
         }
         defaultWebDataSources.forEach(webBookDataSourceManager::loadWebDataSourceClass)
         defaultPlugins.forEach { getPluginInstance(it)?.let { plugin -> loadPlugin(plugin, forceLoad = true) } }
-        appContext.dataDir.resolve("plugin")
+        pluginsDir
             .also(File::mkdir)
             .listFiles()
+            ?.filter { it.isDirectory }
             ?.forEach {
-                loadPlugin(it)
+                loadPlugin(getPluginFile(it))
             }
     }
 
@@ -94,14 +108,36 @@ class PluginManager @Inject constructor(
 
     fun loadPlugin(path: File, forceLoad: Boolean = false): String? {
         path.setReadOnly()
+        val packageManager = appContext.packageManager
+        val pluginDir = path.parentFile ?: return null
+        val packageInfo = packageManager.getPackageArchiveInfo(path.path, PackageManager.GET_PERMISSIONS)?.also { packageInfo ->
+            val dir = getPluginAssetDir(pluginDir)
+                .also {
+                    if (it.exists()) it.deleteRecursively()
+                    it.mkdirs()
+                }
+            val zipFile = ZipFile(path)
+            val entries = zipFile.entries()
+
+            for (entry in entries) {
+                if (entry.name.startsWith("assets"))
+                zipFile.getInputStream(entry).buffered().use { inputStream ->
+                    val outputFile = dir.resolve(entry.name.replaceFirst("assets/", ""))
+                        .also { it.parentFile?.mkdirs() }
+                    outputFile.outputStream().buffered().use {
+                        inputStream.copyTo(it)
+                    }
+                }
+            }
+            zipFile.close()
+            extractLibFromApk(path, getPluginLibsDir(pluginDir).also { it.mkdirs() })
+        }
         val classLoader = DexClassLoader(
             path.path,
-            appContext.cacheDir.resolve("plugin/optimizedDirectory").path,
             null,
+            getPluginLibsDir(pluginDir).absolutePath,
             this.javaClass.classLoader
         )
-        val packageManager = appContext.packageManager
-        val packageInfo = packageManager.getPackageArchiveInfo(path.path, PackageManager.GET_PERMISSIONS)
         val scanPackage = packageInfo?.packageName ?: ""
         return loadPlugin(
             classLoader,
@@ -128,7 +164,7 @@ class PluginManager @Inject constructor(
             ?.let {
                 loadPlugin(it, forceLoad = forceLoad)
             }
-        webBookDataSourceManager.loadWebDataSourcesFromClassLoader(classLoader, scanPackage)
+        webBookDataSourceManager.loadWebDataSourcesFromClassLoader(classLoader, pluginInjector, scanPackage)
         if (id != null) {
             pluginClassLoaderMap[id] = classLoader
         }
@@ -149,10 +185,58 @@ class PluginManager @Inject constructor(
         val path = pluginPathMap[id] ?: return
         unloadPlugin(id)
         path.delete()
+        if (path.parentFile?.parentFile == pluginsDir) {
+            path.parentFile!!.deleteRecursively()
+        }
         enabledPluginsUserData.update {
             it.toMutableList().apply { remove(id) }
         }
         _allPluginInfo.removeIf { it.id == id }
+    }
+
+
+
+    private fun extractLibFromApk(apk: File, targetDir: File) {
+        try {
+            val tempDir = targetDir.resolve("temp").also { it.mkdir() }
+            val packageInfo = appContext.packageManager.getPackageArchiveInfo(apk.path, 0)
+            packageInfo?.applicationInfo?.let { appInfo ->
+                val sourceDir = apk.path
+                val zipFile = ZipFile(sourceDir)
+                val entries = zipFile.entries()
+
+                for (entry in entries) {
+                    if (entry.name.startsWith("lib/") && !entry.isDirectory && !entry.name.endsWith("libandroidx.graphics.path.so")) {
+                        zipFile.getInputStream(entry).buffered().use { inputStream ->
+                            val outputFile = tempDir.resolve(entry.name.replaceFirst("lib/", ""))
+                                .also { file ->
+                                    file.parentFile?.mkdirs()
+                                }
+                                .also { it.createNewFile() }
+                            outputFile.outputStream().buffered().use {
+                                inputStream.copyTo(it)
+                            }
+                        }
+                    }
+                }
+                zipFile.close()
+            }
+            val abiList = Build.SUPPORTED_ABIS
+            for (abi in abiList.reversed()) {
+                val abiDir = tempDir.resolve(abi)
+                if (!abiDir.exists()) continue
+                abiDir.listFiles()?.forEach { file ->
+                    val outputFile = targetDir.resolve(file.name)
+                        .also(File::createNewFile)
+                    outputFile.outputStream().buffered().use {
+                        file.inputStream().buffered().copyTo(it)
+                    }
+                }
+            }
+            tempDir.deleteRecursively()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @Composable

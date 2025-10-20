@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +38,7 @@ import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 fun DebugScreen(
     onClickBack: () -> Unit,
     onClickQuery: (String) -> Unit,
+    onClickOpenBook: (Int) -> Unit,
     result: String
 ) {
     Scaffold(
@@ -66,6 +68,60 @@ fun DebugScreen(
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
             var sqlCommand by remember { mutableStateOf("") }
+            var bookId by remember { mutableIntStateOf(-1) }
+
+            Text(
+                modifier = Modifier.padding(vertical = 12.dp),
+                text = "打开书本",
+                style = AppTypography.labelLarge,
+                fontWeight = FontWeight.W600,
+                maxLines = 1
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                value = if (bookId == -1) "" else bookId.toString(),
+                onValueChange = { bookId = it.toIntOrNull() ?: -1 },
+                label = { Text("书本ID") },
+                placeholder = { Text("输入书本ID") },
+                supportingText = { Text("输入书本ID") },
+                maxLines = 1,
+                interactionSource = interactionSource,
+                trailingIcon = {
+                    IconButton(onClick = { bookId = -1 }) {
+                        Icon(
+                            painter = painterResource(R.drawable.cancel_24px),
+                            contentDescription = "cancel",
+                            tint =
+                                if (isFocused) OutlinedTextFieldDefaults.colors().focusedTrailingIconColor
+                                else OutlinedTextFieldDefaults.colors().unfocusedTrailingIconColor
+                        )
+                    }
+                }
+            )
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    onClick = {
+                        onClickOpenBook.invoke(bookId)
+                    }
+                ) {
+                    Text(
+                        text = "打开"
+                    )
+                }
+            }
+
+            Text(
+                modifier = Modifier.padding(vertical = 12.dp),
+                text = "SQL调试",
+                style = AppTypography.labelLarge,
+                fontWeight = FontWeight.W600,
+                maxLines = 1
+            )
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -108,6 +164,7 @@ fun DebugScreen(
                     .fillMaxWidth(),
                 text = result
             )
+
             Text(
                 modifier = Modifier.padding(vertical = 12.dp),
                 text = "崩溃测试",
@@ -132,7 +189,6 @@ fun DebugScreen(
                         Looper.getMainLooper().quit()
                     }
                 )
-
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by NPE",
@@ -141,7 +197,6 @@ fun DebugScreen(
                         throw NullPointerException()
                     }
                 )
-
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by divide by zero",
@@ -150,7 +205,6 @@ fun DebugScreen(
                         throw ArithmeticException(" / by zero")
                     }
                 )
-
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by RuntimeException",

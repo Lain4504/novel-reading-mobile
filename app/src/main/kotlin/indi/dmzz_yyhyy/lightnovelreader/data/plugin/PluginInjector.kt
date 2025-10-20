@@ -31,7 +31,7 @@ class PluginInjector @Inject constructor(
     localBookDataSource: LocalBookDataSource,
     bookRepository: BookRepository,
 ) {
-    val injectMap = mapOf(
+    private val injectMap = mapOf(
         Context::class.java to appContext,
         UserDataDaoApi::class.java to userDataDataDao,
         UserDataRepositoryApi::class.java to userDataRepository,
@@ -42,21 +42,30 @@ class PluginInjector @Inject constructor(
         BookshelfRepositoryApi::class.java to bookshelfRepository
     )
 
-    fun providePlugin(clazz: Class<*>): LightNovelReaderPlugin? {
+    @Suppress("UNCHECKED_CAST")
+    fun  <T>provide(clazz: Class<*>): T? {
         try {
-            return clazz.getDeclaredField("INSTANCE").get(null) as LightNovelReaderPlugin
+            return clazz.getDeclaredField("INSTANCE").get(null) as T
         }
         catch (_: NoSuchFieldException) { }
         catch (_: ClassCastException) { }
         try {
-            return clazz.getDeclaredConstructor().newInstance() as LightNovelReaderPlugin
+            return clazz.getDeclaredConstructor().newInstance() as T
         }
         catch (_: NoSuchMethodException) { }
         catch (_: SecurityException) { }
-        clazz.constructors.forEach { constructor ->
-            constructor.parameterTypes.all { injectMap.keys.contains(it) }
-            return constructor.newInstance(*constructor.parameterTypes.map { injectMap[it] }.toTypedArray()) as LightNovelReaderPlugin
+        try {
+            clazz.constructors.forEach { constructor ->
+                constructor.parameterTypes.all { injectMap.keys.contains(it) }
+                return constructor.newInstance(*constructor.parameterTypes.map { injectMap[it] }.toTypedArray()) as T
+            }
         }
+        catch (_: NoSuchFieldException) { }
+        catch (_: ClassCastException) { }
         return null
+    }
+
+    fun providePlugin(clazz: Class<*>): LightNovelReaderPlugin? {
+        return provide(clazz)
     }
 }

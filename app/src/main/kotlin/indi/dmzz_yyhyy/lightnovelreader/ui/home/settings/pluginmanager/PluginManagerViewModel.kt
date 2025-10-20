@@ -53,7 +53,9 @@ class PluginManagerViewModel @Inject constructor(
 
     fun installPlugin(uri: Uri) {
         CoroutineScope(Dispatchers.IO).launch {
-            val pluginFile = context.dataDir.resolve("plugin").resolve("${uri.hashCode()}")
+            // copy the plugin to app data dir
+            val pluginFile = pluginManager.getPluginFile(pluginManager.getPluginDir(uri.hashCode().toString()))
+                .also { it.parentFile?.mkdirs() }
             context.contentResolver.openFileDescriptor(uri, "r")?.use { parcelFileDescriptor ->
                 FileInputStream(parcelFileDescriptor.fileDescriptor).use { plugin ->
                     pluginFile.outputStream().use {
