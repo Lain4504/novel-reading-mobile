@@ -67,6 +67,8 @@ object Route {
                 data class Detail(
                     val id: String
                 )
+                @Serializable
+                object Repository
             }
             @Serializable
             object Debug
@@ -135,6 +137,10 @@ object Route {
     data class SliderValueDialog(
         val value: Float,
         val floatUserDataPath: String
+    )
+    @Serializable
+    data class PluginInstallerDialog(
+        val source: String
     )
     @Serializable
     object DownloadManager
