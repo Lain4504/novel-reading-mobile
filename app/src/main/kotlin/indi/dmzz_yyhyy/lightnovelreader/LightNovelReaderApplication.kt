@@ -38,7 +38,6 @@ class LightNovelReaderApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         pluginManager.loadAllPlugins()
-        println("loadPlugin")
         coroutineScope.launch(Dispatchers.IO) {
             loggerRepository.logLevel = LogLevel.from(userDataRepository.stringUserData(UserDataPath.Settings.Data.LogLevel.path).getOrDefault("none"))
             loggerRepository.startLogging()
