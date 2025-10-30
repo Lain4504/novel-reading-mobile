@@ -85,18 +85,12 @@ class PluginInstaller @Inject constructor(
     }
 
     private fun parsePluginAnnotationFromFile(tempFile: File): Pair<String, Plugin>? = try {
-        val cacheDir = context.cacheDir.resolve("plugin_parse").apply { mkdirs() }
+        val workDir = pluginManager.pluginsTempDir
+        val useFile = workDir.resolve("parse_${System.currentTimeMillis()}_${tempFile.name}")
+        tempFile.copyTo(useFile, overwrite = true)
+        useFile.setReadOnly()
 
-        val useFile = if (tempFile.parentFile?.absolutePath?.contains(cacheDir.absolutePath) == true
-            || (!tempFile.canWrite() && tempFile.canRead())
-        ) tempFile else {
-            val cachedFile = cacheDir.resolve("${System.currentTimeMillis()}_${tempFile.name}")
-            tempFile.copyTo(cachedFile, overwrite = true)
-            cachedFile.setReadOnly()
-            cachedFile
-        }
-
-        val optimizedDir = context.cacheDir.resolve("plugin_optimized").apply { mkdirs() }
+        val optimizedDir = workDir.resolve("odex").apply { mkdirs() }
         val classLoader = DexClassLoader(
             useFile.absolutePath,
             optimizedDir.absolutePath,
@@ -111,7 +105,7 @@ class PluginInstaller @Inject constructor(
         val annotation = pluginClass.getAnnotation(Plugin::class.java) ?: return null
         val pluginId = pluginClass.`package`?.name ?: return null
 
-        if (useFile != tempFile) runCatching { useFile.delete() }
+        useFile.delete()
         pluginId to annotation
     } catch (_: Throwable) { null }
 
@@ -129,8 +123,8 @@ class PluginInstaller @Inject constructor(
     ): InstallCheckResult = withContext(Dispatchers.IO) {
         val tempSignatures = preSignaturesNewApk ?: getApkSignatures(tempFile)
 
-        val pluginDir = context.dataDir.resolve("plugin").apply { mkdirs() }
-        val pluginFile = pluginDir.resolve(pluginId.hashCode().toString())
+        val pluginDir = context.dataDir.resolve("plugin").resolve(pluginId).apply { mkdirs() }
+        val pluginFile = pluginManager.getPluginFile(pluginDir)
         val isInstalled = pluginFile.exists()
 
         if (!isInstalled) return@withContext InstallCheckResult.Ok
@@ -161,22 +155,59 @@ class PluginInstaller @Inject constructor(
         tempFile: File,
         pluginId: String,
     ): Boolean {
-        val pluginDir = context.dataDir.resolve("plugin").apply { mkdirs() }
-        val pluginFile = pluginDir.resolve(pluginId.hashCode().toString())
-        val isInstalled = pluginFile.exists()
+        val pluginsRoot = pluginManager.pluginsDir
+        val pluginDir = pluginsRoot.resolve(pluginId).apply { mkdirs() }
 
-        return if (isInstalled) {
-            pluginManager.upgradePlugin(pluginId, tempFile)
-        } else {
-            val replaced = try {
-                tempFile.copyTo(pluginFile, overwrite = true)
-                tempFile.delete()
-                pluginFile.setReadOnly()
-                true
-            } catch (_: Throwable) { false }
-            replaced && pluginManager.loadPlugin(pluginFile, forceLoad = true) != null
+        val pluginFile = pluginManager.getPluginFile(pluginDir)
+        val assetDir = pluginManager.getPluginAssetDir(pluginDir).apply { mkdirs() }
+        val libsDir = pluginManager.getPluginLibsDir(pluginDir).apply { mkdirs() }
+
+        val isInstalled = pluginFile.exists()
+        if (isInstalled) {
+            return pluginManager.upgradePlugin(pluginId, tempFile)
         }
+
+        val replaced = try {
+            tempFile.copyTo(pluginFile, overwrite = true)
+            tempFile.delete()
+            pluginFile.setReadOnly()
+            true
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            false
+        }
+
+        if (!replaced) return false
+
+        try {
+            val zipFile = java.util.zip.ZipFile(pluginFile)
+            val entries = zipFile.entries()
+            while (entries.hasMoreElements()) {
+                val entry = entries.nextElement()
+                if (entry.name.startsWith("assets/") && !entry.isDirectory) {
+                    zipFile.getInputStream(entry).use { input ->
+                        val outFile = assetDir.resolve(entry.name.removePrefix("assets/"))
+                        outFile.parentFile?.mkdirs()
+                        outFile.outputStream().use { output -> input.copyTo(output) }
+                    }
+                }
+            }
+            zipFile.close()
+
+            pluginManager.extractLibFromApk(pluginFile, libsDir)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        val loaded = pluginManager.loadPlugin(pluginFile, forceLoad = true) != null
+        if (loaded) {
+            enabledPluginUserData.update {
+                it.toMutableList().apply { if (!contains(pluginId)) add(pluginId) }
+            }
+        }
+        return loaded
     }
+
 
 
     suspend fun copyUriToFileWithProgress(

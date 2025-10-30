@@ -273,21 +273,28 @@ class PluginInstallerDialogViewModel @Inject constructor(
     }
 
     private fun parsePluginAnnotationFromFile(tempFile: File): Pair<String, Plugin>? = try {
-        val cacheDir = context.cacheDir.resolve("plugin_parse").apply { mkdirs() }
-        val cachedFile = cacheDir.resolve("${System.currentTimeMillis()}_${tempFile.name}")
-        tempFile.copyTo(cachedFile, overwrite = true); cachedFile.setReadOnly()
+        val workDir = pluginManager.pluginsTempDir
+        val useFile = workDir.resolve("parse_${System.currentTimeMillis()}_${tempFile.name}")
+        tempFile.copyTo(useFile, overwrite = true)
+        useFile.setReadOnly()
 
-        val optimizedDir = context.cacheDir.resolve("plugin_optimized").apply { mkdirs() }
-        val classLoader = DexClassLoader(cachedFile.absolutePath, optimizedDir.absolutePath, null, this::class.java.classLoader)
+        val optimizedDir = workDir.resolve("odex").apply { mkdirs() }
+        val classLoader = DexClassLoader(
+            useFile.absolutePath,
+            optimizedDir.absolutePath,
+            null,
+            this::class.java.classLoader
+        )
 
-        val pkgInfo = context.packageManager.getPackageArchiveInfo(cachedFile.absolutePath, 0)
+        val pkgInfo = context.packageManager.getPackageArchiveInfo(useFile.absolutePath, 0)
         val scanPackage = pkgInfo?.packageName ?: ""
         val annotated = AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java, scanPackage)
         val pluginClass = annotated.firstOrNull() ?: return null
         val annotation = pluginClass.getAnnotation(Plugin::class.java) ?: return null
         val pluginId = pluginClass.`package`?.name ?: return null
 
-        runCatching { cachedFile.delete() }
+        useFile.delete()
         pluginId to annotation
     } catch (_: Throwable) { null }
+
 }

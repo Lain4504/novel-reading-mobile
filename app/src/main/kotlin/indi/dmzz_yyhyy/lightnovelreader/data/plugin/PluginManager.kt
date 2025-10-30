@@ -48,16 +48,18 @@ class PluginManager @Inject constructor(
 
     private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic, BiliNovel)
     private val defaultPlugins = listOf<Class<*>>()
-
     private val computeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    val pluginsDir: File = appContext.dataDir.resolve("plugin")
+    val pluginsDir: File = appContext.dataDir.resolve("plugins")
+    val pluginsTempDir: File = appContext.cacheDir.resolve("plugins_tmp")
     fun getPluginDir(name: String): File = pluginsDir.resolve(name)
     fun getPluginFile(pluginDir: File): File = pluginDir.resolve("plugin")
     fun getPluginAssetDir(pluginDir: File): File = pluginDir.resolve("asset")
     fun getPluginLibsDir(pluginDir: File): File = pluginDir.resolve("libs")
 
     fun loadAllPlugins() {
+        val tmp = pluginsTempDir
+        if (tmp.exists()) tmp.deleteRecursively()
         errorPluginsUserData.get()?.forEach { path ->
             File(path).also {
                 it.delete()
@@ -266,7 +268,7 @@ class PluginManager @Inject constructor(
         pluginClassLoaderMap.remove(id)
     }
 
-    private fun extractLibFromApk(apk: File, targetDir: File) {
+    fun extractLibFromApk(apk: File, targetDir: File) {
         try {
             val tempDir = targetDir.resolve("temp").also { it.mkdir() }
             val packageInfo = appContext.packageManager.getPackageArchiveInfo(apk.path, 0)
