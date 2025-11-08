@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.home
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -68,7 +69,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.LnrSnackbar
@@ -79,9 +79,11 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.ExploreUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import io.nightfish.lightnovelreader.api.explore.ExploreBooksRow
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedTargetStateInContentKeyLambda")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ExploreHomeScreen(
@@ -90,7 +92,7 @@ fun ExploreHomeScreen(
     selectedRoute: Any,
     controller: NavController,
     onClickExpand: (String) -> Unit,
-    onClickBook: (Int) -> Unit,
+    onClickBook: (String) -> Unit,
     init: () -> Unit,
     changePage: (Int) -> Unit,
     onClickSearch: () -> Unit,
@@ -232,7 +234,7 @@ fun TopBar(
 fun ExplorePage(
     explorePageBooksRawList: List<ExploreBooksRow>,
     onClickExpand: (String) -> Unit,
-    onClickBook: (Int) -> Unit,
+    onClickBook: (String) -> Unit,
     nestedScrollConnection: NestedScrollConnection,
     refresh: () -> Unit
 ) {
@@ -326,7 +328,7 @@ fun ExplorePage(
                                         Cover(
                                             width = 98.dp,
                                             height = 138.dp,
-                                            url = exploreDisplayBook.coverUrl,
+                                            uri = exploreDisplayBook.coverUri,
                                             rounded = 6.dp
                                         )
                                     }

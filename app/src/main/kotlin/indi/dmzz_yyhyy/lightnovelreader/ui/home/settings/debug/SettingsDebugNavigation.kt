@@ -4,7 +4,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
+import io.nightfish.lightnovelreader.api.ui.LocalNavController
+import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
@@ -16,6 +17,9 @@ fun NavGraphBuilder.settingsDebugDestination() {
         DebugScreen(
             onClickBack = navController::popBackStackIfResumed,
             onClickQuery = viewModel::runSQLCommand,
+            onClickOpenBook = {
+                navController.navigateToBookDetailDestination(it)
+            },
             result = viewModel.result
         )
     }

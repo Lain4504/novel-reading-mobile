@@ -39,13 +39,13 @@ class DetailViewModel @Inject constructor(
     var isInitialized by mutableStateOf(false)
         private set
 
-    fun init(bookId: Int) {
+    fun init(bookId: String) {
         Log.d("DetailViewModel", "Init bookId = $bookId")
         if (isInitialized) return
         isInitialized = true
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.getBookInformationFlow(bookId, viewModelScope).collect {
-                if (it.id == -1) return@collect
+                if (it.id.isBlank()) return@collect
                 _uiState.bookInformation = it
                 _uiState.isLoading = false
                 val bookshelfBookMetadata = bookshelfRepository.getBookshelfBookMetadata(bookId) ?: return@collect
@@ -81,7 +81,7 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    fun cacheBook(bookId: Int): Flow<WorkInfo?> {
+    fun cacheBook(bookId: String): Flow<WorkInfo?> {
         val work = bookRepository.cacheBook(bookId)
         val isCachedFlow = bookRepository.isCacheBookWorkFlow(work.id)
         viewModelScope.launch(Dispatchers.IO) {
@@ -100,7 +100,7 @@ class DetailViewModel @Inject constructor(
     }
 
 
-    fun exportToEpub(uri: Uri, bookId: Int, title: String): Flow<WorkInfo?> {
+    fun exportToEpub(uri: Uri, bookId: String, title: String): Flow<WorkInfo?> {
         val workRequest = OneTimeWorkRequestBuilder<ExportBookToEPUBWork>()
             .setInputData(
                 workDataOf(
@@ -114,7 +114,7 @@ class DetailViewModel @Inject constructor(
             )
             .build()
         workManager.enqueueUniqueWork(
-            bookId.toString(),
+            bookId,
             ExistingWorkPolicy.KEEP,
             workRequest
         )

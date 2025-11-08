@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.AnimatedText
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
@@ -59,6 +58,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.ExploreUiState
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.addToBookshelfAction
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,14 +66,14 @@ fun ExploreSearchScreen(
     exploreUiState: ExploreUiState,
     exploreSearchUiState: ExploreSearchUiState,
     refresh: () -> Unit,
-    requestAddBookToBookshelf: (Int) -> Unit,
+    requestAddBookToBookshelf: (String) -> Unit,
     onClickBack: () -> Unit,
     init: () -> Unit,
     onChangeSearchType: (String) -> Unit,
     onSearch: (String) -> Unit,
     onClickDeleteHistory: (String) -> Unit,
     onClickClearAllHistory: () -> Unit,
-    onClickBook: (Int) -> Unit
+    onClickBook: (String) -> Unit
 ) {
     var searchKeyword by rememberSaveable { mutableStateOf("") }
     var searchBarExpanded by rememberSaveable { mutableStateOf(true) }
@@ -166,8 +166,8 @@ fun ExploreSearchScreen(
                     ) {
                         EmptyPage(
                             icon = painterResource(R.drawable.schedule_90dp),
-                            titleId = R.string.nothing_here,
-                            descriptionId = R.string.nothing_here_desc_search
+                            title = stringResource(R.string.nothing_here),
+                            description = stringResource(R.string.nothing_here_desc_search)
                         )
                     }
                     AnimatedVisibility(
@@ -268,8 +268,8 @@ fun ExploreSearchScreen(
             ) {
                 EmptyPage(
                     icon = painterResource(R.drawable.not_found_90dp),
-                    titleId = R.string.search_no_results,
-                    descriptionId = R.string.search_no_results_desc
+                    title = stringResource(R.string.search_no_results),
+                    description = stringResource(R.string.search_no_results_desc)
                 )
             }
             AnimatedVisibility(

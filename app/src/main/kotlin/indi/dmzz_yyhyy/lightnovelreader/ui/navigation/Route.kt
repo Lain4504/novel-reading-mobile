@@ -32,7 +32,7 @@ object Route {
             )
             @Serializable
             data class AddBookToBookshelfDialog(
-                val selectedBookIds: List<Int>
+                val selectedBookIds: List<String>
             )
         }
         @Serializable
@@ -57,7 +57,7 @@ object Route {
                 @Serializable
                 object Manager
                 @Serializable
-                data class Rules(val bookId: Int)
+                data class Rules(val bookId: String)
             }
             @Serializable
             object PluginManager {
@@ -67,6 +67,8 @@ object Route {
                 data class Detail(
                     val id: String
                 )
+                @Serializable
+                object Repository
             }
             @Serializable
             object Debug
@@ -79,7 +81,7 @@ object Route {
         object ExportUserDataDialog
         @Serializable
         data class EditTextFormattingRuleDialog(
-            val bookId: Int,
+            val bookId: String,
             val ruleId: Int
         )
     }
@@ -87,7 +89,7 @@ object Route {
     object Book {
         @Serializable
         data class Detail(
-            val bookId: Int
+            val bookId: String
         )
         @Serializable
         data object Reader
@@ -117,24 +119,27 @@ object Route {
         }
         @Serializable
         data class ImageViewerDialog(
-            val imageUrl: String
+            val imageUri: String
         )
-
     }
     @Serializable
     object UpdatesAvailableDialog
     @Serializable
     data class AddBookToBookshelfDialog(
-        val bookId: Int
+        val bookId: String
     )
     @Serializable
     data class MarkAllChaptersAsReadDialog(
-        val bookId: Int
+        val bookId: String
     )
     @Serializable
     data class SliderValueDialog(
         val value: Float,
         val floatUserDataPath: String
+    )
+    @Serializable
+    data class PluginInstallerDialog(
+        val source: String
     )
     @Serializable
     object DownloadManager

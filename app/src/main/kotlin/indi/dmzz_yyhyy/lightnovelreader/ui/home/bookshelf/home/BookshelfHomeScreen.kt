@@ -120,15 +120,15 @@ fun BookshelfHomeScreen(
     selectedRoute: Any,
     init: () -> Unit,
     changePage: (Int) -> Unit,
-    changeBookSelectState: (Int) -> Unit,
+    changeBookSelectState: (String) -> Unit,
     uiState: BookshelfHomeUiState,
     onClickCreate: () -> Unit,
     onClickEdit: (Int) -> Unit,
-    onClickBook: (Int) -> Unit,
+    onClickBook: (String) -> Unit,
     onClickEnableSelectMode: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,
-    onClickPin: (Int?) -> Unit,
+    onClickPin: () -> Unit,
     onClickRemove: () -> Unit,
     onClickMarkSelectedBooks: () -> Unit,
     saveAllBookshelfJsonData: (Uri) -> Unit,
@@ -137,8 +137,8 @@ fun BookshelfHomeScreen(
     clearToast: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
-    getBookInfoFlow: (Int) -> StateFlow<BookInformation>,
-    getBookVolumesFlow: (Int) -> StateFlow<BookVolumes>,
+    getBookInfoFlow: (String) -> StateFlow<BookInformation>,
+    getBookVolumesFlow: (String) -> StateFlow<BookVolumes>,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -151,7 +151,7 @@ fun BookshelfHomeScreen(
     val saveThisBookshelfLauncher = launcher(saveBookshelfJsonData)
     val importBookshelfLauncher = launcher(importBookshelf)
 
-    val onLongPress: (Int) -> Unit = { bookId ->
+    val onLongPress: (String) -> Unit = { bookId ->
         if (!uiState.selectMode) {
             onClickEnableSelectMode.invoke()
         }
@@ -347,8 +347,8 @@ fun BookshelfHomeScreen(
                 ) {
                     EmptyPage(
                         icon = painterResource(R.drawable.bookmarks_90px),
-                        titleId = R.string.nothing_here,
-                        descriptionId = R.string.nothing_here_desc_bookshelf
+                        title = stringResource(R.string.nothing_here),
+                        description = stringResource(R.string.nothing_here_desc_bookshelf)
                     )
                 }
 
@@ -559,7 +559,7 @@ fun TopBar(
     onClickEdit: () -> Unit,
     onClickDisableSelectMode: () -> Unit,
     onClickSelectAll: () -> Unit,
-    onClickPin: (Int?) -> Unit,
+    onClickPin: () -> Unit,
     onClickRemove: () -> Unit,
     onClickBookmark: () -> Unit,
     onClickShareBookshelf: () -> Unit,
@@ -738,7 +738,7 @@ fun TopBar(
                         contentDescription = "select all"
                     )
                 }
-                IconButton({ onClickPin(null) }) {
+                IconButton({ onClickPin() }) {
                     Icon(
                         painter = painterResource(R.drawable.keep_24px),
                         contentDescription = "pin"

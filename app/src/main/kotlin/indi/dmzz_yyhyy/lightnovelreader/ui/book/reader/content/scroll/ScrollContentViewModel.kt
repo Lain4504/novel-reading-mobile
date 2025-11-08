@@ -3,6 +3,7 @@ package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.scroll
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.IntSize
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.content.ContentComponentRepository
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentViewModel
 import indi.dmzz_yyhyy.lightnovelreader.utils.throttleLatest
@@ -16,7 +17,8 @@ class ScrollContentViewModel(
     val bookRepository: BookRepository,
     val coroutineScope: CoroutineScope,
     val settingState: SettingState,
-    val updateReadingProgress: (Float) -> Unit
+    val updateReadingProgress: (Float) -> Unit,
+    val contentComponentRepository: ContentComponentRepository
 ) : ContentViewModel {
     private var progressScrollLoadJob: Job? = null
     private val loadChapterJobs: MutableList<Job> = mutableListOf()
@@ -30,7 +32,10 @@ class ScrollContentViewModel(
         setLazyColumnSize = {
             lazyColumnSize = it
         },
-        writeProgressRightNow = ::writeProgressRightNow
+        writeProgressRightNow = ::writeProgressRightNow,
+        getContentData =  {
+            contentComponentRepository.getContentDataFromJson(it)
+        }
     )
 
     init {
@@ -146,7 +151,7 @@ class ScrollContentViewModel(
         }
     }
 
-    override fun changeBookId(id: Int) {
+    override fun changeBookId(id: String) {
         uiState.bookId = id
     }
 
@@ -168,7 +173,7 @@ class ScrollContentViewModel(
         }
     }
 
-    override fun changeChapter(id: Int) {
+    override fun changeChapter(id: String) {
         loadChapterJobs.forEach(Job::cancel)
         uiState.contentList.clear()
         uiState.readingContentId = id

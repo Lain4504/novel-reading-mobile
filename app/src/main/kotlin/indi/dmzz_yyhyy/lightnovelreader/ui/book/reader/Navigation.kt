@@ -1,6 +1,7 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.collectAsState
@@ -9,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.HiltViewModelFactory
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -17,20 +19,21 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.imageview.ImageViewerScreen
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.imageview.ImageViewerViewModel
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.ColorPickerDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.theme.navigateToSettingsThemeDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.saveBitmapAsPng
-import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.urlToBitmap
+import indi.dmzz_yyhyy.lightnovelreader.utils.ImageUtils.uriToBitmap
 import indi.dmzz_yyhyy.lightnovelreader.utils.isResumed
 import indi.dmzz_yyhyy.lightnovelreader.utils.popBackStackIfResumed
+import io.nightfish.lightnovelreader.api.ui.LocalNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 fun NavGraphBuilder.bookReaderDestination() {
     composable<Route.Book.Reader> { navBackStackEntry ->
@@ -45,16 +48,14 @@ fun NavGraphBuilder.bookReaderDestination() {
             onClickPrevChapter = viewModel::prevChapter,
             onClickNextChapter = viewModel::nextChapter,
             onChangeChapter = viewModel::changeChapter,
-            onClickThemeSettings = navController::navigateToSettingsThemeDestination,
-            onZoomImage = navController::navigateToImageViewerDialog,
-            header = viewModel.imageHeader
+            onClickThemeSettings = navController::navigateToSettingsThemeDestination
         )
     }
     colorPickerDialog()
     imageViewerDialog()
 }
 
-fun NavController.navigateToBookReaderDestination(bookId: Int, chapterId: Int, context: Context) {
+fun NavController.navigateToBookReaderDestination(bookId: String, chapterId: String, context: Context) {
     if (this.currentBackStackEntry?.destination?.route?.contains("indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route.Book.Detail") != true) {
         return
     }
@@ -93,7 +94,6 @@ fun NavController.navigateToColorPickerDialog(colorUserDataPath: String, colors:
     if (!this.isResumed()) return
     navigate(Route.Book.ColorPickerDialog(colorUserDataPath, colors.toLongArray()))
 }
-
 private fun NavGraphBuilder.imageViewerDialog() {
     dialog<Route.Book.ImageViewerDialog>(
         dialogProperties = DialogProperties(
@@ -109,39 +109,39 @@ private fun NavGraphBuilder.imageViewerDialog() {
         val coroutineScope = rememberCoroutineScope()
 
         ImageViewerScreen(
-            imageUrl = route.imageUrl,
+            imageUri = route.imageUri.toUri(),
             onDismissRequest = { navController.popBackStack() },
             onClickSave = {
-                urlToBitmap(
-                    scope = coroutineScope,
-                    imageURL = route.imageUrl,
-                    context = context,
-                    onSuccess = { bitmap ->
-                        coroutineScope.launch {
-                            val savedName = saveBitmapAsPng(context, bitmap)
-                            withContext(Dispatchers.Main) {
-                                if (savedName != null) {
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(R.string.saved_to_pictures_dir, savedName),
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                } else {
-                                    Toast.makeText(context, context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
-                                }
+                coroutineScope.launch(Dispatchers.IO) {
+                    uriToBitmap(
+                        imageUri = route.imageUri.toUri(),
+                        context = context,
+                        header = viewModel.imageHeader
+                    )
+                        .onSuccess {
+                            coroutineScope.launch {
+                                saveBitmapAsPng(context, it)
+                                    .onSuccess {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.saved_to_pictures_dir, it),
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    .onFailure {
+                                        Toast.makeText(context, context.getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
+                                    }
                             }
                         }
-                    },
-                    onError = { error ->
-                        Log.d("ImageViewer", "Failed to save image: ${error.message}")
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.save_failed),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    },
-                    header = viewModel.imageHeader
-                )
+                        .onFailure {
+                            Log.d("ImageViewer", "Failed to save image: ${it.message}")
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.save_failed),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                }
             },
             header = viewModel.imageHeader
         )
@@ -149,11 +149,11 @@ private fun NavGraphBuilder.imageViewerDialog() {
 }
 
 fun NavController.navigateToImageViewerDialog(
-    imageUrl: String
+    imageUri: Uri
 ) {
     navigate(
         Route.Book.ImageViewerDialog(
-            imageUrl = imageUrl
+            imageUri = imageUri.toString()
         )
     )
 }

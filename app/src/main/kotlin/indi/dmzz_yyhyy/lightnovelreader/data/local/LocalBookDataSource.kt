@@ -22,13 +22,13 @@ class LocalBookDataSource @Inject constructor(
     private val chapterContentDao: ChapterContentDao,
     private val userReadingDataDao: UserReadingDataDao
 ): LocalBookDataSourceApi {
-    override suspend fun getBookInformation(id: Int): BookInformation? = bookInformationDao.get(id)
+    override suspend fun getBookInformation(id: String): BookInformation? = bookInformationDao.get(id)
     override fun updateBookInformation(info: BookInformation) = bookInformationDao.update(info)
-    override suspend fun getBookVolumes(id: Int): BookVolumes? = bookVolumesDao.getBookVolumes(id)
-    override fun updateBookVolumes(bookId: Int, bookVolumes: BookVolumes) =
+    override suspend fun getBookVolumes(id: String): BookVolumes? = bookVolumesDao.getBookVolumes(id)
+    override fun updateBookVolumes(bookId: String, bookVolumes: BookVolumes) =
         bookVolumesDao.update(bookId, bookVolumes)
 
-    override suspend fun getChapterContent(id: Int) = chapterContentDao.get(id)?.let {
+    override suspend fun getChapterContent(id: String) = chapterContentDao.get(id)?.let {
         MutableChapterContent(
             it.id,
             it.title,
@@ -40,7 +40,7 @@ class LocalBookDataSource @Inject constructor(
     override fun updateChapterContent(chapterContent: ChapterContent) =
         chapterContentDao.update(chapterContent)
 
-    override fun getUserReadingData(id: Int) = userReadingDataDao.getEntity(id).let {
+    override fun getUserReadingData(id: String) = userReadingDataDao.getEntity(id).let {
         it ?: return@let MutableUserReadingData.empty().apply { this.id = id }
         MutableUserReadingData(
             it.id,
@@ -54,7 +54,7 @@ class LocalBookDataSource @Inject constructor(
         )
     }
 
-    override fun getUserReadingDataFlow(id: Int) = userReadingDataDao.getEntityFlow(id).map {
+    override fun getUserReadingDataFlow(id: String) = userReadingDataDao.getEntityFlow(id).map {
         it ?: return@map MutableUserReadingData.empty().apply { this.id = id }
         MutableUserReadingData(
             it.id,
@@ -68,7 +68,7 @@ class LocalBookDataSource @Inject constructor(
         )
     }
 
-    override fun updateUserReadingData(id: Int, update: (MutableUserReadingData) -> UserReadingData) {
+    override fun updateUserReadingData(id: String, update: (MutableUserReadingData) -> UserReadingData) {
         val userReadingData = userReadingDataDao.getEntityWithoutFlow(id)?.let {
             MutableUserReadingData(
                 it.id,
@@ -104,7 +104,7 @@ class LocalBookDataSource @Inject constructor(
             )
         }
 
-    override suspend fun isChapterContentExists(id: Int): Boolean =
+    override suspend fun isChapterContentExists(id: String): Boolean =
         chapterContentDao.getId(id) != null
 
     override fun clear() {

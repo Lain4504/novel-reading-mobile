@@ -309,7 +309,7 @@ private fun NoRecords() {
 
 private fun computeDailyDetails(
     records: List<BookRecordEntity>,
-    bookInfoMap: Map<Int, BookInformation>
+    bookInfoMap: Map<String, BookInformation>
 ): DailyDateDetails? {
     if (records.isEmpty()) return null
 

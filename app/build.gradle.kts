@@ -20,7 +20,7 @@ android {
         minSdk = 24
         targetSdk = 36
         // 版本号为x.y.z则versionCode为x*1000000+y*10000+z*1000+debug版本号(开发需要时迭代, 三位数)
-        versionCode = 1_02_00_004
+        versionCode = 1_02_00_006
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -133,7 +133,7 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     // Potato EPUB
     implementation(project(":epub"))
-    implementation(libs.serialization.json)
+    implementation(libs.kotlinx.serialization.json)
     // Swipe
     implementation(libs.swipe)
     // Chart
@@ -146,6 +146,11 @@ dependencies {
     implementation(libs.compose.shimmer)
     // LNR API
     implementation(project(":api"))
+    implementation(libs.dom4j)
+    implementation(libs.kotlin.result)
+    implementation(libs.kotlin.result.coroutines)
+    // apksig
+    implementation(libs.apksig)
 }
 
 configurations.implementation {

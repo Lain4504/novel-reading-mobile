@@ -16,11 +16,11 @@ data class BookshelfData(
     @SerializedName("system_update_reminder")
     val systemUpdateReminder: Boolean,
     @SerializedName("all_book_ids")
-    val allBookIds: List<Int>,
+    val allBookIds: List<String>,
     @SerializedName("pinned_book_ids")
-    val pinnedBookIds: List<Int>,
+    val pinnedBookIds: List<String>,
     @SerializedName("updatedBookIds")
-    val updatedBookIds: List<Int>,
+    val updatedBookIds: List<String>,
 )
 
 fun Bookshelf.toJsonData(): BookshelfData =

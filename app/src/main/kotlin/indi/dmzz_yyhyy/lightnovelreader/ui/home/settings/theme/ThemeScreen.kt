@@ -63,20 +63,20 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.LocalAppTheme
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.selectDataFile
-import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
-import io.nightfish.lightnovelreader.api.ui.components.SettingsSwitchEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncher
 import indi.dmzz_yyhyy.lightnovelreader.utils.uriLauncherWithFlag
+import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
+import io.nightfish.lightnovelreader.api.ui.components.SettingsSwitchEntry
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -502,7 +502,7 @@ fun ReaderThemeSettingsList(
     )
     val textMeasurer = rememberTextMeasurer()
     val coroutineScope = rememberCoroutineScope()
-    val launcher = uriLauncher {
+    val launcher = uriLauncher { uri ->
         CoroutineScope(Dispatchers.IO).launch {
             val font = context.filesDir.resolve("readerTextFont")
                 .also {
@@ -512,7 +512,7 @@ fun ReaderThemeSettingsList(
                     } else it.createNewFile()
                 }
             try {
-                context.contentResolver.openFileDescriptor(it, "r")
+                context.contentResolver.openFileDescriptor(uri, "r")
                     ?.use { parcelFileDescriptor ->
                         FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
                             fileInputStream.readBytes()

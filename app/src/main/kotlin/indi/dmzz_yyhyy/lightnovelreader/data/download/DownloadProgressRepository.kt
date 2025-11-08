@@ -34,7 +34,7 @@ class DownloadProgressRepository @Inject constructor(
                 try {
                     return@mapNotNull MutableDownloadItem(
                         DownloadType.valueOf(values[0].trim()),
-                        values[1].toInt()
+                        values[1]
                     ).apply { progress = 1f }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -48,7 +48,7 @@ class DownloadProgressRepository @Inject constructor(
             return userDataDao.getFlow(path).map { value ->
                 value?.split(",")?.map {
                     val values = it.split("|")
-                    MutableDownloadItem(DownloadType.valueOf(values[0].trim()), values[1].toInt()).apply { progress = 1f }
+                    MutableDownloadItem(DownloadType.valueOf(values[0].trim()), values[1]).apply { progress = 1f }
                 }
             }
         }

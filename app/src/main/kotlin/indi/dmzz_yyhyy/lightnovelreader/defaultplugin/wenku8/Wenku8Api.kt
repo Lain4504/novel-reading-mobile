@@ -1,6 +1,10 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8
 
+import android.content.Context
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.Wenku8AllExplorePage
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore.Wenku8HomeExplorePage
@@ -13,11 +17,17 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.Cache
 import indi.dmzz_yyhyy.lightnovelreader.utils.update
 import io.nightfish.lightnovelreader.api.book.BookInformation
 import io.nightfish.lightnovelreader.api.book.BookVolumes
+import io.nightfish.lightnovelreader.api.book.CanBeEmpty
 import io.nightfish.lightnovelreader.api.book.ChapterContent
 import io.nightfish.lightnovelreader.api.book.ChapterInformation
 import io.nightfish.lightnovelreader.api.book.MutableBookInformation
 import io.nightfish.lightnovelreader.api.book.MutableChapterContent
 import io.nightfish.lightnovelreader.api.book.Volume
+import io.nightfish.lightnovelreader.api.book.WorldCount
+import io.nightfish.lightnovelreader.api.content.builder.ContentBuilder
+import io.nightfish.lightnovelreader.api.content.builder.image
+import io.nightfish.lightnovelreader.api.content.builder.simpleText
+import io.nightfish.lightnovelreader.api.content.component.ImageComponentData
 import io.nightfish.lightnovelreader.api.web.WebBookDataSource
 import io.nightfish.lightnovelreader.api.web.WebDataSource
 import io.nightfish.lightnovelreader.api.web.explore.ExploreExpandedPageDataSource
@@ -39,6 +49,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import java.net.URLEncoder
@@ -46,6 +59,7 @@ import java.net.UnknownHostException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
 
 @WebDataSource(
     "Wenku8",
@@ -64,7 +78,7 @@ object Wenku8Api: WebBookDataSource {
         "大小姐", "性转", "伪娘", "人外",
         "后宫", "百合", "耽美", "NTR", "女性视角"
     )
-    private var allBookChapterListCacheId: Int = -1
+    private var allBookChapterListCacheId: String = ""
     private var allBookChapterListCache: List<ChapterInformation> = emptyList()
     private val DATA_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     override val exploreExpandedPageDataSourceMap = mutableMapOf<String, ExploreExpandedPageDataSource>()
@@ -83,11 +97,12 @@ object Wenku8Api: WebBookDataSource {
         }
     }
 
-    private inline fun <reified T> ifCache(id: Int, block: () -> T): T {
-        val cacheData = cache.getCache<T>(id)
+    private inline fun <reified T: CanBeEmpty> ifCache(id: String, block: () -> T): T {
+        val cacheData = cache.getCache<T>(id.hashCode())
         if (cacheData == null) {
             val data = block.invoke()
-            cache.cache(id, data)
+            if (data.isEmpty()) return data
+            cache.cache(id.hashCode(), data)
             return data
         }
         return cacheData
@@ -197,8 +212,9 @@ object Wenku8Api: WebBookDataSource {
 
     override val id: Int = "wenku8".hashCode()
 
-    override suspend fun getBookInformation(id: Int): BookInformation = ifCache(id) {
+    override suspend fun getBookInformation(id: String): BookInformation = ifCache(id) {
         return@ifCache wenku8Api("action=book&do=meta&aid=$id&t=0")?.let {
+            if (id.toIntOrNull() == null) return@let BookInformation.empty(id)
             val titleGroup = it
                 .selectFirst("[name=Title]")?.text()
                 ?.let { it1 -> titleRegex.find(it1)?.groups }
@@ -208,12 +224,12 @@ object Wenku8Api: WebBookDataSource {
                     title = titleGroup?.get(1)?.value ?: it.selectFirst("[name=Title]")?.text()
                     ?: "",
                     subtitle = titleGroup?.get(2)?.value ?: "",
-                    coverUrl = "https://img.wenku8.com/image/${id / 1000}/$id/${id}s.jpg",
+                    coverUrl = "https://img.wenku8.com/image/${id.toInt() / 1000}/$id/${id}s.jpg".toUri(),
                     author = it.selectFirst("[name=Author]")?.attr("value") ?: "",
                     description = wenku8Api("action=book&do=intro&aid=$id&t=0")?.text() ?: "",
                     tags = it.selectFirst("[name=Tags]")?.attr("value")?.split(" ") ?: emptyList(),
                     publishingHouse = it.selectFirst("[name=PressId]")?.attr("value") ?: "",
-                    wordCount = it.selectFirst("[name=BookLength]")?.attr("value")?.toInt() ?: -1,
+                    wordCount = WorldCount(it.selectFirst("[name=BookLength]")?.attr("value")?.toInt() ?: -1),
                     lastUpdated = LocalDate.parse(
                         it.selectFirst("[name=LastUpdate]")?.attr("value"), DATA_TIME_FORMATTER
                     ).atStartOfDay(),
@@ -226,19 +242,20 @@ object Wenku8Api: WebBookDataSource {
         } ?: BookInformation.empty()
     }
 
-    override suspend fun getBookVolumes(id: Int): BookVolumes = ifCache(id) {
+    override suspend fun getBookVolumes(id: String): BookVolumes = ifCache(id) {
+        if (id.toIntOrNull() == null) return@ifCache BookVolumes.empty(id)
         return@ifCache BookVolumes(
             id,
             wenku8Api("action=book&do=list&aid=$id&t=0")
             ?.select("volume")
             ?.map { element ->
                 Volume(
-                    volumeId = element.attr("vid").toInt(),
+                    volumeId = element.attr("vid"),
                     volumeTitle = element.ownText(),
                     chapters = element.select("volume > chapter")
                         .map {
                             ChapterInformation(
-                                id = it.attr("cid").toInt(),
+                                id = it.attr("cid"),
                                 title = it.text(),
                             )
                         }
@@ -247,7 +264,7 @@ object Wenku8Api: WebBookDataSource {
         )
     }
 
-    override suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent = ifCache(chapterId.hashCode() + bookId.hashCode())  {
+    override suspend fun getChapterContent(chapterId: String, bookId: String): ChapterContent = ifCache(chapterId + bookId)  {
         if (allBookChapterListCacheId != bookId) {
             allBookChapterListCacheId = bookId
             allBookChapterListCache = getBookVolumes(bookId).let { bookVolumes ->
@@ -261,8 +278,11 @@ object Wenku8Api: WebBookDataSource {
         return@ifCache wenku8Api("action=book&do=text&aid=$bookId&cid=$chapterId&t=0")
             .let { document ->
                 document
-                    ?.wholeText()
-                    ?.let { s ->
+                    ?.body()
+                    .toString()
+                    .replaceFirst("<body>", "")
+                    .replaceFirst("</body>", "")
+                    .let { s ->
                         var title = ""
                         var content = ""
                         s.split("\n").forEachIndexed { index, line ->
@@ -276,30 +296,33 @@ object Wenku8Api: WebBookDataSource {
                                 return@forEachIndexed
                             }
                         }
-                        val imagesResult = Regex("(http.*?)(<!--image-->)")
-                            .findAll(document.toString())
-                            .toList()
-                        imagesResult.forEach {
-                            content = content.replace(it.groups[1]?.value ?: it.value, "[image]${it.groups[1]?.value ?: ""}[image]")
-                        }
+                        val jsonObject = ContentBuilder().apply {
+                            content.split("<!--image-->").forEach {
+                                if (it.trim().startsWith("http")) {
+                                    image(it.trim().toUri())
+                                } else if(it.isNotBlank()) {
+                                    simpleText(it)
+                                }
+                            }
+                        }.build()
                         MutableChapterContent(
                             id = chapterId,
                             title = title,
-                            content = content,
+                            content = jsonObject,
                             lastChapter = allBookChapterListCache
                                 .indexOfFirst { it.id == chapterId }
                                 .let {
-                                    if (it == -1) it else allBookChapterListCache.getOrNull(it - 1)?.id
-                                        ?: -1
+                                    if (it == -1) "" else allBookChapterListCache.getOrNull(it - 1)?.id
+                                        ?: ""
                                 },
                             nextChapter = allBookChapterListCache
                                 .indexOfFirst { it.id == chapterId }
                                 .let {
-                                    if (it == -1) it else allBookChapterListCache.getOrNull(it + 1)?.id
-                                        ?: -1
+                                    if (it == -1) "" else allBookChapterListCache.getOrNull(it + 1)?.id
+                                        ?: ""
                                 }
                         )
-                    } ?: ChapterContent.empty()
+                    }
             }
     }
 
@@ -328,7 +351,7 @@ object Wenku8Api: WebBookDataSource {
                 ?.select("item")
                 ?.forEach { element ->
                     searchResult.update {
-                        it + listOf(getBookInformation(element.attr("aid").toInt()))
+                        it + listOf(getBookInformation(element.attr("aid")))
                     }
                 }
                 ?.let {
@@ -368,8 +391,7 @@ object Wenku8Api: WebBookDataSource {
                         .selectFirst("div > div:nth-child(1) > a")
                         ?.attr("href")
                         ?.replace("/book/", "")
-                        ?.replace(".htm", "")
-                        ?.toInt() ?: -1
+                        ?.replace(".htm", "") ?: ""
                     )
                 else {
                     val titleGroup = element.selectFirst("div > div:nth-child(1) > a")
@@ -379,13 +401,12 @@ object Wenku8Api: WebBookDataSource {
                         id = element.selectFirst("div > div:nth-child(1) > a")
                             ?.attr("href")
                             ?.replace("/book/", "")
-                            ?.replace(".htm", "")
-                            ?.toInt() ?: -1,
+                            ?.replace(".htm", "") ?: "",
                         title = titleGroup?.get(1)?.value ?: element.selectFirst("div > div:nth-child(1) > a")
                             ?.attr("title") ?: "",
                         subtitle = titleGroup?.get(2)?.value ?: "",
                         coverUrl = element.selectFirst("div > div:nth-child(1) > a > img")
-                            ?.attr("src") ?: "",
+                            ?.attr("src")?.toUri() ?: Uri.EMPTY,
                         author = element.selectFirst("div > div:nth-child(2) > p:nth-child(2)")
                             ?.text()?.split("/")?.getOrNull(0)
                             ?.split(":")?.getOrNull(1) ?: "",
@@ -396,10 +417,10 @@ object Wenku8Api: WebBookDataSource {
                         publishingHouse = element.selectFirst("div > div:nth-child(2) > p:nth-child(2)")
                             ?.text()?.split("/")?.getOrNull(1)
                             ?.split(":")?.getOrNull(1) ?: "",
-                        wordCount = element.selectFirst("div > div:nth-child(2) > p:nth-child(3)")
+                        wordCount = WorldCount(element.selectFirst("div > div:nth-child(2) > p:nth-child(3)")
                             ?.text()?.split("/")?.getOrNull(1)
                             ?.split(":")?.getOrNull(1)
-                            ?.replace("K", "")?.toInt()?.times(1000) ?: -1,
+                            ?.replace("K", "")?.toInt()?.times(1000) ?: -1),
                         lastUpdated = element.selectFirst("div > div:nth-child(2) > p:nth-child(3)")
                             ?.text()?.split("/")?.getOrNull(0)
                             ?.split(":")?.getOrNull(1)
@@ -541,18 +562,24 @@ object Wenku8Api: WebBookDataSource {
             navController.navigateToExploreExpandDestination(tag)
     }
 
-    override fun getCoverUrlInVolume(bookId: Int, volume: Volume, volumeChapterContentMap: Map<Int, ChapterContent>): String? {
+    override fun getCoverUriInVolume(bookId: String, volume: Volume, volumeChapterContentMap: MutableMap<String, ChapterContent>, context: Context): Uri? {
         return volume.chapters
             .find { it.title.endsWith("插图") }
             ?.let { chapterInformation ->
                 val chapterContent = volumeChapterContentMap[chapterInformation.id] ?: return null
                 if (chapterContent.isEmpty()) return null
-                chapterContent.content.split("[image]")
-                    .filter(String::isNotEmpty)
-                    .forEach { singleText ->
-                        if (singleText.startsWith("http://") || singleText.startsWith("https://")) {
-                            return singleText
-                        }
+                chapterContent.content["components"]?.jsonArray
+                    ?.mapNotNull { it.jsonObject }
+                    ?.filter {
+                        it["id"]?.jsonPrimitive?.content == ImageComponentData.ID
+                    }
+                    ?.forEach {
+                        val uri = it["data"]?.jsonObject["uri"]?.jsonPrimitive?.content?.toUri() ?: return null
+                        val options = BitmapFactory.Options()
+                        options.inJustDecodeBounds = true
+                        val inputStream = context.contentResolver.openInputStream(uri)
+                        BitmapFactory.decodeStream(inputStream, null, options)
+                        if (options.outHeight > options.outWidth) return uri
                     }
                 return null
             }

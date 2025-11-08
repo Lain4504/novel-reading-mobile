@@ -37,6 +37,7 @@ import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 fun DebugScreen(
     onClickBack: () -> Unit,
     onClickQuery: (String) -> Unit,
+    onClickOpenBook: (String) -> Unit,
     result: String
 ) {
     Scaffold(
@@ -59,13 +60,67 @@ fun DebugScreen(
                 },
             )
         }
-    ) {
+    ) { padding ->
         Column(
-            modifier = Modifier.padding(it).padding(horizontal = 16.dp)
+            modifier = Modifier.padding(padding).padding(horizontal = 16.dp)
         ) {
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
             var sqlCommand by remember { mutableStateOf("") }
+            var bookId by remember { mutableStateOf("") }
+
+            Text(
+                modifier = Modifier.padding(vertical = 12.dp),
+                text = "打开书本",
+                style = AppTypography.labelLarge,
+                fontWeight = FontWeight.W600,
+                maxLines = 1
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                value = bookId,
+                onValueChange = { bookId = it },
+                label = { Text("书本ID") },
+                placeholder = { Text("输入书本ID") },
+                supportingText = { Text("输入书本ID") },
+                maxLines = 1,
+                interactionSource = interactionSource,
+                trailingIcon = {
+                    IconButton(onClick = { bookId = "" }) {
+                        Icon(
+                            painter = painterResource(R.drawable.cancel_24px),
+                            contentDescription = "cancel",
+                            tint =
+                                if (isFocused) OutlinedTextFieldDefaults.colors().focusedTrailingIconColor
+                                else OutlinedTextFieldDefaults.colors().unfocusedTrailingIconColor
+                        )
+                    }
+                }
+            )
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    onClick = {
+                        onClickOpenBook.invoke(bookId)
+                    }
+                ) {
+                    Text(
+                        text = "打开"
+                    )
+                }
+            }
+
+            Text(
+                modifier = Modifier.padding(vertical = 12.dp),
+                text = "SQL调试",
+                style = AppTypography.labelLarge,
+                fontWeight = FontWeight.W600,
+                maxLines = 1
+            )
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -108,6 +163,7 @@ fun DebugScreen(
                     .fillMaxWidth(),
                 text = result
             )
+
             Text(
                 modifier = Modifier.padding(vertical = 12.dp),
                 text = "崩溃测试",
@@ -132,7 +188,6 @@ fun DebugScreen(
                         Looper.getMainLooper().quit()
                     }
                 )
-
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by NPE",
@@ -141,7 +196,6 @@ fun DebugScreen(
                         throw NullPointerException()
                     }
                 )
-
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by divide by zero",
@@ -150,7 +204,6 @@ fun DebugScreen(
                         throw ArithmeticException(" / by zero")
                     }
                 )
-
                 SettingsClickableEntry(
                     modifier = Modifier.background(colorScheme.background),
                     title = "Crash by RuntimeException",

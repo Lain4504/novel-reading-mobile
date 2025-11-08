@@ -14,12 +14,12 @@ interface ExpandedPageUiState {
     val pageTitle: String
     val filters: List<Filter>
     val bookList: List<BookInformation>
-    val allBookshelfBookIds: List<Int>
+    val allBookshelfBookIds: List<String>
 }
 
 class MutableExpandedPageUiState : ExpandedPageUiState {
     override var pageTitle: String by mutableStateOf("")
     override var filters: SnapshotStateList<Filter> = mutableStateListOf()
     override var bookList: List<BookInformation> by mutableStateOf(emptyList())
-    override var allBookshelfBookIds: List<Int> by mutableStateOf(emptyList())
+    override var allBookshelfBookIds: List<String> by mutableStateOf(emptyList())
 }

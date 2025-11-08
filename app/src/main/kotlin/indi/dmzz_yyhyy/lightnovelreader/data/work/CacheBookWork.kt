@@ -24,8 +24,8 @@ class CacheBookWork @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val bookId = inputData.getInt("bookId", -1)
-        if (bookId < 0) return Result.failure()
+        val bookId = inputData.getString("bookId") ?: return Result.failure()
+        if (bookId.isBlank()) return Result.failure()
         val downloadItem = MutableDownloadItem(DownloadType.CACHE, bookId)
         downloadProgressRepository.addExportItem(downloadItem)
         var count = 0
