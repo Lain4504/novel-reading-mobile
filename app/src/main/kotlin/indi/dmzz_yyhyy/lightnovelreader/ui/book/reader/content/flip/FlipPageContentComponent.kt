@@ -47,7 +47,6 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
-import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
 import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
 import io.nightfish.lightnovelreader.api.content.component.AbstractContentComponent
@@ -109,7 +108,7 @@ private fun SimpleFlipPageTextComponent(
                 with(density) {
                     (paddingValues.calculateTopPadding() + paddingValues.calculateBottomPadding()).toPx()
                 }.toInt()
-            ).debugPrint()
+            )
         val key = uiState.readingChapterContent.content.hashCode() + width + height
         if (key == contentKey) return@remember emptyList()
         contentKey = key
