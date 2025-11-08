@@ -49,7 +49,7 @@ class PluginManager @Inject constructor(
     private val errorPluginsUserData =
         userDataRepository.stringListUserData(UserDataPath.Plugin.ErrorPlugins.path)
 
-    private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic, BiliNovel)
+    private val defaultWebDataSources = listOf(Wenku8Api)
     private val defaultPlugins = listOf<Class<*>>()
     private val computeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -78,7 +78,6 @@ class PluginManager @Inject constructor(
             }
         }
         defaultWebDataSources.forEach(webBookDataSourceManager::loadWebDataSourceClass)
-        defaultPlugins.forEach { getPluginInstance(it)?.let { p -> loadPlugin(p, forceLoad = true) } }
         pluginsDir
             .also(File::mkdir)
             .listFiles()
@@ -168,7 +167,16 @@ class PluginManager @Inject constructor(
         )
         val scanPackage = packageInfo?.packageName ?: ""
 
-        val id = loadPlugin(classLoader, scanPackage, forceLoad)
+        val id = loadPlugin(
+            classLoader = classLoader,
+            pluginContext = PluginContext(
+                dataDir = getPluginDataDir(pluginDir),
+                pluginFile = getPluginFile(pluginDir),
+                assetDir = getPluginAssetDir(pluginDir)
+            ),
+            scanPackage = scanPackage,
+            forceLoad = forceLoad
+        )
         if (id != null) {
             pluginPathMap[id] = path
             computeScope.launch {
