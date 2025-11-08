@@ -17,9 +17,9 @@ class LazyLoadWebDataSource(
     override val searchTypeMap = bookDataSource.searchTypeMap
     override val searchTipMap = bookDataSource.searchTipMap
     override val searchTypeIdList = bookDataSource.searchTypeIdList
-    override suspend fun getBookInformation(id: Int) = bookDataSource.getBookInformation(id)
-    override suspend fun getBookVolumes(id: Int) = bookDataSource.getBookVolumes(id)
-    override suspend fun getChapterContent(chapterId: Int, bookId: Int) = bookDataSource.getChapterContent(chapterId, bookId)
+    override suspend fun getBookInformation(id: String) = bookDataSource.getBookInformation(id)
+    override suspend fun getBookVolumes(id: String) = bookDataSource.getBookVolumes(id)
+    override suspend fun getChapterContent(chapterId: String, bookId: String) = bookDataSource.getChapterContent(chapterId, bookId)
     override fun search(searchType: String, keyword: String) = bookDataSource.search(searchType, keyword)
     override fun stopAllSearch() = bookDataSource.stopAllSearch()
 
