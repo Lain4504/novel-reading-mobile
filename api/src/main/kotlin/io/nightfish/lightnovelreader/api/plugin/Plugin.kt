@@ -26,5 +26,5 @@ annotation class Plugin(
     val author: String,
     val description: String,
     val updateUrl: String,
-    val apiVersion: Int = 0
+    val apiVersion: Int
 )
