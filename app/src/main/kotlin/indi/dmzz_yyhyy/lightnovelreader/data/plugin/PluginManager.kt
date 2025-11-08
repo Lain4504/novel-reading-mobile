@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.navigation.NavGraphBuilder
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dalvik.system.DexClassLoader
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
@@ -245,5 +246,13 @@ class PluginManager @Inject constructor(
     @Composable
     fun PluginContent(pluginId: String, paddingValues: PaddingValues) {
         pluginMap[pluginId]?.PageContent(paddingValues)
+    }
+
+    fun NavGraphBuilder.onBuildNavHost() {
+        pluginMap.values.forEach {
+            with(it) {
+                onBuildNavHost()
+            }
+        }
     }
 }

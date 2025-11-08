@@ -9,7 +9,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import io.nightfish.lightnovelreader.api.content.builder.ContentBuilder
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.UriConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.converter.WorldCountConverter
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.dao.BookInformationDao
@@ -33,6 +32,8 @@ import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserDataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.UserReadingDataEntity
 import indi.dmzz_yyhyy.lightnovelreader.data.local.room.entity.VolumeEntity
 import io.nightfish.lightnovelreader.api.book.WorldCount
+import io.nightfish.lightnovelreader.api.content.builder.ContentBuilder
+import io.nightfish.lightnovelreader.api.content.builder.image
 import io.nightfish.lightnovelreader.api.content.builder.simpleText
 
 @Database(
@@ -312,9 +313,13 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                     do {
                         val contentValues = ContentValues()
                         val textContent = cursor.getString(cursor.columnNames.indexOfFirst { it == "content" })
-                        val content = ContentBuilder()
-                            .simpleText(textContent)
-                            .build()
+
+                        val content = ContentBuilder().apply {
+                            textContent.split("[image]").forEach {
+                                if (it.trim().startsWith("http")) image(it.toUri())
+                                else simpleText(it)
+                            }
+                        }.build()
                         contentValues.put("id", cursor.getInt(cursor.columnNames.indexOfFirst { it == "id" }).toString())
                         contentValues.put("content", content.toString())
                         contentValues.put("lastChapter", cursor.getInt(cursor.columnNames.indexOfFirst { it == "lastChapter" }).toString())

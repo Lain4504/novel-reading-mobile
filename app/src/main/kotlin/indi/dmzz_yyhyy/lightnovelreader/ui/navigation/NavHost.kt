@@ -6,9 +6,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import io.nightfish.lightnovelreader.api.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.bookNavigation
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.addBookToBookshelfDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.markAllChaptersAsReadDialog
@@ -20,11 +20,13 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.expandEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandExit
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopEnter
 import indi.dmzz_yyhyy.lightnovelreader.utils.expandPopExit
+import io.nightfish.lightnovelreader.api.ui.LocalNavController
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun LightNovelReaderNavHost(
-    navController: NavHostController
+    navController: NavHostController,
+    onBuildNavHost: NavGraphBuilder.() -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     CompositionLocalProvider(
@@ -46,6 +48,7 @@ fun LightNovelReaderNavHost(
                 addBookToBookshelfDialog()
                 downloadManager()
                 markAllChaptersAsReadDialog()
+                onBuildNavHost.invoke(this)
             }
         }
     }

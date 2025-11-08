@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.caoccao.javet.interop.NodeRuntime
 import com.caoccao.javet.interop.V8Host
+import io.nightfish.lightnovelreader.api.PluginContext
 import io.nightfish.lightnovelreader.api.plugin.LightNovelReaderPlugin
 import io.nightfish.lightnovelreader.api.plugin.Plugin
 import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
@@ -53,6 +54,7 @@ import java.util.zip.ZipFile
 )
 class JsLoaderPlugin(
     val appContext: Context,
+    val pluginContext: PluginContext,
     val userDataRepositoryApi: UserDataRepositoryApi,
     val dataSourceManagerApi: WebBookDataSourceManagerApi
 ) : LightNovelReaderPlugin {
@@ -62,7 +64,7 @@ class JsLoaderPlugin(
         private const val TAG = "JsLoaderPlugin"
     }
 
-    val jsWebDataSourceDir = appContext.dataDir.resolve("js_web_data_source")
+    val jsWebDataSourceDir = pluginContext.dataDir.resolve("js_web_data_source")
 
     override fun onLoad() {
         Log.i(TAG, "JsLoaderPlugin is loaded")
@@ -73,9 +75,8 @@ class JsLoaderPlugin(
         }
         Log.i(TAG, "JsRuntime is loaded")
         ZipFile(
-            appContext.dataDir
-                    .resolve("plugin_assets/io.nightfish.lightnovelreader.plugin.js/node_modules.zip")
-        ).unzip(appContext.dataDir.resolve("node_modules"))
+            pluginContext.getAsset("node_modules.zip")
+        ).unzip(pluginContext.dataDir.resolve("node_modules"))
         jsWebDataSourceDir
             .listFiles { it.isDirectory }
             ?.forEach(::loadJsWebDataSource)
