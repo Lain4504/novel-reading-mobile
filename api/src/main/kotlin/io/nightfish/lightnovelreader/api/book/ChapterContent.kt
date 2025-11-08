@@ -2,25 +2,33 @@ package io.nightfish.lightnovelreader.api.book
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import io.nightfish.lightnovelreader.api.util.empty
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
 
 @Stable
 interface ChapterContent: CanBeEmpty {
-    val id: Int
+    val id: String
     val title: String
-    val content: String
-    val lastChapter: Int
-    val nextChapter: Int
+    val content: JsonObject
+    val lastChapter: String
+    val nextChapter: String
 
-    fun hasPrevChapter(): Boolean = lastChapter > -1
-    fun hasNextChapter(): Boolean = nextChapter > -1
-    override fun isEmpty() = this.id == -1 || this.content.isBlank()
+    fun hasPrevChapter(): Boolean = lastChapter.isNotEmpty()
+    fun hasNextChapter(): Boolean = nextChapter.isNotEmpty()
+    override fun isEmpty() = this.id.isEmpty()
+            || this.content.isEmpty()
+            || this.content["components"]?.jsonArray?.isEmpty() ?: true
 
     companion object {
-        fun empty(): ChapterContent = empty(-1)
-        fun empty(chapterId: Int): ChapterContent = MutableChapterContent(chapterId, "", "")
+        fun empty(): ChapterContent = empty("")
+        fun empty(chapterId: String): ChapterContent = MutableChapterContent(
+            chapterId,
+            "",
+            JsonObject.empty()
+        )
     }
 
     fun toMutable(): MutableChapterContent {
@@ -31,20 +39,20 @@ interface ChapterContent: CanBeEmpty {
 }
 
 class MutableChapterContent(
-    id: Int,
+    id: String,
     title: String,
-    content: String,
-    lastChapter: Int = -1,
-    nextChapter: Int = -1
+    content: JsonObject,
+    lastChapter: String = "",
+    nextChapter: String = ""
 ) : ChapterContent {
-    override var id by mutableIntStateOf(id)
+    override var id by mutableStateOf(id)
     override var title by mutableStateOf(title)
     override var content by mutableStateOf(content)
-    override var lastChapter by mutableIntStateOf(lastChapter)
-    override var nextChapter by mutableIntStateOf(nextChapter)
+    override var lastChapter by mutableStateOf(lastChapter)
+    override var nextChapter by mutableStateOf(nextChapter)
 
     companion object {
-        fun empty(): MutableChapterContent = MutableChapterContent(-1, "", "")
+        fun empty(): MutableChapterContent = MutableChapterContent("", "", JsonObject.empty() )
     }
 
     fun update(chapterContent: ChapterContent) {
@@ -66,11 +74,11 @@ class MutableChapterContent(
     }
 
     override fun hashCode(): Int {
-        var result = id
+        var result = id.hashCode()
         result = 31 * result + title.hashCode()
         result = 31 * result + content.hashCode()
-        result = 31 * result + lastChapter
-        result = 31 * result + nextChapter
+        result = 31 * result + lastChapter.hashCode()
+        result = 31 * result + nextChapter.hashCode()
         return result
     }
 }

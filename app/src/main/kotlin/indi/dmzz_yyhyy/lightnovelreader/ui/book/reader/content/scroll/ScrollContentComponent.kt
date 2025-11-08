@@ -23,6 +23,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -41,7 +42,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
@@ -58,10 +58,8 @@ fun ScrollContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
-    onClickNextChapter: () -> Unit,
-    header: Map<String, String>
+    onClickNextChapter: () -> Unit
 ) {
     ScrollContentTextComponent(
         modifier = modifier,
@@ -69,10 +67,8 @@ fun ScrollContentComponent(
         settingState = settingState,
         paddingValues = paddingValues,
         changeIsImmersive = changeIsImmersive,
-        onZoomImage = onZoomImage,
         onClickPrevChapter = onClickPrevChapter,
-        onClickNextChapter = onClickNextChapter,
-        header = header
+        onClickNextChapter = onClickNextChapter
     )
 }
 
@@ -83,10 +79,8 @@ fun ScrollContentTextComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
-    onClickNextChapter: () -> Unit,
-    header: Map<String, String>
+    onClickNextChapter: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -229,7 +223,7 @@ fun ScrollContentTextComponent(
                 key = { index -> uiState.contentList.getOrNull(index)?.id ?: -1 } ,
                 contentType = { { null } }
             ) { index ->
-                uiState.contentList.getOrNull(index)?.let{
+                uiState.contentList.getOrNull(index)?.let{ chapterContent ->
                     Column(
                         Modifier.defaultMinSize(
                             minHeight = with(density) {
@@ -239,7 +233,7 @@ fun ScrollContentTextComponent(
                     ) {
                         if (settingState.isUsingContinuousScrolling) {
                             val titleRegex = Regex("^(第[一二三四五六七八九十]+卷)\\s+(.*)")
-                            val matchResult = titleRegex.find(it.title)
+                            val matchResult = titleRegex.find(chapterContent.title)
 
                             Column(
                                 modifier = Modifier.fillMaxWidth()
@@ -274,7 +268,7 @@ fun ScrollContentTextComponent(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = 8.dp),
-                                        text = it.title,
+                                        text = chapterContent.title,
                                         textAlign = TextAlign.Center,
                                         fontSize = (settingState.fontSize + 6).sp,
                                         lineHeight = (settingState.fontSize + settingState.fontLineHeight + 6).sp,
@@ -295,29 +289,10 @@ fun ScrollContentTextComponent(
                                 Spacer(Modifier.height(16.dp))
                             }
                         }
-
-                        it.content
-                            .split("[image]")
-                            .filter { it.isNotBlank() }
-                            .forEach {
-                                BaseContentComponent(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .defaultMinSize(
-                                            minHeight = with(density) {
-                                                screenHeight.toDp()
-                                            }
-                                        ),
-                                    text = it,
-                                    fontSize = settingState.fontSize.sp,
-                                    fontLineHeight = settingState.fontLineHeight.sp,
-                                    fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                                    fontFamily = fontFamily,
-                                    color = textColor,
-                                    onZoomImage = onZoomImage,
-                                    header = header
-                                )
-                            }
+                        val contentData = remember(chapterContent.content) { uiState.getContentData(chapterContent.content) }
+                        contentData.components.forEach {
+                            it.Content(Modifier)
+                        }
                     }
                 }
             }

@@ -20,5 +20,5 @@ class WordCountFilter(onChange: () -> Unit) : SliderFilter(
     override val displayTitle: String
         get() = "字数"
     override fun filter(bookInformation: BookInformation): Boolean =
-        !enabled || bookInformation.wordCount >= value
+        !enabled || bookInformation.wordCount.count >= value
 }

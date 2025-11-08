@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BookCardItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Component
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.explore.ExploreScreen
@@ -60,6 +59,7 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.addToBookshelfAction
 import indi.dmzz_yyhyy.lightnovelreader.utils.fadingEdge
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,9 +71,9 @@ fun ExpandedPageScreen(
     expandedPageDataSourceId: String,
     init: (String) -> Unit,
     loadMore: () -> Unit,
-    requestAddBookToBookshelf: (Int) -> Unit,
+    requestAddBookToBookshelf: (String) -> Unit,
     onClickBack: () -> Unit,
-    onClickBook: (Int) -> Unit,
+    onClickBook: (String) -> Unit,
     refresh: () -> Unit,
 ) {
     val rememberPullToRefreshState = rememberPullToRefreshState()

@@ -236,7 +236,7 @@
     <string name="filter_by_publishing_house">文库筛选</string>
     <string name="filter_by_publishing_house_desc">根据小说文库的筛选。</string>
     <string name="book_info_update_date">%1$d-%2$d-%3$d 更新</string>
-    <string name="book_info_word_count_kilo">%sK 字</string>
+    <string name="book_info_word_count_kilo">%s 字</string>
     <string name="name">名称</string>
     <string name="bookshelf_name">书架名称</string>
     <string name="bookshelf_name_suggestion">为书架命名，建议长度在6个汉字以内</string>

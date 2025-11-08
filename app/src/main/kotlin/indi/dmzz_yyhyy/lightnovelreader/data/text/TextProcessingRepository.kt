@@ -1,10 +1,12 @@
 package indi.dmzz_yyhyy.lightnovelreader.data.text
 
+import indi.dmzz_yyhyy.lightnovelreader.data.content.ContentComponentRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.format.FormatRepository
 import io.nightfish.lightnovelreader.api.book.BookInformation
 import io.nightfish.lightnovelreader.api.book.BookVolumes
 import io.nightfish.lightnovelreader.api.book.ChapterContent
 import io.nightfish.lightnovelreader.api.explore.ExploreDisplayBook
+import io.nightfish.lightnovelreader.api.text.ComponentProcessor
 import io.nightfish.lightnovelreader.api.text.TextProcessingRepositoryApi
 import io.nightfish.lightnovelreader.api.text.TextProcessor
 import javax.inject.Inject
@@ -13,7 +15,8 @@ import javax.inject.Singleton
 @Singleton
 class TextProcessingRepository @Inject constructor(
     simplifiedTraditionalProcessor: SimplifiedTraditionalProcessor,
-    formatRepository: FormatRepository
+    formatRepository: FormatRepository,
+    val contentComponentRepository: ContentComponentRepository
 ): TextProcessingRepositoryApi {
     private val processors = mutableListOf<TextProcessor>()
 
@@ -37,14 +40,18 @@ class TextProcessingRepository @Inject constructor(
     fun processSearchTipMap(block: () -> Map<String, String>): Map<String, String> = process(block.invoke()) { it::processSearchTipMap }
     fun processBookInformation(block: () -> BookInformation): BookInformation = process(block.invoke()) { it::processBookInformation }
     fun processBookVolumes(block: () -> BookVolumes): BookVolumes = process(block.invoke()) { it::processBookVolumes }
-    fun processChapterContent(bookId: Int, block: () -> ChapterContent): ChapterContent = process(block.invoke()) { processor ->
+    fun processChapterContent(bookId: String, block: () -> ChapterContent): ChapterContent = process(block.invoke()) { processor ->
         {
-            processor.processChapterContent(bookId, it)
+            processor.processChapterContent(bookId, it, ComponentProcessor(
+                contentComponentRepository.serializeMap, contentComponentRepository.dataKClassMap, it.content
+            ))
         }
     }
-    suspend fun coroutineProcessChapterContent(bookId: Int, block: suspend () -> ChapterContent): ChapterContent = process(block.invoke()) { processor ->
+    suspend fun coroutineProcessChapterContent(bookId: String, block: suspend () -> ChapterContent): ChapterContent = process(block.invoke()) { processor ->
         {
-            processor.processChapterContent(bookId, it)
+            processor.processChapterContent(bookId, it, ComponentProcessor(
+                contentComponentRepository.serializeMap, contentComponentRepository.dataKClassMap, it.content
+            ))
         }
     }
     fun processExploreBooksRow(exploreDisplayBook: ExploreDisplayBook): ExploreDisplayBook = process(exploreDisplayBook) { it::processExploreBooksRow }

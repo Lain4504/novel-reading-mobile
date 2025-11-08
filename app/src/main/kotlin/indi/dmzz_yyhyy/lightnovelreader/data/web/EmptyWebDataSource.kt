@@ -21,11 +21,11 @@ object EmptyWebDataSource: WebBookDataSource {
     override val searchTypeMap: Map<String, String> = emptyMap()
     override val searchTipMap: Map<String, String> = emptyMap()
     override val searchTypeIdList: List<String> = emptyList()
-    override suspend fun getBookInformation(id: Int): BookInformation = BookInformation.empty()
+    override suspend fun getBookInformation(id: String): BookInformation = BookInformation.empty()
 
-    override suspend fun getBookVolumes(id: Int): BookVolumes = BookVolumes.empty(-1)
+    override suspend fun getBookVolumes(id: String): BookVolumes = BookVolumes.empty("")
 
-    override suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent = ChapterContent.empty()
+    override suspend fun getChapterContent(chapterId: String, bookId: String): ChapterContent = ChapterContent.empty()
 
     override fun search(searchType: String, keyword: String): Flow<List<BookInformation>> = flow { emptyList<BookInformation>() }
 

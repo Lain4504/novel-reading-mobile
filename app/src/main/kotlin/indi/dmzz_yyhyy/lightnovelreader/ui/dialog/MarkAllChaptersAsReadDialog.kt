@@ -11,7 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
+import io.nightfish.lightnovelreader.api.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
 
 fun NavGraphBuilder.markAllChaptersAsReadDialog() {
@@ -33,7 +33,7 @@ fun NavGraphBuilder.markAllChaptersAsReadDialog() {
     }
 }
 
-fun NavController.navigateToMarkAllChaptersAsReadDialog(bookId: Int) {
+fun NavController.navigateToMarkAllChaptersAsReadDialog(bookId: String) {
     navigate(Route.MarkAllChaptersAsReadDialog(bookId))
 }
 
@@ -41,7 +41,7 @@ fun NavController.navigateToMarkAllChaptersAsReadDialog(bookId: Int) {
 fun MarkAllChaptersAsReadDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
-    volumesList: List<Int>
+    volumesList: List<String>
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,

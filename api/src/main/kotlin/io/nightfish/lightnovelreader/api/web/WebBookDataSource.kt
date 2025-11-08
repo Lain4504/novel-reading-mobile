@@ -1,5 +1,7 @@
 package io.nightfish.lightnovelreader.api.web
 
+import android.content.Context
+import android.net.Uri
 import androidx.navigation.NavController
 import io.nightfish.lightnovelreader.api.book.BookInformation
 import io.nightfish.lightnovelreader.api.book.BookVolumes
@@ -83,7 +85,7 @@ interface WebBookDataSource {
      * @param id 书本id
      * @return 经过格式化后的书本元数据, getBookInformation.empty()
      */
-    suspend fun getBookInformation(id: Int): BookInformation
+    suspend fun getBookInformation(id: String): BookInformation
 
     /**
      * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
@@ -92,7 +94,7 @@ interface WebBookDataSource {
      * @param id 书本id
      * @return 经过格式化后的书本章节目录数据, 如未找到改书则返回BookVolumes.empty
      */
-    suspend fun getBookVolumes(id: Int): BookVolumes
+    suspend fun getBookVolumes(id: String): BookVolumes
 
     /**
      * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
@@ -102,7 +104,7 @@ interface WebBookDataSource {
      * @param bookId 章节所属书本id
      * @return 经过格式化后的书本章节类容录数据, 如未找到改书则返回ChapterContent.empty()
      */
-    suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent
+    suspend fun getChapterContent(chapterId: String, bookId: String): ChapterContent
 
     /**
      * 执行搜索任务
@@ -130,16 +132,17 @@ interface WebBookDataSource {
     fun progressBookTagClick(tag: String, navController: NavController) {  }
 
     /**
-     * 根据卷获取该卷封面的Url, 用于EPUB分卷导出
+     * 根据卷获取该卷封面的Uri, 用于EPUB分卷导出
      * 如无, 则返回null
      *
      * @param bookId 书本id
      * @param volume 需要搜索封面的卷id
      * @param volumeChapterContentMap 包含搜索卷全部章节的Map, 以章节id为key
      */
-    fun getCoverUrlInVolume(
-        bookId: Int,
+    fun getCoverUriInVolume(
+        bookId: String,
         volume: Volume,
-        volumeChapterContentMap: Map<Int, ChapterContent>
-    ): String? = null
+        volumeChapterContentMap: MutableMap<String, ChapterContent>,
+        context: Context
+    ): Uri? = null
 }

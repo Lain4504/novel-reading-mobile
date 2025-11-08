@@ -33,10 +33,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.book.BookInformation
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
+import indi.dmzz_yyhyy.lightnovelreader.data.book.get
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.utils.withHaptic
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 
 @Composable
 fun BookCardContent(
@@ -78,7 +79,7 @@ fun BookCardContent(
                     Cover(
                         width = 90.dp,
                         height = 136.dp,
-                        url = bookInformation.coverUrl,
+                        uri = bookInformation.coverUri,
                         rounded = 8.dp
                     )
 
@@ -181,10 +182,7 @@ fun BookCardContent(
                         style = AppTypography.labelMedium
                     )
                     Text(
-                        text = stringResource(
-                            R.string.book_info_word_count_kilo,
-                            bookInformation.wordCount / 1000
-                        ),
+                        text = bookInformation.wordCount.get(),
                         style = AppTypography.labelMedium
                     )
                 }

@@ -7,4 +7,5 @@ interface WebBookDataSourceManagerApi {
     )
 
     fun unregisterWebDataSource(webDataSourceId: Int)
+    fun getWebDataSource(): WebBookDataSource
 }

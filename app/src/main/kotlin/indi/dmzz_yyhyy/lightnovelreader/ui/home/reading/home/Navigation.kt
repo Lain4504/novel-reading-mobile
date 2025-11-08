@@ -7,7 +7,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
+import io.nightfish.lightnovelreader.api.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.detail.navigateToBookDetailDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.navigateToBookReaderDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.downloadmanager.navigateToDownloadManager
@@ -24,7 +24,6 @@ fun NavGraphBuilder.readingHomeDestination(sharedTransitionScope: SharedTransiti
         ReadingScreen(
             controller = navController,
             selectedRoute = Route.Main.Reading,
-            updateReadingBooks = readingViewModel::updateReadingBooks,
             recentReadingBookIds = readingViewModel.recentReadingBookIds,
             recentReadingUserReadingDataMap = readingViewModel.recentReadingUserReadingDataMap,
             recentReadingBookInformationMap = readingViewModel.recentReadingBookInformationMap,
@@ -38,6 +37,7 @@ fun NavGraphBuilder.readingHomeDestination(sharedTransitionScope: SharedTransiti
             animatedVisibilityScope = this,
             onClickStats = navController::navigateToReadingStatsDestination,
             loadBookInfo = readingViewModel::loadBookInfo,
+            onAddBook = readingViewModel::addToReadingList,
             onRemoveBook = readingViewModel::removeFromReadingList
         )
     }

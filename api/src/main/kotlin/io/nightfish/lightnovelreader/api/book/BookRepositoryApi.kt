@@ -5,27 +5,27 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 interface BookRepositoryApi {
-    fun getStateBookInformation(id: Int, coroutineScope: CoroutineScope): BookInformation
-    fun getBookInformationFlow(id: Int, coroutineScope: CoroutineScope): Flow<BookInformation>
-    fun getBookVolumesFlow(id: Int, coroutineScope: CoroutineScope): Flow<BookVolumes>
+    fun getStateBookInformation(id: String, coroutineScope: CoroutineScope): BookInformation
+    fun getBookInformationFlow(id: String, coroutineScope: CoroutineScope): Flow<BookInformation>
+    fun getBookVolumesFlow(id: String, coroutineScope: CoroutineScope): Flow<BookVolumes>
     fun getStateChapterContent(
-        chapterId: Int,
-        bookId: Int,
+        chapterId: String,
+        bookId: String,
         coroutineScope: CoroutineScope
     ): ChapterContent
 
-    suspend fun getChapterContent(chapterId: Int, bookId: Int): ChapterContent
+    suspend fun getChapterContent(chapterId: String, bookId: String): ChapterContent
     fun getChapterContentFlow(
-        chapterId: Int,
-        bookId: Int,
+        chapterId: String,
+        bookId: String,
         coroutineScope: CoroutineScope
     ): Flow<ChapterContent>
 
-    fun getStateUserReadingData(bookId: Int, coroutineScope: CoroutineScope): UserReadingData
-    fun getUserReadingData(bookId: Int): UserReadingData
-    fun getUserReadingDataFlow(bookId: Int): Flow<UserReadingData>
+    fun getStateUserReadingData(bookId: String, coroutineScope: CoroutineScope): UserReadingData
+    fun getUserReadingData(bookId: String): UserReadingData
+    fun getUserReadingDataFlow(bookId: String): Flow<UserReadingData>
     fun getAllUserReadingData(): List<UserReadingData>
-    fun updateUserReadingData(id: Int, update: (MutableUserReadingData) -> UserReadingData)
-    suspend fun getIsBookCached(bookId: Int): Boolean
+    fun updateUserReadingData(id: String, update: (MutableUserReadingData) -> UserReadingData)
+    suspend fun getIsBookCached(bookId: String): Boolean
     fun progressBookTagClick(tag: String, navController: NavController)
 }

@@ -238,7 +238,7 @@
     <string name="filter_by_publishing_house">Filter by Publishing House</string>
     <string name="filter_by_publishing_house_desc">Filter by the book\'s publishing house</string>
     <string name="book_info_update_date">Updated on %1$d-%2$d-%3$d</string>
-    <string name="book_info_word_count_kilo">%sK Words</string>
+    <string name="book_info_word_count_kilo">%s Words</string>
     <string name="name">Name</string>
     <string name="bookshelf_name">Bookshelf Name</string>
     <string name="bookshelf_name_suggestion">Name your bookshelf with a simple name</string>

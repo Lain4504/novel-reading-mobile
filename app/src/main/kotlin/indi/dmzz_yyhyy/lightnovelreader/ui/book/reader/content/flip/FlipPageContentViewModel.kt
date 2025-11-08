@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.snapshotFlow
 import indi.dmzz_yyhyy.lightnovelreader.data.book.BookRepository
+import indi.dmzz_yyhyy.lightnovelreader.data.content.ContentComponentRepository
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,8 @@ import java.time.LocalDateTime
 class FlipPageContentViewModel(
     val bookRepository: BookRepository,
     val coroutineScope: CoroutineScope,
-    val updateReadingProgress: (Float) -> Unit
+    val updateReadingProgress: (Float) -> Unit,
+    val contentComponentRepository: ContentComponentRepository
 ) : ContentViewModel {
     private var notRecoveredProgress = 0f
     private var collectProgressJob: Job? = null
@@ -22,7 +24,8 @@ class FlipPageContentViewModel(
         loadLastChapter = ::loadLastChapter,
         loadNextChapter = ::loadNextChapter,
         changeChapter = ::changeChapter,
-        updatePageState = ::updatePagerState
+        updatePageState = ::updatePagerState,
+        getContentData = contentComponentRepository::getContentDataFromJson
     )
 
     init {
@@ -53,7 +56,7 @@ class FlipPageContentViewModel(
         }
     }
 
-    override fun changeBookId(id: Int) {
+    override fun changeBookId(id: String) {
         uiState.bookId = id
     }
 
@@ -71,8 +74,8 @@ class FlipPageContentViewModel(
         )
     }
 
-    override fun changeChapter(id: Int) {
-        if (id < 0) {
+    override fun changeChapter(id: String) {
+        if (id.isBlank()) {
             Log.e("FlipPageContentViewModel", "a id less than 0 was transferred")
             return
         }
@@ -96,10 +99,9 @@ class FlipPageContentViewModel(
         coroutineScope.launch(Dispatchers.IO) {
             snapshotFlow { uiState.readingChapterContent.nextChapter }.collect {
                 if (uiState.readingChapterContent.hasNextChapter()) {
-                    bookRepository.getChapterContentFlow(
+                    bookRepository.getChapterContent(
                         chapterId = it,
                         bookId = uiState.bookId,
-                        coroutineScope
                     )
                 }
             }

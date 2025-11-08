@@ -21,7 +21,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
 import indi.dmzz_yyhyy.lightnovelreader.R
 import io.nightfish.lightnovelreader.api.bookshelf.Bookshelf
-import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
+import io.nightfish.lightnovelreader.api.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.BaseDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.CheckBoxListItem
 import indi.dmzz_yyhyy.lightnovelreader.ui.navigation.Route
@@ -44,7 +44,7 @@ fun NavGraphBuilder.addBookToBookshelfDialog() {
     }
 }
 
-fun NavController.navigateToAddBookToBookshelfDialog(bookId: Int) {
+fun NavController.navigateToAddBookToBookshelfDialog(bookId: String) {
     navigate(Route.AddBookToBookshelfDialog(bookId))
 }
 

@@ -33,18 +33,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.book.BookInformation
 import indi.dmzz_yyhyy.lightnovelreader.data.format.FormattingGroup
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFormattingScreen(
-    onClickGroup: (Int) -> Unit,
+    onClickGroup: (String) -> Unit,
     onClickBack: () -> Unit,
     groups: List<FormattingGroup>,
-    bookInformationMap: Map<Int, BookInformation>
+    bookInformationMap: Map<String, BookInformation>
 ) {
     val enterAlwaysScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -56,7 +56,7 @@ fun TextFormattingScreen(
             )
         }
     ) { paddingValues ->
-        val rules = groups.filter { it.id != -1 }
+        val rules = groups.filter { it.id.isNotBlank() }
         LazyColumn(
             modifier = Modifier.padding(paddingValues)
         ) {
@@ -64,7 +64,7 @@ fun TextFormattingScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = { onClickGroup(-1) })
+                        .clickable(onClick = { onClickGroup("") })
                         .padding(horizontal = 14.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -94,13 +94,13 @@ fun TextFormattingScreen(
                             maxLines = 1
                         )
                         Text(
-                            text = stringResource(R.string.n_rules, groups.firstOrNull { it.id == -1 }?.size ?: 0),
+                            text = stringResource(R.string.n_rules, groups.firstOrNull { it.id.isBlank() }?.size ?: 0),
                             style = AppTypography.labelMedium,
                             color = colorScheme.secondary
                         )
                     }
                     IconButton(
-                        onClick = { onClickGroup(-1) }
+                        onClick = { onClickGroup("") }
                     ) {
                         Icon(
                             modifier = Modifier.size(18.dp),
@@ -140,7 +140,7 @@ fun TextFormattingScreen(
 
 @Composable
 private fun Group(
-    onClickGroup: (Int) -> Unit,
+    onClickGroup: (String) -> Unit,
     formattingGroup: FormattingGroup,
     bookInformation: BookInformation
 ) {
@@ -155,7 +155,7 @@ private fun Group(
         Cover(
             width = 60.dp,
             height = 87.dp,
-            url = bookInformation.coverUrl,
+            uri = bookInformation.coverUri,
             rounded = 8.dp
         )
         Spacer(Modifier.width(10.dp))

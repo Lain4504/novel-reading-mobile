@@ -30,7 +30,7 @@ class CheckUpdateWork @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val reminderBookMap = mutableMapOf<Int, BookInformation>()
+        val reminderBookMap = mutableMapOf<String, BookInformation>()
         bookshelfRepository.getAllBookshelfBooksMetadata().forEach { bookshelfBookMetadata ->
             delay(3000)
             Log.d("CheckUpdateWork", "Updating book id=${bookshelfBookMetadata.id}")
@@ -57,7 +57,7 @@ class CheckUpdateWork @AssistedInject constructor(
                 }
                 createNotificationChannel()
                 notify(
-                    it.id,
+                    it.id.hashCode(),
                     NotificationCompat.Builder(appContext, "BookUpdate")
                         .setSmallIcon(R.drawable.icon_foreground)
                         .setContentTitle(appContext.getString(R.string.app_name))

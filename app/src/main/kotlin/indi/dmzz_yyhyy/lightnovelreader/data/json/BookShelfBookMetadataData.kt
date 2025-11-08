@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 data class BookShelfBookMetadataData(
     @SerializedName("id")
-    val id: Int,
+    val id: String,
     @SerializedName("last_update")
     val lastUpdate: LocalDateTime,
     @SerializedName("book_shelf_ids")

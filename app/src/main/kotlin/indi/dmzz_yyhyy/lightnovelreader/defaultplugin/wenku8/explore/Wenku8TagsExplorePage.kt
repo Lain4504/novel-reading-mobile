@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore
 
+import androidx.core.net.toUri
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.wenku8Cookie
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGet
@@ -60,7 +61,7 @@ object Wenku8TagsExplorePage: ExplorePageDataSource {
             ""
         )
         val idlList = soup.select("#content > table > tbody > tr:nth-child(2) > td > div > div:nth-child(1) > a")
-            .map { it.attr("href").replace("/book/", "").replace(".htm", "").toInt() }
+            .map { it.attr("href").replace("/book/", "").replace(".htm", "") }
         val titleList = soup.select("#content > table > tbody > tr:nth-child(2) > td > div > div:nth-child(2) > b > a")
             .map { it.text().split("(").getOrNull(0) ?: "" }
         val authorList = soup.select("#content > table > tbody > tr:nth-child(2) > td > div > div:nth-child(2) > p:nth-child(2)")
@@ -75,7 +76,7 @@ object Wenku8TagsExplorePage: ExplorePageDataSource {
                     id = idlList[it],
                     title = titleList[it],
                     author = authorList[it],
-                    coverUrl = coverUrlList[it],
+                    coverUri = coverUrlList[it].toUri(),
                 )
             },
             expandable = true,

@@ -15,18 +15,19 @@ interface BookVolumesDao {
     @TypeConverters(ListConverter::class)
     @Query("replace into volume (book_id, volume_id, volume_title, chapter_id_list, volume_index)" +
             " values (:bookId, :volumeId, :volumeTitle, :chapterIds, :index)")
-    fun update(bookId: Int, volumeId: Int, volumeTitle: String, chapterIds: String, index: Int)
+    fun update(bookId: String, volumeId: String, volumeTitle: String, chapterIds: String, index: Int)
 
     @Query("replace into chapter_information (id, title) values (:id, :title)")
-    fun updateChapterInformation(id: Int, title: String)
+    fun updateChapterInformation(id: String, title: String)
 
     @Query("select * from chapter_information where id = :id")
-    suspend fun getChapterInformation(id: Int): ChapterInformation?
+    suspend fun getChapterInformation(id: String): ChapterInformation?
 
     @Transaction
-    fun update(bookId: Int, volumes: BookVolumes) {
+    fun update(bookId: String, volumes: BookVolumes) {
         volumes.volumes.forEachIndexed { index, volume ->
-            update(bookId, volume.volumeId, volume.volumeTitle, volume.chapters.map { it.id }.joinToString(","), index)
+            update(bookId, volume.volumeId, volume.volumeTitle,
+                volume.chapters.joinToString(",") { it.id }, index)
             volume.chapters.forEach {
                 updateChapterInformation(it.id, it.title)
             }
@@ -34,13 +35,13 @@ interface BookVolumesDao {
     }
 
     @Query("select * from volume where volume_id = :volumeId")
-    suspend fun getVolumeEntity(volumeId: Int): VolumeEntity?
+    suspend fun getVolumeEntity(volumeId: String): VolumeEntity?
 
     @Query("select * from volume where book_id = :bookId")
-    suspend fun getVolumeEntitiesByBookId(bookId: Int): List<VolumeEntity>
+    suspend fun getVolumeEntitiesByBookId(bookId: String): List<VolumeEntity>
 
     @Transaction
-    suspend fun getBookVolumes(bookId: Int): BookVolumes? {
+    suspend fun getBookVolumes(bookId: String): BookVolumes? {
         return BookVolumes(
             bookId,
             getVolumeEntitiesByBookId(bookId)
@@ -50,7 +51,7 @@ interface BookVolumesDao {
                     volumeEntity.volumeId,
                     volumeEntity.volumeTitle,
                     volumeEntity.chapterIds.map {
-                        getChapterInformation(it) ?: ChapterInformation(0, "")
+                        getChapterInformation(it) ?: ChapterInformation("", "")
                     })
         })
     }

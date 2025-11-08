@@ -11,14 +11,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dalvik.system.DexClassLoader
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.bilinovel.BiliNovel
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
 import indi.dmzz_yyhyy.lightnovelreader.utils.PluginAnnotationParser
 import indi.dmzz_yyhyy.lightnovelreader.utils.getApkSignatures
 import io.nightfish.lightnovelreader.api.ApiCompat
 import io.nightfish.lightnovelreader.api.ApiMetadata
+import io.nightfish.lightnovelreader.api.PluginContext
 import io.nightfish.lightnovelreader.api.plugin.LightNovelReaderPlugin
 import io.nightfish.lightnovelreader.api.plugin.Plugin
 import io.nightfish.lightnovelreader.api.userdata.UserDataPath
@@ -56,6 +55,7 @@ class PluginManager @Inject constructor(
     val pluginsDir: File = appContext.dataDir.resolve("plugins")
     val pluginsTempDir: File = appContext.cacheDir.resolve("plugins_tmp")
     fun getPluginDir(name: String): File = pluginsDir.resolve(name)
+    fun getPluginDataDir(pluginDir: File) = pluginDir.resolve("data")
     fun getPluginFile(pluginDir: File): File = pluginDir.resolve("plugin")
     fun getPluginAssetDir(pluginDir: File): File = pluginDir.resolve("asset")
     fun getPluginLibsDir(pluginDir: File): File = pluginDir.resolve("libs")
@@ -70,12 +70,14 @@ class PluginManager @Inject constructor(
                     it.parentFile!!.deleteRecursively()
                 }
             }
-            errorPluginsUserData.update { it.toMutableList().apply { remove(path) } }
+            errorPluginsUserData.update {
+                it.toMutableList().apply {
+                    remove(path)
+                }
+            }
         }
-
         defaultWebDataSources.forEach(webBookDataSourceManager::loadWebDataSourceClass)
         defaultPlugins.forEach { getPluginInstance(it)?.let { p -> loadPlugin(p, forceLoad = true) } }
-
         pluginsDir
             .also(File::mkdir)
             .listFiles()
@@ -116,15 +118,17 @@ class PluginManager @Inject constructor(
         return id
     }
 
-    private fun getPluginInstance(clazz: Class<*>): LightNovelReaderPlugin? {
+    private fun getPluginInstance(clazz: Class<*>, pluginContext: PluginContext): LightNovelReaderPlugin? {
         if (!LightNovelReaderPlugin::class.java.isAssignableFrom(clazz)) return null
-        return pluginInjector.providePlugin(clazz)
+        return pluginInjector.providePlugin(clazz, pluginContext)
     }
 
     fun loadPlugin(plugin: LightNovelReaderPlugin, forceLoad: Boolean = false) {
         val id = getPluginId(plugin.javaClass) ?: return
         if (!enabledPluginsUserData.getOrDefault(emptyList()).contains(id) && !forceLoad) return
-        plugin.onLoad()
+        plugin.apply {
+            onLoad()
+        }
         pluginMap[id] = plugin
     }
 
@@ -156,7 +160,7 @@ class PluginManager @Inject constructor(
             }
 
         val classLoader = DexClassLoader(
-            path.path,
+            path.absolutePath,
             null,
             getPluginLibsDir(pluginDir).absolutePath,
             this.javaClass.classLoader
@@ -178,25 +182,21 @@ class PluginManager @Inject constructor(
         return id
     }
 
-    fun loadPlugin(classLoader: DexClassLoader, scanPackage: String = "", forceLoad: Boolean = false): String? {
+    fun loadPlugin(classLoader: DexClassLoader, pluginContext: PluginContext, scanPackage: String = "", forceLoad: Boolean = false): String? {
         var id: String? = null
         AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java, scanPackage)
             .filter {
-                val tmpId = getPluginId(it)
-                id = tmpId
-                tmpId != null
+                id = getPluginId(it)
+                id != null
             }
-            .firstNotNullOfOrNull(::getPluginInstance)
-            ?.let { inst ->
-                val pid = id ?: return@let
-                if (forceLoad || enabledPluginsUserData.getOrDefault(emptyList()).contains(pid)) {
-                    inst.onLoad()
-                    pluginMap[pid] = inst
-                }
+            .map { getPluginInstance(it, pluginContext) }
+            .filter { it is LightNovelReaderPlugin }
+            .map { it as LightNovelReaderPlugin }
+            .firstOrNull()
+            ?.let {
+                loadPlugin(it, forceLoad = forceLoad)
             }
-
         webBookDataSourceManager.loadWebDataSourcesFromClassLoader(classLoader, pluginInjector, scanPackage)
-
         if (id != null) {
             pluginClassLoaderMap[id] = classLoader
         }
@@ -221,48 +221,44 @@ class PluginManager @Inject constructor(
         val tmp = File(dir, "${oldFile.name}.tmp")
         val bak = File(dir, "${oldFile.name}.bak")
 
-        try {
-            if (tmp.exists()) tmp.delete()
-            newFile.copyTo(tmp, overwrite = true)
-            newFile.delete()
-            tmp.setReadOnly()
-        } catch (_: Throwable) {
-            tmp.delete()
+        fun restoreOld(): Boolean {
             loadPlugin(oldFile, forceLoad = true)
             return false
         }
 
-        try {
-            if (bak.exists()) bak.delete()
-            if (!oldFile.renameTo(bak)) {
-                tmp.delete()
-                loadPlugin(oldFile, forceLoad = true)
-                return false
-            }
-        } catch (_: Throwable) {
+        if (tmp.exists()) tmp.delete()
+        runCatching {
+            newFile.copyTo(tmp, overwrite = true)
+            newFile.delete()
+            tmp.setReadOnly()
+        }.getOrElse {
             tmp.delete()
-            loadPlugin(oldFile, forceLoad = true)
-            return false
+            return restoreOld()
+        }
+
+        if (bak.exists()) bak.delete()
+        if (!oldFile.renameTo(bak)) {
+            tmp.delete()
+            return restoreOld()
         }
 
         if (!tmp.renameTo(oldFile)) {
             bak.renameTo(oldFile)
             tmp.delete()
-            loadPlugin(oldFile, forceLoad = true)
-            return false
+            return restoreOld()
         }
 
         _allPluginInfo.removeAll { it.id == id }
-        val loadedId = try { loadPlugin(oldFile, forceLoad = true) } catch (_: Throwable) { null }
+        val loadedId = runCatching { loadPlugin(oldFile, forceLoad = true) }.getOrNull()
 
         return if (loadedId == id) {
-            try { bak.delete() } catch (_: Throwable) {}
+            bak.delete()
             pluginPathMap[id] = oldFile
             true
         } else {
-            try { oldFile.delete() } catch (_: Throwable) {}
-            try { bak.renameTo(oldFile) } catch (_: Throwable) {}
-            try { tmp.delete() } catch (_: Throwable) {}
+            oldFile.delete()
+            bak.renameTo(oldFile)
+            tmp.delete()
             loadPlugin(oldFile, forceLoad = true)
             false
         }
