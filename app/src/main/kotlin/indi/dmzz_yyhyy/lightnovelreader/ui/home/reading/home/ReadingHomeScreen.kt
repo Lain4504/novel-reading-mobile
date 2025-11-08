@@ -59,17 +59,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 import com.valentinilk.shimmer.unclippedBoundsInWindow
 import indi.dmzz_yyhyy.lightnovelreader.R
-import io.nightfish.lightnovelreader.api.book.BookInformation
-import io.nightfish.lightnovelreader.api.book.UserReadingData
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import indi.dmzz_yyhyy.lightnovelreader.ui.SharedContentKey
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Cover
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.EmptyPage
@@ -79,6 +74,9 @@ import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
 import indi.dmzz_yyhyy.lightnovelreader.utils.formTime
 import indi.dmzz_yyhyy.lightnovelreader.utils.removeFromBookshelfAction
 import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
+import io.nightfish.lightnovelreader.api.book.BookInformation
+import io.nightfish.lightnovelreader.api.book.UserReadingData
+import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 import kotlinx.coroutines.delay
 import me.saket.swipe.SwipeAction
 import me.saket.swipe.SwipeableActionsBox
@@ -88,22 +86,19 @@ import me.saket.swipe.SwipeableActionsBox
 fun ReadingScreen(
     controller: NavController,
     selectedRoute: Any,
-    updateReadingBooks: () -> Unit,
-    recentReadingBookInformationMap: Map<Int, BookInformation>,
-    recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
-    recentReadingBookIds: List<Int>,
-    onClickBook: (Int) -> Unit,
-    onClickContinueReading: (Int, Int) -> Unit,
+    recentReadingBookInformationMap: Map<String, BookInformation>,
+    recentReadingUserReadingDataMap: Map<String, UserReadingData>,
+    recentReadingBookIds: List<String>,
+    onClickBook: (String) -> Unit,
+    onClickContinueReading: (String, String) -> Unit,
     onClickDownloadManager: () -> Unit,
     onClickStats: () -> Unit,
-    onRemoveBook: (Int) -> Unit,
+    onRemoveBook: (String) -> Unit,
+    onAddBook: (String) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    loadBookInfo: (Int) -> Unit
+    loadBookInfo: (String) -> Unit
 ) {
-    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
-        updateReadingBooks()
-    }
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     with(sharedTransitionScope) {
@@ -160,6 +155,7 @@ fun ReadingScreen(
                 modifier = Modifier.padding(it),
                 onClickBook = onClickBook,
                 onClickContinueReading = onClickContinueReading,
+                onAddBook = onAddBook,
                 onRemoveBook = onRemoveBook,
                 recentReadingBookInformationMap = recentReadingBookInformationMap,
                 recentReadingUserReadingDataMap = recentReadingUserReadingDataMap,
@@ -175,14 +171,15 @@ fun ReadingScreen(
 @Composable
 private fun ReadingContent(
     modifier: Modifier,
-    onClickBook: (Int) -> Unit,
-    onClickContinueReading: (Int, Int) -> Unit,
-    onRemoveBook: (Int) -> Unit,
-    recentReadingBookInformationMap: Map<Int, BookInformation>,
-    recentReadingUserReadingDataMap: Map<Int, UserReadingData>,
-    recentReadingBookIds: List<Int>,
+    onClickBook: (String) -> Unit,
+    onClickContinueReading: (String, String) -> Unit,
+    onAddBook: (String) -> Unit,
+    onRemoveBook: (String) -> Unit,
+    recentReadingBookInformationMap: Map<String, BookInformation>,
+    recentReadingUserReadingDataMap: Map<String, UserReadingData>,
+    recentReadingBookIds: List<String>,
     scrollBehavior: TopAppBarScrollBehavior,
-    loadBookInfo: (Int) -> Unit
+    loadBookInfo: (String) -> Unit
 ) {
     val context = LocalContext.current
     val shimmerInstance = rememberShimmer(ShimmerBounds.Custom)
@@ -282,7 +279,7 @@ private fun ReadingContent(
                                 ) {
                                     when (it) {
                                         SnackbarResult.Dismissed -> { }
-                                        SnackbarResult.ActionPerformed -> onRemoveBook(-id)
+                                        SnackbarResult.ActionPerformed -> onAddBook(id)
                                     }
                                 }
                             }
@@ -429,7 +426,7 @@ private fun ReadingBookCard(
                 Cover(
                     width = 94.dp,
                     height = 142.dp,
-                    url = bookInformation.coverUrl,
+                    uri = bookInformation.coverUri,
                     rounded = 8.dp,
                 )
                 Column(
@@ -525,7 +522,7 @@ private fun ReadingHeaderCard(
     modifier: Modifier = Modifier,
     bookInformation: BookInformation,
     userReadingData: UserReadingData,
-    onClickContinueReading: (Int, Int) -> Unit
+    onClickContinueReading: (String, String) -> Unit
 ) {
     Row(
         modifier = modifier
@@ -537,7 +534,7 @@ private fun ReadingHeaderCard(
             Cover(
                 height = 178.dp,
                 width = 122.dp,
-                url = bookInformation.coverUrl,
+                uri = bookInformation.coverUri,
                 rounded = 8.dp
             )
         }

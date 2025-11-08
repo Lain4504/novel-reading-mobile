@@ -31,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -41,33 +40,23 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import indi.dmzz_yyhyy.lightnovelreader.R
 import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.SettingState
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.BaseContentComponent
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.Loading
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
 import indi.dmzz_yyhyy.lightnovelreader.utils.LocalSnackbarHost
-import indi.dmzz_yyhyy.lightnovelreader.utils.readerTextColor
+import indi.dmzz_yyhyy.lightnovelreader.utils.debugPrint
 import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderBackgroundPainter
-import indi.dmzz_yyhyy.lightnovelreader.utils.rememberReaderFontFamily
 import indi.dmzz_yyhyy.lightnovelreader.utils.showSnackbar
-import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
-import kotlinx.coroutines.Dispatchers
+import io.nightfish.lightnovelreader.api.content.component.AbstractContentComponent
+import io.nightfish.lightnovelreader.api.content.component.AbstractDivisibleContentComponent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
-import indi.dmzz_yyhyy.lightnovelreader.R
 
 @Composable
 fun FlipPageContentComponent(
@@ -76,10 +65,8 @@ fun FlipPageContentComponent(
     settingState: SettingState,
     paddingValues: PaddingValues,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
-    header: Map<String, String>
 ) {
     SimpleFlipPageTextComponent(
         modifier = modifier,
@@ -87,10 +74,8 @@ fun FlipPageContentComponent(
         uiState = uiState,
         settingState = settingState,
         changeIsImmersive = changeIsImmersive,
-        onZoomImage = onZoomImage,
         onClickNextChapter = onClickNextChapter,
         onClickPrevChapter = onClickPrevChapter,
-        header = header
     )
 }
 
@@ -101,20 +86,44 @@ private fun SimpleFlipPageTextComponent(
     uiState: FlipPageContentUiState,
     settingState: SettingState,
     changeIsImmersive: () -> Unit,
-    onZoomImage: (String) -> Unit,
     onClickPrevChapter: () -> Unit,
     onClickNextChapter: () -> Unit,
-    header: Map<String, String>
 ) {
-    val textMeasurer = rememberTextMeasurer()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val resources = LocalResources.current
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
     var contentKey by remember { mutableIntStateOf(0) }
-    var slipTextJob by remember { mutableStateOf<Job?>(null) }
-    var constraints by remember { mutableStateOf<Constraints?>(null) }
-    var textStyle by remember { mutableStateOf<TextStyle?>(null) }
-    var slippedTextList by remember { mutableStateOf(emptyList<String>()) }
-    var readingPageFistCharOffset by remember { mutableIntStateOf(0) }
+    val slippedContentComponentList = remember(uiState.readingChapterContent.content, resources, density) {
+        val width = resources.displayMetrics
+            .widthPixels
+            .minus(
+                with(density) {
+                    (paddingValues.calculateStartPadding(layoutDirection) + paddingValues.calculateEndPadding(layoutDirection)).toPx()
+                }.toInt()
+            )
+        val height = resources.displayMetrics
+            .heightPixels
+            .minus(
+                with(density) {
+                    (paddingValues.calculateTopPadding() + paddingValues.calculateBottomPadding()).toPx()
+                }.toInt()
+            ).debugPrint()
+        val key = uiState.readingChapterContent.content.hashCode() + width + height
+        if (key == contentKey) return@remember emptyList()
+        contentKey = key
+        val result = mutableListOf<AbstractContentComponent<*>>()
+        uiState.getContentData(uiState.readingChapterContent.content).components.forEach {
+            if (it is AbstractDivisibleContentComponent<*, *>) {
+                result.addAll(it.split(height, width))
+            } else {
+                result.add(it)
+            }
+        }
+        uiState.updatePageState(PagerState { result.size })
+        return@remember result
+    }
     val focusRequester = remember { FocusRequester() }
     val snackbarHostState = LocalSnackbarHost.current
 
@@ -127,7 +136,7 @@ private fun SimpleFlipPageTextComponent(
                     pagerState.scrollToPage(pagerState.currentPage - 1)
                 }
             }
-        } else if (settingState.fastChapterChange && slippedTextList.isNotEmpty()) {
+        } else if (settingState.fastChapterChange && slippedContentComponentList.isNotEmpty()) {
             uiState.loadLastChapter.invoke()
         } else {
             scope.launch {
@@ -155,7 +164,7 @@ private fun SimpleFlipPageTextComponent(
                     pagerState.scrollToPage(pagerState.currentPage + 1)
                 }
             }
-        } else if (settingState.fastChapterChange && slippedTextList.isNotEmpty()) {
+        } else if (settingState.fastChapterChange && slippedContentComponentList.isNotEmpty()) {
             uiState.loadNextChapter.invoke()
         } else {
             scope.launch {
@@ -173,61 +182,6 @@ private fun SimpleFlipPageTextComponent(
             }
         }
     }
-
-    LaunchedEffect(
-        uiState.readingChapterContent.content,
-        textStyle,
-        settingState.fontLineHeight.sp,
-        settingState.fontSize.sp,
-        constraints?.maxHeight,
-        constraints?.maxWidth
-    ) {
-        val key =
-            uiState.readingChapterContent.content.hashCode() + settingState.fontLineHeight.sp.value.hashCode() + settingState.fontSize.sp.value.hashCode() + constraints?.maxHeight.hashCode() + constraints?.maxWidth.hashCode()
-        if (constraints == null || textStyle == null || key == contentKey) return@LaunchedEffect
-        contentKey = key
-        slipTextJob?.cancel()
-        slipTextJob = scope.launch(Dispatchers.IO) {
-            readingPageFistCharOffset = slippedTextList
-                .subList(0, uiState.pagerState.currentPage.coerceAtMost(slippedTextList.size))
-                .sumOf { it.length }
-                .plus(1)
-            slippedTextList = slipText(
-                textMeasurer = textMeasurer,
-                constraints = constraints!!,
-                text = uiState.readingChapterContent.content,
-                style = textStyle!!.copy(
-                    fontSize = settingState.fontSize.sp,
-                    fontWeight = FontWeight.W400,
-                    lineHeight = (settingState.fontLineHeight + settingState.fontSize).sp
-                )
-            )
-            uiState.updatePageState(PagerState { slippedTextList.size })
-        }
-    }
-    LocalResources.current.displayMetrics.let { displayMetrics ->
-        constraints = Constraints(
-            maxWidth = displayMetrics
-                .widthPixels
-                .minus(
-                    with(LocalDensity.current) {
-                        (paddingValues.calculateStartPadding(LayoutDirection.Ltr) + paddingValues.calculateEndPadding(
-                            LayoutDirection.Ltr
-                        ))
-                            .toPx()
-                    }.toInt()
-                ),
-            maxHeight = displayMetrics
-                .heightPixels
-                .minus(
-                    with(LocalDensity.current) {
-                        (paddingValues.calculateTopPadding() + paddingValues.calculateBottomPadding() + 10.dp)
-                            .toPx()
-                    }.toInt()
-                ),
-        )
-    }
-    textStyle = AppTypography.bodyMedium
     AnimatedVisibility(
         uiState.readingChapterContent.isEmpty(),
         enter = fadeIn(),
@@ -304,7 +258,7 @@ private fun SimpleFlipPageTextComponent(
                     detectTapGestures(
                         onTap = {
                             if (settingState.isUsingFlipPage && settingState.isUsingClickFlipPage)
-                                if (it.x <= context.resources.displayMetrics.widthPixels * 0.425) lastPage(
+                                if (it.x <= resources.displayMetrics.widthPixels * 0.425) lastPage(
                                     uiState.pagerState
                                 )
                                 else nextPage(uiState.pagerState)
@@ -322,80 +276,12 @@ private fun SimpleFlipPageTextComponent(
                         contentScale = ContentScale.Crop
                     )
                 }
-
-                BaseContentComponent(
-                    modifier = modifier
+                slippedContentComponentList.getOrNull(it)?.Content(
+                    modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    imageModifier = Modifier.fillMaxSize().padding(paddingValues),
-                    text = slippedTextList.getOrNull(it) ?: "",
-                    fontSize = settingState.fontSize.sp,
-                    fontLineHeight = settingState.fontLineHeight.sp,
-                    fontWeight = FontWeight(settingState.fontWeigh.toInt()),
-                    fontFamily = rememberReaderFontFamily(settingState),
-                    color = readerTextColor(settingState),
-                    onZoomImage = onZoomImage,
-                    header = header
+                        .padding(paddingValues)
                 )
             }
         }
     }
-}
-
-fun slipText(
-    textMeasurer: TextMeasurer,
-    constraints: Constraints,
-    text: String,
-    style: TextStyle,
-): List<String> {
-    val resultList: MutableList<String> = mutableListOf()
-    text.split("[image]").filter { it.isNotEmpty() }.forEach { single ->
-        if (single.trim().startsWith("http://") || single.trim().startsWith("https://"))
-            resultList.add(single)
-        else {
-            textMeasurer
-                .measure(
-                    text = single,
-                    style = style,
-                    constraints = constraints
-                )
-                .getSlipString(single, constraints)
-                .let(resultList::addAll)
-        }
-    }
-    return resultList
-}
-
-fun TextLayoutResult.getSlipString(text: String, constraints: Constraints): List<String> {
-    val result: MutableList<String> = mutableListOf()
-    var lastLine = 0
-    fun getNotOverflowText(startLine: Int): String {
-        fun getNotOverflowLine(): Int {
-            val startHeight = getLineTop(startLine)
-            fun isLineOverflow(line: Int): Boolean =
-                getLineBottom(line) > startHeight + constraints.maxHeight
-
-            var checkLine = getLineForOffset(
-                getOffsetForPosition(
-                    Offset(
-                        constraints.maxWidth.toFloat(),
-                        startHeight + constraints.maxHeight
-                    )
-                )
-            )
-            while (isLineOverflow(checkLine))
-                checkLine--
-            return checkLine
-        }
-
-        val startTextOffset = getLineStart(startLine)
-        lastLine = getNotOverflowLine()
-        val endTextOffset = getLineEnd(lastLine)
-        lastLine++
-        return text.slice(startTextOffset..<endTextOffset)
-    }
-    while (lastLine != this.lineCount) {
-        getNotOverflowText(lastLine).let(result::add)
-    }
-    return result.filter { it.isNotBlank() }
 }

@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,7 +37,7 @@ import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
 fun DebugScreen(
     onClickBack: () -> Unit,
     onClickQuery: (String) -> Unit,
-    onClickOpenBook: (Int) -> Unit,
+    onClickOpenBook: (String) -> Unit,
     result: String
 ) {
     Scaffold(
@@ -61,14 +60,14 @@ fun DebugScreen(
                 },
             )
         }
-    ) {
+    ) { padding ->
         Column(
-            modifier = Modifier.padding(it).padding(horizontal = 16.dp)
+            modifier = Modifier.padding(padding).padding(horizontal = 16.dp)
         ) {
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
             var sqlCommand by remember { mutableStateOf("") }
-            var bookId by remember { mutableIntStateOf(-1) }
+            var bookId by remember { mutableStateOf("") }
 
             Text(
                 modifier = Modifier.padding(vertical = 12.dp),
@@ -81,15 +80,15 @@ fun DebugScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-                value = if (bookId == -1) "" else bookId.toString(),
-                onValueChange = { bookId = it.toIntOrNull() ?: -1 },
+                value = bookId,
+                onValueChange = { bookId = it },
                 label = { Text("书本ID") },
                 placeholder = { Text("输入书本ID") },
                 supportingText = { Text("输入书本ID") },
                 maxLines = 1,
                 interactionSource = interactionSource,
                 trailingIcon = {
-                    IconButton(onClick = { bookId = -1 }) {
+                    IconButton(onClick = { bookId = "" }) {
                         Icon(
                             painter = painterResource(R.drawable.cancel_24px),
                             contentDescription = "cancel",

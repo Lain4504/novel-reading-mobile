@@ -9,7 +9,7 @@ data class JsBookInformation(
     override val id: Int,
     override val title: String,
     override val subtitle: String,
-    override val coverUrl: String,
+    override val coverUri: String,
     override val author: String,
     override val description: String,
     override val tags: List<String>,

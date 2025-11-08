@@ -11,24 +11,24 @@ import java.time.LocalDateTime
 
 @Stable
 interface UserReadingData: CanBeEmpty {
-    val id: Int
+    val id: String
     val lastReadTime: LocalDateTime
     val totalReadTime: Int
     val readingProgress: Float
-    val lastReadChapterId: Int
+    val lastReadChapterId: String
     val lastReadChapterTitle: String
     val lastReadChapterProgress: Float
-    val readCompletedChapterIds: List<Int>
+    val readCompletedChapterIds: List<String>
 
-    override fun isEmpty(): Boolean = id == -1
+    override fun isEmpty(): Boolean = id.isEmpty()
 
     companion object {
         fun empty(): UserReadingData = MutableUserReadingData(
-            -1,
+            "",
             LocalDateTime.MIN,
             -1,
             0.0f,
-            -1,
+            "",
             "",
             0.0f,
             readCompletedChapterIds = emptyList()
@@ -43,31 +43,31 @@ interface UserReadingData: CanBeEmpty {
 }
 
 class MutableUserReadingData(
-    id: Int,
+    id: String,
     lastReadTime: LocalDateTime,
     totalReadTime: Int,
     readingProgress: Float,
-    lastReadChapterId: Int,
+    lastReadChapterId: String,
     lastReadChapterTitle: String,
     lastReadChapterProgress: Float,
-    readCompletedChapterIds: List<Int>
+    readCompletedChapterIds: List<String>
 ): UserReadingData {
-    override var id by mutableIntStateOf(id)
+    override var id by mutableStateOf(id)
     override var lastReadTime by mutableStateOf(lastReadTime)
     override var totalReadTime by mutableIntStateOf(totalReadTime)
     override var readingProgress by mutableFloatStateOf(readingProgress)
-    override var lastReadChapterId by mutableIntStateOf(lastReadChapterId)
+    override var lastReadChapterId by mutableStateOf(lastReadChapterId)
     override var lastReadChapterTitle by mutableStateOf(lastReadChapterTitle)
     override var lastReadChapterProgress by mutableFloatStateOf(lastReadChapterProgress)
-    override var readCompletedChapterIds = mutableStateListOf<Int>().apply { addAll(readCompletedChapterIds) }
+    override var readCompletedChapterIds = mutableStateListOf<String>().apply { addAll(readCompletedChapterIds) }
     
     companion object {
         fun empty(): MutableUserReadingData = MutableUserReadingData(
-            -1,
+            "",
             LocalDateTime.MIN,
             -1,
             0.0f,
-            -1,
+            "",
             "",
             0.0f,
             readCompletedChapterIds = emptyList()

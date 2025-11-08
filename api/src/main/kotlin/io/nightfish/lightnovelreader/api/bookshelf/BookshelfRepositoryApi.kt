@@ -9,11 +9,11 @@ interface BookshelfRepositoryApi {
     fun getAllBookshelfIds(): List<Int>
     fun deleteBookshelf(bookshelfId: Int)
     fun addBookIntoBookShelf(bookshelfId: Int, bookInformation: BookInformation)
-    fun addUpdatedBooksIntoBookShelf(bookShelfId: Int, bookId: Int)
-    fun getAllBookshelfBookIdsFlow(): Flow<List<Int>>
-    fun deleteBookFromBookshelf(bookshelfId: Int, bookId: Int)
-    fun deleteBookFromBookshelfUpdatedBookIds(bookshelfId: Int, bookId: Int)
-    fun updateBookshelfBookMetadataLastUpdateTime(bookId: Int, time: LocalDateTime)
+    fun addUpdatedBooksIntoBookShelf(bookShelfId: Int, bookId: String)
+    fun getAllBookshelfBookIdsFlow(): Flow<List<String>>
+    fun deleteBookFromBookshelf(bookshelfId: Int, bookId: String)
+    fun deleteBookFromBookshelfUpdatedBookIds(bookshelfId: Int, bookId: String)
+    fun updateBookshelfBookMetadataLastUpdateTime(bookId: String, time: LocalDateTime)
     fun clear()
     fun getAllBookshelvesFlow(): Flow<List<MutableBookshelf>>
     fun getBookshelf(id: Int): MutableBookshelf?
@@ -28,6 +28,6 @@ interface BookshelfRepositoryApi {
 
     fun updateBookshelf(bookshelfId: Int, updater: (MutableBookshelf) -> Bookshelf)
     fun getAllBookshelfBooksMetadata(): List<BookshelfBookMetadata>
-    fun getBookshelfBookMetadata(id: Int): BookshelfBookMetadata?
-    fun getBookshelfBookMetadataFlow(id: Int): Flow<BookshelfBookMetadata?>
+    fun getBookshelfBookMetadata(id: String): BookshelfBookMetadata?
+    fun getBookshelfBookMetadataFlow(id: String): Flow<BookshelfBookMetadata?>
 }

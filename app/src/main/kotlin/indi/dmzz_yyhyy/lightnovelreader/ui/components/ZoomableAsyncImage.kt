@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.components
 
+import android.net.Uri
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ZoomableImage(
-    imageUrl: String,
+    imageUri: Uri,
     modifier: Modifier = Modifier,
     onZoomEnd: () -> Unit,
     maxScale: Float = 5f,
@@ -43,7 +44,7 @@ fun ZoomableImage(
 
     Box(
         modifier = modifier
-            .pointerInput(imageUrl) {
+            .pointerInput(imageUri) {
                 awaitPointerEventScope {
                     while (true) {
                         val down = awaitPointerEvent(PointerEventPass.Main)
@@ -100,7 +101,7 @@ fun ZoomableImage(
                         builder.addHeader(it.key, it.value)
                     }
                 }
-                .data(imageUrl)
+                .data(imageUri)
                 .crossfade(true)
                 .build(),
             contentScale = ContentScale.FillWidth,

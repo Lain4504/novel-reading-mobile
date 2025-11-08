@@ -9,7 +9,6 @@ import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,11 +48,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import indi.dmzz_yyhyy.lightnovelreader.R
-import indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.content.ContentUiState
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsMenuEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.components.SettingsSliderEntry
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.data.MenuOptions
-import io.nightfish.lightnovelreader.api.book.ChapterContent
 import io.nightfish.lightnovelreader.api.ui.components.SettingsClickableEntry
 import io.nightfish.lightnovelreader.api.ui.components.SettingsSwitchEntry
 import io.nightfish.lightnovelreader.api.ui.theme.AppTypography
@@ -443,14 +440,4 @@ fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResul
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
     launcher.launch(Intent.createChooser(intent, "选择背景图片"))
-}
-
-class PreviewContentUiState(
-    override val bookId: Int,
-    override val readingChapterContent: ChapterContent,
-    override val readingProgress: Float = 0f,
-): ContentUiState {
-    override val loadNextChapter: () -> Unit = {}
-    override val loadLastChapter: () -> Unit = {}
-    override val changeChapter: (Int) -> Unit = {}
 }

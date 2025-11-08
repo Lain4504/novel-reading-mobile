@@ -6,6 +6,7 @@ import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
 import io.nightfish.lightnovelreader.api.userdata.UserDataPath
 import io.nightfish.lightnovelreader.api.web.WebBookDataSource
+import io.nightfish.lightnovelreader.api.web.WebBookDataSourceManagerApi
 import io.nightfish.lightnovelreader.api.web.WebDataSource
 import io.nightfish.lightnovelreader.api.web.WebDataSourceItem
 import javax.inject.Inject
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 @Singleton
 class WebBookDataSourceManager @Inject constructor (
     val userDataRepository: UserDataRepository
-): io.nightfish.lightnovelreader.api.web.WebBookDataSourceManagerApi {
+): WebBookDataSourceManagerApi {
     private val _webDataSourceItems = mutableListOf<WebDataSourceItem>()
     private val webDataSourceItemListMap = mutableMapOf<DexClassLoader, List<WebDataSourceItem>>()
     val webDataSourceItems: List<WebDataSourceItem> = _webDataSourceItems
@@ -35,6 +36,8 @@ class WebBookDataSourceManager @Inject constructor (
         webBookDataSources.removeAll { it.id == webDataSourceId }
         onWebDataSourceListChange()
     }
+
+    override fun getWebDataSource(): WebBookDataSource = mutableWebDataSourceProvider.value
 
     fun loadWebDataSourcesFromClassLoader(classLoader: DexClassLoader, injector: PluginInjector, scanPackage: String = "") {
         val items = mutableListOf<WebDataSourceItem>()

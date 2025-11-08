@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.explore
 
+import androidx.core.net.toUri
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api.host
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.wenku8Cookie
 import indi.dmzz_yyhyy.lightnovelreader.utils.autoReconnectionGet
@@ -43,7 +44,7 @@ object Wenku8HomeExplorePage: ExplorePageDataSource {
         val title = soup?.selectFirst("#centers > div:nth-child(${index+2}) > div.blocktitle")?.text()
             ?.split("(")?.getOrNull(0) ?: ""
         val idlList = soup?.select("#centers > div:nth-child(${index+2}) > div.blockcontent > div > div > a:nth-child(1)")
-            ?.map { it.attr("href").replace("/book/", "").replace(".htm", "").toInt() }
+            ?.map { it.attr("href").replace("/book/", "").replace(".htm", "") }
         val titleList = soup?.select("#centers > div:nth-child(${index+2}) > div.blockcontent > div > div > a:nth-child(3)")
             ?.map { it.text().split("(").getOrNull(0) ?: "" } ?: emptyList()
         val coverUrlList = soup?.select("#centers > div:nth-child(${index+2}) > div.blockcontent > div > div > a:nth-child(1) > img")
@@ -55,7 +56,7 @@ object Wenku8HomeExplorePage: ExplorePageDataSource {
                     id = idlList[it],
                     title = titleList[it],
                     author = "",
-                    coverUrl = coverUrlList[it],
+                    coverUri = coverUrlList[it].toUri(),
                 )
             } ?: emptyList(),
             expandable = false

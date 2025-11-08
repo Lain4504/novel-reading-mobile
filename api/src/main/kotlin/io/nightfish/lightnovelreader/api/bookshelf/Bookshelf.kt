@@ -13,9 +13,9 @@ interface Bookshelf {
     val sortType: BookshelfSortType
     val autoCache: Boolean
     val systemUpdateReminder: Boolean
-    val allBookIds: List<Int>
-    val pinnedBookIds: List<Int>
-    val updatedBookIds: List<Int>
+    val allBookIds: List<String>
+    val pinnedBookIds: List<String>
+    val updatedBookIds: List<String>
     fun isEmpty() = this.id == -1
 }
 
@@ -25,7 +25,7 @@ class MutableBookshelf : Bookshelf {
     override var sortType by mutableStateOf(BookshelfSortType.Default)
     override var autoCache by mutableStateOf(false)
     override var systemUpdateReminder by mutableStateOf(false)
-    override var allBookIds by mutableStateOf<List<Int>>(listOf())
-    override var pinnedBookIds by mutableStateOf<List<Int>>(listOf())
-    override var updatedBookIds by mutableStateOf<List<Int>>(listOf())
+    override var allBookIds by mutableStateOf<List<String>>(listOf())
+    override var pinnedBookIds by mutableStateOf<List<String>>(listOf())
+    override var updatedBookIds by mutableStateOf<List<String>>(listOf())
 }

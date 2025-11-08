@@ -17,7 +17,7 @@ interface ExploreSearchUiState {
     val searchType: String
     val searchTip: String
     val searchResult: List<BookInformation>
-    val allBookshelfBookIds: List<Int>
+    val allBookshelfBookIds: List<String>
 }
 
 class MutableExploreSearchUiState : ExploreSearchUiState {
@@ -30,5 +30,5 @@ class MutableExploreSearchUiState : ExploreSearchUiState {
     override var searchType: String by mutableStateOf("")
     override var searchTip: String by mutableStateOf("")
     override var searchResult: List<BookInformation> by mutableStateOf(mutableListOf())
-    override var allBookshelfBookIds: List<Int> by mutableStateOf(mutableListOf())
+    override var allBookshelfBookIds: List<String> by mutableStateOf(mutableListOf())
 }

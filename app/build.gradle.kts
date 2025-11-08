@@ -146,6 +146,9 @@ dependencies {
     implementation(libs.compose.shimmer)
     // LNR API
     implementation(project(":api"))
+    implementation(libs.dom4j)
+    implementation(libs.kotlin.result)
+    implementation(libs.kotlin.result.coroutines)
 }
 
 configurations.implementation {

@@ -1,5 +1,6 @@
 package indi.dmzz_yyhyy.lightnovelreader.ui.book.reader.imageview
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +24,7 @@ import me.saket.telephoto.zoomable.zoomable
 
 @Composable
 fun ImageViewerScreen(
-    imageUrl: String,
+    imageUri: Uri,
     onDismissRequest: () -> Unit,
     onClickSave: () -> Unit,
     header: Map<String, String> = emptyMap()
@@ -45,7 +46,7 @@ fun ImageViewerScreen(
                         builder.addHeader(it.key, it.value)
                     }
                 }
-                .data(imageUrl)
+                .data(imageUri)
                 .crossfade(true)
                 .build(),
             contentDescription = null

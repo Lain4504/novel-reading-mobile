@@ -34,17 +34,17 @@ class JsWebBookDataSource(
     override val searchTypeIdList: List<String>
         get() = TODO("Not yet implemented")
 
-    override suspend fun getBookInformation(id: Int): BookInformation {
+    override suspend fun getBookInformation(id: String): BookInformation {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getBookVolumes(id: Int): BookVolumes {
+    override suspend fun getBookVolumes(id: String): BookVolumes {
         TODO("Not yet implemented")
     }
 
     override suspend fun getChapterContent(
-        chapterId: Int,
-        bookId: Int
+        chapterId: String,
+        bookId: String
     ): ChapterContent {
         TODO("Not yet implemented")
     }

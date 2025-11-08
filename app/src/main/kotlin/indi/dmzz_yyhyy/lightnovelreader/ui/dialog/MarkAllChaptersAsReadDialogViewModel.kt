@@ -18,10 +18,10 @@ import javax.inject.Inject
 class MarkAllChaptersAsReadDialogViewModel @Inject constructor(
     private val bookRepository: BookRepository
 ) : ViewModel() {
-    var bookVolumes by mutableStateOf(BookVolumes.empty(-1))
+    var bookVolumes by mutableStateOf(BookVolumes.empty())
         private set
 
-    var bookId: Int = -1
+    var bookId = ""
         set(value) {
             viewModelScope.launch(Dispatchers.IO) {
                 bookRepository.getBookVolumesFlow(bookId, viewModelScope).collect {
@@ -33,7 +33,7 @@ class MarkAllChaptersAsReadDialogViewModel @Inject constructor(
         }
 
     fun markAllChaptersAsRead() {
-        if (bookId == -1) return
+        if (bookId.isBlank()) return
         Log.i("MarkAllAsReadDialog", "Marked all chapters of book ($bookId) as read")
         viewModelScope.launch(Dispatchers.IO) {
             bookRepository.updateUserReadingData(bookId) { userReadingData ->

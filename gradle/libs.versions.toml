@@ -5,6 +5,7 @@ javascriptengine = "1.0.0"
 javet = "5.0.0"
 kotlin = "2.2.20"
 kotlinComposeCompilerPlugin = "2.1.20"
+kotlinResult = "2.1.0"
 ksp = "2.2.20-2.0.3"
 materialIconsCore = "1.7.8"
 polyglot = "25.0.0"
@@ -52,6 +53,8 @@ javet-node-macos-arm64 = { module = "com.caoccao.javet:javet-node-macos-arm64", 
 javet-node-linux-x86_x4 = { module = "com.caoccao.javet:javet-node-linux-x86_64", version.ref = "javet" }
 javet-node-windows-x86_x4 = { module = "com.caoccao.javet:javet-node-windows-x86_64", version.ref = "javet" }
 javet-node-macos-x86_x4 = { module = "com.caoccao.javet:javet-node-macos-x86_64", version.ref = "javet" }
+kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResult" }
+kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResult" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }

@@ -2,11 +2,12 @@ package io.nightfish.lightnovelreader.api.book
 
 
 data class BookVolumes(
-    val bookId: Int,
+    val bookId: String,
     val volumes: List<Volume>
 ): CanBeEmpty {
     companion object {
-        fun empty(bookId: Int) = BookVolumes(bookId, emptyList())
+        fun empty() = BookVolumes("", emptyList())
+        fun empty(bookId: String) = BookVolumes(bookId, emptyList())
     }
 
     override fun isEmpty(): Boolean = volumes.isEmpty()

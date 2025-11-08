@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
-import indi.dmzz_yyhyy.lightnovelreader.ui.LocalNavController
+import io.nightfish.lightnovelreader.api.ui.LocalNavController
 import indi.dmzz_yyhyy.lightnovelreader.ui.dialog.EditTextFormattingRuleDialog
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.navigateToSettingsTextFormattingRulesDestination
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.textformatting.rules.settingsTextFormattingRulesDestination
@@ -47,7 +47,7 @@ fun NavGraphBuilder.editTextFormattingRuleDialog() {
     }
 }
 
-fun NavController.navigateToEditTextFormattingRuleDialog(bookId: Int, ruleId: Int) {
+fun NavController.navigateToEditTextFormattingRuleDialog(bookId: String, ruleId: Int) {
     if (!this.isResumed()) return
     navigate(Route.Main.EditTextFormattingRuleDialog(bookId, ruleId))
 }

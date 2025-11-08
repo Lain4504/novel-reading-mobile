@@ -3,16 +3,16 @@ package io.nightfish.lightnovelreader.api.book
 import kotlinx.coroutines.flow.Flow
 
 interface LocalBookDataSourceApi {
-    suspend fun getBookInformation(id: Int): BookInformation?
+    suspend fun getBookInformation(id: String): BookInformation?
     fun updateBookInformation(info: BookInformation)
-    suspend fun getBookVolumes(id: Int): BookVolumes?
-    fun updateBookVolumes(bookId: Int, bookVolumes: BookVolumes)
-    suspend fun getChapterContent(id: Int): MutableChapterContent?
+    suspend fun getBookVolumes(id: String): BookVolumes?
+    fun updateBookVolumes(bookId: String, bookVolumes: BookVolumes)
+    suspend fun getChapterContent(id: String): MutableChapterContent?
     fun updateChapterContent(chapterContent: ChapterContent)
-    fun getUserReadingData(id: Int): MutableUserReadingData
-    fun getUserReadingDataFlow(id: Int): Flow<MutableUserReadingData>
-    fun updateUserReadingData(id: Int, update: (MutableUserReadingData) -> UserReadingData)
+    fun getUserReadingData(id: String): MutableUserReadingData
+    fun getUserReadingDataFlow(id: String): Flow<MutableUserReadingData>
+    fun updateUserReadingData(id: String, update: (MutableUserReadingData) -> UserReadingData)
     fun getAllUserReadingData(): List<UserReadingData>
-    suspend fun isChapterContentExists(id: Int): Boolean
+    suspend fun isChapterContentExists(id: String): Boolean
     fun clear()
 }

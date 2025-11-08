@@ -21,24 +21,25 @@ class ReadingHomeViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
-    private val readingBooksUserData = userDataRepository.intListUserData(UserDataPath.ReadingBooks.path)
-    var recentReadingBookIds: List<Int> by mutableStateOf(listOf())
+    private val readingBooksUserData = userDataRepository.stringListUserData(UserDataPath.ReadingBooks.path)
+    var recentReadingBookIds: List<String> by mutableStateOf(listOf())
         private set
-    private val _recentReadingBookInformationMap = mutableStateMapOf<Int, BookInformation>()
-    private val _recentReadingUserReadingDataMap = mutableStateMapOf<Int, UserReadingData>()
-    val recentReadingBookInformationMap: Map<Int, BookInformation> = _recentReadingBookInformationMap
-    val recentReadingUserReadingDataMap: Map<Int, UserReadingData> = _recentReadingUserReadingDataMap
+    private val _recentReadingBookInformationMap = mutableStateMapOf<String, BookInformation>()
+    private val _recentReadingUserReadingDataMap = mutableStateMapOf<String, UserReadingData>()
+    val recentReadingBookInformationMap: Map<String, BookInformation> = _recentReadingBookInformationMap
+    val recentReadingUserReadingDataMap: Map<String, UserReadingData> = _recentReadingUserReadingDataMap
 
-    fun updateReadingBooks() {
-        viewModelScope.launch(Dispatchers.IO) {
-            recentReadingBookIds = readingBooksUserData
-                .getOrDefault(emptyList())
-                .reversed()
-                .filter { it != -1 }
+    init {
+        viewModelScope.launch {
+            readingBooksUserData.getFlowWithDefault(emptyList()).collect {
+                recentReadingBookIds = it
+                    .reversed()
+                    .filter(String::isNotBlank)
+            }
         }
     }
 
-    fun loadBookInfo(id: Int) {
+    fun loadBookInfo(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val info = bookRepository.getStateBookInformation(id, viewModelScope)
             val userData = bookRepository.getStateUserReadingData(id, viewModelScope)
@@ -49,21 +50,20 @@ class ReadingHomeViewModel @Inject constructor(
         }
     }
 
-    fun removeFromReadingList(bookId: Int) {
+
+    fun removeFromReadingList(bookId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val currentList = readingBooksUserData.getOrDefault(emptyList()).toMutableList()
-
-            if (bookId >= 0) {
-                currentList.remove(bookId)
-            } else {
-                val restoredId = -bookId
-                if (!currentList.contains(restoredId)) {
-                    currentList.add(0, restoredId)
-                }
+            readingBooksUserData.update {
+                it.toMutableList().apply { remove(bookId) }
             }
+        }
+    }
 
-            readingBooksUserData.set(currentList)
-            updateReadingBooks()
+    fun addToReadingList(bookId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            readingBooksUserData.update {
+                it + listOf(bookId)
+            }
         }
     }
 }

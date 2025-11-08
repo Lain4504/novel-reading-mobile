@@ -11,10 +11,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dalvik.system.DexClassLoader
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
 import indi.dmzz_yyhyy.lightnovelreader.data.web.WebBookDataSourceManager
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.bilinovel.BiliNovel
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api
-import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
+import io.nightfish.lightnovelreader.api.PluginContext
 import io.nightfish.lightnovelreader.api.plugin.LightNovelReaderPlugin
 import io.nightfish.lightnovelreader.api.plugin.Plugin
 import io.nightfish.lightnovelreader.api.userdata.UserDataPath
@@ -37,12 +36,11 @@ class PluginManager @Inject constructor(
     val allPluginInfo: SnapshotStateList<PluginInfo> = _allPluginInfo
     private val enabledPluginsUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.EnabledPlugins.path)
     private val errorPluginsUserData = userDataRepository.stringListUserData(UserDataPath.Plugin.ErrorPlugins.path)
-    private val defaultWebDataSources = listOf(Wenku8Api, ZaiComic, BiliNovel)
-    private val defaultPlugins = listOf<Class<*>>()
-
+    private val defaultWebDataSources = listOf(Wenku8Api)
     val pluginsDir = appContext.dataDir.resolve("plugin")
     fun getPluginDir(name: String) = pluginsDir.resolve(name)
     fun getPluginFile(pluginDir: File) = pluginDir.resolve("plugin")
+    fun getPluginDataDir(pluginDir: File) = pluginDir.resolve("data")
     fun getPluginAssetDir(pluginDir: File) = pluginDir.resolve("asset")
     fun getPluginLibsDir(pluginDir: File) = pluginDir.resolve("libs")
 
@@ -61,7 +59,6 @@ class PluginManager @Inject constructor(
             }
         }
         defaultWebDataSources.forEach(webBookDataSourceManager::loadWebDataSourceClass)
-        defaultPlugins.forEach { getPluginInstance(it)?.let { plugin -> loadPlugin(plugin, forceLoad = true) } }
         pluginsDir
             .also(File::mkdir)
             .listFiles()
@@ -92,9 +89,9 @@ class PluginManager @Inject constructor(
         return null
     }
 
-    private fun getPluginInstance(clazz: Class<*>): LightNovelReaderPlugin? {
+    private fun getPluginInstance(clazz: Class<*>, pluginContext: PluginContext): LightNovelReaderPlugin? {
         if (!LightNovelReaderPlugin::class.java.isAssignableFrom(clazz)) return null
-        return pluginInjector.providePlugin(clazz)
+        return pluginInjector.providePlugin(clazz, pluginContext)
     }
 
     fun loadPlugin(plugin: LightNovelReaderPlugin, forceLoad: Boolean = false) {
@@ -120,12 +117,13 @@ class PluginManager @Inject constructor(
             val entries = zipFile.entries()
 
             for (entry in entries) {
-                if (entry.name.startsWith("assets"))
-                zipFile.getInputStream(entry).buffered().use { inputStream ->
-                    val outputFile = dir.resolve(entry.name.replaceFirst("assets/", ""))
-                        .also { it.parentFile?.mkdirs() }
-                    outputFile.outputStream().buffered().use {
-                        inputStream.copyTo(it)
+                if (entry.name.startsWith("assets")) {
+                    zipFile.getInputStream(entry).buffered().use { inputStream ->
+                        val outputFile = dir.resolve(entry.name.replaceFirst("assets/", ""))
+                            .also { it.parentFile?.mkdirs() }
+                        outputFile.outputStream().buffered().use {
+                            inputStream.copyTo(it)
+                        }
                     }
                 }
             }
@@ -133,7 +131,7 @@ class PluginManager @Inject constructor(
             extractLibFromApk(path, getPluginLibsDir(pluginDir).also { it.mkdirs() })
         }
         val classLoader = DexClassLoader(
-            path.path,
+            path.absolutePath,
             null,
             getPluginLibsDir(pluginDir).absolutePath,
             this.javaClass.classLoader
@@ -141,6 +139,11 @@ class PluginManager @Inject constructor(
         val scanPackage = packageInfo?.packageName ?: ""
         return loadPlugin(
             classLoader,
+            PluginContext(
+                dataDir = getPluginDataDir(pluginDir),
+                pluginFile = getPluginFile(pluginDir),
+                assetDir = getPluginAssetDir(pluginDir)
+            ),
             scanPackage,
             forceLoad
         ).also {
@@ -150,14 +153,14 @@ class PluginManager @Inject constructor(
         }
     }
 
-    fun loadPlugin(classLoader: DexClassLoader, scanPackage: String = "", forceLoad: Boolean = false): String? {
+    fun loadPlugin(classLoader: DexClassLoader, pluginContext: PluginContext, scanPackage: String = "", forceLoad: Boolean = false): String? {
         var id: String? = null
         AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java, scanPackage)
             .filter {
                 id = getPluginId(it)
                 id != null
             }
-            .map(::getPluginInstance)
+            .map { getPluginInstance(it, pluginContext) }
             .filter { it is LightNovelReaderPlugin }
             .map { it as LightNovelReaderPlugin }
             .firstOrNull()
