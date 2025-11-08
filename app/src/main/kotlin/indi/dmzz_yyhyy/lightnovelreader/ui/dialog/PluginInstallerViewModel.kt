@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dalvik.system.DexClassLoader
 import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginInfo
 import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginInstaller
 import indi.dmzz_yyhyy.lightnovelreader.data.plugin.PluginInstallerOperation
@@ -19,7 +18,7 @@ import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.pluginmanager.DeleteDia
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.pluginmanager.InstallDialogState
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.pluginmanager.PluginMetadata
 import indi.dmzz_yyhyy.lightnovelreader.ui.home.settings.pluginmanager.UpdateDialogState
-import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
+import indi.dmzz_yyhyy.lightnovelreader.utils.PluginAnnotationParser
 import indi.dmzz_yyhyy.lightnovelreader.utils.getApkSignatures
 import io.nightfish.lightnovelreader.api.plugin.Plugin
 import jakarta.inject.Inject
@@ -272,29 +271,13 @@ class PluginInstallerDialogViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Main) { _closeDialogFlow.emit(Unit) }
     }
 
-    private fun parsePluginAnnotationFromFile(tempFile: File): Pair<String, Plugin>? = try {
-        val workDir = pluginManager.pluginsTempDir
-        val useFile = workDir.resolve("parse_${System.currentTimeMillis()}_${tempFile.name}")
-        tempFile.copyTo(useFile, overwrite = true)
-        useFile.setReadOnly()
-
-        val optimizedDir = workDir.resolve("odex").apply { mkdirs() }
-        val classLoader = DexClassLoader(
-            useFile.absolutePath,
-            optimizedDir.absolutePath,
-            null,
-            this::class.java.classLoader
+    private fun parsePluginAnnotationFromFile(tempFile: File): Pair<String, Plugin>? {
+        return PluginAnnotationParser.parsePluginAnnotationFromFile(
+            apkFile = tempFile,
+            workDir = pluginManager.pluginsTempDir,
+            parentClassLoader = this::class.java.classLoader,
+            pm = context.packageManager
         )
-
-        val pkgInfo = context.packageManager.getPackageArchiveInfo(useFile.absolutePath, 0)
-        val scanPackage = pkgInfo?.packageName ?: ""
-        val annotated = AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java, scanPackage)
-        val pluginClass = annotated.firstOrNull() ?: return null
-        val annotation = pluginClass.getAnnotation(Plugin::class.java) ?: return null
-        val pluginId = pluginClass.`package`?.name ?: return null
-
-        useFile.delete()
-        pluginId to annotation
-    } catch (_: Throwable) { null }
+    }
 
 }

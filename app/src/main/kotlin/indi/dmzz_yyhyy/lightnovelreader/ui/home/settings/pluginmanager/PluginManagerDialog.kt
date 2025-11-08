@@ -318,7 +318,7 @@ fun PluginSignatureDialog(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("所有者: ${sig.subject}")
-                            Text("公钥: ${sig.publicKeyAlgorithm} ,${sig.publicKeyLength}-bit")
+                            Text("公钥: ${sig.publicKeyAlgorithm}, ${sig.publicKeyLength}-bit")
                             Text("SHA256: ${sig.sha256}")
                         }
                     }

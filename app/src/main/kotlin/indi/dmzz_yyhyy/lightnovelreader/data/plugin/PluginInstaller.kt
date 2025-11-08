@@ -3,10 +3,9 @@ package indi.dmzz_yyhyy.lightnovelreader.data.plugin
 import android.content.Context
 import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dalvik.system.DexClassLoader
 import indi.dmzz_yyhyy.lightnovelreader.data.userdata.UserDataRepository
-import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
 import indi.dmzz_yyhyy.lightnovelreader.utils.ApkSignatureInfo
+import indi.dmzz_yyhyy.lightnovelreader.utils.PluginAnnotationParser
 import indi.dmzz_yyhyy.lightnovelreader.utils.getApkSignatures
 import indi.dmzz_yyhyy.lightnovelreader.utils.isSignatureMatch
 import io.nightfish.lightnovelreader.api.plugin.Plugin
@@ -47,7 +46,12 @@ class PluginInstaller @Inject constructor(
         callbacks.onProgress(null)
         tempFile.setReadOnly()
 
-        val parsed = preParsed ?: parsePluginAnnotationFromFile(tempFile)
+        val parsed = preParsed ?: PluginAnnotationParser.parsePluginAnnotationFromFile(
+            apkFile = tempFile,
+            workDir = pluginManager.pluginsTempDir,
+            parentClassLoader = this::class.java.classLoader,
+            pm = context.packageManager
+        )
         if (parsed == null) {
             val msg = "无效的插件：未包含有效 @Plugin 注解\n请重新选择一个 .lnrp 插件安装文件。"
             callbacks.onError(msg)
@@ -83,31 +87,6 @@ class PluginInstaller @Inject constructor(
         if (!success) callbacks.onError("安装失败")
         return success
     }
-
-    private fun parsePluginAnnotationFromFile(tempFile: File): Pair<String, Plugin>? = try {
-        val workDir = pluginManager.pluginsTempDir
-        val useFile = workDir.resolve("parse_${System.currentTimeMillis()}_${tempFile.name}")
-        tempFile.copyTo(useFile, overwrite = true)
-        useFile.setReadOnly()
-
-        val optimizedDir = workDir.resolve("odex").apply { mkdirs() }
-        val classLoader = DexClassLoader(
-            useFile.absolutePath,
-            optimizedDir.absolutePath,
-            null,
-            this::class.java.classLoader
-        )
-
-        val pkgInfo = context.packageManager.getPackageArchiveInfo(useFile.absolutePath, 0)
-        val scanPackage = pkgInfo?.packageName ?: ""
-        val annotated = AnnotationScanner.findAnnotatedClasses(classLoader, Plugin::class.java, scanPackage)
-        val pluginClass = annotated.firstOrNull() ?: return null
-        val annotation = pluginClass.getAnnotation(Plugin::class.java) ?: return null
-        val pluginId = pluginClass.`package`?.name ?: return null
-
-        useFile.delete()
-        pluginId to annotation
-    } catch (_: Throwable) { null }
 
     private sealed class InstallCheckResult {
         data object Ok : InstallCheckResult()

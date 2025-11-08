@@ -15,7 +15,10 @@ import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.bilinovel.BiliNovel
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.wenku8.Wenku8Api
 import indi.dmzz_yyhyy.lightnovelreader.defaultplugin.zaicomic.ZaiComic
 import indi.dmzz_yyhyy.lightnovelreader.utils.AnnotationScanner
+import indi.dmzz_yyhyy.lightnovelreader.utils.PluginAnnotationParser
 import indi.dmzz_yyhyy.lightnovelreader.utils.getApkSignatures
+import io.nightfish.lightnovelreader.api.ApiCompat
+import io.nightfish.lightnovelreader.api.ApiMetadata
 import io.nightfish.lightnovelreader.api.plugin.LightNovelReaderPlugin
 import io.nightfish.lightnovelreader.api.plugin.Plugin
 import io.nightfish.lightnovelreader.api.userdata.UserDataPath
@@ -78,7 +81,18 @@ class PluginManager @Inject constructor(
             .listFiles()
             ?.filter { it.isDirectory }
             ?.forEach { dir ->
-                loadPlugin(getPluginFile(dir))
+                val file = getPluginFile(dir)
+                PluginAnnotationParser.parsePluginAnnotationFromFile(
+                    apkFile = file,
+                    workDir = pluginsTempDir,
+                    parentClassLoader = this::class.java.classLoader,
+                    pm = appContext.packageManager
+                )?.let { (pid, ann) ->
+                    if (!ApiCompat.isSupported(ann.apiVersion, ApiMetadata.API_VERSION)) {
+                        enabledPluginsUserData.update { it.toMutableList().apply { remove(pid) } }
+                    }
+                }
+                loadPlugin(file)
             }
     }
 
