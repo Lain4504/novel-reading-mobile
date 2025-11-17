@@ -1,0 +1,33 @@
+query SearchNovels($title: String!) {
+  searchNovels(title: $title) {
+    id
+    title
+    slug
+    description
+    coverImage
+    authorName
+    authorId
+    status
+    type
+    viewCount
+    followCount
+    rating
+    ratingCount
+    chapterCount
+    wordCount
+    isR18
+    categories
+    categoriesWithLabels {
+      id
+      label
+    }
+    tags
+    createdAt
+    updatedAt
+    latestChapterId
+    latestChapterTitle
+    latestChapterNumber
+    latestChapterCreatedAt
+  }
+}
+

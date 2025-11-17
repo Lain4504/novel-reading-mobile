@@ -1,0 +1,19 @@
+query GetChapters($volumeId: ID!) {
+  chapters(volumeId: $volumeId) {
+    id
+    title
+    volumeId
+    novelId
+    chapterNumber
+    wordCount
+    viewCount
+    status
+    createdAt
+    updatedAt
+    publishedAt
+    previousChapterId
+    nextChapterId
+    commentCount
+  }
+}
+

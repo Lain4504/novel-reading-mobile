@@ -1,0 +1,311 @@
+package com.miraimagiclab.novelreadingapp.ui.components
+
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import com.miraimagiclab.novelreadingapp.ui.home.settings.data.MenuOptions
+import com.miraimagiclab.novelreadingapp.ui.home.settings.navigateToSliderValueDialog
+import io.lain4504.novelreadingapp.api.ui.LocalNavController
+import io.lain4504.novelreadingapp.api.ui.theme.AppTypography
+import io.lain4504.novelreadingapp.api.userdata.FloatUserData
+import io.lain4504.novelreadingapp.api.userdata.StringUserData
+import java.text.DecimalFormat
+import kotlin.math.roundToInt
+
+@Composable
+fun SettingsSliderEntry(
+    modifier: Modifier = Modifier,
+    painter: Painter? = null,
+    title: String,
+    unit: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
+    floatUserData: FloatUserData,
+    steps: List<Float>? = null
+) {
+    val navController = LocalNavController.current
+    var tempValue by remember { mutableFloatStateOf(value) }
+    LaunchedEffect(value) {
+        tempValue = value
+    }
+
+    SettingsSliderEntry(
+        painter = painter,
+        modifier = modifier,
+        title = title,
+        unit = unit,
+        value = tempValue,
+        valueRange = valueRange,
+        valueFormat = valueFormat,
+        steps = steps,
+        onSlideChange = { tempValue = it },
+        onSliderChangeFinished = { floatUserData.asynchronousSet(tempValue) },
+        onLongClick = {
+            navController.navigateToSliderValueDialog(floatUserData.path, tempValue)
+        }
+    )
+}
+
+@Composable
+private fun SettingsSliderEntry(
+    modifier: Modifier = Modifier,
+    painter: Painter? = null,
+    title: String,
+    unit: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    valueFormat: (Float) -> Float = { (it * 2).roundToInt().toFloat() / 2 },
+    steps: List<Float>? = null,
+    onSlideChange: (Float) -> Unit,
+    onSliderChangeFinished: () -> Unit,
+    onLongClick: () -> Unit
+) {
+    val actualSteps = steps?.distinct()?.sorted()
+    val sliderValue = if (actualSteps != null) {
+        actualSteps.indexOfFirst { it == value }.takeIf { it >= 0 }?.toFloat()
+            ?: actualSteps.indexOfFirst { it > value }.coerceAtLeast(0).toFloat()
+    } else value
+
+    val sliderRange = if (actualSteps != null) 0f..(actualSteps.lastIndex.toFloat())
+    else valueRange
+
+    val stepsCount = if (actualSteps != null) actualSteps.size - 2 else 0
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .then(modifier)
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onLongClick
+            )
+            .padding(horizontal = 22.dp)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        painter?.let {
+            Icon(
+                modifier = Modifier.padding(end = 22.dp).size(24.dp),
+                painter = it,
+                tint = colorScheme.onSurfaceVariant,
+                contentDescription = "Icon"
+            )
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = title,
+                color = colorScheme.onSurface,
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.Normal
+            )
+
+            val displayValue = if (actualSteps != null)
+                actualSteps[sliderValue.toInt()]
+            else value
+
+            Row(
+                modifier = Modifier
+                    .animateContentSize(
+                        animationSpec = tween(
+                            durationMillis = 250,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+            ) {
+                AnimatedText(
+                    text = "${DecimalFormat("#.#").format(displayValue)}",
+                    color = colorScheme.primary,
+                    style = AppTypography.labelMedium,
+                    maxLines = 1
+                )
+
+                Spacer(Modifier.width(1.dp))
+
+                Text(
+                    text = unit,
+                    color = colorScheme.primary,
+                    style = AppTypography.labelMedium,
+                    maxLines = 1
+                )
+            }
+
+            Slider(
+                modifier = Modifier.fillMaxWidth(),
+                value = sliderValue,
+                valueRange = sliderRange,
+                steps = stepsCount,
+                onValueChange = { raw ->
+                    val newValue = if (actualSteps != null) {
+                        val index = raw.roundToInt().coerceIn(0, actualSteps.lastIndex)
+                        actualSteps[index]
+                    } else {
+                        valueFormat(raw)
+                    }
+                    onSlideChange(newValue)
+                },
+                onValueChangeFinished = onSliderChangeFinished,
+                colors = SliderDefaults.colors(
+                    inactiveTrackColor = colorScheme.primaryContainer,
+                ),
+            )
+        }
+    }
+}
+
+
+@Composable
+fun SettingsMenuEntry(
+    modifier: Modifier = Modifier,
+    painter: Painter? = null,
+    title: String,
+    description: String? = null,
+    options: MenuOptions,
+    selectedOptionKey: String,
+    stringUserData: StringUserData
+) {
+    SettingsMenuEntry(
+        modifier = modifier,
+        painter = painter,
+        title = title,
+        description = description,
+        options = options,
+        selectedOptionKey = selectedOptionKey,
+        onOptionChange = { stringUserData.asynchronousSet(it) }
+    )
+}
+
+@Composable
+fun SettingsMenuEntry(
+    modifier: Modifier = Modifier,
+    painter: Painter? = null,
+    title: String,
+    description: String? = null,
+    options: MenuOptions,
+    selectedOptionKey: String,
+    onOptionChange: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf(options.get(selectedOptionKey)) }
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .then(modifier)
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+            .padding(horizontal = 22.dp)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        painter?.let {
+            Icon(
+                modifier = Modifier.padding(end = 22.dp).size(24.dp),
+                painter = it,
+                tint = colorScheme.onSurfaceVariant,
+                contentDescription = "Icon"
+            )
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = title,
+                color = colorScheme.onSurface,
+                style = AppTypography.titleMedium,
+                fontWeight = FontWeight.Normal
+            )
+            description?.let {
+                Text(
+                    text = it,
+                    color = colorScheme.onSurfaceVariant,
+                    style = AppTypography.labelMedium
+                )
+            }
+            AnimatedTextLine(
+                text = stringResource(selectedOption.nameId),
+                style = AppTypography.labelMedium,
+                color = colorScheme.primary
+            )
+
+            Box(
+                modifier = Modifier.offset {
+                    IntOffset(0, 20)
+                }
+            ) {
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    options.optionList.forEach { option ->
+                        DropdownMenuItem(
+                            modifier = if (option.key == selectedOptionKey)
+                                Modifier.background(colorScheme.surfaceContainerHighest)
+                            else
+                                Modifier,
+                            onClick = {
+                                selectedOption = option
+                                onOptionChange(option.key)
+                                expanded = false
+                            },
+                            enabled = true,
+                            interactionSource = remember { MutableInteractionSource() },
+                            text = {
+                                Text(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    text = stringResource(option.nameId),
+                                    style = AppTypography.dropDownItem
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+

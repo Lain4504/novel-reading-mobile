@@ -1,0 +1,2682 @@
+type Mutation {
+    # Novel mutations
+    createNovel(novelInput: NovelInput!): CreateNovelResult
+    updateNovel(id: ID!, novelInput: NovelInput!): CreateNovelResult
+    deleteNovel(id: ID!): DeleteNovelResult
+    adminDeleteNovel(id: ID!): DeleteNovelResult
+    restoreNovel(id: ID!): DeleteNovelResult
+
+    # Volume mutations
+    createVolume(novelId: ID!, title: String!, description: String): Volume
+    updateVolume(id: ID!, volumeInput: VolumeInput!): Volume
+    deleteVolume(id: ID!): CreateResult
+    reorderVolumes(novelId: ID!, volumeIds: [ID!]!): CreateResult
+
+    # Chapter mutations
+    createChapter(volumeId: ID!, chapterInput: ChapterInput!): CreateResult
+    updateChapter(id: ID!, chapterInput: ChapterInput!): CreateResult
+    deleteChapter(id: ID!): CreateResult
+    reorderChapters(volumeId: ID!, chapterIds: [ID!]!): ReorderChaptersResponse!
+    publishChapterNow(id: ID!): ChapterOperationResult!
+    scheduleChapter(id: ID!, scheduledAt: String!): ChapterOperationResult!
+    rescheduleChapter(id: ID!, scheduledAt: String!): ChapterOperationResult!
+    restoreChapter(id: ID!): ChapterOperationResult!
+    hardDeleteChapter(id: ID!): CreateResult!
+
+    # Comment mutations
+    createComment(content: String!, targetId: ID!, targetType: String!): Comment
+    createReply(content: String!, parentId: ID!, replyToId: ID, isFromNovelDetail: Boolean): Comment
+    editComment(commentId: ID!, content: String!): Comment
+    likeComment(commentId: ID!): Comment
+    softDeleteComment(commentId: ID!, message: String): DeleteCommentResult
+
+    # Forum Comment mutations
+    createForumComment(content: String!, forumId: ID!): ForumComment
+    createForumReply(content: String!, parentId: ID!, replyToId: ID): ForumComment
+    editForumComment(commentId: ID!, content: String!): ForumComment
+    likeForumComment(commentId: ID!): ForumComment
+    softDeleteForumComment(commentId: ID!, message: String): DeleteForumCommentResult
+
+    # Report mutations
+    reportNovel(novelId: ID!, reasonTemplate: String!, customMessage: String): ReportResult
+    reportComment(commentId: ID!, targetType: String!, parentEntityId: ID!, reasonTemplate: String!, customMessage: String): ReportResult
+    updateReportStatus(reportId: ID!, newStatus: ReportStatus!, adminNotes: String): ReportResult
+
+    # Reading history mutations
+    updateReadingProgress(
+        novelId: ID!
+        chapterNumber: Int!
+    ): InteractionResult!
+    removeFromReadingHistory(novelId: ID!): BasicResult!
+
+    # User-Novel Interaction mutations
+    followNovel(novelId: ID!): InteractionResult
+    unfollowNovel(novelId: ID!): BasicResult
+    updateFollowNotification(novelId: ID!, notify: Boolean!): UpdateFollowNotificationResponse!
+
+    removeRating(novelId: ID!): BasicResult
+
+    # Review mutations
+    createReview(
+        novelId: ID!
+        writingQuality: Int!
+        stabilityOfUpdates: Int!
+        storyDevelopment: Int!
+        characterDesign: Int!
+        worldBackground: Int!
+        reviewText: String!
+        hasSpoiler: Boolean
+    ): Review
+    deleteReview(novelId: ID!): Boolean
+    
+    # Review voting mutations
+    upvoteReview(reviewId: ID!): ReviewVoteResult
+    downvoteReview(reviewId: ID!): ReviewVoteResult
+
+    # News mutations
+    createNews(title: String!, content: String!, summary: String, type: NewsType!, novelId: ID, published: Boolean): NewsResult
+    updateNews(id: ID!, newsInput: NewsInput!): NewsResult
+    deleteNews(id: ID!): BasicResult
+    publishNews(id: ID!, publish: Boolean!): NewsResult
+
+    # User management mutations
+    updateRole(userId: ID!, roles: [UserRole]!): RoleUpdateResult
+    updateBanStatus(userId: ID!, banned: Boolean!): StatusUpdateResult
+    updateProfile(updateProfileInput: UpdateProfileInput!): ProfileUpdateResult
+    updateDisplayName(displayName: String!): ProfileUpdateResult
+
+    # Image mutations
+    deleteImage(id: ID!): ImageUploadResult
+
+    # View confirmation
+    confirmChapterView(chapterId: ID!): ViewConfirmationResponse!
+
+    # Payment mutations (moved to UserBalanceGraphQLController)
+    createWithdrawalRequest(userId: String!, coinAmount: Int!): WithdrawalRequest!
+    approveWithdrawalRequest(requestId: String!): Boolean!
+    rejectWithdrawalRequest(requestId: String!, reason: String!): Boolean!
+
+    # Payment order mutations
+    changePaymentOrderStatus(orderId: String!, status: String!, reason: String): PaymentOrderStatusResult!
+
+    # Collection mutations
+    createCollection(name: String!, description: String, coverImage: String): CollectionResult!
+    updateCollection(id: ID!, name: String, description: String, coverImage: String, status: CollectionStatus): CollectionResult!
+    deleteCollection(id: ID!): BasicResult!
+    addNovelToCollection(collectionId: ID!, novelId: ID!): CollectionResult!
+    removeNovelFromCollection(collectionId: ID!, novelId: ID!): CollectionResult!
+    reorderNovelsInCollection(collectionId: ID!, novelIds: [ID!]!): CollectionResult!
+
+    # Bookmark mutations
+    createBookmark(chapterId: ID!): BookmarkResult!
+    removeBookmark(chapterId: ID!): BookmarkResult!
+
+
+
+    # Monthly Snapshot Management (Admin only)
+    triggerMonthlySnapshots: Boolean
+    triggerSnapshotCompression: Boolean
+    triggerCacheCleanup: Boolean
+
+}
+
+input NewsInput {
+    title: String
+    content: String
+    summary: String
+    type: NewsType
+    novelId: ID
+    published: Boolean
+}
+
+input NovelInput {
+    title: String
+    slug: String
+    authorName: String
+    illustratorName: String
+    description: String
+    coverImage: String
+    largeBackground: String
+    categories: [String]
+    tags: [String]
+    status: String
+    type: String
+    isR18: Boolean
+    additionalInfo: String
+}
+
+input VolumeInput {
+    title: String
+    description: String
+    coverImage: String
+}
+
+input ChapterInput {
+    title: String
+    content: String
+    footnotes: [FootnoteInput!]
+    status: ChapterStatusEnum
+    scheduledPublishAt: String
+    version: Int
+    volumeId: ID
+}
+
+input FootnoteInput {
+    id: ID
+    code: String!
+    content: String!
+    order: Int
+}
+
+type PagedNovels {
+    content: [Novel]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+# Absolute ranking types
+type AbsoluteRanking {
+    novelId: ID!
+    title: String!
+    slug: String
+    authorName: String
+    authorId: ID
+    coverImage: String
+    description: String
+    categories: [CategoryEnum]
+    categoriesWithLabels: [CategoryWithLabel]
+    type: NovelTypeEnum
+    status: NovelStatusEnum
+    createdAt: String
+    updatedAt: String
+    followCount: Int!
+    viewCount: Int!
+    rating: Float!
+    ratingCount: Int!
+    giftPoints: Int!
+    commentCount: Int
+    wishlistCount: Int
+    wordCount: Int
+    chapterCount: Int
+    absoluteScore: Float!
+    rank: Int!
+    isR18: Boolean
+    latestChapterId: String
+    latestChapterTitle: String
+    latestChapterNumber: Int
+    latestChapterCreatedAt: String
+}
+
+type PagedAbsoluteRankings {
+    content: [AbsoluteRanking]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+type RankingOption {
+    value: String!
+    label: String!
+}
+
+# Monthly Growth Ranking types
+type NovelStats {
+    viewCount: Int
+    followCount: Int
+    commentCount: Int
+    rating: Float
+    ratingCount: Int
+    giftPoints: Int
+    chapterCount: Int
+    wordCount: Int
+    compositeScore: Float
+}
+
+type GrowthMetrics {
+    viewGrowthRate: Float
+    followGrowthRate: Float
+    commentGrowthRate: Float
+    ratingGrowthRate: Float
+    giftGrowthRate: Float
+    chapterGrowthRate: Float
+    wordGrowthRate: Float
+    viewGrowthAbsolute: Int
+    followGrowthAbsolute: Int
+    commentGrowthAbsolute: Int
+    giftGrowthAbsolute: Int
+    chapterGrowthAbsolute: Int
+    wordGrowthAbsolute: Int
+}
+
+type NovelGrowthRanking {
+    novelId: ID!
+    title: String!
+    authorName: String
+    coverImage: String
+    description: String
+    type: NovelTypeEnum
+    status: NovelStatusEnum
+    latestChapterId: ID
+    latestChapterTitle: String
+    latestChapterNumber: Int
+    latestChapterCreatedAt: String
+    categories: [CategoryEnum]
+    categoriesWithLabels: [CategoryWithLabel]
+    rank: Int!
+    totalGrowthScore: Float!
+    startMonthStats: NovelStats!
+    endMonthStats: NovelStats!
+    growthMetrics: GrowthMetrics!
+}
+
+# Daily Top Novel types
+type DailyTopNovel {
+    novelId: ID!
+    title: String!
+    slug: String
+    authorName: String
+    authorId: ID
+    coverImage: String
+    description: String
+    categories: [CategoryEnum]
+    categoriesWithLabels: [CategoryWithLabel]
+    type: NovelTypeEnum
+    status: NovelStatusEnum
+    createdAt: String
+    updatedAt: String
+    dailyViews: Int!
+    dailyRevenue: Float!
+    date: String
+    rank: Int!
+    isR18: Boolean
+    latestChapterId: String
+    latestChapterTitle: String
+    latestChapterNumber: Int
+    latestChapterCreatedAt: String
+}
+
+type MonthlyGrowthRankingResponse {
+    rankings: [NovelGrowthRanking!]!
+    totalElements: Int!
+    totalPages: Int!
+    currentPage: Int!
+    pageSize: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    isRealTime: Boolean!
+    calculatedAt: String!
+    fromMonth: String
+    toMonth: String
+}
+
+
+
+type RankingOptions {
+    sortOptions: [String]!
+    categories: [RankingOption]!
+    novelTypes: [RankingOption]!
+}
+
+type CacheOperationResult {
+    success: Boolean!
+    message: String!
+}
+
+
+
+type PagedChapters {
+    content: [Chapter]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type PagedUserPaymentOrders {
+    content: [OrderPay]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+# Paginated Transactions response
+type PagedTransactions {
+    content: [Transaction!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+type PagedPaymentOrders {
+    content: [PaymentOrder]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type Query {
+    # Novel queries
+    novel(id: ID!): Novel
+    myDeletedNovels(page: Int, size: Int): PagedNovels
+    # Unified dynamic filtered novels query - replaces all specific filter endpoints
+    filteredNovelsPaginated(filterType: String!, filterValue: String!, page: Int, size: Int): PagedNovels
+    searchNovels(title: String!): [Novel]
+    recentNovels(page: Int, size: Int, type: NovelTypeEnum): PagedNovels
+    latestNovels(type: NovelTypeEnum): [Novel]
+
+    # Add new query for novels by tag with pagination
+    countChaptersInVolumeByNovelId(novelId: String!): CountChaptersResponse!
+    getFirstChapterByNovelId(novelId: ID!): Chapter
+
+    # Add new query for random completed novels
+    completedNovels: [Novel]
+
+    # Get random novels by category
+    categoryRandomNovels(category: CategoryEnum!, limit: Int): [Novel]
+
+    # Get a single random novel
+    randomNovel: Novel
+
+    # Get random novels with good ratings for recommendations
+    advancedSearch(
+        categories: [String]
+        searchQuery: String
+        status: NovelStatusEnum
+        type: NovelTypeEnum
+        minWordCount: Int
+        maxWordCount: Int
+        page: Int
+        size: Int
+        sortBy: String
+    ): PagedNovels
+
+    # Absolute ranking queries
+    absoluteRankings(
+        categories: [String]
+        type: NovelTypeEnum
+        sortBy: String
+        page: Int
+        size: Int
+    ): PagedAbsoluteRankings
+
+    topNovelsByMetric(
+        metric: String!
+        categories: [String]
+        type: NovelTypeEnum
+        limit: Int
+    ): [AbsoluteRanking]
+
+    # Filter novels by category with advanced filters
+    novelsByCategoryFiltered(
+        category: String
+        status: String
+        type: String
+        createdDateStart: String
+        createdDateEnd: String
+        updatedDateStart: String
+        updatedDateEnd: String
+        minWordCount: Int
+        maxWordCount: Int
+        minFollowCount: Int
+        maxFollowCount: Int
+        minViewCount: Int
+        maxViewCount: Int
+        sortBy: String
+        sortDirection: String
+        page: Int
+        size: Int
+    ): PagedNovels
+
+
+
+    rankingOptions: RankingOptions
+    clearRankingCaches: CacheOperationResult
+
+    # Monthly growth ranking queries
+    monthlyGrowthRankings(
+        month: Int!
+        year: Int!
+        category: CategoryEnum
+        type: NovelTypeEnum
+        sortBy: String
+        page: Int = 0
+        size: Int = 50
+    ): MonthlyGrowthRankingResponse!
+
+    # Get available sort options for growth rankings
+    growthRankingSortOptions: [String!]!
+    
+    # Clear growth ranking caches (admin only)
+    clearGrowthRankingCaches: CacheOperationResult
+
+    # Daily top novel queries
+    dailyTopNovelsToday(limit: Int): [DailyTopNovel!]!
+    dailyTopNovelsByDate(date: String!, limit: Int): [DailyTopNovel!]! # date format: MM-dd (e.g., "01-15")
+    dailyTopNovelsTodayWithCategory(category: CategoryEnum!, limit: Int): [DailyTopNovel!]!
+    dailyTopNovelsTodayWithType(type: NovelTypeEnum!, limit: Int): [DailyTopNovel!]!
+    dailyTopNovelsByDateWithCategory(date: String!, category: CategoryEnum!, limit: Int): [DailyTopNovel!]! # date format: MM-dd
+    dailyTopNovelsByDateWithType(date: String!, type: NovelTypeEnum!, limit: Int): [DailyTopNovel!]! # date format: MM-dd
+
+    novelsRelatedToByCategories(currentNovelId: ID!,  limit: Int): [Novel!]!
+    novelsPaginated(page: Int, size: Int, searchTitle: String, searchAuthor: String, status: String, categories: [String] ): PagedNovels
+    # Volume queries
+    volumes(novelId: ID!): [Volume]
+    volume(id: ID!): Volume
+    volumesByChapterId(chapterId: ID!): Volume
+
+    # Chapter queries
+    chapters(volumeId: ID!): [Chapter]
+    chapter(id: ID!): Chapter
+    chapterAuthorDto(id: ID!): Chapter
+    deletedChapters(volumeId: ID!): [Chapter]
+    # Author/Admin only: list PUBLISHED chapters by volumeId
+    publishedChaptersByVolumeForAuthor(volumeId: ID!): [Chapter]
+    # Author/Admin only: list chapters by status for a novel (ignore volumes)
+    getListChapterByStatus(novelId: ID!, status: ChapterStatusEnum!): [Chapter]
+    recentChapters(page: Int, size: Int, type: NovelTypeEnum): PagedRecentChapters
+    
+    # Chapter count queries
+    countChaptersByStatusForNovel(novelId: ID!): ChapterCountDto
+    countChaptersByStatusForVolume(volumeId: ID!): ChapterCountDto
+    countChaptersByStatusGlobal: ChapterCountDto
+
+    # Comment queries (new page-based pagination)
+    commentsPaginated(targetId: ID!, targetType: String!, page: Int, size: Int, isAll: Boolean): PagedComments
+    repliesPaginated(threadId: ID!, page: Int, size: Int): PagedComments
+
+    # Forum Comment queries
+    forumCommentsPaginated(forumId: ID!, page: Int, size: Int): PagedForumComments
+    forumRepliesPaginated(threadId: ID!, page: Int, size: Int): PagedForumComments
+
+
+
+    # User-Novel Interaction queries
+    followedNovels: [Novel]
+    followedNovelsPaginated(page: Int, size: Int): PagedNovelsInteraction
+    followedNovelsPaginatedByUserId(userId: ID!, page: Int, size: Int): PagedNovelsInteraction
+    myReadingHistory: [UserNovelInteraction]
+    myReadingHistoryPaginated(page: Int, size: Int): PagedReadingHistory
+    myReadingHistoryByNovelId(novelId: ID!): ReadingHistory
+    readingProgress(novelId: ID!): UserNovelInteraction
+    userNovelInteraction(novelId: ID!): UserNovelInteraction
+    readingProgressDetails(novelId: ID!): ReadingProgressDetails
+
+    # Report queries
+    reports(page: Int, size: Int): PagedReports
+    reportsByStatus(status: ReportStatus!, page: Int, size: Int): PagedReports
+    reportsByTargetType(targetType: ReportTargetType, status: ReportStatus, page: Int, size: Int): PagedReports
+    report(id: ID!): Report
+    myReports: [Report]
+    reportStatistics: ReportStatistics
+
+    # Novel Gallery queries
+    novelGallery(novelId: ID!): NovelGallery
+
+    # News queries
+    allNews(page: Int, size: Int): PagedNews
+    publishedNews(page: Int, size: Int): PagedNews
+    newsByType(searchText: String, type: NewsType, page: Int, size: Int, publishedOnly: Boolean): PagedNews
+    newsByNovelId(novelId: ID!, page: Int, size: Int, publishedOnly: Boolean): PagedNews
+    newsByNovelIdAndType(novelId: ID!, type: NewsType!, page: Int, size: Int, publishedOnly: Boolean): PagedNews
+    forumPostsByActivity(page: Int, size: Int, publishedOnly: Boolean, type: NewsType): PagedNews
+    searchNews(title: String, page: Int, size: Int, type: NewsType, sort: String): PagedNews
+    newsByAuthor(authorId: ID!, page: Int, size: Int, type: NewsType, publishedOnly: Boolean): PagedNews
+    myForumPosts(page: Int, size: Int, type: NewsType, publishedOnly: Boolean): PagedNews
+    recentNews: [News!]!
+    news(id: ID!): News
+    forumDetail(id: ID!): News
+    forumDetailPublished(id: ID!): News
+
+    # Author novels queries
+    novelsByAuthor(authorId: ID!, novelId:ID!, limit: Int): [Novel]!
+    novelsByAuthorPaginated(authorId: ID!, page: Int, size: Int): AuthorNovelsResult!
+    myAuthorNovels: [Novel]!
+
+    # User queries
+    user(id: ID!): User
+    usersPaginated(page: Int, size: Int, searchText: String, role: String, banned: Boolean, verified: Boolean): PagedUsers
+
+    # Image queries
+    imagesByOwner(ownerId: ID!, ownerType: String!): [Image]
+    activeImage(ownerId: ID!, ownerType: String!): Image
+
+    # Category queries
+    categories: [Category]
+
+    # Collection queries
+    collections(page: Int, size: Int, searchName: String, status: CollectionStatus): PagedCollections!
+    collection(id: ID!): Collection
+    collectionByName(name: String!): Collection
+    collectionsByNovel(novelId: ID!): [Collection!]!
+    collectionStatistics: CollectionStatistics!
+
+    # Review queries - DEPRECATED: Use new review system queries instead
+
+    # Recent comments queries
+    recentComments: [RecentCommentResponse!]!
+
+    # Admin-only comment edit history queries
+    getCommentEditHistory(commentId: ID!): [String!]!
+    getCommentById(commentId: ID!): Comment
+    getForumCommentById(commentId: ID!): ForumComment
+    getForumCommentEditHistory(commentId: ID!): [String!]!
+
+
+
+
+    # Get dashboard statistics for admin
+    dashboardStats: DashboardStats!
+
+    # Lấy review của user hiện tại cho một novel
+    myNovelReview(novelId: ID!): Review
+
+    # Review system queries
+    novelReviews(novelId: ID!, page: Int, size: Int, sortBy: ReviewSortType, minWordCount: Int, hasSpoiler: Boolean): PaginatedReviews
+    myReview(novelId: ID!): Review
+    recentReviews(page: Int, size: Int): PaginatedReviews
+    novelReviewStatistics(novelId: ID!): ReviewStatistics
+    getReviewById(reviewId: ID!): Review
+    canWriteReview(novelId: ID!): CanWriteReviewResponse
+
+    # Novel statistics
+    getAllCategoriesByNovelCount: [CategoryStatsDTO!]!
+
+
+    # Get paginated chapters grouped by volume for a novel
+    novelChaptersGroupedByVolume(
+        novelId: ID!
+        page: Int = 0
+        size: Int = 20
+        desc: Boolean = false
+    ): PaginatedVolumeGroups!
+
+    # Notification queries
+    myNotifications(page: Int, size: Int, type: NotificationType): NotificationPageInfo
+    myNotificationCounts: NotificationTypeCounts
+    # Get unread notifications count for the current user
+    unreadNotificationsCount: Int
+
+    # Get a specific notification by ID (automatically marks as read)
+    notification(id: ID!): Notification
+
+    # Payment order queries
+    paymentOrders(
+        status: String,
+        username: String,
+        page: Int,
+        size: Int
+    ): PagedPaymentOrders!
+    paymentOrder(id: ID!): PaymentOrder
+    myPaymentOrders(
+        status: String,
+        page: Int,
+        size: Int
+    ): PagedPaymentOrders!
+
+    # Payment order history and audit
+    paymentOrderHistory(
+        orderId: String!,
+        page: Int = 0,
+        size: Int = 10
+    ): PaymentOrderHistoryPage!
+    highRiskOrderChanges(
+        page: Int = 0,
+        size: Int = 10
+    ): PaymentOrderHistoryPage!
+    dailyOrderChangeStats: DailyOrderChangeStats!
+    availableOrderTransitions(orderId: String!): [String!]!
+
+}
+
+type AuthorNovelsResult {
+    authorWorks: [Novel]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+# News types
+enum NewsType {
+    ANNOUNCEMENT
+    NEWS
+    DISCUSSION
+    QA
+    REVIEW
+}
+
+type News {
+    id: ID!
+    title: String!
+    content: String!
+    summary: String
+    coverImage: String
+    slug: String
+    authorId: ID!
+    authorName: String
+    username: String
+    avatarUrl: String
+    novelId: ID
+    createdAt: String
+    updatedAt: String
+    type: NewsType!
+    commentCount: Int
+    viewCount: Int
+    published: Boolean!
+    publishedAt: String
+    lastActivityUserId: ID
+    lastActivityUserName: String
+    lastActivityUserAvatar: String
+    lastActivityAt: String
+    version: Int
+}
+
+type PagedNews {
+    content: [News]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type NewsResult {
+    success: Boolean!
+    message: String
+    news: News
+}
+
+# Report related types
+enum ReportTargetType {
+    NOVEL
+    COMMENT_NOVEL
+    COMMENT_CHAPTER
+    COMMENT_NEWS
+}
+
+enum ReportStatus {
+    PENDING
+    REVIEWING
+    RESOLVED
+    REJECTED
+}
+
+type Report {
+    id: ID!
+    reporterId: ID!
+    reporterName: String
+    targetId: ID!
+    targetType: ReportTargetType!
+    parentEntityId: ID
+    reasonTemplate: String!
+    customMessage: String
+    status: ReportStatus!
+    createdAt: String
+    updatedAt: String
+    resolvedAt: String
+    handledById: ID
+    handledByName: String
+    adminNotes: String
+    novel: Novel
+    comment: Comment
+}
+
+type ReportResult {
+    success: Boolean!
+    message: String
+    report: Report
+}
+
+type ReportStatistics {
+    pendingCount: Int!
+    reviewingCount: Int!
+    resolvedCount: Int!
+    rejectedCount: Int!
+    novelCount: Int!
+    commentNovelCount: Int!
+    commentChapterCount: Int!
+    commentNewsCount: Int!
+}
+
+type PagedReports {
+    content: [Report]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+# Comment related types
+type Comment {
+    id: ID!
+    content: String!
+    userId: ID!
+    userName: String
+    displayName: String
+    userAvatar: String
+    targetId: ID!
+    targetType: String!
+    novelId: ID
+    parentId: ID
+    level: Int
+    threadId: ID
+    replyToId: ID
+    replyToUserName: String
+    likeCount: Int
+    replyCount: Int
+    version: Int
+    createdAt: String
+    updatedAt: String
+    cursor: String
+    replies: [Comment]  # Auto-loaded initial replies (first 2)
+    chapterTitle: String
+    isFromNovelDetail: Boolean
+    hasMoreReplies: Boolean
+
+    # Soft delete fields
+    deleted: Boolean
+    message: String  # Message to display when comment is deleted
+
+    # Edit history
+    editHistory: [String!]  # Array of previous content versions
+    
+    # Comment identification fields
+    isCommentFromAdmin: Boolean
+    isCommentFromAuthor: Boolean
+    isCommentFromMod: Boolean
+    isAuthorBanned: Boolean  # Whether the comment author is banned
+}
+
+type CommentEdge {
+    node: Comment!
+    cursor: String!
+}
+
+type CommentConnection {
+    edges: [CommentEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
+}
+
+type DeleteCommentResult {
+    success: Boolean!
+    message: String
+}
+
+# New page-based pagination types for Comments
+type PagedComments {
+    content: [Comment!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+# Forum Comment related types
+type ForumComment {
+    id: ID!
+    content: String!
+    userId: ID!
+    userName: String
+    displayName: String
+    userAvatar: String
+    targetId: ID!
+    forumId: ID
+    parentId: ID
+    level: Int
+    threadId: ID
+    replyToId: ID
+    replyToUserName: String
+    likeCount: Int
+    replyCount: Int
+    version: Int
+    createdAt: String
+    updatedAt: String
+    cursor: String
+    replies: [ForumComment]
+    hasMoreReplies: Boolean
+
+    # Soft delete fields
+    deleted: Boolean
+    message: String  # Message to display when comment is deleted
+
+    # Edit history
+    editHistory: [String!]  # Array of previous content versions
+    
+    # Comment identification fields
+    isCommentFromAdmin: Boolean
+    isCommentFromAuthor: Boolean
+    isCommentFromMod: Boolean
+    isAuthorBanned: Boolean  # Whether the comment author is banned
+}
+
+type PagedForumComments {
+    content: [ForumComment!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+type DeleteForumCommentResult {
+    success: Boolean!
+    message: String
+}
+
+
+
+# User-Novel Interaction type
+type UserNovelInteraction {
+    id: ID!
+    userId: ID!
+    novelId: ID!
+    hasFollowing: Boolean!
+    inWishlist: Boolean!
+    hasRating: Boolean!
+    rating: Int
+    reviewText: String
+    currentChapterNumber: Int
+    currentChapterId: ID
+    totalChapterReads: Int
+    lastReadAt: String
+    createdAt: String
+    updatedAt: String
+    reviewTimeAt: String
+    # Relationships
+    notify: Boolean!
+    novel: Novel
+    currentChapter: Chapter
+    latestChapter: Chapter
+}
+
+type PagedNovelsInteraction {
+    content: [Novel]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+
+type InteractionResult {
+    success: Boolean!
+    message: String!
+    interaction: UserNovelInteraction
+}
+
+type CreateResult {
+    success: Boolean!
+    message: String
+}
+
+type ReorderChaptersResponse {
+    success: Boolean!
+    message: String!
+}
+
+type CreateNovelResult {
+    success: Boolean!
+    message: String
+    novel: Novel
+}
+
+# Novel, Volume, and Chapter types
+type Novel {
+    id: ID!
+    title: String!
+    slug: String
+    description: String
+    coverImage: String
+    largeBackground: String
+    categories: [String!]
+    categoriesWithLabels: [CategoryWithLabel]
+    tags: [String]
+    viewCount: Int
+    followCount: Int
+    rating: Float
+    ratingCount: Int
+    wishlistCount: Int
+    commentCount: Int
+    wordCount: Int
+    chapterCount: Int
+    giftPoints: Int
+    authorId: ID!
+    authorName: String
+    illustratorName: String
+    status: NovelStatusEnum
+    type: NovelTypeEnum
+    createdAt: String
+    updatedAt: String
+    daysUntilPermanentDeletion: Int
+    isR18: Boolean
+    additionalInfo: String
+    systemType: String
+    deletedBy: String
+    deletedByUserId: String
+
+    # Latest chapter information
+    latestChapterId: String
+    latestChapterTitle: String
+    latestChapterNumber: Int
+    latestChapterCreatedAt: String
+}
+
+type Volume {
+    id: ID!
+    title: String!
+    novelId: ID!
+    coverImage: String
+    volumeNumber: Int
+    chapterCount: Int
+    createdAt: String
+    updatedAt: String
+    description: String
+}
+
+type Chapter {
+    id: ID!
+    title: String!
+    content: String
+    footnotes: [Footnote!]
+    footnotesCount: Int
+    volumeId: ID
+    novelId: ID!
+    chapterNumber: Int
+    wordCount: Int
+    viewCount: Int
+    version: Int
+    status: ChapterStatusEnum
+    createdAt: String
+    updatedAt: String
+    scheduledPublishAt: String
+    publishedAt: String
+    deletedAt: String
+    previousChapterId: ID
+    nextChapterId: ID
+    commentCount: Int
+}
+
+type Footnote {
+    id: ID
+    code: String!
+    content: String!
+    order: Int
+}
+
+# Reading History related types
+type ReadingHistory {
+    id: ID!
+    userId: ID!
+    novelId: ID!
+    volumeId: ID
+    chapterId: ID
+    currentChapterNumber: Int
+    currentChapterId: ID
+    lastReadPosition: Int
+    lastReadAt: String
+    createdAt: String
+    updatedAt: String
+
+    # Additional fields for UI display
+    novel: Novel
+    chapterTitle: String
+    totalChapters: Int
+    readingProgress: Float
+}
+
+type PagedReadingHistory {
+    content: [UserNovelInteraction]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type ReadingHistoryResult {
+    success: Boolean!
+    message: String
+    readingHistory: ReadingHistory
+}
+
+type BasicResult {
+    success: Boolean!
+    message: String
+}
+
+# Notification types
+enum NotificationType {
+    SOCIAL_COMMENT
+    SYSTEM_ANNOUNCEMENT
+    NOVEL_UPDATE
+}
+
+enum EntityType {
+    NOVEL
+    CHAPTER
+    COMMENT
+    NEWS
+    GIFT
+    SYSTEM
+}
+
+type NotificationActor {
+    actorId: ID
+    actorName: String
+    actorAvatar: String
+    actedAt: String
+    actionPreview: String
+}
+
+type Notification {
+    id: ID
+    userId: ID
+    type: NotificationType
+    title: String
+    message: String
+    read: Boolean
+    entityId: ID
+    entityType: EntityType
+    actorId: ID
+    actorName: String
+    actorAvatar: String
+    additionalActors: [NotificationActor]
+    contextData: String
+    createdAt: String
+    updatedAt: String
+    readAt: String
+    isGrouped: Boolean
+    actorCount: Int
+    isGlobal: Boolean
+    link: String
+    novel: Novel
+    chapter: Chapter
+    comment: Comment
+    news: News
+}
+
+type NotificationPageInfo {
+    hasNextPage: Boolean
+    hasPreviousPage: Boolean
+    totalPages: Int
+    totalElements: Int
+    content: [Notification]
+}
+
+# Notification mutations
+extend type Mutation {
+    # Mark a notification as read
+    markNotificationAsRead(notificationId: ID!): NotificationResponse
+
+    # Mark all notifications as read for the current user
+    markAllNotificationsAsRead: NotificationCountResponse
+
+    # Delete a notification
+    deleteNotification(notificationId: ID!): SuccessResponse
+
+    # Create a system notification (admin only)
+    createSystemNotification(title: String!, message: String!, link: String): NotificationResponse
+
+    # Clean up old notifications (admin only)
+    cleanupOldNotifications(daysToKeep: Int): NotificationCountResponse
+
+    # Gift system mutations
+    sendGift(request: GiftRequestInput!): Gift!
+    calculateGiftCost(request: GiftRequestInput!): GiftCostCalculation!
+
+    # Novel Gallery mutations
+    createNovelGallery(novelId: ID!, title: String, description: String): GenericResult
+    createGallerySection(galleryId: ID!, title: String!, description: String): GenericResult
+    editGallerySection(sectionId: ID!, title: String, description: String): GenericResult
+    addImageToSection(sectionId: ID!, imageId: ID!, description: String): GenericResult
+    removeImageFromSection(sectionId: ID!, imageId: ID!): GenericResult
+    updateImageDescription(sectionId: ID!, imageId: ID!, description: String!): GenericResult
+    deleteGalleryImage(imageId: ID!): GenericResult
+
+    # User Balance and Payment mutations
+    updatePrimaryBankInfo(bankName: String!, accountNumber: String!, accountName: String!): PaymentInfo!
+
+    # Payment Order mutations
+    createPaymentOrder(packageId: String!): PaymentOrderResponse!
+
+    # Reward mutations (Admin only)
+    giveRewardToUser(input: GiveRewardInput!): GiveRewardResponse!
+}
+
+enum SuccessResponse {
+    success
+    failure
+}
+
+# Response types for notification operations
+type NotificationResponse {
+    success: Boolean
+    message: String
+    notification: Notification
+}
+
+type NotificationCountResponse {
+    success: Boolean
+    message: String
+    count: Int
+}
+
+# User related types
+type PagedUsers {
+    content: [User]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type User {
+    id: ID!
+    username: String!
+    displayName: String
+    email: String!
+    roles: [String]!
+    banned: Boolean!
+    verified: Boolean!
+    avatarUrl: String
+    backgroundUrl: String
+    bio: String
+    socialLinks: [SocialLink]
+    lastTimeLogin: String
+    authorName: String
+    createdAt: String
+    updatedAt: String
+    lockUntil: String
+    lockReason: String
+}
+
+# Social link type for user profiles
+type SocialLink {
+    platform: String!
+    url: String!
+}
+
+# User role enum
+enum UserRole {
+    USER_ROLE_ENUM
+    ADMIN_ROLE_ENUM
+    MODERATOR_ROLE_ENUM
+    AUTHOR_ROLE_ENUM
+    SUPER_ADMIN_ROLE_ENUM
+}
+
+# User status update result
+type StatusUpdateResult {
+    success: Boolean!
+    message: String
+    error: String
+}
+
+# User role update result
+type RoleUpdateResult {
+    success: Boolean!
+    message: String
+    error: String
+}
+
+# Image related types
+type Image {
+    id: ID!
+    originalFilename: String
+    contentType: String
+    fileSize: Int
+    publicUrl: String!
+    ownerId: String
+    ownerType: String
+    active: Boolean
+    createdAt: String
+    updatedAt: String
+}
+
+type ImageUploadResult {
+    success: Boolean!
+    message: String
+    image: Image
+}
+
+# Category related types
+type Category {
+    id: String!
+    name: String!
+}
+
+type CategoryWithLabel {
+    id: String!
+    label: String!
+}
+
+# Novel categories enum
+enum CategoryEnum {
+    FANTASY
+    SCIENCE_FICTION
+    ROMANCE
+    MYSTERY
+    HORROR
+    HISTORICAL
+    ADVENTURE
+    SCI_FI
+    ISEKAI
+    WUXIA
+    XIANXIA
+    XUANHUAN
+    QIHUAN
+    URBAN
+    SCHOOL_LIFE
+    SLICE_OF_LIFE
+    COMEDY
+    DRAMA
+    ACTION
+    MARTIAL_ARTS
+    BOYS_LOVE
+    GIRLS_LOVE
+}
+
+enum NovelTypeEnum {
+    SERIES
+    STANDALONE
+}
+
+enum SystemTypeEnum {
+    DRAFT
+    PUBLISHED
+    VIP
+    DELETED
+}
+
+# Collection related types
+type Collection {
+    id: ID!
+    name: String!
+    description: String
+    coverImage: String
+    status: CollectionStatus!
+    novelIds: [String!]!
+    createdById: String!
+    createdByName: String!
+    updatedById: String!
+    updatedByName: String!
+    createdAt: String!
+    updatedAt: String!
+    novelCount: Int!
+    totalViews: Int!
+    totalFollows: Int!
+    novels: [Novel!]
+}
+
+enum CollectionStatus {
+    ACTIVE
+    INACTIVE
+    ARCHIVED
+}
+
+type PagedCollections {
+    content: [Collection!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type CollectionResult {
+    success: Boolean!
+    message: String!
+    collection: Collection
+}
+
+type CollectionStatistics {
+    totalCollections: Int!
+    activeCollections: Int!
+    inactiveCollections: Int!
+    archivedCollections: Int!
+}
+
+type SimpleChapter {
+    id: ID!
+    chapterNumber: Int!
+    title: String!
+}
+
+type VolumeWithTop3Chapters {
+    id: ID!
+    title: String!
+    top3Chapters: [SimpleChapter!]!
+}
+
+# Thêm các type cho cursor-based pagination của chapters
+
+type ChapterEdge {
+    node: Chapter!
+    cursor: String!
+}
+
+type ChapterConnection {
+    edges: [ChapterEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+# Add ChapterStatusEnum
+enum ChapterStatusEnum {
+    DRAFT
+    SCHEDULED
+    PUBLISHED
+    DELETED
+}
+
+type ChapterOperationResult {
+    success: Boolean!
+    message: String
+    chapter: Chapter
+}
+
+type ChapterCountDto {
+    novelId: String
+    volumeId: String
+    statusCounts: [ChapterStatusCount!]!
+    totalChapters: Int!
+}
+
+type ChapterStatusCount {
+    status: ChapterStatusEnum!
+    count: Int!
+}
+
+type ReviewEdge {
+    node: Review!
+    cursor: String!
+}
+
+# DEPRECATED: ReviewConnection - Use PaginatedReviews instead
+
+# Rating statistics types
+type RatingCount {
+    rating: Int!
+    count: Int!
+    percentage: Float!
+}
+
+type RatingStatistics {
+    totalRatings: Int!
+    averageRating: Float!
+    ratingCounts: [RatingCount!]!
+}
+
+# Novel status enum
+enum NovelStatusEnum {
+    ONGOING
+    COMPLETED
+    HIATUS
+    CANCELLED
+}
+
+# Add new types for recent chapters
+type RecentChapter {
+    # Chapter information
+    id: ID!
+    title: String!
+    chapterNumber: Int
+    createdAt: String
+    updatedAt: String
+    viewCount: Int
+    chapterCount: Int
+    # Novel information
+    novelId: ID!
+    novelTitle: String!
+    coverImage: String
+    novelDescription: String
+    novelViewCount: Int
+    categories: [CategoryEnum]
+    categoriesWithLabels: [CategoryWithLabel]
+    isR18: Boolean
+    wordCount: Int
+    status: NovelStatusEnum
+
+    # Author information
+    authorId: ID
+    authorName: String
+    
+    # Latest chapter information for the novel
+    latestChapterId: ID
+    latestChapterTitle: String
+    latestChapterNumber: Int
+    latestChapterCreatedAt: String
+}
+
+type PagedRecentChapters {
+    content: [RecentChapter]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+
+
+type ReviewResponse {
+    id: ID!
+    user: ReviewUser!
+    novel: Novel!
+    content: String
+    rating: Int!
+    createdAt: String!
+    reviewTimeAt: String
+}
+
+# DEPRECATED: Old ReviewUser - Use ReviewUser from Review system instead
+
+type RecentCommentResponse {
+    id: ID!
+    content: String!
+    userId: ID!
+    userName: String
+    displayName: String
+    userAvatar: String
+    targetId: ID!
+    targetType: String!
+    createdAt: String!
+    likeCount: Int
+    replyCount: Int
+    novel: Novel!
+    chapter: Chapter
+    chapterTitle: String
+    version: Int
+    deleted: Boolean
+    message: String
+}
+
+# User profile update input
+input UpdateProfileInput {
+    displayName: String
+    bio: String
+    avatarUrl: String
+    backgroundUrl: String
+    socialLinks: [SocialLinkInput]
+}
+
+# Social link input for profile updates
+input SocialLinkInput {
+    platform: String!
+    url: String!
+}
+
+# User profile update result
+type ProfileUpdateResult {
+    success: Boolean!
+    message: String
+    user: User
+}
+
+# Add new types for latest chapters per novel
+type LatestChapter {
+    id: ID!
+    title: String!
+    chapterNumber: Int!
+    createdAt: String!
+    updatedAt: String
+    viewCount: Int
+    wordCount: Int
+    isR18: Boolean
+
+    # Novel related info
+    novelId: ID!
+    novelTitle: String!
+    coverImage: String
+    novelViewCount: Int
+    categories: [String]
+    categoriesWithLabels: [CategoryWithLabel]
+    description: String
+
+    # Author related info
+    authorId: ID
+    authorName: String
+}
+
+type DeleteNovelResult {
+    success: Boolean!
+    message: String
+}
+
+# Stats types
+
+
+type DailyViews {
+    date: String!
+    views: Int!
+}
+
+type PlatformOverview {
+    totalUsers: Int!
+    totalNovels: Int!
+    totalChapters: Int!
+    userGrowth: Float!
+    contentGrowth: Float!
+    totalRevenue: Int!
+    revenueGrowth: Float!
+}
+
+type MonthlyData {
+    month: String!
+    userCount: Int!
+    novelCount: Int!
+    chapterCount: Int!
+}
+
+type GenreDistribution {
+    name: String!
+    percentage: Int!
+}
+
+type UserActivity {
+    hour: String!
+    userCount: Int!
+}
+
+# Daily Stats Type
+type DailyStats {
+    date: String!
+    newUsers: Int!
+    newNovels: Int!
+    newChapters: Int!
+    totalReads: Int!
+    revenue: Int!
+}
+
+# Content Growth Types
+type ContentGrowthItem {
+    period: String!
+    novels: Int!
+    chapters: Int!
+}
+
+type ContentGrowthStats {
+    period: String!
+    data: [ContentGrowthItem!]!
+}
+
+# User Engagement Types
+type WeekdayEngagement {
+    day: String!
+    engagementScore: Int!
+}
+
+type UserEngagementStats {
+    averageReadTimeMinutes: Int!
+    averageSessionsPerUser: Float!
+    averageChaptersPerSession: Float!
+    completionRate: Float!
+    returnRate: Float!
+    weekdayEngagement: [WeekdayEngagement!]!
+}
+
+# Top Performing Novel Type
+type TopPerformingNovel {
+    id: ID!
+    title: String!
+    author: String!
+    reads: Int
+    followers: Int
+    rating: Float
+    ratingCount: Int
+    comments: Int
+    metric: String!
+}
+
+# Revenue Stats Types
+type RevenueItem {
+    name: String!
+    amount: Int!
+    percentage: Float
+    growth: Float
+}
+
+type RevenueStats {
+    dimension: String!
+    data: [RevenueItem!]!
+    totalRevenue: Int!
+}
+
+# User statistics
+type UserStatsOverview {
+    totalChapters: Int!
+    totalNovels: Int!
+    totalComments: Int!
+    totalFollowedNovels: Int!
+    totalReviewedNovels: Int!
+}
+
+# Author statistics
+type AuthorStats {
+    totalViews: Int!
+    totalViewsChange: Int!
+    totalComments: Int!
+    totalFollowers: Int!
+    totalNovels: Int!
+    totalChapters: Int!
+    totalWords: Int!
+}
+
+# Statistics queries
+extend type Query {
+
+    # Author statistics
+    authorStats(authorId: String!): AuthorStats
+
+    # Gift system queries
+    giftTypes: [GiftTypeInfo!]!
+    novelGifts(novelId: ID!, page: Int, size: Int): PaginatedGifts!
+    novelGiftStats(novelId: ID!): NovelGiftStats!
+    userSentGifts(page: Int, size: Int): PaginatedGifts!
+    authorReceivedGifts(page: Int, size: Int): PaginatedGifts!
+    authorGiftStats: [NovelGiftStats!]!
+    topNovelsByGifts(page: Int, size: Int): PaginatedNovelGiftStats!
+    topNovelsByGiftRevenue(page: Int, size: Int): PaginatedNovelGiftStats!
+
+    # User Balance and Payment queries
+    userBalance: UserBalance!
+    userPaymentInfo: PaymentInfo!
+    hasEnoughCoins(requiredCoins: Int!): Boolean!
+    hasEnoughAuthorCoins(requiredCoins: Int!): Boolean!
+    userBalanceStats: UserBalanceStats!
+
+    # User transaction history
+    myTransactions(page: Int, size: Int, type: String): PagedTransactions
+
+    # Novel transaction history (author-only)
+    novelTransactionsByDay(novelId: ID!, year: Int!, dayKey: String!, page: Int, size: Int): PagedTransactions
+
+    # Payment Order queries
+    userPaymentOrders(page: Int, size: Int): PagedUserPaymentOrders!
+    userPaymentOrder(orderId: String!): OrderPay
+
+    # Coin Package queries
+    coinPackages: [CoinPackage!]!
+    coinPackage(packageId: String!): CoinPackage
+    popularCoinPackages: [CoinPackage!]!
+    specialOfferCoinPackages: [CoinPackage!]!
+
+    # Coin system information
+    coinSystemInfo: CoinSystemInfo!
+
+    # User withdrawal queries
+    myWithdrawalRequests(page: Int, size: Int, status: String): WithdrawalRequestPage!
+    myWithdrawalRequest(requestId: ID!): WithdrawalRequestDto
+    myPendingWithdrawals: [WithdrawalRequestDto!]!
+
+    # Admin withdrawal queries
+    withdrawalRequests(page: Int, size: Int, status: String, userId: String): WithdrawalRequestPage!
+    withdrawalRequest(requestId: ID!): WithdrawalRequestDto
+    withdrawalRequestsByStatus(status: String!, page: Int, size: Int): WithdrawalRequestPage!
+    pendingWithdrawalRequests(page: Int, size: Int): WithdrawalRequestPage!
+    withdrawalRequestStats: WithdrawalRequestStatsDto!
+
+    # User Activity Log queries (Admin only)
+    getAllActivityLogs(page: Int, size: Int): PagedUserActivityLogs!
+    getActivityLogsByActionType(actionType: String!, page: Int, size: Int): PagedUserActivityLogs!
+    getActivityLogsByTargetType(targetType: String!, page: Int, size: Int): PagedUserActivityLogs!
+    getActivityLogsByPerformer(performedBy: String!, page: Int, size: Int): PagedUserActivityLogs!
+    getActivityLogsByOriginalOwner(originalOwnerId: String!, page: Int, size: Int): PagedUserActivityLogs!
+    getActivityLogsByTargetId(targetId: String!): [UserActivityLog!]!
+
+    # Featured Novel queries
+    featuredNovels(page: Int, size: Int): PaginatedFeaturedNovels!
+    topFeaturedNovels(limit: Int): [FeaturedNovel!]!
+    featuredNovelAlgorithm: FeaturedNovelAlgorithm!
+
+    # Bookmark queries
+    isChapterBookmarked(chapterId: ID!): Boolean!
+    myBookmarks(page: Int, size: Int): PagedNovelBookmarks!
+
+    # Novel Daily Statistics queries
+    # Lấy thống kê theo tháng cho một novel
+    novelMonthlyStats(novelId: String!, year: Int!, month: Int!): NovelDailyStatsDTO
+    
+    # Lấy thống kê theo năm cho một novel
+    novelYearlyStats(novelId: String!, year: Int!): NovelDailyStatsDTO
+    
+    # Lấy summary tháng cho dashboard (lightweight)
+    novelMonthlySummary(novelId: String!, year: Int!, month: Int!): MonthlySummaryDTO
+    
+    # Lấy thống kê nhiều tháng (cross-year support)
+    novelMultiMonthStats(novelId: String!, years: [Int!]!, months: [Int!]!): MultiMonthDTO
+
+
+}
+
+# Novel Performance Type
+type NovelPerformance {
+    id: ID!
+    name: String!
+    views: Int!
+    likes: Int!
+    chapters: Int!
+    rating: Float
+    commentCount: Int
+}
+
+# Dashboard Stats Type
+type DashboardStats {
+    totalUsers: Int!
+    totalNovels: Int!
+    activeUsers: Int!
+    newUsersToday: Int!
+    newNovelsToday: Int!
+    reportsToReview: Int!
+    uniqueVisitorsToday: Int!
+    pendingWithdrawalRequests: Int!
+}
+
+# View confirmation
+type ViewConfirmationResponse {
+    success: Boolean!
+    message: String
+}
+
+type UpdateFollowNotificationResponse {
+    success: Boolean!
+    message: String!
+    notify: Boolean!
+}
+
+
+
+type CategoryStatsDTO {
+    category: CategoryEnum!
+    label: String!
+    novelCount: Int!
+}
+
+
+
+
+
+type WithdrawalRequest {
+    id: ID!
+    userId: String!
+    authorId: String!
+    coinAmount: Int!
+    amount: Float!
+    status: String!
+    bankName: String!
+    bankAccountNumber: String!
+    bankAccountName: String!
+    transactionId: String
+    rejectReason: String
+    completedAt: String
+    createdAt: String!
+    updatedAt: String!
+    description: String!
+}
+
+# Enhanced withdrawal request DTO with user information
+type WithdrawalRequestDto {
+    id: ID!
+    userId: String!
+    authorId: String!
+    coinAmount: Int!
+    amount: Float!
+    status: String!
+    bankName: String
+    bankAccountNumber: String
+    bankAccountName: String
+    transactionId: String
+    rejectReason: String
+    completedAt: String
+    createdAt: String!
+    updatedAt: String!
+    description: String
+
+    # User information (for admin views)
+    userName: String
+    userEmail: String
+    userAvatar: String
+
+    # Author statistics (for admin views)
+    authorTotalEarned: Float
+    authorTotalWithdrawn: Float
+    authorTotalRequests: Int
+}
+
+# Paginated withdrawal requests response
+type WithdrawalRequestPage {
+    content: [WithdrawalRequestDto!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+# Withdrawal request statistics
+type WithdrawalRequestStatsDto {
+    totalRequests: Int!
+    pendingRequests: Int!
+    approvedRequests: Int!
+    rejectedRequests: Int!
+    completedRequests: Int!
+
+    totalAmountRequested: Float!
+    totalAmountApproved: Float!
+    totalAmountCompleted: Float!
+    totalAmountRejected: Float!
+
+    totalCoinsRequested: Int!
+    totalCoinsApproved: Int!
+    totalCoinsCompleted: Int!
+    totalCoinsRejected: Int!
+
+    averageRequestAmount: Float!
+    averageProcessingTimeHours: Float!
+
+    # Growth metrics (compared to previous period)
+    requestGrowthRate: Float
+    amountGrowthRate: Float
+}
+
+type ChapterGroup {
+    chapter: String!
+    group: [Chapter!]!
+}
+
+type VolumeGroup {
+    vol: String!
+    description: String
+    coverImage: String
+    chapters: [ChapterGroup!]!
+}
+
+type PaginatedVolumeGroups {
+    content: [VolumeGroup!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+# Type for notification counts by type
+type NotificationTypeCounts {
+    total: Int!
+    systemAnnouncement: Int!
+    socialComment: Int!
+    novelUpdate: Int!
+    novelGift: Int!
+}
+
+
+
+
+
+# Review System Types
+
+type Review {
+    id: ID!
+    userId: ID!
+    novelId: ID!
+    overallRating: Float!
+    writingQuality: Int!
+    stabilityOfUpdates: Int!
+    storyDevelopment: Int!
+    characterDesign: Int!
+    worldBackground: Int!
+    reviewText: String!
+    wordCount: Int
+    chaptersReadWhenReviewed: Int
+    totalChaptersAtReview: Int
+    upvotes: Int
+    downvotes: Int
+    currentUserVote: Boolean # null = no vote, true = upvote, false = downvote
+    version: Int
+    hasSpoiler: Boolean
+    createdAt: String!
+    updatedAt: String!
+    user: ReviewUser
+    novel: Novel
+}
+
+type ReviewUser {
+    id: ID!
+    name: String!
+    displayName: String!
+    avatarUrl: String
+    email: String
+}
+
+type ReviewStatistics {
+    totalReviews: Int!
+    averageOverallRating: Float!
+    averageWritingQuality: Float!
+    averageStabilityOfUpdates: Float!
+    averageStoryDevelopment: Float!
+    averageCharacterDesign: Float!
+    averageWorldBackground: Float!
+    totalUpvotes: Int
+    totalDownvotes: Int
+}
+
+type PaginatedReviews {
+    content: [Review!]!
+    totalElements: Int!
+    totalPages: Int!
+    currentPage: Int!
+    size: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type CanWriteReviewResponse {
+    canWrite: Boolean!
+    message: String!
+}
+
+enum ReviewSortType {
+    RECENT
+    POPULAR
+    RELEVANT
+}
+
+type ReviewVoteResult {
+    upvotes: Int!
+    downvotes: Int!
+    currentUserVote: Boolean
+}
+
+
+type ReadingProgressDetails {
+    hasInteraction: Boolean!
+    currentChapterNumber: Int
+    totalChapterReads: Int
+    lastReadAt: String
+    currentChapterId: ID
+    novelTotalChapters: Int
+    readPercentage: Float
+    requiredPercentage: Float
+    canWriteReview: Boolean
+    chaptersNeededForReview: Int
+    novelExists: Boolean
+    message: String
+}
+
+
+type CountChaptersResponse {
+    success: Boolean!
+    message: String
+    data: [VolumeChapterCount!]
+}
+
+type VolumeChapterCount {
+    volumeId: String!
+    volumeTitle: String!
+    chapterCount: Int!
+}
+
+# Gift System Types
+
+enum GiftTypeEnum {
+    PEN
+    TEA
+    LAMP
+    SCROLL
+    CROWN
+}
+
+type Gift {
+    id: ID!
+    senderId: String!
+    senderName: String
+    senderAvatar: String
+    novelId: String!
+    novelTitle: String
+    authorId: String!
+    authorName: String
+    giftType: GiftTypeEnum!
+    totalCoinCost: Int!
+    authorCoinsReceived: Int # Số coin tác giả thực tế nhận được (chỉ hiển thị cho tác giả)
+    message: String
+    # anonymous is deprecated; always show sender name
+    createdAt: String!
+    updatedAt: String!
+    giftDisplayName: String
+    giftEmoji: String
+    giftDescription: String
+    displaySenderName: String
+}
+
+type NovelGiftStats {
+    id: ID!
+    novelId: String!
+    novelTitle: String
+    authorId: String!
+    authorName: String
+    totalGifts: Int!
+    totalCoinsFromGifts: Int! # Tổng coin user đã trả
+    totalAuthorCoinsReceived: Int! # Tổng coin tác giả thực tế nhận được
+    totalPlatformFee: Int! # Tổng phí nền tảng
+    platformFeeRate: Float! # Tỷ lệ phí nền tảng (%)
+    authorEarningsVnd: Float! # Thu nhập tác giả (VND)
+    giftTypeCounts: String # JSON string of Map<GiftTypeEnum, Long>
+    uniqueGifters: Int!
+    lastGiftAt: String
+    mostPopularGiftType: GiftTypeEnum
+    mostPopularGiftDisplayName: String
+    averageGiftValue: Float
+    createdAt: String!
+    updatedAt: String!
+}
+
+type GiftTypeInfo {
+    type: GiftTypeEnum!
+    name: String!
+    emoji: String!
+    coinCost: Int!
+    description: String!
+    displayName: String!
+    level: Int!
+}
+
+type PaginatedGifts {
+    content: [Gift!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type PaginatedNovelGiftStats {
+    content: [NovelGiftStats!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+input GiftRequestInput {
+    novelId: String!
+    giftType: GiftTypeEnum!
+    message: String
+}
+
+type GiftCostCalculation {
+    totalCost: Int!
+    giftType: GiftTypeEnum!
+    unitCost: Int!
+}
+
+# User Balance and Payment System Types
+
+type UserBalance {
+    id: ID!
+    userId: String!
+    coinBalance: Int!
+    authorCoinBalance: Int!
+    totalDeposited: Float!
+    totalCoinsSpent: Int!
+    totalCoinsEarned: Int!
+    totalWithdrawn: Float!
+    createdAt: String!
+    updatedAt: String!
+    lastTransactionAt: String
+    userName: String
+    totalAssets: Float # Giá trị coin tác giả có thể rút ra (100% - không có phí rút tiền)
+}
+
+type PaymentInfo {
+    id: ID!
+    userId: String!
+    primaryBankName: String
+    primaryBankAccountNumber: String
+    primaryBankAccountName: String
+    createdAt: String!
+    updatedAt: String!
+    userName: String
+    hasBankInfo: Boolean
+    maskedAccountNumber: String
+}
+
+type UserBalanceStats {
+    coinBalance: Int!
+    authorCoinBalance: Int!
+    totalAssets: Float! # Giá trị coin tác giả có thể rút ra (sau phí 15%)
+    totalDeposited: Float!
+    totalCoinsSpent: Int!
+    totalCoinsEarned: Int!
+    totalWithdrawn: Float!
+}
+
+input PaymentMethodInput {
+    type: String!
+    name: String!
+    bankName: String
+    accountNumber: String
+    accountName: String
+}
+
+# Payment Order Types
+
+type OrderPay {
+    id: ID!
+    userId: String!
+    orderId: String!
+    transactionId: String
+    amount: Float!
+    coinAmount: Int!
+    status: String!
+    paymentMethod: String!
+    qrCodeUrl: String
+    bankAccountNumber: String
+    bankAccountName: String
+    bankName: String
+    transferContent: String
+    webhookData: String
+    createdAt: String!
+    updatedAt: String!
+    paidAt: String
+    expiredAt: String
+    description: String
+    errorMessage: String
+}
+
+type PaymentOrderResponse {
+    success: Boolean!
+    message: String!
+    order: OrderPay
+}
+
+
+
+# Coin System Information
+type CoinSystemInfo {
+    coinToVndRate: Float!
+    transactionFeeRate: Float!
+    withdrawalFeeRate: Float!
+    description: String!
+}
+
+# Reward System Types
+enum CoinType {
+    USER_COIN
+    AUTHOR_COIN
+}
+
+input GiveRewardInput {
+    userId: ID!
+    coinAmount: Int!
+    coinType: CoinType!
+    reason: String!
+}
+
+type GiveRewardResponse {
+    success: Boolean!
+    message: String!
+    transaction: Transaction
+}
+
+# Transaction types for user history
+enum TransactionType {
+    CHAPTER_UNLOCK
+    COMBO_UNLOCK
+    NOVEL_GIFT
+    SYSTEM_REWARD
+}
+
+type Transaction {
+    id: ID!
+    userId: String!
+    novelId: String
+    chapterId: String
+    type: TransactionType!
+    coinAmount: Int!
+    amount: Float!
+    authorCoinAmount: Int
+    authorAmount: Float
+    description: String
+    status: String
+    createdAt: String
+    updatedAt: String
+    completedAt: String
+    errorMessage: String
+
+    # Gift enrichment
+    relatedGiftId: String
+    giftMessage: String
+    giftTotalCoinCost: Int
+    giftAuthorCoinsReceived: Int
+    giftType: String
+    giftDisplayName: String
+    giftEmoji: String
+    senderId: String
+    senderName: String
+    senderAvatar: String
+    novelTitle: String
+    authorName: String
+}
+
+# Coin Package System Types
+
+type CoinPackage {
+    id: ID!
+    name: String!
+    description: String
+    price: Float!
+    baseCoinAmount: Int!
+    bonusCoinAmount: Int!
+    totalCoinAmount: Int!
+    bonusPercentage: Float!
+    displayOrder: Int!
+    isPopular: Boolean!
+    isSpecialOffer: Boolean!
+
+    # Computed fields for display
+    bonusDisplayText: String!
+    priceDisplayText: String!
+    coinDisplayText: String!
+    displayTag: String
+    tagColor: String
+}
+
+# Payment Order types
+type PaymentOrder {
+    id: ID!
+    orderId: String!
+    userId: String!
+    packageId: String!
+    packageName: String!
+    amount: Float!
+    coinAmount: Int!
+    status: String!
+    qrCodeUrl: String
+    transferContent: String
+    errorMessage: String
+    createdAt: String!
+    updatedAt: String!
+    expiredAt: String
+    completedAt: String
+    paidAt: String
+
+    # Related data
+    user: User
+    coinPackage: CoinPackage
+}
+
+
+
+type PaymentOrderStatusResult {
+    success: Boolean!
+    message: String!
+    order: PaymentOrder
+    warnings: [String!]
+    availableTransitions: [String!]
+}
+
+# Payment Order History Types
+type PaymentOrderHistory {
+    id: ID!
+    orderId: String!
+    fromStatus: String!
+    toStatus: String!
+    reason: String
+    adminUserId: String
+    adminUsername: String
+    changedAt: String!
+    changeType: String!
+    isHighRisk: Boolean!
+    requiresApproval: Boolean!
+    approvalStatus: String
+    approvedByUserId: String
+    approvedByUsername: String
+    approvedAt: String
+    metadata: String # JSON string
+
+    # Helper/Display fields
+    fromStatusDisplayName: String
+    toStatusDisplayName: String
+    changeTypeDisplayName: String
+    riskLevel: String
+    hoursAgo: Int
+}
+
+type PaymentOrderHistoryPage {
+    content: [PaymentOrderHistory!]!
+    totalElements: Int!
+    totalPages: Int!
+    size: Int!
+    number: Int!
+    first: Boolean!
+    last: Boolean!
+    numberOfElements: Int!
+    empty: Boolean!
+}
+
+type DailyOrderChangeStats {
+    date: String!
+    highRiskChangesToday: Int!
+    reversalsToday: Int!
+}
+
+# Novel Gallery Types
+type NovelGallery {
+    id: ID!
+    novelId: ID!
+    authorId: ID!
+    title: String!
+    description: String
+    isActive: Boolean!
+    createdAt: String!
+    updatedAt: String!
+    sections: [GallerySection!]
+}
+
+type GalleryImage {
+    imageId: String!
+    description: String
+    image: Image
+}
+
+type GallerySection {
+    id: ID!
+    galleryId: ID!
+    novelId: ID!
+    title: String!
+    description: String
+    displayOrder: Int!
+    galleryImages: [GalleryImage!]
+    isActive: Boolean!
+    createdAt: String!
+    updatedAt: String!
+}
+
+# Generic result type for gallery operations
+type GenericResult {
+    success: Boolean!
+    message: String!
+    gallery: NovelGallery
+    section: GallerySection
+}
+
+# User Activity Log Types
+type UserActivityLog {
+    id: ID!
+    performedBy: String!
+    performedByUsername: String
+    createdAt: String!
+    message: String!
+    actionType: String!
+    targetType: String!
+    targetId: String!
+    originalOwnerId: String
+    originalOwnerUsername: String
+}
+
+type PagedUserActivityLogs {
+    content: [UserActivityLog!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+# Featured Novel Types
+type FeaturedNovel {
+    id: ID!
+    title: String!
+    slug: String
+    description: String
+    coverImage: String
+    authorName: String
+    illustratorName: String
+    
+    # Basic metrics
+    viewCount: Int
+    followCount: Int
+    commentCount: Int
+    rating: Float
+    ratingCount: Int
+    chapterCount: Int
+    giftPoints: Int
+    
+    # Featured scores
+    featuredScore: Float!
+    growthScore: Float!
+    engagementScore: Float!
+    popularityScore: Float!
+    
+    # Weekly growth (7 days)
+    weeklyViewGrowth: Int
+    weeklyFollowGrowth: Int
+    weeklyCommentGrowth: Int
+    weeklyGiftGrowth: Int
+    
+    # Monthly growth (30 days)
+    monthlyViewGrowth: Int
+    monthlyFollowGrowth: Int
+    monthlyCommentGrowth: Int
+    monthlyGiftGrowth: Int
+    
+    # Time information
+    createdAt: String
+    updatedAt: String
+    lastChapterAt: String
+    
+    # Latest chapter information
+    latestChapterId: String
+    latestChapterTitle: String
+    latestChapterNumber: Int
+    latestChapterCreatedAt: String
+    
+    # Gift statistics
+    totalGifts: Int
+    uniqueGifters: Int
+    mostPopularGiftType: String
+    
+    # Status and type
+    status: String
+    type: String
+    isR18: Boolean
+    
+    # Categories
+    categories: [String]
+    categoriesWithLabels: [CategoryWithLabel]
+}
+
+type PaginatedFeaturedNovels {
+    content: [FeaturedNovel!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+type FeaturedNovelAlgorithm {
+    weights: FeaturedNovelWeights!
+    criteria: FeaturedNovelCriteria!
+    timeframes: FeaturedNovelTimeframes!
+    description: String!
+}
+
+type FeaturedNovelWeights {
+    viewWeight: Float!
+    followWeight: Float!
+    commentWeight: Float!
+    giftWeight: Float!
+    growthWeight: Float!
+    absoluteWeight: Float!
+}
+
+type FeaturedNovelCriteria {
+    popularityScore: String!
+    growthScore: String!
+    engagementScore: String!
+    timeBonus: String!
+}
+
+type FeaturedNovelTimeframes {
+    weeklyDays: Int!
+    monthlyDays: Int!
+    cacheUpdateInterval: String!
+}
+
+# Bookmark System Types
+
+type Bookmark {
+    id: ID!
+    userId: ID!
+    novelId: ID!
+    chapterId: ID!
+    chapterTitle: String
+    chapterNumber: Int
+    createdAt: String!
+    updatedAt: String!
+}
+
+type BookmarkWithChapter {
+    id: ID!
+    userId: ID!
+    novelId: ID!
+    chapterId: ID!
+    chapterTitle: String
+    chapterNumber: Int
+    createdAt: String!
+    updatedAt: String!
+}
+
+type NovelBookmarks {
+    novelId: ID!
+    novelTitle: String!
+    coverImage: String
+    authorName: String
+    bookmarks: [BookmarkWithChapter!]!
+    bookmarkCount: Int!
+}
+
+type PagedNovelBookmarks {
+    content: [NovelBookmarks!]!
+    totalPages: Int!
+    totalElements: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+    currentPage: Int!
+    pageSize: Int!
+}
+
+type BookmarkResult {
+    success: Boolean!
+    message: String!
+}
+
+# Novel Daily Statistics Types
+
+# Main DTO for Novel Daily Stats
+type NovelDailyStatsDTO {
+    novelId: String!
+    novelTitle: String!
+    year: Int!
+    month: Int! # 0 = yearly data
+    
+    # Daily data list
+    dailyData: [DailyDataDTO!]!
+    
+    # Summary statistics
+    summary: SummaryDTO!
+}
+
+# Daily data entry
+type DailyDataDTO {
+    date: String! # "01-15" format
+    views: Int!
+    revenue: Float!
+    timestamp: String! # ISO datetime
+}
+
+# Summary statistics
+type SummaryDTO {
+    totalViews: Int!
+    totalRevenue: Float!
+    dayCount: Int!
+    averageViews: Float!
+    averageRevenue: Float!
+}
+
+# Monthly summary for dashboard
+type MonthlySummaryDTO {
+    totalViews: Int!
+    totalRevenue: Float!
+    dayCount: Int!
+    year: Int!
+    month: Int!
+    averageViews: Float!
+    averageRevenue: Float!
+}
+
+# Multi-month stats response
+type MultiMonthDTO {
+    novelId: String!
+    novelTitle: String!
+    monthlyData: [MonthlyDataEntry!]!
+}
+
+# Month data entry for multi-month stats
+type MonthlyDataEntry {
+    monthKey: String! # "2024-01"
+    monthSummary: MonthSummaryDTO!
+}
+
+# Month summary for multi-month stats
+type MonthSummaryDTO {
+    year: Int!
+    month: Int!
+    totalViews: Int!
+    totalRevenue: Float!
+    dayCount: Int!
+    averageViews: Float!
+    averageRevenue: Float!
+    dailyBreakdown: [DailyDataDTO!]
+}
+
+# Comment Rate Limiting Types
+type CommentLockInfo {
+    isLocked: Boolean!
+    lockUntil: String
+    lockReason: String
+    remainingMinutes: Int
+}
+
+type UnlockCommentResult {
+    success: Boolean!
+    message: String
+}
+
+# Comment Rate Limiting Mutations
+extend type Mutation {
+    # Admin: Unlock user from commenting
+    unlockUserComments(userId: ID!, reason: String): UnlockCommentResult
+    
+    # Get comment lock info for a user
+    getCommentLockInfo(userId: ID!): CommentLockInfo
+}

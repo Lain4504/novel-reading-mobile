@@ -1,0 +1,29 @@
+query GetChapter($id: ID!) {
+  chapter(id: $id) {
+    id
+    title
+    content
+    footnotes {
+      id
+      code
+      content
+      order
+    }
+    footnotesCount
+    volumeId
+    novelId
+    chapterNumber
+    wordCount
+    viewCount
+    version
+    status
+    createdAt
+    updatedAt
+    scheduledPublishAt
+    publishedAt
+    previousChapterId
+    nextChapterId
+    commentCount
+  }
+}
+

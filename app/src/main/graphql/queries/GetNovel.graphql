@@ -1,0 +1,39 @@
+query GetNovel($id: ID!) {
+  novel(id: $id) {
+    id
+    title
+    slug
+    description
+    coverImage
+    largeBackground
+    categories
+    categoriesWithLabels {
+      id
+      label
+    }
+    tags
+    viewCount
+    followCount
+    rating
+    ratingCount
+    wishlistCount
+    commentCount
+    wordCount
+    chapterCount
+    giftPoints
+    authorId
+    authorName
+    illustratorName
+    status
+    type
+    createdAt
+    updatedAt
+    isR18
+    additionalInfo
+    latestChapterId
+    latestChapterTitle
+    latestChapterNumber
+    latestChapterCreatedAt
+  }
+}
+

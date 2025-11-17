@@ -1,0 +1,13 @@
+package com.miraimagiclab.novelreadingapp.data.local.room.entity
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "user_data")
+data class UserDataEntity(
+    @PrimaryKey
+    val path: String,
+    val group: String,
+    val type: String,
+    val value: String
+)

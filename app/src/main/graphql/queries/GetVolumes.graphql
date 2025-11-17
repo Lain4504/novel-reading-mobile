@@ -1,0 +1,14 @@
+query GetVolumes($novelId: ID!) {
+  volumes(novelId: $novelId) {
+    id
+    title
+    novelId
+    coverImage
+    volumeNumber
+    chapterCount
+    createdAt
+    updatedAt
+    description
+  }
+}
+

@@ -1,0 +1,332 @@
+package com.miraimagiclab.novelreadingapp.data.bookshelf
+
+import android.net.Uri
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.miraimagiclab.novelreadingapp.data.json.AppUserDataContent
+import com.miraimagiclab.novelreadingapp.data.json.AppUserDataJsonBuilder
+import com.miraimagiclab.novelreadingapp.data.json.toJsonData
+import com.miraimagiclab.novelreadingapp.data.local.room.converter.ListConverter
+import com.miraimagiclab.novelreadingapp.data.local.room.converter.LocalDateTimeConverter
+import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookshelfDao
+import com.miraimagiclab.novelreadingapp.data.local.room.entity.BookshelfEntity
+import com.miraimagiclab.novelreadingapp.data.web.WebBookDataSourceProvider
+import com.miraimagiclab.novelreadingapp.data.work.CacheBookWork
+import com.miraimagiclab.novelreadingapp.data.work.SaveBookshelfWork
+import io.lain4504.novelreadingapp.api.book.BookInformation
+import io.lain4504.novelreadingapp.api.bookshelf.Bookshelf
+import io.lain4504.novelreadingapp.api.bookshelf.BookshelfBookMetadata
+import io.lain4504.novelreadingapp.api.bookshelf.BookshelfRepositoryApi
+import io.lain4504.novelreadingapp.api.bookshelf.BookshelfSortType
+import io.lain4504.novelreadingapp.api.bookshelf.MutableBookshelf
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import java.time.Instant
+import java.time.LocalDateTime
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.collections.map
+import kotlin.collections.plus
+
+@Singleton
+class BookshelfRepository @Inject constructor(
+    private val bookshelfDao: BookshelfDao,
+    private val workManager: WorkManager,
+    private val webBookDataSourceProvider: WebBookDataSourceProvider
+): BookshelfRepositoryApi {
+    override fun getAllBookshelfIds(): List<Int> = bookshelfDao.getAllBookshelfIds()
+
+    override fun getAllBookshelvesFlow(): Flow<List<MutableBookshelf>> = bookshelfDao.getAllBookshelfFlow().map { bookshelfEntities ->
+        bookshelfEntities.map { bookshelfEntity ->
+            MutableBookshelf().apply {
+                this.id =   bookshelfEntity.id
+                this.name = bookshelfEntity.name
+                this.sortType = BookshelfSortType.entries.first { it.key == bookshelfEntity.sortType }
+                this.autoCache = bookshelfEntity.autoCache
+                this.systemUpdateReminder = bookshelfEntity.systemUpdateReminder
+                this.allBookIds = bookshelfEntity.allBookIds
+                this.pinnedBookIds = bookshelfEntity.pinnedBookIds
+                this.updatedBookIds = bookshelfEntity.updatedBookIds
+            }
+        }
+    }
+
+    override fun getBookshelf(id: Int): MutableBookshelf? = MutableBookshelf().apply {
+        val bookshelfEntity = bookshelfDao.getBookshelf(id) ?: return null
+        this.id = id
+        this.name = bookshelfEntity.name
+        this.sortType = BookshelfSortType.entries.first { it.key == bookshelfEntity.sortType }
+        this.autoCache = bookshelfEntity.autoCache
+        this.systemUpdateReminder = bookshelfEntity.systemUpdateReminder
+        this.allBookIds = bookshelfEntity.allBookIds
+        this.pinnedBookIds = bookshelfEntity.pinnedBookIds
+        this.updatedBookIds = bookshelfEntity.updatedBookIds
+    }
+
+    override fun getBookshelfFlow(id: Int): Flow<MutableBookshelf?> = bookshelfDao
+        .getBookShelfFlow(id)
+        .map { bookshelfEntity ->
+            bookshelfEntity ?: return@map null
+            MutableBookshelf().apply {
+                this.id = id
+                this.name = bookshelfEntity.name
+                this.sortType = BookshelfSortType.entries.first { it.key == bookshelfEntity.sortType }
+                this.autoCache = bookshelfEntity.autoCache
+                this.systemUpdateReminder = bookshelfEntity.systemUpdateReminder
+                this.allBookIds = bookshelfEntity.allBookIds
+                this.pinnedBookIds = bookshelfEntity.pinnedBookIds
+                this.updatedBookIds = bookshelfEntity.updatedBookIds
+            }
+        }
+
+    override fun createBookShelf(
+        id: Int,
+        name: String,
+        sortType: BookshelfSortType,
+        autoCache: Boolean,
+        systemUpdateReminder: Boolean,
+    ): Int {
+        bookshelfDao.createBookshelf(
+            BookshelfEntity(
+                id = id,
+                name = name,
+                sortType = sortType.key,
+                autoCache = autoCache,
+                systemUpdateReminder = systemUpdateReminder,
+                allBookIds = emptyList(),
+                pinnedBookIds = emptyList(),
+                updatedBookIds = emptyList(),
+            )
+        )
+        return Instant.now().epochSecond.hashCode()
+    }
+
+    override fun deleteBookshelf(bookshelfId: Int) {
+        bookshelfDao.getBookshelf(bookshelfId)?.let { bookshelf ->
+            bookshelf.allBookIds.forEach { bookId ->
+                clearBookshelfIdFromBookshelfBookMetadata(bookshelfId, bookId)
+            }
+        }
+        bookshelfDao.deleteBookshelf(bookshelfId)
+    }
+
+    override fun addBookIntoBookShelf(bookshelfId: Int, bookInformation: BookInformation) {
+        val bookshelf = bookshelfDao.getBookshelf(bookshelfId) ?: return
+        bookshelfDao.addBookshelfMetadata(
+            id = bookInformation.id,
+            lastUpdate = bookInformation.lastUpdated,
+            bookshelfIds = listOf(bookshelfId)
+        )
+        if (bookshelf.autoCache && bookshelf.allBookIds.contains(bookInformation.id)) {
+            val workRequest = OneTimeWorkRequestBuilder<CacheBookWork>()
+                .setInputData(
+                    workDataOf(
+                    "bookId" to bookInformation.id
+                )
+                )
+                .build()
+            workManager.enqueueUniqueWork(
+                bookInformation.id,
+                ExistingWorkPolicy.KEEP,
+                workRequest
+            )
+        }
+        (bookshelf.allBookIds + listOf(bookInformation.id)).let {
+            bookshelfDao.updateBookshelfEntity(
+                bookshelf.copy(
+                    allBookIds = it.distinct(),
+                )
+            )
+        }
+    }
+
+    override fun addUpdatedBooksIntoBookShelf(bookShelfId: Int, bookId: String) {
+        val bookshelf = bookshelfDao.getBookshelf(bookShelfId) ?: return
+        (bookshelf.updatedBookIds + listOf(bookId)).let {
+            bookshelfDao.updateBookshelfEntity(
+                bookshelf.copy(
+                    updatedBookIds = it.distinct(),
+                )
+            )
+        }
+    }
+
+    override fun updateBookshelf(bookshelfId: Int, updater: (MutableBookshelf) -> Bookshelf) {
+        this.getBookshelf(bookshelfId)?.let { oldBookshelf ->
+            updater(oldBookshelf).let { newBookshelf ->
+                bookshelfDao.updateBookshelfEntity(
+                    BookshelfEntity(
+                        bookshelfId,
+                        newBookshelf.name,
+                        newBookshelf.sortType.key,
+                        newBookshelf.autoCache,
+                        newBookshelf.systemUpdateReminder,
+                        newBookshelf.allBookIds,
+                        newBookshelf.pinnedBookIds,
+                        newBookshelf.updatedBookIds,
+                    )
+                )
+            }
+        }
+    }
+
+    override fun getAllBookshelfBooksMetadata(): List<BookshelfBookMetadata> = bookshelfDao
+        .getAllBookshelfBookEntities()
+        .map {
+            BookshelfBookMetadata(
+                it.id,
+                it.lastUpdate,
+                it.bookShelfIds
+            )
+        }
+
+    override fun getAllBookshelfBookIdsFlow(): Flow<List<String>> = bookshelfDao.getAllBookshelfBookIdsFlow()
+
+    override fun getBookshelfBookMetadata(id: String): BookshelfBookMetadata? = bookshelfDao.getBookshelfBookMetadata(id)
+
+    override fun getBookshelfBookMetadataFlow(id: String): Flow<BookshelfBookMetadata?> = bookshelfDao.getBookshelfBookMetadataEntityFlow(id).map {
+        it ?: return@map null
+        BookshelfBookMetadata(
+            it.id,
+            it.lastUpdate,
+            it.bookShelfIds
+        )
+    }
+
+    private fun clearBookshelfIdFromBookshelfBookMetadata(bookshelfId: Int, bookId: String) {
+        bookshelfDao.getBookshelfBookMetadata(bookId)?.let { bookshelfBookMetadata ->
+            bookshelfBookMetadata.bookShelfIds
+                .toMutableList()
+                .apply { removeAll { bookshelfId == it } }
+                .let { bookshelfIds ->
+                    if (bookshelfIds.isEmpty()) bookshelfDao.deleteBookshelfBookMetadata(bookId)
+                    else LocalDateTimeConverter.dateToString(bookshelfBookMetadata.lastUpdate)?.let {
+                        bookshelfDao.updateBookshelfBookMetaDataEntity(
+                            bookId,
+                            it,
+                            bookshelfIds.joinToString(",")
+                        )
+                    }
+                }
+        }
+    }
+
+    override fun deleteBookFromBookshelf(bookshelfId: Int, bookId: String) {
+        clearBookshelfIdFromBookshelfBookMetadata(bookshelfId, bookId)
+        updateBookshelf(bookshelfId) { oldBookshelf ->
+            oldBookshelf.apply {
+                this.allBookIds = allBookIds.toMutableList().apply { removeAll { it == bookId } }
+                this.pinnedBookIds = pinnedBookIds.toMutableList().apply { removeAll { it == bookId } }
+                this.updatedBookIds = updatedBookIds.toMutableList().apply { removeAll { it == bookId } }
+            }
+        }
+    }
+
+    override fun deleteBookFromBookshelfUpdatedBookIds(bookshelfId: Int, bookId: String) {
+        updateBookshelf(bookshelfId) { oldBookshelf ->
+            oldBookshelf.apply {
+                this.updatedBookIds = updatedBookIds.toMutableList().apply { removeAll { it == bookId } }
+            }
+        }
+    }
+
+    override fun updateBookshelfBookMetadataLastUpdateTime(bookId: String, time: LocalDateTime) {
+        bookshelfDao.updateBookshelfBookMetaDataEntity(
+            bookId,
+            LocalDateTimeConverter.dateToString(time) ?: "",
+            ListConverter.intListToString(bookshelfDao.getBookshelfBookMetadata(bookId)?.bookShelfIds!!)
+        )
+    }
+
+    fun exportAllBookshelvesJson(): String = AppUserDataJsonBuilder()
+        .data {
+            webDataSourceId(webBookDataSourceProvider.value.id)
+            getAllBookshelfIds()
+                .mapNotNull { (getBookshelf(it)) }
+                .map { (it as Bookshelf).toJsonData() }
+                .forEach (::bookshelf)
+            getAllBookshelfBooksMetadata()
+                .map(BookshelfBookMetadata::toJsonData)
+                .forEach(::bookshelfBookMetaData)
+        }
+        .build()
+        .toJson()
+
+    fun exportBookshelfToJson(id: Int): String = AppUserDataJsonBuilder()
+        .data {
+            webDataSourceId(webBookDataSourceProvider.value.id)
+            getBookshelf(id)?.toJsonData()?.let(::bookshelf)
+            getBookshelf(id)?.allBookIds
+                ?.mapNotNull(::getBookshelfBookMetadata)
+                ?.map {
+                    BookshelfBookMetadata(
+                        id = it.id,
+                        lastUpdate = it.lastUpdate,
+                        bookShelfIds = listOf(id)
+                    )
+                }
+                ?.map(BookshelfBookMetadata::toJsonData)
+                ?.forEach(::bookshelfBookMetaData)
+        }
+        .build()
+        .toJson()
+
+    fun saveBookshelfJsonData(bookshelfId: Int, uri: Uri): OneTimeWorkRequest {
+        val workRequest = OneTimeWorkRequestBuilder<SaveBookshelfWork>()
+            .setInputData(workDataOf(
+                "bookshelfId" to bookshelfId,
+                "uri" to uri.toString(),
+            ))
+            .build()
+        workManager.enqueueUniqueWork(
+            uri.toString(),
+            ExistingWorkPolicy.KEEP,
+            workRequest
+        )
+        return workRequest
+    }
+
+    fun importBookshelf(data: AppUserDataContent): Boolean {
+        val bookshelfDataList = data.bookshelf ?: return false
+        val bookshelfBookMetadataList = data.bookShelfBookMetadata ?: return false
+        bookshelfDataList.forEach { bookshelf ->
+            val oldBookshelf = bookshelfDao.getBookshelf(bookshelf.id)
+            if (oldBookshelf == null)
+                bookshelfDao.createBookshelf(
+                    BookshelfEntity(
+                        id = bookshelf.id,
+                        name = bookshelf.name,
+                        sortType = bookshelf.sortType.key,
+                        autoCache = bookshelf.autoCache,
+                        systemUpdateReminder = bookshelf.systemUpdateReminder,
+                        allBookIds = bookshelf.allBookIds,
+                        pinnedBookIds = bookshelf.pinnedBookIds,
+                        updatedBookIds = bookshelf.updatedBookIds,
+                    )
+                )
+            else {
+                bookshelfDao.updateBookshelfEntity(
+                    BookshelfEntity(
+                        id = bookshelf.id,
+                        name = bookshelf.name,
+                        sortType = bookshelf.sortType.key,
+                        autoCache = bookshelf.autoCache,
+                        systemUpdateReminder = bookshelf.systemUpdateReminder,
+                        allBookIds = (bookshelf.allBookIds + oldBookshelf.allBookIds).distinct(),
+                        pinnedBookIds = (bookshelf.pinnedBookIds + oldBookshelf.pinnedBookIds).distinct(),
+                        updatedBookIds = (bookshelf.updatedBookIds + oldBookshelf.updatedBookIds).distinct(),
+                    )
+                )
+            }
+        }
+        bookshelfBookMetadataList.forEach {
+            bookshelfDao.addBookshelfMetadata(it.id, it.lastUpdate, it.bookShelfIds)
+        }
+        return true
+    }
+
+    override fun clear() = bookshelfDao.clear()
+}

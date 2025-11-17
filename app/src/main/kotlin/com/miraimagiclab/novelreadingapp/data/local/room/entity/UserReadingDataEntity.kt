@@ -1,0 +1,30 @@
+package com.miraimagiclab.novelreadingapp.data.local.room.entity
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.miraimagiclab.novelreadingapp.data.local.room.converter.ListConverter
+import com.miraimagiclab.novelreadingapp.data.local.room.converter.LocalDateTimeConverter
+import java.time.LocalDateTime
+
+@TypeConverters(ListConverter::class, LocalDateTimeConverter::class)
+@Entity(tableName = "user_reading_data")
+data class UserReadingDataEntity(
+    @PrimaryKey
+    val id: String,
+    @ColumnInfo(name = "last_read_time")
+    val lastReadTime: LocalDateTime,
+    @ColumnInfo(name = "total_read_time")
+    val totalReadTime: Int,
+    @ColumnInfo(name = "reading_progress")
+    val readingProgress: Float,
+    @ColumnInfo(name = "last_read_chapter_id")
+    val lastReadChapterId: String,
+    @ColumnInfo(name = "last_read_chapter_title")
+    val lastReadChapterTitle: String,
+    @ColumnInfo(name = "last_read_chapter_progress")
+    val lastReadChapterProgress: Float,
+    @ColumnInfo(name = "read_completed_chapter_ids", defaultValue = "")
+    val readCompletedChapterIds: List<String>,
+)

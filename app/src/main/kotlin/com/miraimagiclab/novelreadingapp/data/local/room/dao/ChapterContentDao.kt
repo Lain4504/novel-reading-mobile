@@ -1,0 +1,38 @@
+package com.miraimagiclab.novelreadingapp.data.local.room.dao
+
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.TypeConverters
+import com.miraimagiclab.novelreadingapp.data.local.room.converter.JsonObjectConverter
+import com.miraimagiclab.novelreadingapp.data.local.room.entity.ChapterContentEntity
+import io.lain4504.novelreadingapp.api.book.ChapterContent
+import kotlinx.serialization.json.JsonObject
+
+@Dao
+interface ChapterContentDao {
+    @TypeConverters(JsonObjectConverter::class)
+    @Query("replace into chapter_content (id, title, content, lastChapter, nextChapter) " +
+            "values (:id, :title, :content, :lastChapter, :nextChapter)")
+    fun update(id: String, title: String, content: JsonObject, lastChapter: String, nextChapter: String)
+
+    @Transaction
+    fun update(chapterContent: ChapterContent) {
+        update(
+            chapterContent.id,
+            chapterContent.title,
+            chapterContent.content,
+            chapterContent.lastChapter,
+            chapterContent.nextChapter
+        )
+    }
+
+    @Query("select * from chapter_content where id = :id")
+    suspend fun get(id: String): ChapterContentEntity?
+
+    @Query("select id from chapter_content where id = :id")
+    suspend fun getId(id: String): String?
+
+    @Query("delete from chapter_content")
+    fun clear()
+}
