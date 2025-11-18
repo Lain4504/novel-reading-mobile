@@ -52,8 +52,6 @@ fun SettingsScreen(
     controller: NavController,
     selectedRoute: Any,
     settingState: SettingState,
-    updatePhase: String,
-    checkUpdate: () -> Unit,
     importData: (Uri) -> OneTimeWorkRequest,
     onClickLogcat: () -> Unit,
     onClickExportUserData: () -> Unit,
@@ -90,9 +88,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.app_updates)
                 ) {
                     UpdatesSettingsList(
-                        updatePhase = updatePhase,
                         settingState = settingState,
-                        checkUpdate = checkUpdate,
                     )
                 }
                 SettingsCategory(

@@ -54,8 +54,6 @@ sealed class UserDataPath(
     data object Settings: UserDataPath("settings") {
         data object App : UserDataPath("app", Settings) {
             data object AutoCheckUpdate : UserDataPath("auto_check_update", App)
-            data object UpdateChannel: UserDataPath("update_channel", App)
-            data object DistributionPlatform: UserDataPath("update_platform", App)
             data object ProxyUrl: UserDataPath("proxy_url", App)
             data object Statistics : UserDataPath("statistics", App)
             data object MaxCache : UserDataPath("max_cache", App)

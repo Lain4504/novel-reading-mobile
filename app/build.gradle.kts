@@ -122,8 +122,6 @@ dependencies {
     implementation(libs.gson)
     // Markdown
     implementation(libs.markdown)
-    // Ketch
-    implementation(libs.ketch)
     // Room
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)

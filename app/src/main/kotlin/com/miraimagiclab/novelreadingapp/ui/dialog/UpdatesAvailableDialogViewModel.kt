@@ -16,8 +16,5 @@ class UpdatesAvailableDialogViewModel @Inject constructor(
     fun downloadUpdate() =
         updateCheckRepository.downloadUpdate()
 
-    fun checkUpdate() =
-        updateCheckRepository.check()
-
     fun resetAvailable() = updateCheckRepository.resetAvailable()
 }

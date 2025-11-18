@@ -11,14 +11,6 @@
     <string name="key_default_image">Hình nền mặc định</string>
     <string name="key_default_text">Font mặc định</string>
     <string name="key_customize_text">Tùy chỉnh font</string>
-    <!-- Update Channel -->
-    <string name="key_update_channel_release">Bản phát hành</string>
-    <string name="key_update_channel_development">Bản phát triển</string>
-    <string name="key_update_channel_ci" translatable="false">CI</string>
-    <!-- Distribution Platform -->
-    <string name="key_platform_github" translatable="false">GitHub</string>
-    <string name="key_platform_appcenter" translatable="false">AppCenter</string>
-    <string name="key_platform_lnr_api" translatable="false">LightNovelReader API của yukonisen</string>
     <!-- Dark Mode -->
     <string name="key_dark_mode_follow_system">Theo hệ thống</string>
     <string name="key_dark_mode_enabled">Luôn bật</string>

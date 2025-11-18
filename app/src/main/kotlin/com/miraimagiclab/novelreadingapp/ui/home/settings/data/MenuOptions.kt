@@ -1,8 +1,5 @@
 package com.miraimagiclab.novelreadingapp.ui.home.settings.data
 
-import com.miraimagiclab.novelreadingapp.data.update.AppCenterParser
-import com.miraimagiclab.novelreadingapp.data.update.GithubParser
-import com.miraimagiclab.novelreadingapp.data.update.UpdateParser
 import com.miraimagiclab.novelreadingapp.R
 
 @Suppress("PropertyName", "unused")
@@ -20,22 +17,6 @@ sealed class MenuOptions {
         return key
     }
 
-    open class MenuOptionsWithValues<T>: MenuOptions {
-        private val optionWithValueList: MutableList<OptionWithValue<T>>
-        constructor(vararg options: OptionWithValue<T>) : super(options.toList()) {
-            optionWithValueList = options.toMutableList()
-        }
-        constructor(options: List<OptionWithValue<T>>): super(options) {
-            optionWithValueList = options.toMutableList()
-        }
-        fun option(key: String, nameId: Int, value: T): String {
-            _optionList.add(Option(key, nameId))
-            optionWithValueList.add(OptionWithValue(key, nameId, value))
-            return key
-        }
-        fun getOptionWithValue(key: String): OptionWithValue<T> = optionWithValueList.first { it.equals(key) }
-    }
-
     open class Option(
         open val key: String,
         open val nameId: Int
@@ -45,35 +26,6 @@ sealed class MenuOptions {
     }
 
     fun get(key: String): Option = optionList.first { it.equals(key) }
-
-    class OptionWithValue<T>(
-        override val key: String,
-        override val nameId: Int,
-        val value: T
-    ): Option(key, nameId)
-
-    open class UpdateChannelOptions(vararg options: OptionWithValue<UpdateParser>): MenuOptionsWithValues<UpdateParser>(options.toList()) {
-        companion object {
-            const val Release = "Release"
-            const val Development = "Development"
-        }
-    }
-
-    data object GitHubUpdateChannelOptions: UpdateChannelOptions(
-        OptionWithValue(Release, R.string.key_update_channel_release, GithubParser.ReleaseParser),
-        OptionWithValue(Development, R.string.key_update_channel_development, GithubParser.DevelopmentParser),
-        OptionWithValue("CI", R.string.key_update_channel_ci, GithubParser.CIParser)
-    )
-
-    data object AppCenterUpdateChannelOptions: UpdateChannelOptions(
-        OptionWithValue(Release, R.string.key_update_channel_release, AppCenterParser.ReleaseParser),
-        OptionWithValue(Development, R.string.key_update_channel_development, AppCenterParser.DevelopmentParser),
-    )
-
-    data object UpdatePlatformOptions: MenuOptionsWithValues<UpdateChannelOptions>() {
-        val GitHub = option("GitHub", R.string.key_platform_github, GitHubUpdateChannelOptions)
-        val AppCenter = option("AppCenter", R.string.key_platform_appcenter, AppCenterUpdateChannelOptions)
-    }
 
     data object DarkModeOptions: MenuOptions(
         Option("FollowSystem", R.string.key_dark_mode_follow_system),

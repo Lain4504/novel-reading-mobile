@@ -8,8 +8,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,7 +26,6 @@ import com.miraimagiclab.novelreadingapp.ui.components.ExportUserDataDialog
 import com.miraimagiclab.novelreadingapp.ui.components.MutableExportContext
 import com.miraimagiclab.novelreadingapp.ui.components.SliderValueDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.SliderValueDialogViewModel
-import com.miraimagiclab.novelreadingapp.ui.dialog.UpdatesAvailableDialogViewModel
 import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.navigateToSettingsLogcatDestination
 import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.settingsLogcatDestination
 import com.miraimagiclab.novelreadingapp.ui.home.settings.textformatting.editTextFormattingRuleDialog
@@ -49,14 +46,10 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
     composable<Route.Main.Settings.Home> {
         val navController = LocalNavController.current
         val settingsViewModel = hiltViewModel<SettingsViewModel>()
-        val updatesAvailableDialogViewModel = hiltViewModel<UpdatesAvailableDialogViewModel>()
-        val updatePhase by updatesAvailableDialogViewModel.updatePhaseFlow.collectAsState("Not Checked")
         SettingsScreen(
             controller = navController,
             selectedRoute = Route.Main.Settings,
-            updatePhase = updatePhase,
             settingState = settingsViewModel.settingState,
-            checkUpdate = updatesAvailableDialogViewModel::checkUpdate,
             importData = settingsViewModel::importFromFile,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             onClickLogcat = navController::navigateToSettingsLogcatDestination,

@@ -2,14 +2,12 @@ package com.miraimagiclab.novelreadingapp.data.update
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
-import androidx.core.content.FileProvider
-import com.ketch.Ketch
-import com.ketch.Status
-import com.miraimagiclab.novelreadingapp.data.userdata.UserDataRepository
-import com.miraimagiclab.novelreadingapp.ui.home.settings.data.MenuOptions
-import dagger.hilt.android.qualifiers.ApplicationContext
 import com.miraimagiclab.novelreadingapp.BuildConfig
+import com.miraimagiclab.novelreadingapp.R
+import com.miraimagiclab.novelreadingapp.data.userdata.UserDataRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.lain4504.novelreadingapp.api.userdata.UserDataPath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,33 +16,31 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import org.jsoup.Jsoup
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UpdateCheckRepository @Inject constructor(
     @param:ApplicationContext @field:ApplicationContext private val context: Context,
-    private val userDataRepository: UserDataRepository,
-    private val ketch: Ketch
+    private val userDataRepository: UserDataRepository
 ) {
-    private val dateFormat = SimpleDateFormat("HH:mm", Locale.US)
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private var checkJob: Job? = null
+    private val playStoreUrl = "https://play.google.com/store/apps/details?id=${context.packageName}&hl=en_US&gl=US"
+
     var release: Release? = null
         private set
     private val mutableAvailable: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val availableFlow: Flow<Boolean> = mutableAvailable
-    private val _updatePhase = MutableStateFlow("未检查")
+    private val _updatePhase = MutableStateFlow(context.getString(R.string.update_phase_not_checked))
     val updatePhase: Flow<String> = _updatePhase
 
     init {
         coroutineScope.launch {
-            if (userDataRepository.booleanUserData(UserDataPath.Settings.App.AutoCheckUpdate.path).getOrDefault(true))
+            if (userDataRepository.booleanUserData(UserDataPath.Settings.App.AutoCheckUpdate.path).getOrDefault(true)) {
                 check()
+            }
         }
     }
 
@@ -55,99 +51,82 @@ class UpdateCheckRepository @Inject constructor(
     }
 
     fun check() {
-        if (checkJob != null && checkJob!!.isActive) return
+        if (checkJob?.isActive == true) return
         checkJob = coroutineScope.launch {
-            val updateChannelKey = userDataRepository.stringUserData(UserDataPath.Settings.App.UpdateChannel.path).get() ?: MenuOptions.UpdateChannelOptions.Development
-            val distributionPlatform = userDataRepository.stringUserData(UserDataPath.Settings.App.DistributionPlatform.path).get() ?: MenuOptions.UpdatePlatformOptions.GitHub
-            Log.i("UpdateChecker", "Checking for updates from $distributionPlatform/$updateChannelKey")
-            if (distributionPlatform == "AppCenter") {
-                _updatePhase.update { "失败: AppCenter 平台已不受支持" }
-                return@launch
-            }
-            _updatePhase.update { "已请求更新，等待 $distributionPlatform 应答" }
             try {
-                release =
-                    MenuOptions.UpdatePlatformOptions
-                        .getOptionWithValue(distributionPlatform).value
-                        .getOptionWithValue(updateChannelKey).value
-                        .parser(_updatePhase)
-            } catch (e: Exception) {
-                Log.e("UpdateChecker", "failed to get release")
-                e.printStackTrace()
-                _updatePhase.emit("${dateFormat.format(Date())} | 失败: ${e.javaClass.simpleName}\n${e.message}")
-            }
-            if (release != null) {
-                if (release!!.version > BuildConfig.VERSION_CODE) {
-                    Log.i("UpdateChecker", "Updates available: ${release!!.versionName}")
-                    _updatePhase.emit("${dateFormat.format(Date())} | 有可用更新: ${release!!.versionName}")
-                } else {
-                    Log.i("UpdateChecker", "App is up to date (${release!!.versionName})")
-                    _updatePhase.emit("${dateFormat.format(Date())} | 已是最新 (远程: ${release!!.versionName})")
+                _updatePhase.emit(context.getString(R.string.update_phase_checking_play_store))
+                val latestVersionName = fetchLatestVersionName()
+                if (latestVersionName == null) {
+                    release = null
+                    mutableAvailable.emit(false)
+                    _updatePhase.emit(context.getString(R.string.update_phase_failed))
+                    return@launch
                 }
+                val remoteVersionCode = versionNameToCode(latestVersionName)
+                if (remoteVersionCode > BuildConfig.VERSION_CODE) {
+                    release = Release(
+                        version = remoteVersionCode,
+                        versionName = latestVersionName,
+                        releaseNotes = context.getString(R.string.update_phase_play_store_new_version),
+                        storeUrl = playStoreUrl
+                    )
+                    mutableAvailable.emit(true)
+                    _updatePhase.emit(
+                        context.getString(
+                            R.string.update_phase_available,
+                            latestVersionName
+                        )
+                    )
+                } else {
+                    release = null
+                    mutableAvailable.emit(false)
+                    _updatePhase.emit(context.getString(R.string.update_phase_latest))
+                }
+            } catch (e: Exception) {
+                Log.e("UpdateChecker", "Failed to query Play Store", e)
+                release = null
+                mutableAvailable.emit(false)
+                _updatePhase.emit(
+                    context.getString(
+                        R.string.update_phase_failed_with_reason,
+                        e.localizedMessage ?: e.javaClass.simpleName
+                    )
+                )
             }
-            mutableAvailable.emit(release != null && release!!.version > BuildConfig.VERSION_CODE)
         }
     }
 
     fun downloadUpdate() {
-        release ?: Log.e("UpdateChecker", "Didn't find the release because release is null!").also { return }
-        val cacheDir = File(context.cacheDir, "updates").also {
-            if (!it.exists()) it.mkdirs()
-        }
-        val file = cacheDir.resolve("LightNovelReader-update.apk").also {
-            if (it.exists()) it.delete()
-        }
-        if (release!!.downloadFileProgress == null) {
-            val downloadWorkId =
-                ketch.download(release!!.downloadUrl, cacheDir.path, "LightNovelReader-update.apk")
-            coroutineScope.launch {
-                ketch.observeDownloadById(downloadWorkId).collect {
-                    when (it?.status) {
-                        Status.SUCCESS -> {
-                            if (file.length() == 0L) return@collect
-                            Log.i("UpdateChecker", "Download success, installing")
-                            installApk(file)
-                        }
-                        Status.FAILED -> Log.e(
-                            "UpdateChecker",
-                            "Failed to download update apk"
-                        )
-                        else -> {}
-                    }
-                }
+        val url = release?.storeUrl ?: playStoreUrl
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-        } else {
-            cacheDir.resolve("LightNovelReader-update-data").also {
-                if (it.exists()) it.delete()
-            }
-            val downloadWorkId =
-                ketch.download(release!!.downloadUrl, cacheDir.path, "LightNovelReader-update-data")
-            coroutineScope.launch {
-                ketch.observeDownloadById(downloadWorkId).collect {
-                    when (it?.status) {
-                        Status.SUCCESS -> {
-                            if (cacheDir.resolve("LightNovelReader-update-data").length() == 0L) return@collect
-                            coroutineScope.launch {
-                                release!!.downloadFileProgress!!(cacheDir.resolve("LightNovelReader-update-data"), file)
-                                coroutineScope.launch(Dispatchers.Main) { installApk(file) }
-                            }
-                        }
-                        Status.FAILED -> Log.e(
-                            "UpdateChecker",
-                            "Failed to download update apk"
-                        )
-                        else -> {}
-                    }
-                }
-            }
-        }
+        )
     }
-    private fun installApk(file: File) {
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-            setDataAndType(uri, "application/vnd.android.package-archive")
-        }
-        context.startActivity(intent)
+
+    private fun fetchLatestVersionName(): String? {
+        return Jsoup.connect(playStoreUrl)
+            .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+            .timeout(6000)
+            .get()
+            .toString()
+            .let { body ->
+                VERSION_REGEX.find(body)?.groupValues?.get(1)?.trim()
+            }
+    }
+
+    private fun versionNameToCode(versionName: String): Int {
+        val numericParts = versionName.replace("[^0-9.]".toRegex(), "")
+            .split(".")
+        val major = numericParts.getOrNull(0)?.toIntOrNull() ?: 0
+        val minor = numericParts.getOrNull(1)?.toIntOrNull() ?: 0
+        val patch = numericParts.getOrNull(2)?.toIntOrNull() ?: 0
+        val build = numericParts.getOrNull(3)?.toIntOrNull() ?: 0
+        return major * 1_000_000 + minor * 10_000 + patch * 1000 + build
+    }
+
+    companion object {
+        private val VERSION_REGEX = "\"softwareVersion\"\\s*:\\s*\"([^\"]+)\"".toRegex()
     }
 }

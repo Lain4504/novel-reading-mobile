@@ -19,7 +19,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.logging.LoggerRepository
-import com.miraimagiclab.novelreadingapp.data.update.UpdateCheckRepository
 import com.miraimagiclab.novelreadingapp.data.userdata.UserDataRepository
 import com.miraimagiclab.novelreadingapp.data.work.CheckUpdateWork
 import com.miraimagiclab.novelreadingapp.theme.LightNovelReaderTheme
@@ -40,7 +39,6 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var loggerRepository: LoggerRepository
     @Inject lateinit var bookshelfRepository: BookshelfRepository
     @Inject lateinit var userDataRepository: UserDataRepository
-    @Inject lateinit var updateCheckRepository: UpdateCheckRepository
     @Inject lateinit var workManager: WorkManager
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 

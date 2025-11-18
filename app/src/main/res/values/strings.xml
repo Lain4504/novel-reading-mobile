@@ -25,11 +25,9 @@
     <string name="invert_selection">Đảo lựa chọn</string>
     <string name="export">Xuất</string>
     <string name="undo">Hoàn tác</string>
-    <string name="manual_download">Thủ công</string>
     <string name="follow_system">Theo hệ thống</string>
     <string name="enabled">Bật</string>
     <string name="disabled">Tắt</string>
-    <string name="install_update">Cài đặt bản cập nhật</string>
     <string name="unspecified">Chưa xác định</string>
     <string name="ignore">Bỏ qua</string>
     <string name="ignore_version">Bỏ qua phiên bản</string>
@@ -90,13 +88,14 @@
     <string name="app_settings">Ứng dụng</string>
     <string name="app_updates">Cập nhật</string>
     <string name="settings_auto_check_updates">Tự kiểm tra cập nhật</string>
-    <string name="settings_auto_check_updates_desc">Tự động kiểm tra bản mới khi mở ứng dụng</string>
-    <string name="settings_update_channel">Kênh cập nhật</string>
-    <string name="settings_update_channel_desc">Chọn kênh cập nhật bạn ưu tiên.</string>
-    <string name="settings_get_updates">Kiểm tra cập nhật</string>
-    <string name="settings_get_updates_desc">Kiểm tra và cài bản mới nhất.</string>
-    <string name="settings_distribution_platform">Nền tảng phân phối</string>
-    <string name="settings_distribution_platform_settings_desc"><!--reserved--></string>
+    <string name="settings_auto_check_updates_desc">Thông báo khi có bản mới trên Google Play</string>
+    <string name="update_phase_not_checked">Chưa kiểm tra</string>
+    <string name="update_phase_checking_play_store">Đang kiểm tra trên Google Play…</string>
+    <string name="update_phase_available">Có bản mới: %s</string>
+    <string name="update_phase_latest">Đã là bản mới nhất</string>
+    <string name="update_phase_failed">Không thể kiểm tra cập nhật</string>
+    <string name="update_phase_failed_with_reason">Lỗi kiểm tra cập nhật (%s)</string>
+    <string name="update_phase_play_store_new_version">Đã có bản phát hành mới trên Google Play.</string>
 
     <string name="reader_settings">Thiết lập trình đọc</string>
     <string name="settings_reader_font_size">Cỡ chữ</string>
@@ -217,6 +216,7 @@
     <string name="bookshelf_new_title">Kệ sách mới</string>
     <string name="bookshelf_edit_title">Chỉnh sửa kệ sách</string>
     <string name="changelog">Lịch sử thay đổi</string>
+    <string name="open_play_store">Mở Google Play</string>
     <string name="recent_reads">Vừa đọc (%d)</string>
     <string name="search_no_results">Không tìm thấy kết quả</string>
     <string name="search_no_results_desc">Kiểm tra chính tả hoặc thử từ khóa tiếng Trung khác.</string>
