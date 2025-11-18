@@ -158,6 +158,9 @@ dependencies {
     implementation(libs.apollo.api)
     implementation(libs.apollo.normalized.cache)
     implementation(libs.apollo.normalized.cache.sqlite)
+    // Play Core In-App Updates
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 }
 
 configurations.implementation {

@@ -334,6 +334,11 @@
     <string name="dialog_delete_bookshelf_text">Bạn có chắc muốn xóa kệ sách này? Kệ sẽ biến mất mãi mãi!</string>
     <string name="dialog_add_to_bookshelf_text">Thêm sách này vào các kệ sau</string>
     <string name="dialog_updates_available">Có bản cập nhật</string>
+    <string name="dialog_update_ready">Cập nhật sẵn sàng</string>
+    <string name="dialog_update_ready_desc">Cập nhật đã được tải xuống. Khởi động lại ứng dụng để áp dụng cập nhật.</string>
+    <string name="update_downloaded">Cập nhật đã được tải xuống</string>
+    <string name="restart_app">Khởi động lại</string>
+    <string name="later">Để sau</string>
     <string name="dialog_snap_user_data_text">Chọn dữ liệu cần xuất</string>
     <string name="dialog_snap_bookshelf">Kệ sách</string>
     <string name="dialog_snap_bookshelf_text">Bao gồm kệ và thông tin sách.</string>

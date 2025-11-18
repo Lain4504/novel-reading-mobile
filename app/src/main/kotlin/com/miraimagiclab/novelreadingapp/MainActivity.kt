@@ -19,6 +19,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.logging.LoggerRepository
+import com.miraimagiclab.novelreadingapp.data.update.InAppUpdateRepository
 import com.miraimagiclab.novelreadingapp.data.userdata.UserDataRepository
 import com.miraimagiclab.novelreadingapp.data.work.CheckUpdateWork
 import com.miraimagiclab.novelreadingapp.theme.LightNovelReaderTheme
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var bookshelfRepository: BookshelfRepository
     @Inject lateinit var userDataRepository: UserDataRepository
     @Inject lateinit var workManager: WorkManager
+    @Inject lateinit var inAppUpdateRepository: InAppUpdateRepository
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +60,11 @@ class MainActivity : ComponentActivity() {
             PeriodicWorkRequestBuilder<CheckUpdateWork>(2, TimeUnit.HOURS)
                 .build()
         )
+        
+        // Check for in-app updates if auto-check is enabled
+        if (userDataRepository.booleanUserData(UserDataPath.Settings.App.AutoCheckUpdate.path).getOrDefault(true)) {
+            inAppUpdateRepository.startFlexibleUpdate(this)
+        }
         coroutineScope.launch(Dispatchers.IO) {
             if (bookshelfRepository.getAllBookshelfIds().isEmpty())
                 bookshelfRepository.createBookShelf(
@@ -127,8 +134,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Check if update was downloaded while app was in background
+        inAppUpdateRepository.checkIfUpdateDownloaded()
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
+        inAppUpdateRepository.cleanup()
         coroutineScope.cancel()
     }
 }
