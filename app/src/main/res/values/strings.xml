@@ -33,7 +33,6 @@
     <string name="unspecified">Chưa xác định</string>
     <string name="ignore">Bỏ qua</string>
     <string name="ignore_version">Bỏ qua phiên bản</string>
-    <string name="switch_and_restart">Chuyển và khởi động lại</string>
     <string name="hide_read">Ẩn đã đọc</string>
     <string name="mark_all_read">Đánh dấu tất cả đã đọc</string>
     <string name="export_include_images">Bao gồm ảnh</string>
@@ -171,8 +170,6 @@
     <string name="settings_snap_data_desc">Tạo bản chụp dữ liệu hiện tại thành tệp .lnr</string>
     <string name="settings_import_data">Nhập dữ liệu người dùng</string>
     <string name="settings_import_data_desc">Nhập dữ liệu từ tệp .lnr đã chọn</string>
-    <string name="settings_select_data_source">Nguồn dữ liệu</string>
-    <string name="settings_select_data_source_desc">Chuyển đổi nguồn dữ liệu của ứng dụng</string>
     <string name="settings_app_logs">Nhật ký ứng dụng</string>
     <string name="settings_app_logs_desc">Xem và chia sẻ log để gỡ lỗi</string>
     <string name="settings_app_log_level">Mức log</string>
@@ -185,7 +182,11 @@
     <string name="settings_github_repo">Kho GitHub</string>
     <string name="settings_github_repo_desc">Star repo để giúp chúng tôi tiếp cận nhiều người hơn</string>
     <string name="settings_communication">Kết nối</string>
-    <string name="settings_communication_desc">Tham gia nhóm QQ để trò chuyện và gửi phản hồi</string>
+    <string name="settings_communication_desc">Tham gia nhóm Discord để trò chuyện và gửi phản hồi</string>
+    <string name="settings_discord_server">Máy chủ Discord</string>
+    <string name="settings_discord_server_desc">Tham gia cộng đồng Ranoku trên Discord</string>
+    <string name="settings_facebook_page">Trang Facebook</string>
+    <string name="settings_facebook_page_desc">Theo dõi trang Facebook chính thức của Ranoku</string>
     <string name="settings_statistics">Thống kê</string>
     <string name="settings_statistics_desc">Chúng tôi dùng Microsoft AppCenter để thu thập thống kê ẩn danh nhằm cải thiện ứng dụng</string>
     <string name="experimental_settings">Thử nghiệm</string>
@@ -259,7 +260,6 @@
     <string name="bookshelf_group_title_updated">Đã cập nhật (%s)</string>
     <string name="bookshelf_group_title_pinned">Đã ghim (%s)</string>
     <string name="bookshelf_group_title_all">Tất cả (%s)</string>
-    <string name="data_source_provider">Nguồn: %s</string>
     <string name="read_progress">Đã đọc %s</string>
     <string name="read_minutes">%d phút</string>
     <string name="translators">Người đóng góp bản dịch</string>
@@ -343,7 +343,6 @@
     <string name="dialog_snap_settings_text">Bao gồm cài đặt ứng dụng và trình đọc.</string>
     <string name="dialog_snap_bookmarks">Đánh dấu</string>
     <string name="dialog_snap_bookmarks_text">Bao gồm toàn bộ đánh dấu sách.</string>
-    <string name="dialog_select_data_source_text">Chọn nguồn dữ liệu. Thao tác này sẽ xóa bộ nhớ đệm và chuyển nguồn của ứng dụng. Dữ liệu người dùng hiện tại vẫn được giữ và có thể khôi phục khi chuyển lại.</string>
     <string name="dialog_slider_custom">Nhập giá trị</string>
     <string name="dialog_slider_custom_illegal_value">Vui lòng nhập con số hợp lệ.</string>
     <string name="dialog_color_picker">Bảng màu</string>

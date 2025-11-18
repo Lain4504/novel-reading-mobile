@@ -18,9 +18,7 @@ import io.lain4504.novelreadingapp.api.ui.components.SettingsClickableEntry
 @Composable
 fun AboutSettingsList() {
     val appInfo: String = buildString {
-        appendLine(BuildConfig.APPLICATION_ID)
-        append("${BuildConfig.VERSION_NAME} [${BuildConfig.VERSION_CODE}] - ")
-            .append(if (BuildConfig.DEBUG) "debug" else "release")
+        append(BuildConfig.VERSION_NAME)
     }
     var showAppInfoDialog by remember { mutableStateOf(false) }
 
@@ -39,30 +37,15 @@ fun AboutSettingsList() {
     SettingsClickableEntry(
         modifier = Modifier.background(colorScheme.surfaceContainer),
         painter = painterResource(R.drawable.group_24px),
-        title = stringResource(R.string.settings_communication),
-        description = stringResource(R.string.settings_communication_desc),
-        openUrl = "https://qm.qq.com/q/Tp80Hf9Oms"
+        title = stringResource(R.string.settings_discord_server),
+        description = stringResource(R.string.settings_discord_server_desc),
+        openUrl = "https://discord.com/invite/cxrtYXdK8q"
     )
     SettingsClickableEntry(
         modifier = Modifier.background(colorScheme.surfaceContainer),
         painter = painterResource(R.drawable.archive_24px),
-        title = stringResource(R.string.settings_github_repo),
-        description = stringResource(R.string.settings_github_repo_desc),
-        openUrl = "https://github.com/dmzz-yyhyy/LightNovelReader"
+        title = stringResource(R.string.settings_facebook_page),
+        description = stringResource(R.string.settings_facebook_page_desc),
+        openUrl = "https://www.facebook.com/profile.php?id=61578944706240"
     )
-    SettingsClickableEntry(
-        modifier = Modifier.background(colorScheme.surfaceContainer),
-        painter = painterResource(R.drawable.volunteer_activism_24px),
-        title = "请作者喝茶",
-        description = "夜鱼很可爱, 请给夜鱼💰",
-        openUrl = "https://afdian.com/a/lightnovelreader"
-    )
-    /* SettingsSwitchEntry(
-        modifier = Modifier.background(colorScheme.surfaceContainer),
-        title = stringResource(R.string.settings_statistics),
-        description = stringResource(R.string.settings_statistics_desc),
-        checked = if (BuildConfig.DEBUG) false else settingState.statistics,
-        booleanUserData = settingState.statisticsUserData,
-        disabled = BuildConfig.DEBUG
-    ) */
 }

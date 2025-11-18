@@ -63,8 +63,6 @@ object Route {
             object Theme
         }
         @Serializable
-        object SourceChangeDialog
-        @Serializable
         object ExportUserDataDialog
         @Serializable
         data class EditTextFormattingRuleDialog(

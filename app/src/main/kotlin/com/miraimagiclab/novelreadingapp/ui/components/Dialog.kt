@@ -64,7 +64,6 @@ import androidx.compose.ui.window.Dialog
 import com.miraimagiclab.novelreadingapp.BuildConfig
 import com.miraimagiclab.novelreadingapp.R
 import io.lain4504.novelreadingapp.api.ui.theme.AppTypography
-import io.lain4504.novelreadingapp.api.web.WebDataSourceItem
 import kotlin.math.round
 
 @Composable
@@ -330,41 +329,6 @@ fun ExportUserDataDialog(
                     style = AppTypography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun SourceChangeDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    webDataSourceItems: List<WebDataSourceItem>,
-    selectedWebDataSourceId: Int,
-    onClickItem: (Int) -> Unit
-) {
-    BaseDialog(
-        icon = painterResource(R.drawable.public_24px),
-        title = stringResource(R.string.settings_select_data_source),
-        description = stringResource(R.string.dialog_select_data_source_text),
-        onDismissRequest = onDismissRequest,
-        onConfirmation = onConfirmation,
-        dismissText = stringResource(R.string.cancel),
-        confirmationText = stringResource(R.string.switch_and_restart)
-    ) {
-        webDataSourceItems.forEachIndexed { index, webDataSourceItem ->
-            RadioButtonListItem(
-                modifier = Modifier
-                    .sizeIn(minWidth = 280.dp, maxWidth = 500.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 14.dp),
-                title = webDataSourceItem.name,
-                supportingText = stringResource(R.string.data_source_provider, webDataSourceItem.provider),
-                selected = selectedWebDataSourceId == webDataSourceItem.id,
-                onClick = { onClickItem(webDataSourceItem.id) }
-            )
-            if (index != webDataSourceItems.size - 1) {
-                HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             }
         }
     }

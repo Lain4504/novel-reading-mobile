@@ -56,7 +56,6 @@ fun SettingsScreen(
     checkUpdate: () -> Unit,
     importData: (Uri) -> OneTimeWorkRequest,
     onClickLogcat: () -> Unit,
-    onClickChangeSource: () -> Unit,
     onClickExportUserData: () -> Unit,
     onClickThemeSettings: () -> Unit,
     onClickTextFormatting: () -> Unit,
@@ -116,7 +115,6 @@ fun SettingsScreen(
                     title = stringResource(R.string.data_settings),
                 ) {
                     DataSettingsList(
-                        onClickChangeSource = onClickChangeSource,
                         onClickExportUserData = onClickExportUserData,
                         settingState = settingState,
                         importData = importData

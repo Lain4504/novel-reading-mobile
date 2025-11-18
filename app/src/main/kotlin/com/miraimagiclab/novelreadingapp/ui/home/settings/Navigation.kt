@@ -10,7 +10,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,10 +27,8 @@ import com.miraimagiclab.novelreadingapp.ui.components.ExportContext
 import com.miraimagiclab.novelreadingapp.ui.components.ExportUserDataDialog
 import com.miraimagiclab.novelreadingapp.ui.components.MutableExportContext
 import com.miraimagiclab.novelreadingapp.ui.components.SliderValueDialog
-import com.miraimagiclab.novelreadingapp.ui.components.SourceChangeDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.SliderValueDialogViewModel
 import com.miraimagiclab.novelreadingapp.ui.dialog.UpdatesAvailableDialogViewModel
-import com.miraimagiclab.novelreadingapp.ui.home.settings.SourceChangeDialogViewModel
 import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.navigateToSettingsLogcatDestination
 import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.settingsLogcatDestination
 import com.miraimagiclab.novelreadingapp.ui.home.settings.textformatting.editTextFormattingRuleDialog
@@ -46,7 +43,6 @@ import io.lain4504.novelreadingapp.api.ui.LocalNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionScope) {
@@ -62,7 +58,6 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
             settingState = settingsViewModel.settingState,
             checkUpdate = updatesAvailableDialogViewModel::checkUpdate,
             importData = settingsViewModel::importFromFile,
-            onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             onClickLogcat = navController::navigateToSettingsLogcatDestination,
             onClickTextFormatting = navController::navigateToSettingsTextFormattingManagerDestination,
@@ -71,7 +66,6 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
             sharedTransitionScope = sharedTransitionScope
         )
     }
-    sourceChangeDialog()
     exportUserDataDialog()
     editTextFormattingRuleDialog()
     sliderValueDialog()
@@ -92,35 +86,6 @@ fun NavGraphBuilder.settingsNavigation(sharedTransitionScope: SharedTransitionSc
 @Suppress("unused")
 fun NavController.navigateToSettingsDestination() {
     navigate(Route.Main.Settings)
-}
-
-private fun NavGraphBuilder.sourceChangeDialog() {
-    dialog<Route.Main.SourceChangeDialog> {
-        val navController = LocalNavController.current
-        val viewModel = hiltViewModel<SourceChangeDialogViewModel>()
-        var selectedWebDataSourceId by remember { mutableIntStateOf(viewModel.webBookDataSourceId) }
-        val context = LocalContext.current
-        SourceChangeDialog(
-            onDismissRequest = {
-                navController.popBackStack()
-                selectedWebDataSourceId = viewModel.webBookDataSourceId
-            },
-            onConfirmation = {
-                viewModel.changeWebSource(selectedWebDataSourceId, File(context.filesDir, "data"))
-                navController.popBackStack()
-            },
-            webDataSourceItems = viewModel.webDataSourceItems,
-            selectedWebDataSourceId = selectedWebDataSourceId,
-            onClickItem = {
-                selectedWebDataSourceId = it
-            }
-        )
-    }
-}
-
-private fun NavController.navigateToSourceChangeDialog() {
-    if (!this.isResumed()) return
-    navigate(Route.Main.SourceChangeDialog)
 }
 
 private fun NavGraphBuilder.sliderValueDialog() {
