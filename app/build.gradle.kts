@@ -28,6 +28,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        resourceConfigurations += listOf("vi")
     }
 
     @Suppress("UnstableApiUsage")
