@@ -16,9 +16,7 @@ import com.miraimagiclab.novelreadingapp.R
 import io.lain4504.novelreadingapp.api.ui.components.SettingsClickableEntry
 
 @Composable
-fun AboutSettingsList(
-    onClickDebugMode: () -> Unit
-) {
+fun AboutSettingsList() {
     val appInfo: String = buildString {
         appendLine(BuildConfig.APPLICATION_ID)
         append("${BuildConfig.VERSION_NAME} [${BuildConfig.VERSION_CODE}] - ")
@@ -67,12 +65,4 @@ fun AboutSettingsList(
         booleanUserData = settingState.statisticsUserData,
         disabled = BuildConfig.DEBUG
     ) */
-    if (BuildConfig.DEBUG)
-        SettingsClickableEntry(
-            modifier = Modifier.background(colorScheme.surfaceContainer),
-            painter = painterResource(R.drawable.adb_24px),
-            title = stringResource(R.string.settings_debug_tools),
-            description = stringResource(R.string.settings_debug_tools_desc),
-            onClick = onClickDebugMode
-        )
 }

@@ -36,7 +36,6 @@
     <string name="switch_and_restart">Chuyển và khởi động lại</string>
     <string name="hide_read">Ẩn đã đọc</string>
     <string name="mark_all_read">Đánh dấu tất cả đã đọc</string>
-    <string name="export_epub">Xuất EPUB</string>
     <string name="export_include_images">Bao gồm ảnh</string>
     <string name="export_split_volumes">Xuất theo tập</string>
     <string name="select_location">Chọn vị trí</string>
@@ -181,8 +180,6 @@
     <string name="settings_auto_proxy">Proxy tự động</string>
     <string name="settings_auto_proxy_desc">Tự động lấy IP proxy từ internet, <b>có thể khiến sách bạn đọc bị lộ</b></string>
     <string name="about_settings">Giới thiệu</string>
-    <string name="settings_debug_tools">Công cụ debug</string>
-    <string name="settings_debug_tools_desc">Tiện ích dành cho gỡ lỗi</string>
     <string name="settings_about_source_code"><![CDATA[Xem mã nguồn tại %1$s<br/>Báo lỗi & yêu cầu tính năng qua %2$s]]></string>
     <string name="settings_about_oss">Thế giới tiểu thuyết của bạn.</string>
     <string name="settings_github_repo">Kho GitHub</string>
@@ -336,8 +333,6 @@
     <string name="dialog_delete_bookshelf">Xóa kệ sách</string>
     <string name="dialog_delete_bookshelf_text">Bạn có chắc muốn xóa kệ sách này? Kệ sẽ biến mất mãi mãi!</string>
     <string name="dialog_add_to_bookshelf_text">Thêm sách này vào các kệ sau</string>
-    <string name="dialog_export_to_epub">Xuất EPUB</string>
-    <string name="dialog_export_to_epub_text">EPUB (Electronic Publication) là chuẩn sách điện tử với định dạng .epub.\n\nBạn có muốn xuất sách này thành EPUB?</string>
     <string name="dialog_updates_available">Có bản cập nhật</string>
     <string name="dialog_snap_user_data_text">Chọn dữ liệu cần xuất</string>
     <string name="dialog_snap_bookshelf">Kệ sách</string>

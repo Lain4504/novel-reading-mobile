@@ -65,7 +65,6 @@
 -keepclasseswithmembers class com.miraimagiclab.novelreadingapp.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
--keep class com.miraimagiclab.novelreadingapp.defaultplugin.** { *; }
 
 -keep class kotlin.** { *; }
 -keep class kotlinx.** { *; }

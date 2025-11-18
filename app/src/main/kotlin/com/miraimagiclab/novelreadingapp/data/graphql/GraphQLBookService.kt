@@ -40,7 +40,7 @@ class GraphQLBookService @Inject constructor(
     private val apolloClient: ApolloClient
 ) : WebBookDataSource {
     
-    override val id: Int = "graphql-apollo".hashCode()
+    override val id: Int = "backend-api".hashCode()
     
     private val _offLine = MutableStateFlow(false)
     override val offLine: Boolean

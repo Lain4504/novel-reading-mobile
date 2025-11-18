@@ -8,17 +8,24 @@ import io.lain4504.novelreadingapp.api.web.WebDataSource
 import io.lain4504.novelreadingapp.api.web.WebDataSourceItem
 import javax.inject.Inject
 import javax.inject.Singleton
-
+import kotlin.jvm.JvmSuppressWildcards
 
 @Singleton
-class WebBookDataSourceManager @Inject constructor (
-    val userDataRepository: UserDataRepository
-): WebBookDataSourceManagerApi {
+class WebBookDataSourceManager @Inject constructor(
+    val userDataRepository: UserDataRepository,
+    dataSources: Set<@JvmSuppressWildcards WebBookDataSource>
+) : WebBookDataSourceManagerApi {
     private val _webDataSourceItems = mutableListOf<WebDataSourceItem>()
     val webDataSourceItems: List<WebDataSourceItem> = _webDataSourceItems
 
     private val mutableWebDataSourceProvider = MutableWebDataSourceProvider()
     private val webBookDataSources = mutableListOf<WebBookDataSource>()
+
+    init {
+        dataSources.forEach { dataSource ->
+            loadWebDataSourceClass(dataSource)
+        }
+    }
 
     override fun registerWebDataSource(webBookDataSource: WebBookDataSource, webDataSourceItem: WebDataSourceItem) {
         if (_webDataSourceItems.any { it.id == webDataSourceItem.id }) return
@@ -35,7 +42,7 @@ class WebBookDataSourceManager @Inject constructor (
 
     override fun getWebDataSource(): WebBookDataSource = mutableWebDataSourceProvider.value
 
-    fun loadWebDataSourceClass(instance: WebBookDataSource): WebDataSourceItem {
+    private fun loadWebDataSourceClass(instance: WebBookDataSource): WebDataSourceItem {
         val info = instance.javaClass.getAnnotationsByType(WebDataSource::class.java)
         val item = WebDataSourceItem(
             instance.id,

@@ -31,8 +31,7 @@ import com.miraimagiclab.novelreadingapp.ui.components.SliderValueDialog
 import com.miraimagiclab.novelreadingapp.ui.components.SourceChangeDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.SliderValueDialogViewModel
 import com.miraimagiclab.novelreadingapp.ui.dialog.UpdatesAvailableDialogViewModel
-import com.miraimagiclab.novelreadingapp.ui.home.settings.debug.navigateToSettingsDebugDestination
-import com.miraimagiclab.novelreadingapp.ui.home.settings.debug.settingsDebugDestination
+import com.miraimagiclab.novelreadingapp.ui.home.settings.SourceChangeDialogViewModel
 import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.navigateToSettingsLogcatDestination
 import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.settingsLogcatDestination
 import com.miraimagiclab.novelreadingapp.ui.home.settings.textformatting.editTextFormattingRuleDialog
@@ -63,7 +62,6 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
             settingState = settingsViewModel.settingState,
             checkUpdate = updatesAvailableDialogViewModel::checkUpdate,
             importData = settingsViewModel::importFromFile,
-            onClickDebugMode = navController::navigateToSettingsDebugDestination,
             onClickChangeSource = navController::navigateToSourceChangeDialog,
             onClickExportUserData = navController::navigateToExportUserDataDialog,
             onClickLogcat = navController::navigateToSettingsLogcatDestination,
@@ -85,7 +83,6 @@ fun NavGraphBuilder.settingsNavigation(sharedTransitionScope: SharedTransitionSc
         startDestination = Route.Main.Settings.Home
     ) {
         settingsDestination(sharedTransitionScope)
-        settingsDebugDestination()
         settingsLogcatDestination()
         settingsThemeDestination()
         settingsTextFormattingNavigation()
@@ -122,7 +119,8 @@ private fun NavGraphBuilder.sourceChangeDialog() {
 }
 
 private fun NavController.navigateToSourceChangeDialog() {
- navigate(Route.Main.SourceChangeDialog)
+    if (!this.isResumed()) return
+    navigate(Route.Main.SourceChangeDialog)
 }
 
 private fun NavGraphBuilder.sliderValueDialog() {

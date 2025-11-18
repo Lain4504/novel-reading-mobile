@@ -60,8 +60,6 @@ object Route {
                 data class Rules(val bookId: String)
             }
             @Serializable
-            object Debug
-            @Serializable
             object Theme
         }
         @Serializable
