@@ -39,6 +39,11 @@ import javax.inject.Singleton
 class GraphQLBookService @Inject constructor(
     private val apolloClient: ApolloClient
 ) : WebBookDataSource {
+
+    private val completionMarker = BookInformation.empty()
+    private val searchResolvers: Map<String, suspend (String) -> List<BookInformation>> = mapOf(
+        SEARCH_TYPE_TITLE to ::searchByTitle
+    )
     
     override val id: Int = "backend-api".hashCode()
     
@@ -52,12 +57,12 @@ class GraphQLBookService @Inject constructor(
     override val explorePageDataSourceMap: Map<String, ExplorePageDataSource> = emptyMap()
     override val exploreExpandedPageDataSourceMap: Map<String, ExploreExpandedPageDataSource> = emptyMap()
     override val searchTypeMap: Map<String, String> = mapOf(
-        "title" to "Title"
+        SEARCH_TYPE_TITLE to "Title"
     )
     override val searchTipMap: Map<String, String> = mapOf(
-        "title" to "Search by novel title"
+        SEARCH_TYPE_TITLE to "Search by novel title"
     )
-    override val searchTypeIdList: List<String> = listOf("title")
+    override val searchTypeIdList: List<String> = listOf(SEARCH_TYPE_TITLE)
     
     override fun onLoad() {
         // Initialize if needed
@@ -110,20 +115,24 @@ class GraphQLBookService @Inject constructor(
     }
     
     override fun search(searchType: String, keyword: String): Flow<List<BookInformation>> = flow {
-        try {
-            val response = apolloClient.query(SearchNovelsQuery(title = keyword)).execute()
-            
-            val novels = response.data?.searchNovels?.mapNotNull { novel ->
-                novel?.let { convertToBookInformationFromSearch(it) }
-            } ?: emptyList()
-            
-            emit(novels)
-            emit(listOf(BookInformation.empty())) // End marker
+        val normalizedKeyword = keyword.trim()
+        if (normalizedKeyword.isEmpty()) {
+            emit(emptyList())
+            emit(listOf(completionMarker))
+            return@flow
+        }
+        val resolver = searchResolvers[searchType] ?: searchResolvers.getValue(SEARCH_TYPE_TITLE)
+        val novels = try {
+            resolver(normalizedKeyword).also {
+                _offLine.value = false
+            }
         } catch (e: Exception) {
             e.printStackTrace()
-            emit(emptyList())
-            emit(listOf(BookInformation.empty()))
+            _offLine.value = true
+            emptyList()
         }
+        emit(novels)
+        emit(listOf(completionMarker))
     }
     
     override fun stopAllSearch() {
@@ -240,6 +249,17 @@ class GraphQLBookService @Inject constructor(
             lastChapter = chapter.previousChapterId ?: "",
             nextChapter = chapter.nextChapterId ?: ""
         )
+    }
+
+    private suspend fun searchByTitle(keyword: String): List<BookInformation> {
+        val response = apolloClient.query(SearchNovelsQuery(title = keyword)).execute()
+        return response.data?.searchNovels.orEmpty().mapNotNull { novel ->
+            novel?.let { convertToBookInformationFromSearch(it) }
+        }
+    }
+
+    companion object {
+        private const val SEARCH_TYPE_TITLE = "title"
     }
 }
 

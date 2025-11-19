@@ -1,5 +1,4 @@
 package com.miraimagiclab.novelreadingapp.ui.home.explore.search
-
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -71,13 +70,14 @@ fun ExploreSearchScreen(
     init: () -> Unit,
     onChangeSearchType: (String) -> Unit,
     onSearch: (String) -> Unit,
+    onChangeSearchKeyword: (String) -> Unit,
     onClickDeleteHistory: (String) -> Unit,
     onClickClearAllHistory: () -> Unit,
     onClickBook: (String) -> Unit
 ) {
-    var searchKeyword by rememberSaveable { mutableStateOf("") }
     var searchBarExpanded by rememberSaveable { mutableStateOf(true) }
     var dropdownMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    val searchKeyword = exploreSearchUiState.currentKeyword
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
         init.invoke()
     }
@@ -122,10 +122,18 @@ fun ExploreSearchScreen(
                     inputField = {
                         SearchBarDefaults.InputField(
                             query = searchKeyword,
-                            onQueryChange = { searchKeyword = it },
-                            onSearch = {
-                                searchBarExpanded = false
-                                onSearch(it)
+                            onQueryChange = {
+                                onChangeSearchKeyword(it)
+                            },
+                            onSearch = { query ->
+                                val trimmedKeyword = query.trim()
+                                if (trimmedKeyword.isNotEmpty()) {
+                                    if (query != searchKeyword) {
+                                        onChangeSearchKeyword(query)
+                                    }
+                                    searchBarExpanded = false
+                                    onSearch(trimmedKeyword)
+                                }
                             },
                             expanded = searchBarExpanded,
                             onExpandedChange = { searchBarExpanded = it },
@@ -146,7 +154,7 @@ fun ExploreSearchScreen(
                                     if (searchKeyword.isNotBlank())
                                         IconButton(onClick = {
                                             searchBarExpanded = true
-                                            searchKeyword = ""
+                                            onChangeSearchKeyword("")
                                         }) {
                                             Icon(painter = painterResource(R.drawable.close_24px), contentDescription = "clear")
                                         }
@@ -219,27 +227,32 @@ fun ExploreSearchScreen(
                                 AnimatedContent(
                                     targetState = history,
                                     label = "HistoryItemAnimation"
-                                ) {
+                                ) { keyword ->
                                     Row (
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(46.dp)
                                             .padding(horizontal = 16.dp)
                                             .clickable {
-                                                searchKeyword = it
                                                 searchBarExpanded = false
-                                                onSearch.invoke(history)
+                                                onChangeSearchKeyword(keyword)
+                                                val trimmedKeyword = keyword.trim()
+                                                if (trimmedKeyword.isNotEmpty()) {
+                                                    onSearch.invoke(trimmedKeyword)
+                                                }
                                             },
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
                                             modifier = Modifier.padding(start = 8.dp),
-                                            text = it,
+                                            text = keyword,
                                             style = AppTypography.labelLarge,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Box(Modifier.weight(2f))
-                                        IconButton(onClick = { onClickDeleteHistory(history) }) {
+                                        IconButton(onClick = {
+                                            onClickDeleteHistory(keyword)
+                                        }) {
                                             Icon(
                                                 painter = painterResource(R.drawable.close_24px),
                                                 contentDescription = "delete",

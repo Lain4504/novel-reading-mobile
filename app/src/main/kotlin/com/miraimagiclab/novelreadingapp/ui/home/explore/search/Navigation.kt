@@ -30,6 +30,7 @@ fun NavGraphBuilder.exploreSearchDestination() {
             init = exploreSearchViewModel::init,
             onChangeSearchType = { exploreSearchViewModel.changeSearchType(it) },
             onSearch = { exploreSearchViewModel.search(it) },
+            onChangeSearchKeyword = exploreSearchViewModel::updateSearchKeyword,
             onClickDeleteHistory = { exploreSearchViewModel.deleteHistory(it) },
             onClickClearAllHistory = exploreSearchViewModel::clearAllHistory,
             onClickBook = {

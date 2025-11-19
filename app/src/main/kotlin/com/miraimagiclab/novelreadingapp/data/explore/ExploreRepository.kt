@@ -1,14 +1,11 @@
 package com.miraimagiclab.novelreadingapp.data.explore
-
 import com.miraimagiclab.novelreadingapp.data.text.TextProcessingRepository
 import com.miraimagiclab.novelreadingapp.data.web.WebBookDataSourceProvider
 import io.lain4504.novelreadingapp.api.book.BookInformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,16 +25,24 @@ class ExploreRepository @Inject constructor(
     val exploreExpandedPageDataSourceMap = webBookDataSourceProvider.value.exploreExpandedPageDataSourceMap
 
     fun search(searchType: String, keyword: String): Flow<List<BookInformation>> {
-        searchResultCacheMap[searchType + keyword]?.let { searchResult ->
-            val flow = MutableStateFlow(emptyList<BookInformation>())
-            flow.update { searchResult }
-            return flow
+        val cacheKey = searchType + keyword
+        searchResultCacheMap[cacheKey]?.let { cachedResult ->
+            val cachedFlow = kotlinx.coroutines.flow.flow {
+                emit(cachedResult)
+                emit(listOf(BookInformation.empty()))
+            }
+            return cachedFlow.map { list ->
+                list.map { processingRepository.processBookInformation { it } }
+            }
         }
         val flow = webBookDataSourceProvider.value.search(searchType, keyword)
         coroutineScope.launch {
-            flow.collect {
-                if (it.isNotEmpty() && it.last().isEmpty()) {
-                    searchResultCacheMap[searchType + keyword] = it
+            var latestResult: List<BookInformation> = emptyList()
+            flow.collect { list ->
+                if (list.isNotEmpty() && list.last().isEmpty()) {
+                    searchResultCacheMap[cacheKey] = latestResult
+                } else {
+                    latestResult = list
                 }
             }
         }

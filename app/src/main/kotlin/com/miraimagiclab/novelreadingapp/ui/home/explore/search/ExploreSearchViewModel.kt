@@ -1,5 +1,4 @@
 package com.miraimagiclab.novelreadingapp.ui.home.explore.search
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
@@ -57,6 +56,10 @@ class ExploreSearchViewModel @Inject constructor(
         }
     }
 
+    fun updateSearchKeyword(keyword: String) {
+        _uiState.currentKeyword = keyword
+    }
+
     fun deleteHistory(history: String) {
         viewModelScope.launch(Dispatchers.IO) {
             searchHistoryUserData.update {
@@ -74,17 +77,31 @@ class ExploreSearchViewModel @Inject constructor(
     }
 
     fun search(keyword: String) {
+        val trimmedKeyword = keyword.trim()
+        if (trimmedKeyword.isEmpty()) {
+            exploreRepository.stopAllSearch()
+            searchJob?.cancel()
+            _uiState.currentKeyword = ""
+            _uiState.isLoading = false
+            _uiState.isLoadingComplete = true
+            _uiState.searchResult = emptyList()
+            return
+        }
+        _uiState.currentKeyword = trimmedKeyword
         exploreRepository.stopAllSearch()
         _uiState.isLoading = true
         _uiState.isLoadingComplete = false
         _uiState.searchResult = mutableListOf()
         searchJob?.cancel()
         searchJob = viewModelScope.launch(Dispatchers.IO) {
-            exploreRepository.search(_uiState.searchType, keyword).collect {
+            exploreRepository.search(_uiState.searchType, trimmedKeyword).collect {
                 _uiState.isLoading = false
                 if (it.isNotEmpty() && it.last().isEmpty()) {
                     _uiState.isLoadingComplete = true
-                    _uiState.searchResult = it.dropLast(1).toMutableList()
+                    val finalResults = it.dropLast(1)
+                    if (finalResults.isNotEmpty()) {
+                        _uiState.searchResult = finalResults.toMutableList()
+                    }
                     return@collect
                 }
                 _uiState.searchResult = it.toMutableList()
@@ -93,9 +110,9 @@ class ExploreSearchViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             searchHistoryUserData.update {
                 val newList = it.toMutableList()
-                if (it.contains(keyword))
-                    newList.remove(keyword)
-                newList.add(keyword)
+                if (it.contains(trimmedKeyword))
+                    newList.remove(trimmedKeyword)
+                newList.add(trimmedKeyword)
                 return@update newList
             }
         }

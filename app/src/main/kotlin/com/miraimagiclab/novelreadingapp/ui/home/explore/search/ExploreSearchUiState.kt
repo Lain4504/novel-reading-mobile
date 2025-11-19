@@ -12,6 +12,7 @@ interface ExploreSearchUiState {
     val isLoading: Boolean
     val isLoadingComplete: Boolean
     val historyList: List<String>
+    val currentKeyword: String
     val searchTypeIdList: List<String>
     val searchTypeNameMap: Map<String, String>
     val searchType: String
@@ -25,6 +26,7 @@ class MutableExploreSearchUiState : ExploreSearchUiState {
     override var isLoading: Boolean by mutableStateOf(true)
     override var isLoadingComplete: Boolean by mutableStateOf(false)
     override var historyList: List<String> by mutableStateOf(mutableListOf())
+    override var currentKeyword: String by mutableStateOf("")
     override var searchTypeIdList: List<String> by mutableStateOf(mutableListOf())
     override var searchTypeNameMap: Map<String, String> by mutableStateOf(mutableMapOf())
     override var searchType: String by mutableStateOf("")
