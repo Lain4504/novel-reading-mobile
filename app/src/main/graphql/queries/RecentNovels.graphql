@@ -1,0 +1,12 @@
+query RecentNovels($page: Int!, $size: Int!) {
+  recentNovels(page: $page, size: $size) {
+    content {
+      id
+      title
+      coverImage
+      authorName
+    }
+  }
+}
+
+

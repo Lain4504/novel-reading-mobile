@@ -1,0 +1,10 @@
+query CompletedNovels {
+  completedNovels {
+    id
+    title
+    coverImage
+    authorName
+  }
+}
+
+

@@ -1,0 +1,10 @@
+query LatestNovels {
+  latestNovels {
+    id
+    title
+    coverImage
+    authorName
+  }
+}
+
+

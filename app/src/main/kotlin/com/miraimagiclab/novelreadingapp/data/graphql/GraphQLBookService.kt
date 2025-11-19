@@ -3,11 +3,17 @@ package com.miraimagiclab.novelreadingapp.data.graphql
 import android.net.Uri
 import androidx.navigation.NavController
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Optional
+import com.miraimagiclab.novelreadingapp.graphql.CategoryRandomNovelsQuery
+import com.miraimagiclab.novelreadingapp.graphql.CompletedNovelsQuery
 import com.miraimagiclab.novelreadingapp.graphql.GetChapterQuery
 import com.miraimagiclab.novelreadingapp.graphql.GetChaptersQuery
 import com.miraimagiclab.novelreadingapp.graphql.GetNovelQuery
 import com.miraimagiclab.novelreadingapp.graphql.GetVolumesQuery
+import com.miraimagiclab.novelreadingapp.graphql.LatestNovelsQuery
+import com.miraimagiclab.novelreadingapp.graphql.RecentNovelsQuery
 import com.miraimagiclab.novelreadingapp.graphql.SearchNovelsQuery
+import com.miraimagiclab.novelreadingapp.graphql.type.CategoryEnum
 import com.miraimagiclab.novelreadingapp.utils.md.HtmlToMdUtil
 import io.lain4504.novelreadingapp.api.book.BookInformation
 import io.lain4504.novelreadingapp.api.book.BookVolumes
@@ -19,6 +25,9 @@ import io.lain4504.novelreadingapp.api.book.Volume
 import io.lain4504.novelreadingapp.api.book.WorldCount
 import io.lain4504.novelreadingapp.api.content.builder.ContentBuilder
 import io.lain4504.novelreadingapp.api.content.builder.simpleText
+import io.lain4504.novelreadingapp.api.explore.ExploreBooksRow
+import io.lain4504.novelreadingapp.api.explore.ExploreDisplayBook
+import io.lain4504.novelreadingapp.api.explore.ExplorePage
 import io.lain4504.novelreadingapp.api.web.WebBookDataSource
 import io.lain4504.novelreadingapp.api.web.WebDataSource
 import io.lain4504.novelreadingapp.api.web.explore.ExploreExpandedPageDataSource
@@ -26,6 +35,7 @@ import io.lain4504.novelreadingapp.api.web.explore.ExplorePageDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.serialization.json.buildJsonObject
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -45,6 +55,11 @@ class GraphQLBookService @Inject constructor(
     private val searchResolvers: Map<String, suspend (String) -> List<BookInformation>> = mapOf(
         SEARCH_TYPE_TITLE to ::searchByTitle
     )
+    private val explorePages: Map<String, ExplorePageDataSource> = linkedMapOf(
+        DISCOVER_PAGE_ID to createDiscoverExplorePage(),
+        TRENDING_PAGE_ID to createTrendingExplorePage(),
+        GENRES_PAGE_ID to createGenresExplorePage()
+    )
     
     override val id: Int = "backend-api".hashCode()
     
@@ -54,8 +69,8 @@ class GraphQLBookService @Inject constructor(
     
     override val isOffLineFlow: Flow<Boolean> = _offLine
     
-    override val explorePageIdList: List<String> = emptyList()
-    override val explorePageDataSourceMap: Map<String, ExplorePageDataSource> = emptyMap()
+    override val explorePageIdList: List<String> = explorePages.keys.toList()
+    override val explorePageDataSourceMap: Map<String, ExplorePageDataSource> = explorePages
     override val exploreExpandedPageDataSourceMap: Map<String, ExploreExpandedPageDataSource> = emptyMap()
     override val searchTypeMap: Map<String, String> = mapOf(
         SEARCH_TYPE_TITLE to "Title"
@@ -84,6 +99,46 @@ class GraphQLBookService @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             BookInformation.empty(id)
+        }
+    }
+
+    private fun createTrendingExplorePage(): ExplorePageDataSource {
+        return object : ExplorePageDataSource {
+            override val title: String = TRENDING_PAGE_TITLE
+            override fun getExplorePage(): ExplorePage {
+                val rowsFlow = flow {
+                    val rows = mutableListOf<ExploreBooksRow>()
+                    emitRowIfNotEmpty(rows, "Hot this week", fetchRecentNovels(page = 0, size = DEFAULT_ROW_LIMIT * 3, limit = DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "Readers' picks", fetchRecentNovels(page = 1, size = DEFAULT_ROW_LIMIT * 3, limit = DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "Freshly completed", fetchCompletedNovels(DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "Action & Adventure", fetchCategoryRandomNovels(CategoryEnum.ADVENTURE, DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "Urban legends", fetchCategoryRandomNovels(CategoryEnum.URBAN, DEFAULT_ROW_LIMIT))
+                }
+                return ExplorePage(title = title, rows = rowsFlow)
+            }
+        }
+    }
+
+    private fun createGenresExplorePage(): ExplorePageDataSource {
+        val genreConfigs = listOf(
+            "Fantasy realms" to CategoryEnum.FANTASY,
+            "Romantic tales" to CategoryEnum.ROMANCE,
+            "Slice of life" to CategoryEnum.SLICE_OF_LIFE,
+            "School life" to CategoryEnum.SCHOOL_LIFE,
+            "Drama & feels" to CategoryEnum.DRAMA,
+            "Comedy relief" to CategoryEnum.COMEDY
+        )
+        return object : ExplorePageDataSource {
+            override val title: String = GENRES_PAGE_TITLE
+            override fun getExplorePage(): ExplorePage {
+                val rowsFlow = flow {
+                    val rows = mutableListOf<ExploreBooksRow>()
+                    genreConfigs.forEach { (label, category) ->
+                        emitRowIfNotEmpty(rows, label, fetchCategoryRandomNovels(category, DEFAULT_ROW_LIMIT))
+                    }
+                }
+                return ExplorePage(title = title, rows = rowsFlow)
+            }
         }
     }
     
@@ -134,6 +189,116 @@ class GraphQLBookService @Inject constructor(
         }
         emit(novels)
         emit(listOf(completionMarker))
+    }
+
+    private fun createDiscoverExplorePage(): ExplorePageDataSource {
+        return object : ExplorePageDataSource {
+            override val title: String = DISCOVER_PAGE_TITLE
+            override fun getExplorePage(): ExplorePage {
+                val rowsFlow = flow {
+                    val rows = mutableListOf<ExploreBooksRow>()
+                    emitRowIfNotEmpty(rows, "Latest updates", fetchLatestNovels(DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "New arrivals", fetchRecentNovels(page = 0, size = DEFAULT_ROW_LIMIT * 2, limit = DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "Completed gems", fetchCompletedNovels(DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "Fantasy spotlight", fetchCategoryRandomNovels(CategoryEnum.FANTASY, DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, "Romance spotlight", fetchCategoryRandomNovels(CategoryEnum.ROMANCE, DEFAULT_ROW_LIMIT))
+                }
+                return ExplorePage(title = title, rows = rowsFlow)
+            }
+        }
+    }
+
+    private suspend fun FlowCollector<List<ExploreBooksRow>>.emitRowIfNotEmpty(
+        rows: MutableList<ExploreBooksRow>,
+        title: String,
+        books: List<ExploreDisplayBook>,
+        expandable: Boolean = false,
+        expandedId: String? = null
+    ) {
+        if (books.isEmpty()) return
+        rows.add(
+            ExploreBooksRow(
+                title = title,
+                bookList = books,
+                expandable = expandable,
+                expandedPageDataSourceId = expandedId
+            )
+        )
+        emit(rows.toList())
+    }
+
+    private suspend fun fetchLatestNovels(limit: Int): List<ExploreDisplayBook> {
+        return try {
+            val response = apolloClient.query(LatestNovelsQuery()).execute()
+            response.data?.latestNovels.orEmpty()
+                .mapNotNull { novel ->
+                    novel?.let {
+                        convertToExploreDisplayBook(it.id, it.title, it.authorName, it.coverImage)
+                    }
+                }
+                .take(limit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    private suspend fun fetchRecentNovels(page: Int, size: Int, limit: Int): List<ExploreDisplayBook> {
+        return try {
+            val response = apolloClient.query(
+                RecentNovelsQuery(
+                    page = page,
+                    size = size
+                )
+            ).execute()
+            response.data?.recentNovels?.content.orEmpty()
+                .mapNotNull { novel ->
+                    novel?.let {
+                        convertToExploreDisplayBook(it.id, it.title, it.authorName, it.coverImage)
+                    }
+                }
+                .take(limit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    private suspend fun fetchCompletedNovels(limit: Int): List<ExploreDisplayBook> {
+        return try {
+            val response = apolloClient.query(CompletedNovelsQuery()).execute()
+            response.data?.completedNovels.orEmpty()
+                .mapNotNull { novel ->
+                    novel?.let {
+                        convertToExploreDisplayBook(it.id, it.title, it.authorName, it.coverImage)
+                    }
+                }
+                .take(limit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    private suspend fun fetchCategoryRandomNovels(category: CategoryEnum, limit: Int): List<ExploreDisplayBook> {
+        return try {
+            val response = apolloClient.query(
+                CategoryRandomNovelsQuery(
+                    category = category,
+                    limit = Optional.Present(limit)
+                )
+            ).execute()
+            response.data?.categoryRandomNovels.orEmpty()
+                .mapNotNull { novel ->
+                    novel?.let {
+                        convertToExploreDisplayBook(it.id, it.title, it.authorName, it.coverImage)
+                    }
+                }
+                .take(limit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
     
     override fun stopAllSearch() {
@@ -262,8 +427,33 @@ class GraphQLBookService @Inject constructor(
         }
     }
 
+    private fun convertToExploreDisplayBook(
+        id: String?,
+        title: String?,
+        authorName: String?,
+        coverImage: String?
+    ): ExploreDisplayBook? {
+        if (id.isNullOrBlank() || title.isNullOrBlank()) return null
+        val coverUri = coverImage?.takeIf { it.isNotBlank() }?.let {
+            runCatching { Uri.parse(it) }.getOrElse { Uri.EMPTY }
+        } ?: Uri.EMPTY
+        return ExploreDisplayBook(
+            id = id,
+            title = title,
+            author = authorName ?: "",
+            coverUri = coverUri
+        )
+    }
+
     companion object {
         private const val SEARCH_TYPE_TITLE = "title"
+        private const val DISCOVER_PAGE_ID = "discover"
+        private const val DISCOVER_PAGE_TITLE = "Discover"
+        private const val TRENDING_PAGE_ID = "trending"
+        private const val TRENDING_PAGE_TITLE = "Trending"
+        private const val GENRES_PAGE_ID = "genres"
+        private const val GENRES_PAGE_TITLE = "Genres"
+        private const val DEFAULT_ROW_LIMIT = 12
     }
 }
 

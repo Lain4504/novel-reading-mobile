@@ -1,0 +1,10 @@
+query CategoryRandomNovels($category: CategoryEnum!, $limit: Int) {
+  categoryRandomNovels(category: $category, limit: $limit) {
+    id
+    title
+    coverImage
+    authorName
+  }
+}
+
+
