@@ -8,6 +8,7 @@ import com.miraimagiclab.novelreadingapp.graphql.GetChaptersQuery
 import com.miraimagiclab.novelreadingapp.graphql.GetNovelQuery
 import com.miraimagiclab.novelreadingapp.graphql.GetVolumesQuery
 import com.miraimagiclab.novelreadingapp.graphql.SearchNovelsQuery
+import com.miraimagiclab.novelreadingapp.utils.md.HtmlToMdUtil
 import io.lain4504.novelreadingapp.api.book.BookInformation
 import io.lain4504.novelreadingapp.api.book.BookVolumes
 import io.lain4504.novelreadingapp.api.book.ChapterContent
@@ -235,8 +236,11 @@ class GraphQLBookService @Inject constructor(
     }
     
     private fun convertToChapterContent(chapter: GetChapterQuery.Chapter): ChapterContent {
-        // Convert chapter content to JsonObject format using ContentBuilder
-        val contentJson = chapter.content?.let { content ->
+        val processedContent = chapter.content?.let { raw ->
+            val version = chapter.version ?: 1
+            if (version >= 2) HtmlToMdUtil.convertHtml(raw) else raw
+        }
+        val contentJson = processedContent?.takeIf { it.isNotBlank() }?.let { content ->
             ContentBuilder().apply {
                 simpleText(content)
             }.build()
