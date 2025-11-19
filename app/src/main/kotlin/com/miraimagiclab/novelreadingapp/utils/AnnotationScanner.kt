@@ -11,11 +11,11 @@ object AnnotationScanner {
     private const val TAG = "AnnotationScanner"
 
     /**
-     * 扫描DexClassLoader中带有指定注解的所有类
+     * Quét tất cả các lớp trong DexClassLoader có gắn annotation chỉ định
      *
-     * @param classLoader 要扫描的DexClassLoader
-     * @param annotationClass 要查找的注解类型
-     * @return 带有指定注解的类列表
+     * @param classLoader DexClassLoader cần quét
+     * @param annotationClass kiểu annotation cần tìm
+     * @return danh sách lớp có annotation tương ứng
      */
     @SuppressLint("NewApi")
     fun findAnnotatedClasses(

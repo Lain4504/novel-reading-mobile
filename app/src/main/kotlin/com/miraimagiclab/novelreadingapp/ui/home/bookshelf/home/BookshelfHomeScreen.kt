@@ -219,9 +219,9 @@ fun BookshelfHomeScreen(
                                     WorkInfo.State.SUCCEEDED -> {
                                         ShareCompat.IntentBuilder(context)
                                             .setType("application/zip")
-                                            .setSubject("分享文件")
+                                            .setSubject("Chia sẻ tệp")
                                             .addStream(uri)
-                                            .setChooserTitle("分享书架")
+                                            .setChooserTitle("Chia sẻ kệ sách")
                                             .startChooser()
                                     }
 
@@ -781,7 +781,7 @@ fun createBookshelfDataFile(fileName: String, launcher: ManagedActivityResultLau
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
         putExtra(Intent.EXTRA_TITLE, "$fileName.lnr")
     }
-    launcher.launch(Intent.createChooser(intent, "选择一位置"))
+    launcher.launch(Intent.createChooser(intent, "Chọn vị trí lưu"))
 }
 
 @Composable
@@ -804,5 +804,5 @@ fun selectBookshelfDataFile(launcher: ManagedActivityResultLauncher<Intent, Acti
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
-    launcher.launch(Intent.createChooser(intent, "选择数据文件"))
+    launcher.launch(Intent.createChooser(intent, "Chọn tệp dữ liệu"))
 }

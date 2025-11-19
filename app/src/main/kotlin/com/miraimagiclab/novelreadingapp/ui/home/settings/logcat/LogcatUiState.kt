@@ -15,6 +15,6 @@ interface LogcatUiState {
 
 class MutableLogcatUiState : LogcatUiState {
     override var isFileMode: Boolean by mutableStateOf(false)
-    override var selectedLogFile: String by mutableStateOf("实时")
+    override var selectedLogFile: String by mutableStateOf("Thời gian thực")
     override var displayedLogEntries: List<LogEntry> by mutableStateOf(emptyList())
 }

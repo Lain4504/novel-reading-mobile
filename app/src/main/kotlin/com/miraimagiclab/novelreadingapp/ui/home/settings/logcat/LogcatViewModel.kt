@@ -41,7 +41,7 @@ class LogcatViewModel @Inject constructor (
 
     fun deleteLogFile(fileName: String) {
         loggerRepository.deleteLogFile(fileName)
-        onSelectLogFile("实时")
+        onSelectLogFile("Thời gian thực")
     }
 
     fun onSelectLogFile(fileName: String) {
@@ -51,5 +51,5 @@ class LogcatViewModel @Inject constructor (
     }
 
     val logFilenameList: List<String>
-        get() = loggerRepository.getAvailableLogFiles() + "实时"
+        get() = loggerRepository.getAvailableLogFiles() + "Thời gian thực"
 }

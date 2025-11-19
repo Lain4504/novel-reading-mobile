@@ -119,11 +119,11 @@ private fun NavGraphBuilder.exportUserDataDialog() {
                     .collect {
                         when (it?.state) {
                             WorkInfo.State.FAILED -> {
-                                Toast.makeText(context, "导出失败", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Xuất dữ liệu thất bại", Toast.LENGTH_SHORT).show()
                             }
 
                             WorkInfo.State.SUCCEEDED -> {
-                                Toast.makeText(context, "导出成功", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Xuất dữ liệu thành công", Toast.LENGTH_SHORT).show()
                             }
 
                             else -> {}
@@ -160,5 +160,5 @@ private fun createDataFile(fileName: String, launcher: ManagedActivityResultLaun
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
         putExtra(Intent.EXTRA_TITLE, "$fileName.lnr")
     }
-    launcher.launch(Intent.createChooser(intent, "选择一位置"))
+    launcher.launch(Intent.createChooser(intent, "Chọn vị trí lưu"))
 }

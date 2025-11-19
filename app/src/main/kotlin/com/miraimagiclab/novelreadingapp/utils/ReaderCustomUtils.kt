@@ -57,7 +57,7 @@ fun rememberReaderFontFamily(settingState: SettingState): FontFamily {
         }
         LaunchedEffect(uri) {
             settingState.fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
-            Toast.makeText(context, "字体加载失败，已恢复为默认字体", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Không tải được phông chữ, đã quay về mặc định", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -102,7 +102,7 @@ fun rememberReaderBackgroundPainter(settingState: SettingState): Painter {
                 else ->
                     settingState.backgroundImageUriUserData.asynchronousSet(Uri.EMPTY)
             }
-            Toast.makeText(context, "背景加载失败，已恢复默认", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Không tải được ảnh nền, đã quay về mặc định", Toast.LENGTH_SHORT).show()
             loadFailed = false
         }
     }

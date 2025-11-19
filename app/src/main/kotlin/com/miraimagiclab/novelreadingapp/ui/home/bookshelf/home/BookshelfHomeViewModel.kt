@@ -209,7 +209,7 @@ class BookshelfHomeViewModel @Inject constructor(
                     WorkInfo.State.ENQUEUED -> return@collect
                     WorkInfo.State.RUNNING -> return@collect
                     WorkInfo.State.SUCCEEDED -> load()
-                    WorkInfo.State.FAILED -> _uiState.toast = "文件损坏或格式错误，请检查后重试。"
+                    WorkInfo.State.FAILED -> _uiState.toast = "Tệp bị hỏng hoặc sai định dạng, hãy kiểm tra rồi thử lại."
                     WorkInfo.State.BLOCKED -> return@collect
                     WorkInfo.State.CANCELLED -> return@collect
                 }

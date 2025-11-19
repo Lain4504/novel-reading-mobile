@@ -11,7 +11,7 @@ abstract class UserData<T> (
 ) {
     val group get() = path.split(".").dropLast(1).joinToString(".")
     /**
-     * 此函数为阻塞函数，请务必不要在初始化阶段或主线程上调用
+     * Hàm này là đồng bộ, không nên gọi trong giai đoạn khởi tạo hoặc trên main thread
      */
     abstract fun set(value: T)
     fun asynchronousSet(value: T) {
@@ -20,19 +20,19 @@ abstract class UserData<T> (
         }
     }
     /**
-     * 此函数为阻塞函数，请务必不要在初始化阶段或主线程上调用
+     * Hàm này là đồng bộ, không nên gọi trong giai đoạn khởi tạo hoặc trên main thread
      */
     abstract fun get(): T?
     abstract fun getFlow(): Flow<T?>
     fun getFlowWithDefault(default: T): Flow<T> = getFlow().map { it ?: default }
     /**
-     * 此函数为阻塞函数，请务必不要在初始化阶段或主线程上调用
+     * Hàm này là đồng bộ, không nên gọi trong giai đoạn khởi tạo hoặc trên main thread
      */
     fun getOrDefault(default: T): T {
         return get() ?: default
     }
     /**
-     * 此函数为阻塞函数，请务必不要在初始化阶段或主线程上调用
+     * Hàm này là đồng bộ, không nên gọi trong giai đoạn khởi tạo hoặc trên main thread
      */
     fun update(updater: (T) -> T, default: T) {
         set(updater(getOrDefault(default)))

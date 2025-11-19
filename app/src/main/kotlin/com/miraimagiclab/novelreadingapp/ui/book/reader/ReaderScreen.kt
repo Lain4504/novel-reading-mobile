@@ -494,7 +494,7 @@ private fun BottomBar(
             IconButton(
                 enabled = false,
                 onClick = {
-                    // TODO 添加至书签
+                    // TODO Thêm vào dấu trang
                 }
             ) {
                 Icon(

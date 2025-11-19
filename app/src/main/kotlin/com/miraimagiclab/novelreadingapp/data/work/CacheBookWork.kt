@@ -41,7 +41,7 @@ class CacheBookWork @AssistedInject constructor(
                 )
                 if (chapter.isEmpty()) return Result.failure().also {
                     Looper.prepare()
-                    Toast.makeText(applicationContext, "缓存失败，请检查网络环境", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "Lưu bộ nhớ đệm thất bại, hãy kiểm tra kết nối mạng", Toast.LENGTH_SHORT).show()
                     Looper.loop()
                 }
                 localBookDataSource.updateChapterContent(chapter)

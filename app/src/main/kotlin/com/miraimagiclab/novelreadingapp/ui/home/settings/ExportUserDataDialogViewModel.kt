@@ -54,9 +54,9 @@ class ExportUserDataDialogViewModel @Inject constructor(
                     WorkInfo.State.SUCCEEDED -> {
                         ShareCompat.IntentBuilder(context)
                             .setType("application/zip")
-                            .setSubject("分享文件")
+                            .setSubject("Chia sẻ tệp")
                             .addStream(uri)
-                            .setChooserTitle("分享")
+                            .setChooserTitle("Chia sẻ")
                             .startChooser()
                     }
                     else -> return@collect

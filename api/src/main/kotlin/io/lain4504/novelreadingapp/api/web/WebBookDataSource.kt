@@ -12,132 +12,127 @@ import io.lain4504.novelreadingapp.api.web.explore.ExplorePageDataSource
 import kotlinx.coroutines.flow.Flow
 
 /**
- * LightNovelReader 的网络数据提供源接口，可以通过实现此接口使软件支持新的数据源
- * 软件加载WebBookDataSource时会对构造器进行接依赖注入
- * 版本: 0.5.0
+ * Interface nguồn dữ liệu web của LightNovelReader, triển khai để bổ sung các nguồn truyện mới.
+ * Khi được nạp, WebBookDataSource sẽ được tiêm dependencies thông qua constructor.
+ * Phiên bản: 0.5.0
  */
 interface WebBookDataSource {
     val id: Int
 
     /**
-     * 当数据源被加载时调用
+     * Được gọi khi nguồn dữ liệu được khởi chạy
      */
     fun onLoad() {}
 
     /**
-     * 获取当前软件整体是否处于离线状态
+     * Kiểm tra đồng bộ xem toàn bộ ứng dụng có đang ở trạng thái offline hay không
      */
     suspend fun isOffLine(): Boolean
 
     /**
-     * 当前软件整体是否处于离线状态
+     * Trạng thái offline hiện tại của ứng dụng
      */
     val offLine: Boolean
 
     /**
-     * 获取当前软件整体是否处于离线状态的数据流
-     * 此数据流应当为热数据流, 并且不断对状态进行更新
+     * Dòng trạng thái offline của ứng dụng.
+     * Nên là hot flow và cập nhật liên tục.
      */
     val isOffLineFlow: Flow<Boolean>
 
     /**
-     * 所有探索页页面数据源的id
+     * Danh sách id của mọi ExplorePage
      */
     val explorePageIdList: List<String>
 
     /**
-     * 获取探索页面数据源的id和页面数据源的对应表
-     * 此函数应当保证主线程安全
+     * Bản đồ giữa id và ExplorePageDataSource.
+     * Hàm nên an toàn khi gọi trên main thread.
      */
     val explorePageDataSourceMap: Map<String, ExplorePageDataSource>
 
     /**
-     * 获取各个探索页横栏的展开页的id与展开页数据源的对应表
-     * 此函数应当保证主线程安全
+     * Bản đồ giữa id và ExploreExpandedPageDataSource cho các trang mở rộng.
+     * Hàm nên an toàn khi chạy trên main thread.
      */
     val exploreExpandedPageDataSourceMap: Map<String, ExploreExpandedPageDataSource>
 
     /**
-     * 搜索类型id和名称的对应表
+     * Bản đồ giữa id loại tìm kiếm và tên hiển thị
      */
     val searchTypeMap: Map<String, String>
 
     /**
-     * 搜索类型id和搜索栏提示的对应表
+     * Bản đồ giữa id loại tìm kiếm và gợi ý trong ô tìm kiếm
      */
     val searchTipMap: Map<String, String>
 
     /**
-     * 搜索类型id的有序列表
+     * Danh sách có thứ tự của các id loại tìm kiếm
      */
     val searchTypeIdList: List<String>
 
     /***
-     * 请求插图时的Header
+     * Header cần thêm khi tải ảnh minh họa (nếu cần)
      */
     val imageHeader: Map<String, String>
         get() = emptyMap()
 
     /**
-     * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
-     * 此函数应当自行实现断线重连等逻辑
+     * Hàm đồng bộ, có thể chặn cho tới khi nhận được dữ liệu (tự xử lý retry khi mạng lỗi).
      *
-     * @param id 书本id
-     * @return 经过格式化后的书本元数据, getBookInformation.empty()
+     * @param id id của sách
+     * @return thông tin sách đã được chuẩn hóa, hoặc BookInformation.empty()
      */
     suspend fun getBookInformation(id: String): BookInformation
 
     /**
-     * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
-     * 此函数应当自行实现断线重连等逻辑
+     * Hàm đồng bộ, tự xử lý retry khi mất kết nối.
      *
-     * @param id 书本id
-     * @return 经过格式化后的书本章节目录数据, 如未找到改书则返回BookVolumes.empty
+     * @param id id của sách
+     * @return danh sách tập/chương đã chuẩn hóa, hoặc BookVolumes.empty nếu không tìm thấy
      */
     suspend fun getBookVolumes(id: String): BookVolumes
 
     /**
-     * 此函数无需保证主线程安全性, 为阻塞函数, 获取到数据前应当保持阻塞
-     * 此函数应当自行实现断线重连等逻辑
+     * Hàm đồng bộ, tự xử lý reconnect khi cần.
      *
-     * @param chapterId 章节id
-     * @param bookId 章节所属书本id
-     * @return 经过格式化后的书本章节类容录数据, 如未找到改书则返回ChapterContent.empty()
+     * @param chapterId id chương
+     * @param bookId id sách chứa chương
+     * @return nội dung chương đã chuẩn hóa, hoặc ChapterContent.empty() nếu không có
      */
     suspend fun getChapterContent(chapterId: String, bookId: String): ChapterContent
 
     /**
-     * 执行搜索任务
+     * Thực thi tác vụ tìm kiếm.
      *
-     * 应当返回搜索结果的数据流
-     * 并且以空书本元数据[BookInformation.Companion.empty]作为列表结尾时表示搜索结束
-     * 此函数本身应当保证主线程安全
+     * Trả về Flow kết quả tìm kiếm, kết thúc bằng một phần tử rỗng [BookInformation.Companion.empty]
+     * để báo hiệu hoàn tất. Hàm phải an toàn khi gọi trên main thread.
      *
-     * @param searchType 搜索类别
-     * @param keyword 搜索关键词
-     * @return 搜索结果的数据流
+     * @param searchType loại tìm kiếm
+     * @param keyword từ khóa
+     * @return Flow kết quả tìm kiếm
      */
     fun search(searchType: String, keyword: String): Flow<List<BookInformation>>
 
     /**
-     * 停止当前所执行的所有搜索任务
-     * 此函数应当保证主线程安全
-     *
+     * Dừng toàn bộ tác vụ tìm kiếm đang chạy.
+     * Hàm nên an toàn trên main thread.
      */
     fun stopAllSearch()
 
     /**
-     * 用于处理书本tag的点击跳转事件
+     * Xử lý sự kiện bấm vào tag của sách
      */
     fun progressBookTagClick(tag: String, navController: NavController) {  }
 
     /**
-     * 根据卷获取该卷封面的Uri, 用于EPUB分卷导出
-     * 如无, 则返回null
+     * Lấy URI ảnh bìa tương ứng với một tập, phục vụ xuất EPUB theo tập.
+     * Nếu không có, trả về null.
      *
-     * @param bookId 书本id
-     * @param volume 需要搜索封面的卷id
-     * @param volumeChapterContentMap 包含搜索卷全部章节的Map, 以章节id为key
+     * @param bookId id sách
+     * @param volume tập cần lấy bìa
+     * @param volumeChapterContentMap map chứa toàn bộ chương trong tập, key là chapterId
      */
     fun getCoverUriInVolume(
         bookId: String,

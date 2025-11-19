@@ -101,7 +101,7 @@ fun EditTextFormattingRuleDialog(
             ) {
                 if (rule.id != -1)
                     TextButton(onClick = onDelete) {
-                        Text(text = "删除规则", color = colorScheme.error)
+                        Text(text = "Xóa quy tắc", color = colorScheme.error)
                     }
                 TextButton(onClick = onDismissRequest) {
                     Text(text = stringResource(R.string.cancel))

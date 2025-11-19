@@ -70,11 +70,11 @@ data class DurationFormat(val locale: Locale = Locale.getDefault()) {
         }
     } else {
         when (unit) {
-            Unit.DAY -> "天"
-            Unit.HOUR -> "小时"
-            Unit.MINUTE -> "分钟"
-            Unit.SECOND -> "秒"
-            Unit.MILLISECOND -> "毫秒"
+            Unit.DAY -> "ngày"
+            Unit.HOUR -> "giờ"
+            Unit.MINUTE -> "phút"
+            Unit.SECOND -> "giây"
+            Unit.MILLISECOND -> "mili giây"
         }
     }
 }

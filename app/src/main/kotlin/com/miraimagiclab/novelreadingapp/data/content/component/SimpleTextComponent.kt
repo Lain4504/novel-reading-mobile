@@ -118,7 +118,7 @@ class SimpleTextComponent(
             }
             LaunchedEffect(uri) {
                 fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
-                Toast.makeText(context, "字体加载失败，已恢复为默认字体", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Không tải được phông chữ, đã quay về mặc định", Toast.LENGTH_SHORT).show()
             }
         }
 

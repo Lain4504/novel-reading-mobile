@@ -190,7 +190,7 @@ fun SliderDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "字数限制：",
+                    text = "Giới hạn số chữ:",
                     style = AppTypography.labelMedium
                 )
                 Spacer(Modifier.weight(1f))
@@ -201,7 +201,7 @@ fun SliderDialog(
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text = "以上",
+                    text = "trở lên",
                     style = AppTypography.labelMedium
                 )
             }

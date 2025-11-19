@@ -123,7 +123,7 @@ class StatsRepository @Inject constructor(
     }
 
     /**
-     * 具有特殊 id 的总阅读记录 Entity，用于总体统计
+     * Entity tổng hợp với id đặc biệt, dùng cho thống kê toàn cục
      */
     private fun createTotalRecordEntity(): BookRecordEntity = BookRecordEntity(
         id = -721,

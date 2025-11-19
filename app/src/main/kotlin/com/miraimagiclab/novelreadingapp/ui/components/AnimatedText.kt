@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.TextUnit
 
 
 /**
- * 动画文本控件
+ * Thành phần văn bản có hiệu ứng
  *
- * 在文本变化时，提供滑动动画效果
+ * Thêm animation trượt khi nội dung thay đổi
  */
 @Composable
 fun AnimatedText(
@@ -97,9 +97,9 @@ fun AnimatedText(
 }
 
 /**
- * 动画文本控件
+ * Thành phần văn bản có hiệu ứng
  *
- * 区别于 AnimatedText, 该控件在文本变化时，提供整行的滑动动画效果
+ * So với AnimatedText, biến thể này trượt toàn bộ dòng khi thay đổi
  */
 @Composable
 fun AnimatedTextLine(

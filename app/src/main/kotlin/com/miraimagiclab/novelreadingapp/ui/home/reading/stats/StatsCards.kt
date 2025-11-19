@@ -78,7 +78,7 @@ private fun assignColors(
 }
 
 /**
- * @return startedBooks/favoriteBooks/finishedBooks 在日期范围内的 BookId 列表
+ * @return danh sách bookId startedBooks/favoriteBooks/finishedBooks trong phạm vi ngày đã chọn
  */
 private fun getBooksInRange(
     statsMap: Map<LocalDate, ReadingStatisticsEntity>,
@@ -92,7 +92,7 @@ private fun getBooksInRange(
 }
 
 /**
- * 统计详情: 活动卡片的行
+ * Phần chi tiết thống kê: các dòng thẻ hoạt động
  */
 @Composable
 private fun BookActivitySection(
@@ -160,7 +160,7 @@ private fun BookActivitySection(
 }
 
 /**
- * 活动卡片（适用各种时间范围）
+ * Thẻ hoạt động (áp dụng cho mọi khoảng thời gian)
  */
 @Composable
 fun ActivityStatsCard(
@@ -214,7 +214,7 @@ fun ActivityStatsCard(
 }
 
 /**
- * 阅读详情卡片（适用各种时间范围）
+ * Thẻ chi tiết lượt đọc (áp dụng cho mọi khoảng thời gian)
  */
 @Composable
 fun ReadingDetailStatsCard(

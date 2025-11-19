@@ -7,5 +7,5 @@ enum class DownloadType(
     @field:DrawableRes val icon: Int,
     val typeName: String
 ) {
-    CACHE(R.drawable.downloading_24px, "缓存")
+    CACHE(R.drawable.downloading_24px, "Bộ nhớ đệm")
 }

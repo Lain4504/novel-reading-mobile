@@ -175,7 +175,7 @@ private fun Group(
                 color = colorScheme.primary
             )
             Text(
-                text = "${formattingGroup.size} 个规则",
+                text = "${formattingGroup.size} quy tắc",
                 style = AppTypography.labelMedium,
                 color = colorScheme.secondary
             )

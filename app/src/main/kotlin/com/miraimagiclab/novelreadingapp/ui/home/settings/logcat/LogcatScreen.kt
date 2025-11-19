@@ -331,7 +331,7 @@ private fun parseFileLabel(fileName: String): Pair<String, String> {
 @Composable
 private fun colorForFile(fileName: String): Color {
     return when {
-        fileName == "实时" -> Color(0xFF4CAF50)
+        fileName == "Thời gian thực" -> Color(0xFF4CAF50)
         fileName.startsWith("lnr_panic_") -> Color(0xFFF44336)
         fileName.startsWith("lnr_export_") -> Color(0xFF2196F3)
         else -> MaterialTheme.colorScheme.onSurfaceVariant

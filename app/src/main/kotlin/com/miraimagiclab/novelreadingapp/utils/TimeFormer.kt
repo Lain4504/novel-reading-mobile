@@ -13,43 +13,36 @@ fun formTime(time: LocalDateTime): String {
     val hourDiff = now.hour - time.hour
     val minuteDiff = now.minute - time.minute
 
+    val vietnamLocale = Locale("vi", "VN")
+
     return when {
-        time == LocalDateTime.MIN -> "从未"
+        time == LocalDateTime.MIN -> "Chưa bao giờ"
         yearDiff > 1 ->
-            if (Locale.getDefault().language.equals(Locale.CHINESE.language))
-                DateTimeFormatter
-                    .ofPattern("uuuu年MMMd日", Locale.CHINESE)
-                    .format(time)
-            else
-                DateTimeFormatter
-                    .ofPattern("d MMM uuuu", Locale.ENGLISH)
-                    .format(time)
-        yearDiff == 1 ->  "去年"
+            DateTimeFormatter
+                .ofPattern("d MMM uuuu", vietnamLocale)
+                .format(time)
+        yearDiff == 1 -> "Năm ngoái"
         (dayDiff > 3 || monthDiff > 1) ->
-            if (Locale.getDefault().language.equals(Locale.CHINESE.language))
-                DateTimeFormatter
-                    .ofPattern("MMMd日", Locale.CHINESE)
-                    .format(time)
-            else
-                DateTimeFormatter
-                    .ofPattern("d MMM", Locale.ENGLISH)
-                    .format(time)
+            DateTimeFormatter
+                .ofPattern("d MMM", vietnamLocale)
+                .format(time)
         dayDiff in 1..3 -> {
             val prefix = when (dayDiff) {
-                1 -> "昨天"
-                2 -> "前天"
-                3 -> "大前天"
+                1 -> "Hôm qua"
+                2 -> "Hôm kia"
+                3 -> "Ba ngày trước"
                 else -> ""
             }
-            if (dayDiff <=2) {
-                "$prefix ${time.hour}:${time.minute}"
+            if (dayDiff <= 2) {
+                val minute = time.minute.toString().padStart(2, '0')
+                "$prefix ${time.hour}:$minute"
             } else {
                 prefix
             }
         }
-        hourDiff in 1..24 -> "$hourDiff 小时前"
-        minuteDiff in 1 until 60 -> "$minuteDiff 分钟前"
-        minuteDiff == 0 -> "刚刚"
-        else -> "很久以前"
+        hourDiff in 1..24 -> "$hourDiff giờ trước"
+        minuteDiff in 1 until 60 -> "$minuteDiff phút trước"
+        minuteDiff == 0 -> "Vừa xong"
+        else -> "Rất lâu trước"
     }
 }

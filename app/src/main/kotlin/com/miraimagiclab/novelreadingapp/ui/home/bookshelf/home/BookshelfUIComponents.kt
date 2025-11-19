@@ -198,7 +198,7 @@ fun BookCardContent(
                 } else {
                     Column {
                         Text(
-                            text = "已更新至: ",
+                            text = "Đã cập nhật đến:",
                             style = AppTypography.labelMedium
                         )
                         Text(

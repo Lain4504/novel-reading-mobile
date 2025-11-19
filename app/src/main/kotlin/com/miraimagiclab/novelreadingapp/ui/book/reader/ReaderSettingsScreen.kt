@@ -438,5 +438,5 @@ fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResul
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
-    launcher.launch(Intent.createChooser(intent, "选择背景图片"))
+    launcher.launch(Intent.createChooser(intent, "Chọn ảnh nền"))
 }

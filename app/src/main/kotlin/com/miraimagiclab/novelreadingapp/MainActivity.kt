@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
             if (bookshelfRepository.getAllBookshelfIds().isEmpty())
                 bookshelfRepository.createBookShelf(
                     id = 1145140721,
-                    name = "已收藏",
+                    name = "Đã lưu",
                     sortType = BookshelfSortType.Default,
                     autoCache = false,
                     systemUpdateReminder = false

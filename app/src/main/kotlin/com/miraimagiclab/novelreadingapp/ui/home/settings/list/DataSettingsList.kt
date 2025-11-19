@@ -91,5 +91,5 @@ fun selectDataFile(launcher: ManagedActivityResultLauncher<Intent, ActivityResul
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             putExtra(DocumentsContract.EXTRA_INITIAL_URI, initUri)
     }
-    launcher.launch(Intent.createChooser(intent, "选择数据文件"))
+    launcher.launch(Intent.createChooser(intent, "Chọn tệp dữ liệu"))
 }
