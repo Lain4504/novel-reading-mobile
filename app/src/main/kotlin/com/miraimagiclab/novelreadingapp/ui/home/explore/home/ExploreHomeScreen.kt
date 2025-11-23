@@ -221,7 +221,7 @@ fun TopBar(
             IconButton(onClick = onClickSearch) {
                 Icon(
                     painter = painterResource(id = R.drawable.search_24px),
-                    contentDescription = "search"
+                    contentDescription = stringResource(R.string.cd_search)
                 )
             }
         },
@@ -286,7 +286,7 @@ fun ExplorePage(
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.arrow_forward_24px),
-                                    contentDescription = "expand"
+                                    contentDescription = stringResource(R.string.cd_expand)
                                 )
                             }
                         }

@@ -16,7 +16,6 @@ import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookRecordDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookVolumesDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookshelfDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.ChapterContentDao
-import com.miraimagiclab.novelreadingapp.data.local.room.dao.FormattingRuleDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.ReadingStatisticsDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserDataDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserReadingDataDao
@@ -26,7 +25,6 @@ import com.miraimagiclab.novelreadingapp.data.local.room.entity.BookshelfBookMet
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.BookshelfEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.ChapterContentEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.ChapterInformationEntity
-import com.miraimagiclab.novelreadingapp.data.local.room.entity.FormattingRuleEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.ReadingStatisticsEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.UserDataEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.UserReadingDataEntity
@@ -47,10 +45,9 @@ import io.lain4504.novelreadingapp.api.content.builder.simpleText
         BookshelfEntity::class,
         BookshelfBookMetadataEntity::class,
         ReadingStatisticsEntity::class,
-        BookRecordEntity::class,
-        FormattingRuleEntity::class
+        BookRecordEntity::class
     ],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
 abstract class LightNovelReaderDatabase : RoomDatabase() {
@@ -62,7 +59,6 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
     abstract fun bookshelfDao(): BookshelfDao
     abstract fun readingStatisticsDao(): ReadingStatisticsDao
     abstract fun bookRecordDao(): BookRecordDao
-    abstract fun formattingRuleDao(): FormattingRuleDao
 
     companion object {
         @Volatile
@@ -84,7 +80,8 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                             MIGRATION_10_11,
                             MIGRATION_11_12,
                             MIGRATION_12_13,
-                            MIGRATION_13_14
+                            MIGRATION_13_14,
+                            MIGRATION_14_15
                         )
                         .allowMainThreadQueries()
                         .build()
@@ -449,6 +446,11 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                     } while (cursor.moveToNext())
                 }
                 db.execSQL("drop table temp")
+            }
+        }
+        private val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("drop table formatting_rule")
             }
         }
     }

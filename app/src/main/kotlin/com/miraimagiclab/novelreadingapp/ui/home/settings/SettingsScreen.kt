@@ -33,13 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.work.OneTimeWorkRequest
 import com.miraimagiclab.novelreadingapp.ui.SharedContentKey
 import com.miraimagiclab.novelreadingapp.ui.home.HomeNavigateBar
 import com.miraimagiclab.novelreadingapp.ui.home.settings.list.AboutSettingsList
-import com.miraimagiclab.novelreadingapp.ui.home.settings.list.AppSettingsList
-import com.miraimagiclab.novelreadingapp.ui.home.settings.list.DataSettingsList
-import com.miraimagiclab.novelreadingapp.ui.home.settings.list.DisplaySettingsList
 import com.miraimagiclab.novelreadingapp.ui.home.settings.list.ReadingSettingsList
 import com.miraimagiclab.novelreadingapp.ui.home.settings.list.UpdatesSettingsList
 import com.miraimagiclab.novelreadingapp.utils.LocalSnackbarHost
@@ -52,11 +48,7 @@ fun SettingsScreen(
     controller: NavController,
     selectedRoute: Any,
     settingState: SettingState,
-    importData: (Uri) -> OneTimeWorkRequest,
-    onClickLogcat: () -> Unit,
-    onClickExportUserData: () -> Unit,
     onClickThemeSettings: () -> Unit,
-    onClickTextFormatting: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
 ) {
@@ -95,35 +87,11 @@ fun SettingsScreen(
                     title = stringResource(R.string.reading_settings),
                 ) {
                     ReadingSettingsList(
-                        settingState = settingState,
-                        onClickTheme = onClickThemeSettings,
-                        onClickTextFormatting = onClickTextFormatting
+                        onClickTheme = onClickThemeSettings
                     )
                 }
-                SettingsCategory(
-                    title = stringResource(R.string.display_settings),
-                ) {
-                    DisplaySettingsList(
-                        settingState = settingState
-                    )
-                }
-                SettingsCategory(
-                    title = stringResource(R.string.data_settings),
-                ) {
-                    DataSettingsList(
-                        onClickExportUserData = onClickExportUserData,
-                        settingState = settingState,
-                        importData = importData
-                    )
-                }
-                SettingsCategory(
-                    title = stringResource(R.string.app_settings),
-                ) {
-                    AppSettingsList(
-                        settingState = settingState,
-                        onClickLogcat = onClickLogcat
-                    )
-                }
+
+
                 SettingsCategory(
                     title = stringResource(R.string.about_settings),
                 ) {

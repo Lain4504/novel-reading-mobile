@@ -46,9 +46,7 @@ data class AppUserDataContent(
     @SerializedName("user_data")
     val userData: List<UserDataData>? = null,
     @SerializedName("reading_stats_data")
-    val readingStatsData: List<DailyReadingStats>? = null,
-    @SerializedName("format_data")
-    val formattingRuleData: List<FormattingRuleData>? = null
+    val readingStatsData: List<DailyReadingStats>? = null
 )
 
 class AppUserDataJsonBuilder {
@@ -83,7 +81,6 @@ class AppUserDataContentBuilder {
     private var bookShelfBookMetadata: MutableList<BookShelfBookMetadataData> = mutableListOf()
     private var userData: MutableList<UserDataData> = mutableListOf()
     private var readingStatsData: MutableList<DailyReadingStats> = mutableListOf()
-    private var formattingRuleData: MutableList<FormattingRuleData> = mutableListOf()
 
     fun build(): AppUserDataContent {
         if (webDataSourceId == null) {
@@ -95,8 +92,7 @@ class AppUserDataContentBuilder {
             bookshelf = bookshelf.ifEmpty { null },
             bookShelfBookMetadata = bookShelfBookMetadata.ifEmpty { null },
             userData = userData.ifEmpty { null },
-            readingStatsData = readingStatsData.ifEmpty { null },
-            formattingRuleData = formattingRuleData.ifEmpty { null }
+            readingStatsData = readingStatsData.ifEmpty { null }
         )
     }
 
@@ -127,11 +123,6 @@ class AppUserDataContentBuilder {
 
     fun dailyReadingData(dailyReadingStats: DailyReadingStats): AppUserDataContentBuilder {
         this.readingStatsData.add(dailyReadingStats)
-        return this
-    }
-
-    fun formattingRule(formattingRuleData: FormattingRuleData): AppUserDataContentBuilder {
-        this.formattingRuleData.add(formattingRuleData)
         return this
     }
 }

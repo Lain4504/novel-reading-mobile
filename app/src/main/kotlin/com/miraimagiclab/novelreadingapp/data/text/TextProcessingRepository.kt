@@ -1,7 +1,6 @@
 package com.miraimagiclab.novelreadingapp.data.text
 
 import com.miraimagiclab.novelreadingapp.data.content.ContentComponentRepository
-import com.miraimagiclab.novelreadingapp.data.format.FormatRepository
 import io.lain4504.novelreadingapp.api.book.BookInformation
 import io.lain4504.novelreadingapp.api.book.BookVolumes
 import io.lain4504.novelreadingapp.api.book.ChapterContent
@@ -15,7 +14,6 @@ import javax.inject.Singleton
 @Singleton
 class TextProcessingRepository @Inject constructor(
     simplifiedTraditionalProcessor: SimplifiedTraditionalProcessor,
-    formatRepository: FormatRepository,
     val contentComponentRepository: ContentComponentRepository
 ): TextProcessingRepositoryApi {
     private val processors = mutableListOf<TextProcessor>()
@@ -58,6 +56,5 @@ class TextProcessingRepository @Inject constructor(
 
     init {
         registerProcessors(simplifiedTraditionalProcessor)
-        registerProcessors(formatRepository)
     }
 }

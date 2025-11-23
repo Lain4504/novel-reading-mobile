@@ -27,11 +27,6 @@ import com.miraimagiclab.novelreadingapp.ui.components.ExportUserDataDialog
 import com.miraimagiclab.novelreadingapp.ui.components.MutableExportContext
 import com.miraimagiclab.novelreadingapp.ui.components.SliderValueDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.SliderValueDialogViewModel
-import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.navigateToSettingsLogcatDestination
-import com.miraimagiclab.novelreadingapp.ui.home.settings.logcat.settingsLogcatDestination
-import com.miraimagiclab.novelreadingapp.ui.home.settings.textformatting.editTextFormattingRuleDialog
-import com.miraimagiclab.novelreadingapp.ui.home.settings.textformatting.navigateToSettingsTextFormattingManagerDestination
-import com.miraimagiclab.novelreadingapp.ui.home.settings.textformatting.settingsTextFormattingNavigation
 import com.miraimagiclab.novelreadingapp.ui.home.settings.theme.navigateToSettingsThemeDestination
 import com.miraimagiclab.novelreadingapp.ui.home.settings.theme.settingsThemeDestination
 import com.miraimagiclab.novelreadingapp.ui.navigation.Route
@@ -51,17 +46,12 @@ fun NavGraphBuilder.settingsDestination(sharedTransitionScope: SharedTransitionS
             controller = navController,
             selectedRoute = Route.Main.Settings,
             settingState = settingsViewModel.settingState,
-            importData = settingsViewModel::importFromFile,
-            onClickExportUserData = navController::navigateToExportUserDataDialog,
-            onClickLogcat = navController::navigateToSettingsLogcatDestination,
-            onClickTextFormatting = navController::navigateToSettingsTextFormattingManagerDestination,
             onClickThemeSettings = navController::navigateToSettingsThemeDestination,
             animatedVisibilityScope = this,
             sharedTransitionScope = sharedTransitionScope
         )
     }
     exportUserDataDialog()
-    editTextFormattingRuleDialog()
     sliderValueDialog()
 }
 
@@ -71,9 +61,7 @@ fun NavGraphBuilder.settingsNavigation(sharedTransitionScope: SharedTransitionSc
         startDestination = Route.Main.Settings.Home
     ) {
         settingsDestination(sharedTransitionScope)
-        settingsLogcatDestination()
         settingsThemeDestination()
-        settingsTextFormattingNavigation()
     }
 }
 

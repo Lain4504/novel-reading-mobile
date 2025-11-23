@@ -146,7 +146,7 @@ fun ExploreSearchScreen(
                             },
                             leadingIcon = {
                                 IconButton(onClick = onClickBack) {
-                                    Icon(painter = painterResource(R.drawable.arrow_back_24px), contentDescription = "back")
+                                    Icon(painter = painterResource(R.drawable.arrow_back_24px), contentDescription = stringResource(R.string.cd_back))
                                 }
                             },
                             trailingIcon = {
@@ -156,11 +156,11 @@ fun ExploreSearchScreen(
                                             searchBarExpanded = true
                                             onChangeSearchKeyword("")
                                         }) {
-                                            Icon(painter = painterResource(R.drawable.close_24px), contentDescription = "clear")
+                                            Icon(painter = painterResource(R.drawable.close_24px), contentDescription = stringResource(R.string.cd_clear))
                                         }
                                     if (searchBarExpanded)
                                         IconButton(onClick = { dropdownMenuExpanded = true }) {
-                                            Icon(painter = painterResource(R.drawable.filter_alt_24px), contentDescription = "filter")
+                                            Icon(painter = painterResource(R.drawable.filter_alt_24px), contentDescription = stringResource(R.string.cd_filter))
                                         }
                                 }
                             },
@@ -255,7 +255,7 @@ fun ExploreSearchScreen(
                                         }) {
                                             Icon(
                                                 painter = painterResource(R.drawable.close_24px),
-                                                contentDescription = "delete",
+                                                contentDescription = stringResource(R.string.cd_delete),
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }

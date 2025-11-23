@@ -6,16 +6,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.miraimagiclab.novelreadingapp.ui.home.settings.SettingState
 import com.miraimagiclab.novelreadingapp.R
 import io.lain4504.novelreadingapp.api.ui.components.SettingsClickableEntry
-import io.lain4504.novelreadingapp.api.ui.components.SettingsSwitchEntry
 
 @Composable
 fun ReadingSettingsList(
-    settingState: SettingState,
-    onClickTheme: () -> Unit,
-    onClickTextFormatting: () -> Unit
+    onClickTheme: () -> Unit
 ) {
     SettingsClickableEntry(
         modifier = Modifier.background(colorScheme.surfaceContainer),
@@ -23,20 +19,5 @@ fun ReadingSettingsList(
         title = stringResource(R.string.settings_theme),
         description = stringResource(R.string.settings_theme_desc),
         onClick = onClickTheme
-    )
-    SettingsClickableEntry(
-        modifier = Modifier.background(colorScheme.surfaceContainer),
-        painter = painterResource(R.drawable.find_replace_24px),
-        title = stringResource(R.string.settings_text_formatting),
-        description = stringResource(R.string.settings_text_formatting_desc),
-        onClick = onClickTextFormatting
-    )
-    SettingsSwitchEntry(
-        modifier = Modifier.background(colorScheme.surfaceContainer),
-        painter = painterResource(R.drawable.translate_24px),
-        title = stringResource(R.string.settings_trad_conversion),
-        description = stringResource(R.string.settings_trad_conversion_desc),
-        checked = settingState.enableSimplifiedTraditionalTransform,
-        booleanUserData = settingState.enableSimplifiedTraditionalTransformUserData,
     )
 }

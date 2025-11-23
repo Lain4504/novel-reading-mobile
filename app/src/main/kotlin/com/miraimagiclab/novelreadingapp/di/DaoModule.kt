@@ -6,7 +6,6 @@ import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookRecordDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookVolumesDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookshelfDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.ChapterContentDao
-import com.miraimagiclab.novelreadingapp.data.local.room.dao.FormattingRuleDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.ReadingStatisticsDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserDataDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserReadingDataDao
@@ -59,11 +58,5 @@ object DaoModule {
     @Singleton
     fun provideBookRecordsDao(db: LightNovelReaderDatabase): BookRecordDao {
         return db.bookRecordDao()
-    }
-
-    @Provides
-    @Singleton
-    fun provideFormattingRuleDao(db: LightNovelReaderDatabase): FormattingRuleDao {
-        return db.formattingRuleDao()
     }
 }

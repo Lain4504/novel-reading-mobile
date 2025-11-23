@@ -9,7 +9,6 @@ import androidx.work.WorkerParameters
 import com.google.gson.JsonSyntaxException
 import com.miraimagiclab.novelreadingapp.data.book.BookRepository
 import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
-import com.miraimagiclab.novelreadingapp.data.format.FormatRepository
 import com.miraimagiclab.novelreadingapp.data.json.AppUserDataContent
 import com.miraimagiclab.novelreadingapp.data.json.AppUserDataJson
 import com.miraimagiclab.novelreadingapp.data.statistics.StatsRepository
@@ -30,8 +29,7 @@ class ImportDataWork @AssistedInject constructor(
     private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository,
     private val userDataRepository: UserDataRepository,
-    private val statsRepository: StatsRepository,
-    private val formatRepository: FormatRepository
+    private val statsRepository: StatsRepository
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
         val fileUri = inputData.getString("uri")?.let(Uri::parse) ?: return Result.failure()
@@ -78,7 +76,6 @@ class ImportDataWork @AssistedInject constructor(
         bookRepository.importUserReadingData(data)
         userDataRepository.importUserData(data)
         statsRepository.importReadingStats(data)
-        formatRepository.importFormattingRules(data)
         return Result.success()
     }
 }

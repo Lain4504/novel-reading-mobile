@@ -1,8 +1,11 @@
 package com.miraimagiclab.novelreadingapp.data.graphql
 
 import android.net.Uri
+import android.content.Context
 import androidx.navigation.NavController
 import com.apollographql.apollo.ApolloClient
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.miraimagiclab.novelreadingapp.R
 import com.apollographql.apollo.api.Optional
 import com.miraimagiclab.novelreadingapp.graphql.CategoryRandomNovelsQuery
 import com.miraimagiclab.novelreadingapp.graphql.CompletedNovelsQuery
@@ -48,6 +51,7 @@ import javax.inject.Singleton
 )
 @Singleton
 class GraphQLBookService @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val apolloClient: ApolloClient
 ) : WebBookDataSource {
 
@@ -104,15 +108,15 @@ class GraphQLBookService @Inject constructor(
 
     private fun createTrendingExplorePage(): ExplorePageDataSource {
         return object : ExplorePageDataSource {
-            override val title: String = TRENDING_PAGE_TITLE
+            override val title: String = context.getString(R.string.explore_tab_trending)
             override fun getExplorePage(): ExplorePage {
                 val rowsFlow = flow {
                     val rows = mutableListOf<ExploreBooksRow>()
-                    emitRowIfNotEmpty(rows, "Hot this week", fetchRecentNovels(page = 0, size = DEFAULT_ROW_LIMIT * 3, limit = DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "Readers' picks", fetchRecentNovels(page = 1, size = DEFAULT_ROW_LIMIT * 3, limit = DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "Freshly completed", fetchCompletedNovels(DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "Action & Adventure", fetchCategoryRandomNovels(CategoryEnum.ADVENTURE, DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "Urban legends", fetchCategoryRandomNovels(CategoryEnum.URBAN, DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_hot_this_week), fetchRecentNovels(page = 0, size = DEFAULT_ROW_LIMIT * 3, limit = DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_readers_picks), fetchRecentNovels(page = 1, size = DEFAULT_ROW_LIMIT * 3, limit = DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_freshly_completed), fetchCompletedNovels(DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_action_adventure), fetchCategoryRandomNovels(CategoryEnum.ADVENTURE, DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_urban_legends), fetchCategoryRandomNovels(CategoryEnum.URBAN, DEFAULT_ROW_LIMIT))
                 }
                 return ExplorePage(title = title, rows = rowsFlow)
             }
@@ -121,15 +125,15 @@ class GraphQLBookService @Inject constructor(
 
     private fun createGenresExplorePage(): ExplorePageDataSource {
         val genreConfigs = listOf(
-            "Fantasy realms" to CategoryEnum.FANTASY,
-            "Romantic tales" to CategoryEnum.ROMANCE,
-            "Slice of life" to CategoryEnum.SLICE_OF_LIFE,
-            "School life" to CategoryEnum.SCHOOL_LIFE,
-            "Drama & feels" to CategoryEnum.DRAMA,
-            "Comedy relief" to CategoryEnum.COMEDY
+            context.getString(R.string.genre_fantasy_vi) to CategoryEnum.FANTASY,
+            context.getString(R.string.genre_romance_vi) to CategoryEnum.ROMANCE,
+            context.getString(R.string.genre_slice_of_life_vi) to CategoryEnum.SLICE_OF_LIFE,
+            context.getString(R.string.genre_school_life_vi) to CategoryEnum.SCHOOL_LIFE,
+            context.getString(R.string.genre_drama_vi) to CategoryEnum.DRAMA,
+            context.getString(R.string.genre_comedy_vi) to CategoryEnum.COMEDY
         )
         return object : ExplorePageDataSource {
-            override val title: String = GENRES_PAGE_TITLE
+            override val title: String = context.getString(R.string.explore_tab_genres)
             override fun getExplorePage(): ExplorePage {
                 val rowsFlow = flow {
                     val rows = mutableListOf<ExploreBooksRow>()
@@ -193,15 +197,15 @@ class GraphQLBookService @Inject constructor(
 
     private fun createDiscoverExplorePage(): ExplorePageDataSource {
         return object : ExplorePageDataSource {
-            override val title: String = DISCOVER_PAGE_TITLE
+            override val title: String = context.getString(R.string.explore_tab_discover)
             override fun getExplorePage(): ExplorePage {
                 val rowsFlow = flow {
                     val rows = mutableListOf<ExploreBooksRow>()
-                    emitRowIfNotEmpty(rows, "Latest updates", fetchLatestNovels(DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "New arrivals", fetchRecentNovels(page = 0, size = DEFAULT_ROW_LIMIT * 2, limit = DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "Completed gems", fetchCompletedNovels(DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "Fantasy spotlight", fetchCategoryRandomNovels(CategoryEnum.FANTASY, DEFAULT_ROW_LIMIT))
-                    emitRowIfNotEmpty(rows, "Romance spotlight", fetchCategoryRandomNovels(CategoryEnum.ROMANCE, DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_latest_updates), fetchLatestNovels(DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_new_arrivals), fetchRecentNovels(page = 0, size = DEFAULT_ROW_LIMIT * 2, limit = DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_completed_gems), fetchCompletedNovels(DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_fantasy_spotlight), fetchCategoryRandomNovels(CategoryEnum.FANTASY, DEFAULT_ROW_LIMIT))
+                    emitRowIfNotEmpty(rows, context.getString(R.string.explore_title_romance_spotlight), fetchCategoryRandomNovels(CategoryEnum.ROMANCE, DEFAULT_ROW_LIMIT))
                 }
                 return ExplorePage(title = title, rows = rowsFlow)
             }

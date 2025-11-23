@@ -352,7 +352,50 @@
     <string name="dialog_slider_custom_illegal_value">Vui lòng nhập con số hợp lệ.</string>
     <string name="dialog_color_picker">Bảng màu</string>
     <string name="dialog_color_picker_desc">Chọn màu cho nền trình đọc.</string>
+    <!-- Explore Tabs & Content -->
+    <string name="explore_tab_discover">Khám phá</string>
+    <string name="explore_tab_trending">Thịnh hành</string>
+    <string name="explore_tab_genres">Thể loại</string>
+
+    <string name="explore_title_latest_updates">Mới cập nhật</string>
+    <string name="explore_title_new_arrivals">Mới đăng</string>
+    <string name="explore_title_completed_gems">Đã hoàn thành</string>
+    <string name="explore_title_fantasy_spotlight">Tiêu điểm Fantasy</string>
+    <string name="explore_title_romance_spotlight">Tiêu điểm Lãng mạn</string>
+
+    <string name="explore_title_hot_this_week">Hot trong tuần</string>
+    <string name="explore_title_readers_picks">Độc giả bình chọn</string>
+    <string name="explore_title_freshly_completed">Vừa hoàn thành</string>
+    <string name="explore_title_action_adventure">Hành động &amp; Phiêu lưu</string>
+    <string name="explore_title_urban_legends">Truyền thuyết đô thị</string>
+
+    <string name="genre_fantasy">Fantasy realms</string>
+    <string name="genre_romance">Romantic tales</string>
+    <string name="genre_slice_of_life">Slice of life</string>
+    <string name="genre_school_life">School life</string>
+    <string name="genre_drama">Drama &amp; feels</string>
+    <string name="genre_comedy">Comedy relief</string>
+
+    <string name="genre_fantasy_vi">Thế giới Fantasy</string>
+    <string name="genre_romance_vi">Chuyện tình lãng mạn</string>
+    <string name="genre_slice_of_life_vi">Đời thường</string>
+    <string name="genre_school_life_vi">Vườn trường</string>
+    <string name="genre_drama_vi">Kịch tính &amp; Cảm xúc</string>
+    <string name="genre_comedy_vi">Hài hước</string>
+
     <string name="ok">OK</string>
 
+
+
+    <!-- Accessibility & Labels -->
+    <string name="book_updated_to">Đã cập nhật đến:</string>
+    <string name="cd_collected">Đã sưu tầm</string>
+    <string name="cd_back">Quay lại</string>
+    <string name="cd_clear">Xóa</string>
+    <string name="cd_filter">Lọc</string>
+    <string name="cd_delete">Xóa</string>
+    <string name="cd_search">Tìm kiếm</string>
+    <string name="cd_expand">Mở rộng</string>
+    <string name="cd_check">Đã chọn</string>
 </resources>
 

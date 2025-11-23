@@ -108,7 +108,7 @@ fun BookCardContent(
                             Icon(
                                 modifier = Modifier.scale(0.75f, 0.75f),
                                 painter = painterResource(R.drawable.filled_bookmark_24px),
-                                contentDescription = "collected_indicator",
+                                contentDescription = stringResource(R.string.cd_collected),
                                 tint = colorScheme.onSurfaceVariant,
                             )
                         }
@@ -135,7 +135,7 @@ fun BookCardContent(
                                 .size(22.dp),
                             painter = painterResource(R.drawable.check_24px),
                             tint = colorScheme.onPrimary,
-                            contentDescription = null
+                            contentDescription = stringResource(R.string.cd_check)
                         )
                     }
                 }
@@ -198,7 +198,7 @@ fun BookCardContent(
                 } else {
                     Column {
                         Text(
-                            text = "Đã cập nhật đến:",
+                            text = stringResource(R.string.book_updated_to),
                             style = AppTypography.labelMedium
                         )
                         Text(

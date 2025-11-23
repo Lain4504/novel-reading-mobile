@@ -79,7 +79,6 @@ import com.miraimagiclab.novelreadingapp.ui.components.Cover
 import com.miraimagiclab.novelreadingapp.ui.components.Loading
 import com.miraimagiclab.novelreadingapp.ui.components.SwitchChip
 import com.miraimagiclab.novelreadingapp.ui.home.bookshelf.home.BookStatusIcon
-import com.miraimagiclab.novelreadingapp.ui.home.settings.textformatting.rules.navigateToSettingsTextFormattingRulesDestination
 import com.miraimagiclab.novelreadingapp.utils.LocalSnackbarHost
 import com.miraimagiclab.novelreadingapp.utils.fadingEdge
 import com.miraimagiclab.novelreadingapp.utils.isScrollingUp
@@ -125,11 +124,7 @@ fun DetailScreen(
             TopBar(
                 title = uiState.bookInformation.title,
                 volumesEmpty = volumesEmpty,
-                onClickBackButton = onClickBackButton,
-                onClickTextFormatting = {
-                    navController.navigateToSettingsTextFormattingRulesDestination(uiState.bookInformation.id)
-                },
-                onClickMarkAllRead = onClickMarkAllRead,
+                onClickBackButton = onClickBackButton,                onClickMarkAllRead = onClickMarkAllRead,
                 scrollBehavior = scrollBehavior,
                 isCollapsed = isCollapsed
             )
@@ -440,7 +435,6 @@ private fun TopBar(
     title: String,
     volumesEmpty: Boolean,
     onClickBackButton: () -> Unit,
-    onClickTextFormatting: () -> Unit,
     onClickMarkAllRead: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
     isCollapsed: Boolean
@@ -465,14 +459,7 @@ private fun TopBar(
                 )
             }
         },
-        actions = {
-            IconButton(
-                enabled = !volumesEmpty,
-                onClick = onClickTextFormatting
-            ) {
-                Icon(painterResource(id = R.drawable.find_replace_24px), "text formating")
-            }
-            Box {
+        actions = {            Box {
                 IconButton(
                     enabled = !volumesEmpty,
                     onClick = { menuExpanded = true }

@@ -8,9 +8,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.miraimagiclab.novelreadingapp.data.book.BookRepository
 import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
-import com.miraimagiclab.novelreadingapp.data.format.FormatRepository
 import com.miraimagiclab.novelreadingapp.data.json.AppUserDataJsonBuilder
-import com.miraimagiclab.novelreadingapp.data.json.FormattingRuleData
 import com.miraimagiclab.novelreadingapp.data.json.toJsonData
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserDataDao
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.UserDataEntity
@@ -38,7 +36,6 @@ class ExportDataWork @AssistedInject constructor(
     private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository,
     private val statsRepository: StatsRepository,
-    private val formatRepository: FormatRepository,
     private val userDataDao: UserDataDao
 ) : CoroutineWorker(appContext, workerParams) {
 
@@ -62,18 +59,6 @@ class ExportDataWork @AssistedInject constructor(
         exportReadingData: Boolean,
         exportSetting: Boolean
     ): String = withContext(Dispatchers.IO) {
-        val formattingRules = formatRepository
-            .getAllRules()
-            .map {
-                FormattingRuleData(
-                    bookId = it.bookId,
-                    name = it.name,
-                    isRegex = it.isRegex,
-                    match = it.match,
-                    replacement = it.replacement,
-                    isEnabled = it.isEnabled
-                )
-            }
         return@withContext AppUserDataJsonBuilder()
             .data {
                 webDataSourceId(webBookDataSourceProvider.value.id)
@@ -95,7 +80,6 @@ class ExportDataWork @AssistedInject constructor(
                         ?.let(::userData)
                     statsRepository.getAllReadingStats()
                         .forEach(::dailyReadingData)
-                    formattingRules.forEach(::formattingRule)
                 }
                 if (exportSetting) {
                     userDataDao.getGroupValues(UserDataPath.Reader.path)
