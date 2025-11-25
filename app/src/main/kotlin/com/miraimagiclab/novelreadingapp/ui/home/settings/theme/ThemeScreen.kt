@@ -3,7 +3,6 @@ package com.miraimagiclab.novelreadingapp.ui.home.settings.theme
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,7 +39,6 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,11 +50,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -510,67 +504,14 @@ fun ReaderThemeSettingsList(
             }
         }
     )
-    val textMeasurer = rememberTextMeasurer()
-    val coroutineScope = rememberCoroutineScope()
-    val launcher = uriLauncher { uri ->
-        CoroutineScope(Dispatchers.IO).launch {
-            val font = context.filesDir.resolve("readerTextFont")
-                .also {
-                    if (it.exists()) {
-                        it.delete()
-                        it.createNewFile()
-                    } else it.createNewFile()
-                }
-            try {
-                context.contentResolver.openFileDescriptor(uri, "r")
-                    ?.use { parcelFileDescriptor ->
-                        FileInputStream(parcelFileDescriptor.fileDescriptor).use { fileInputStream ->
-                            fileInputStream.readBytes()
-                        }.let(font::writeBytes)
-                    }
-            } catch (e: Exception) {
-                Log.e("ReaderTextFont", "failed to load chosen file")
-                e.printStackTrace()
-            }
-            try {
-                textMeasurer
-                    .measure(
-                        text = "",
-                        style = TextStyle(
-                            fontFamily = FontFamily(Font(font))
-                        )
-                    )
-            } catch (_: Exception) {
-                coroutineScope.launch {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.font_file_error),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                return@launch
-            }
-            settingState.fontFamilyUriUserData.set(font.toUri())
-        }
-    }
     SettingsMenuEntry(
         modifier = Modifier.background(colorScheme.background),
         painter = painterResource(R.drawable.text_fields_24px),
         title = stringResource(R.string.settings_theme_text_font),
         description = stringResource(R.string.settings_theme_text_font_desc),
-        options = MenuOptions.SelectText,
-        selectedOptionKey = if (settingState.fontFamilyUri.toString()
-                .isEmpty()
-        ) MenuOptions.SelectText.Default else MenuOptions.SelectText.Customize,
-        onOptionChange = {
-            when (it) {
-                MenuOptions.SelectText.Default -> settingState.fontFamilyUriUserData.asynchronousSet(
-                    Uri.EMPTY
-                )
-
-                MenuOptions.SelectText.Customize -> selectDataFile(launcher, "*/*")
-            }
-        }
+        options = MenuOptions.FontOptions,
+        selectedOptionKey = settingState.fontName,
+        onOptionChange = { settingState.fontNameUserData.asynchronousSet(it) }
     )
 
     BasePageItem(Modifier
