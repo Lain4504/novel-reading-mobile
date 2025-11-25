@@ -51,6 +51,8 @@ class SettingState(
     val darkThemeNameUserData = userDataRepository.stringUserData(UserDataPath.Settings.Display.DarkThemeName.path)
     val backBlockModeUserData = userDataRepository.stringUserData(UserDataPath.Reader.BackBlockMode.path)
 
+    val fontNameUserData = userDataRepository.stringUserData(UserDataPath.Reader.FontName.path)
+
     val fontSize by fontSizeUserData.safeAsState(15f)
     val fontLineHeight by fontLineHeightUserData.safeAsState(7f)
     val fontWeigh by fontWeighUserData.safeAsState(500f)
@@ -77,6 +79,7 @@ class SettingState(
     val textColor by textColorUserData.safeAsState(Color.Unspecified)
     val textDarkColor by textDarkColorUserData.safeAsState(Color.Unspecified)
     val fontFamilyUri by fontFamilyUriUserData.safeAsState(Uri.EMPTY)
+    val fontName by fontNameUserData.safeAsState("Default")
     val backgroundColor by backgroundColorUserData.safeAsState(Color.Unspecified)
     val backgroundImageUri by backgroundImageUriUserData.safeAsState(Uri.EMPTY)
     val backgroundDarkImageUri by backgroundDarkImageUriUserData.safeAsState(Uri.EMPTY)

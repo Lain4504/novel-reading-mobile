@@ -397,5 +397,14 @@
     <string name="cd_search">Tìm kiếm</string>
     <string name="cd_expand">Mở rộng</string>
     <string name="cd_check">Đã chọn</string>
+
+    <string name="key_font_default">Mặc định</string>
+    <string name="key_font_palatino">Palatino</string>
+    <string name="key_font_nunito_sans">Nunito Sans</string>
+    <string name="key_font_arial">Arial</string>
+    <string name="key_font_verdana">Verdana</string>
+    <string name="key_font_bookerly">Bookerly</string>
+    <string name="key_font_andika">Andika</string>
+    <string name="key_font_merriweather">Merriweather</string>
 </resources>
 

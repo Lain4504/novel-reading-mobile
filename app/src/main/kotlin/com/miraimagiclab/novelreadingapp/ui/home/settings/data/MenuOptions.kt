@@ -92,4 +92,15 @@ sealed class MenuOptions {
         val DoublePress = option("double_press", R.string.key_reader_back_block_mode_double_press)
         val FullyBlocked = option("blocked", R.string.key_reader_back_block_mode_blocked)
     }
+
+    data object FontOptions: MenuOptions(
+        Option("Default", R.string.key_font_default),
+        Option("Palatino", R.string.key_font_palatino),
+        Option("Nunito Sans", R.string.key_font_nunito_sans),
+        Option("Arial", R.string.key_font_arial),
+        Option("Verdana", R.string.key_font_verdana),
+        Option("Bookerly", R.string.key_font_bookerly),
+        Option("Andika", R.string.key_font_andika),
+        Option("Merriweather", R.string.key_font_merriweather)
+    )
 }

@@ -50,6 +50,7 @@ class SimpleTextComponent(
     val textColorUserData = userDataRepositoryApi.colorUserData(UserDataPath.Reader.TextColor.path)
     val textDarkColorUserData = userDataRepositoryApi.colorUserData(UserDataPath.Reader.TextDarkColor.path)
     val fontFamilyUriUserData = userDataRepositoryApi.uriUserData(UserDataPath.Reader.FontFamilyUri.path)
+    val fontNameUserData = userDataRepositoryApi.stringUserData(UserDataPath.Reader.FontName.path)
     val textMeasurer = TextMeasurer(
         createFontFamilyResolver(context),
         Density(
@@ -78,7 +79,7 @@ class SimpleTextComponent(
             fontSize = fontSize.sp,
             fontLineHeight = fontLineHeight.sp,
             fontWeight = FontWeight(fontWeigh.toInt()),
-            fontFamily = rememberReaderFontFamily(fontFamilyUriUserData),
+            fontFamily = rememberReaderFontFamily(fontFamilyUriUserData, fontNameUserData),
             color = readerTextColor(textColor, textDarkColor)
         )
     }
@@ -102,27 +103,42 @@ class SimpleTextComponent(
     }
 
     @Composable
-    fun rememberReaderFontFamily(fontFamilyUriUserData: UriUserData): FontFamily {
+    fun rememberReaderFontFamily(fontFamilyUriUserData: UriUserData, fontNameUserData: io.lain4504.novelreadingapp.api.userdata.StringUserData): FontFamily {
         val coroutineScope = rememberCoroutineScope()
         val uri by fontFamilyUriUserData.getFlowWithDefault(Uri.EMPTY).collectAsState(Uri.EMPTY)
-        val fontFamily = remember(uri) {
-            loadReaderFontFamilySafe(uri)
-        }
+        val fontName by fontNameUserData.getFlowWithDefault("Default").collectAsState("Default")
 
-        if (fontFamily == null && uri != Uri.EMPTY) {
-            val context = LocalContext.current
-            LaunchedEffect(Unit) {
-                coroutineScope.launch(Dispatchers.IO) {
-                    fontFamilyUriUserData.set(Uri.EMPTY)
+        if (uri != Uri.EMPTY) {
+            val fontFamily = remember(uri) {
+                loadReaderFontFamilySafe(uri)
+            }
+
+            if (fontFamily == null) {
+                val context = LocalContext.current
+                LaunchedEffect(Unit) {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        fontFamilyUriUserData.set(Uri.EMPTY)
+                    }
                 }
-            }
-            LaunchedEffect(uri) {
-                fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
-                Toast.makeText(context, "Không tải được phông chữ, đã quay về mặc định", Toast.LENGTH_SHORT).show()
+                LaunchedEffect(uri) {
+                    fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
+                    Toast.makeText(context, "Không tải được phông chữ, đã quay về mặc định", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                return fontFamily
             }
         }
 
-        return fontFamily ?: MaterialTheme.typography.bodyMedium.fontFamily as FontFamily
+        return when (fontName) {
+            "Palatino" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.palatino))
+            "Nunito Sans" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.nunito_sans))
+            "Arial" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.arial))
+            "Verdana" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.verdana))
+            "Bookerly" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.bookerly))
+            "Andika" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.andika))
+            "Merriweather" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.merriweather))
+            else -> MaterialTheme.typography.bodyMedium.fontFamily as FontFamily
+        }
     }
 
     override fun split(
@@ -138,7 +154,7 @@ class SimpleTextComponent(
                 fontSize = fontSize.sp,
                 lineHeight = (fontLineHeight + fontSize).sp,
                 fontWeight = FontWeight(fontWeigh.toInt()),
-                fontFamily = readerFontFamily(fontFamilyUriUserData),
+                fontFamily = readerFontFamily(fontFamilyUriUserData, fontNameUserData),
             ),
             constraints = Constraints(maxHeight = height, maxWidth = width),
         )
@@ -146,10 +162,24 @@ class SimpleTextComponent(
             .map { SimpleTextComponent(SimpleTextComponentData(it), userDataRepositoryApi, context) }
     }
 
-    fun readerFontFamily(fontFamilyUriUserData: UriUserData): FontFamily? {
+    fun readerFontFamily(fontFamilyUriUserData: UriUserData, fontNameUserData: io.lain4504.novelreadingapp.api.userdata.StringUserData): FontFamily? {
         val uri = fontFamilyUriUserData.getOrDefault(Uri.EMPTY)
-        val fontFamily = loadReaderFontFamilySafe(uri)
-        return fontFamily
+        if (uri != Uri.EMPTY) {
+            val fontFamily = loadReaderFontFamilySafe(uri)
+            if (fontFamily != null) return fontFamily
+        }
+
+        val fontName = fontNameUserData.getOrDefault("Default")
+        return when (fontName) {
+            "Palatino" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.palatino))
+            "Nunito Sans" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.nunito_sans))
+            "Arial" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.arial))
+            "Verdana" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.verdana))
+            "Bookerly" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.bookerly))
+            "Andika" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.andika))
+            "Merriweather" -> FontFamily(androidx.compose.ui.text.font.Font(com.miraimagiclab.novelreadingapp.R.font.merriweather))
+            else -> null
+        }
     }
 
     fun TextLayoutResult.getSlipString(text: String, width: Int, height: Int): List<String> {

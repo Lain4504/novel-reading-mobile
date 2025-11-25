@@ -46,22 +46,37 @@ fun loadReaderFontFamilySafe(uri: Uri): FontFamily? {
 fun rememberReaderFontFamily(settingState: SettingState): FontFamily {
     val coroutineScope = rememberCoroutineScope()
     val uri = settingState.fontFamilyUri
-    val fontFamily = remember(uri) {
-        loadReaderFontFamilySafe(uri)
+    val fontName = settingState.fontName
+
+    if (uri != Uri.EMPTY) {
+        val fontFamily = remember(uri) {
+            loadReaderFontFamilySafe(uri)
+        }
+
+        if (fontFamily == null) {
+            val context = LocalContext.current
+            coroutineScope.launch(Dispatchers.IO) {
+                settingState.fontFamilyUriUserData.set(Uri.EMPTY)
+            }
+            LaunchedEffect(uri) {
+                settingState.fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
+                Toast.makeText(context, "Không tải được phông chữ, đã quay về mặc định", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            return fontFamily
+        }
     }
 
-    if (fontFamily == null && uri != Uri.EMPTY) {
-        val context = LocalContext.current
-        coroutineScope.launch(Dispatchers.IO) {
-            settingState.fontFamilyUriUserData.set(Uri.EMPTY)
-        }
-        LaunchedEffect(uri) {
-            settingState.fontFamilyUriUserData.asynchronousSet(Uri.EMPTY)
-            Toast.makeText(context, "Không tải được phông chữ, đã quay về mặc định", Toast.LENGTH_SHORT).show()
-        }
+    return when (fontName) {
+        "Palatino" -> FontFamily(Font(R.font.palatino))
+        "Nunito Sans" -> FontFamily(Font(R.font.nunito_sans))
+        "Arial" -> FontFamily(Font(R.font.arial))
+        "Verdana" -> FontFamily(Font(R.font.verdana))
+        "Bookerly" -> FontFamily(Font(R.font.bookerly))
+        "Andika" -> FontFamily(Font(R.font.andika))
+        "Merriweather" -> FontFamily(Font(R.font.merriweather))
+        else -> MaterialTheme.typography.bodyMedium.fontFamily as FontFamily
     }
-
-    return fontFamily ?: MaterialTheme.typography.bodyMedium.fontFamily as FontFamily
 }
 
 @Composable
