@@ -139,6 +139,8 @@ dependencies {
     implementation(libs.zoomable.image.coil)
     // Shimmer
     implementation(libs.compose.shimmer)
+    // Security - EncryptedSharedPreferences
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     // LNR API
     implementation(project(":api"))
     implementation(libs.dom4j)
