@@ -17,7 +17,7 @@ class AuthApiService @Inject constructor(
     @PublicClient private val httpClient: HttpClient
 ) {
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:8080" // Android emulator localhost
+        private const val BASE_URL = "https://ranoku.com" // Android emulator localhost
         private const val AUTH_PATH = "$BASE_URL/api/auth"
     }
 
