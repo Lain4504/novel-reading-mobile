@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.miraimagiclab.novelreadingapp.ui.auth.authNavigation
 import com.miraimagiclab.novelreadingapp.ui.book.bookNavigation
 import com.miraimagiclab.novelreadingapp.ui.dialog.addBookToBookshelfDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.markAllChaptersAsReadDialog
@@ -44,6 +45,7 @@ fun LightNovelReaderNavHost(
             ) {
                 homeNavigation(this@SharedTransitionLayout)
                 bookNavigation()
+                authNavigation()
                 updatesAvailableDialog()
                 addBookToBookshelfDialog()
                 downloadManager()

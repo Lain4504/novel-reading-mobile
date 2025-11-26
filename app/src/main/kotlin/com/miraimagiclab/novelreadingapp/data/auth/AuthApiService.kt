@@ -1,5 +1,6 @@
 package com.miraimagiclab.novelreadingapp.data.auth
 
+import com.miraimagiclab.novelreadingapp.di.AuthenticatedClient
 import com.miraimagiclab.novelreadingapp.di.PublicClient
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -14,7 +15,8 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthApiService @Inject constructor(
-    @PublicClient private val httpClient: HttpClient
+    @PublicClient private val httpClient: HttpClient,
+    @AuthenticatedClient private val authenticatedHttpClient: HttpClient
 ) {
     companion object {
         private const val BASE_URL = "https://ranoku.com" // Android emulator localhost
@@ -53,7 +55,7 @@ class AuthApiService @Inject constructor(
     }
 
     suspend fun getMe(): Result<UserInfo> = runCatching {
-        httpClient.get("$AUTH_PATH/me").body()
+        authenticatedHttpClient.get("$AUTH_PATH/me").body()
     }
 
     suspend fun verifyEmail(email: String, otp: String): Result<MessageResponse> = runCatching {

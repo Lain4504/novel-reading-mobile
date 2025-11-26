@@ -1,5 +1,12 @@
 package com.miraimagiclab.novelreadingapp.data.auth
 
+import com.miraimagiclab.novelreadingapp.di.PublicClient
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -9,8 +16,12 @@ import javax.inject.Singleton
 @Singleton
 class TokenManager @Inject constructor(
     private val tokenStorage: TokenStorage,
-    private val authApiService: AuthApiService
+    @PublicClient private val httpClient: HttpClient
 ) {
+    companion object {
+        private const val BASE_URL = "https://ranoku.com"
+        private const val AUTH_PATH = "$BASE_URL/api/auth"
+    }
     private val refreshMutex = Mutex()
     private var isRefreshing = false
 
@@ -61,7 +72,12 @@ class TokenManager @Inject constructor(
 
         isRefreshing = true
         return try {
-            val result = authApiService.refreshToken(refreshToken)
+            val result = runCatching {
+                httpClient.post("$AUTH_PATH/refresh-token") {
+                    contentType(ContentType.Application.Json)
+                    setBody(TokenRefreshRequest(refreshToken))
+                }.body<TokenRefreshResponse>()
+            }
             
             result.fold(
                 onSuccess = { response ->

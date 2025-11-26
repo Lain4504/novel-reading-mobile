@@ -6,7 +6,9 @@ import com.miraimagiclab.novelreadingapp.data.auth.MessageResponse
 import com.miraimagiclab.novelreadingapp.data.auth.RegisterResponse
 import com.miraimagiclab.novelreadingapp.data.auth.TokenManager
 import com.miraimagiclab.novelreadingapp.data.auth.UserInfo
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +25,7 @@ class AuthRepository @Inject constructor(
             tokenManager.saveTokens(
                 accessToken = response.accessToken,
                 refreshToken = response.refreshToken,
-                userId = response.id,
+                userId = response.userId,
                 username = response.username,
                 email = response.email
             )
@@ -62,6 +64,14 @@ class AuthRepository @Inject constructor(
 
     suspend fun getMe(): Result<UserInfo> {
         return authApiService.getMe()
+    }
+
+    fun getCurrentUser(): Flow<Result<UserInfo>> = flow {
+        if (!tokenManager.isUserAuthenticated()) {
+            emit(Result.failure(Exception("User not authenticated")))
+            return@flow
+        }
+        emit(getMe())
     }
 
     fun getUserId(): String? = tokenManager.getUserId()

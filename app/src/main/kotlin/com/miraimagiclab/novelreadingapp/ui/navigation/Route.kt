@@ -124,4 +124,13 @@ object Route {
     )
     @Serializable
     object DownloadManager
+    @Serializable
+    object Auth {
+        @Serializable
+        object Login
+        @Serializable
+        object Register
+        @Serializable
+        object ForgotPassword
+    }
 }

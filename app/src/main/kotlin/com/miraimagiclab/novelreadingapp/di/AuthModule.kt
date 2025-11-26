@@ -25,13 +25,14 @@ object AuthModule {
     @Provides
     @Singleton
     fun provideAuthApiService(
-        @PublicClient httpClient: HttpClient
-    ): AuthApiService = AuthApiService(httpClient)
+        @PublicClient httpClient: HttpClient,
+        @AuthenticatedClient authenticatedHttpClient: HttpClient
+    ): AuthApiService = AuthApiService(httpClient, authenticatedHttpClient)
 
     @Provides
     @Singleton
     fun provideTokenManager(
         tokenStorage: TokenStorage,
-        authApiService: AuthApiService
-    ): TokenManager = TokenManager(tokenStorage, authApiService)
+        @PublicClient httpClient: HttpClient
+    ): TokenManager = TokenManager(tokenStorage, httpClient)
 }

@@ -23,6 +23,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,8 +34,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.miraimagiclab.novelreadingapp.ui.SharedContentKey
+import com.miraimagiclab.novelreadingapp.ui.auth.UserViewModel
+import com.miraimagiclab.novelreadingapp.ui.auth.navigateToLogin
 import com.miraimagiclab.novelreadingapp.ui.home.HomeNavigateBar
 import com.miraimagiclab.novelreadingapp.ui.home.settings.list.AboutSettingsList
 import com.miraimagiclab.novelreadingapp.ui.home.settings.list.ReadingSettingsList
@@ -52,6 +57,9 @@ fun SettingsScreen(
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
 ) {
+    val userViewModel: UserViewModel = hiltViewModel()
+    val userUiState by userViewModel.uiState.collectAsState()
+    
     val pinnedScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     with(sharedTransitionScope) {
         Scaffold(
@@ -76,6 +84,16 @@ fun SettingsScreen(
                     .verticalScroll(rememberScrollState())
                     .nestedScroll(pinnedScrollBehavior.nestedScrollConnection)
             ) {
+                // User Profile Section - shown at the top
+                UserProfileSection(
+                    user = userUiState.user,
+                    isLoading = userUiState.isLoading,
+                    onLoginClick = {
+                        controller.navigateToLogin()
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                
                 SettingsCategory(
                     title = stringResource(R.string.app_updates)
                 ) {

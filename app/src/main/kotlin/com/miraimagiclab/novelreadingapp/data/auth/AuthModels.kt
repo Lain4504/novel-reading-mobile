@@ -55,12 +55,16 @@ data class ChangePasswordRequest(
 // Response Models
 @Serializable
 data class LoginResponse(
-    val accessToken: String,
-    val refreshToken: String,
-    val id: String,
-    val username: String,
-    val email: String
-)
+    @SerialName("accessToken") val accessToken: String,
+    @SerialName("refreshToken") val refreshToken: String,
+    @SerialName("tokenType") val tokenType: String? = "Bearer",
+    @SerialName("userId") val userId: String,
+    @SerialName("username") val username: String,
+    @SerialName("email") val email: String
+) {
+    // Backward compatibility: use userId as id
+    val id: String get() = userId
+}
 
 @Serializable
 data class RegisterResponse(
@@ -71,9 +75,9 @@ data class RegisterResponse(
 
 @Serializable
 data class TokenRefreshResponse(
-    val accessToken: String,
-    val refreshToken: String,
-    val tokenType: String = "Bearer"
+    @SerialName("accessToken") val accessToken: String,
+    @SerialName("refreshToken") val refreshToken: String,
+    @SerialName("tokenType") val tokenType: String? = "Bearer"
 )
 
 @Serializable
@@ -84,11 +88,26 @@ data class MessageResponse(
 
 @Serializable
 data class UserInfo(
-    val id: String,
-    val username: String,
-    val email: String,
-    val verified: Boolean? = null,
-    val createdAt: String? = null
+    @SerialName("id") val id: String,
+    @SerialName("username") val username: String,
+    @SerialName("displayName") val displayName: String? = null,
+    @SerialName("email") val email: String,
+    @SerialName("roles") val roles: List<String>? = null,
+    @SerialName("banned") val banned: Boolean? = null,
+    @SerialName("avatarUrl") val avatarUrl: String? = null,
+    @SerialName("backgroundUrl") val backgroundUrl: String? = null,
+    @SerialName("bio") val bio: String? = null,
+    @SerialName("socialLinks") val socialLinks: List<SocialLinkDto>? = null,
+    @SerialName("createdAt") val createdAt: String? = null,
+    @SerialName("lastTimeLogin") val lastTimeLogin: String? = null,
+    @SerialName("lockUntil") val lockUntil: String? = null,
+    @SerialName("lockReason") val lockReason: String? = null
+)
+
+@Serializable
+data class SocialLinkDto(
+    @SerialName("platform") val platform: String,
+    @SerialName("url") val url: String
 )
 
 // Error Response
