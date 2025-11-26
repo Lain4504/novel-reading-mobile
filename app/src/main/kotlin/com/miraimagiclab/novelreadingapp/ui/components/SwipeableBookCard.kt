@@ -4,8 +4,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.miraimagiclab.novelreadingapp.ui.home.bookshelf.home.BookCardContent
-import com.miraimagiclab.novelreadingapp.ui.home.bookshelf.home.BookCardContentSkeleton
+import com.miraimagiclab.novelreadingapp.ui.components.BookCardContent
+import com.miraimagiclab.novelreadingapp.ui.components.BookCardContentSkeleton
 import com.valentinilk.shimmer.Shimmer
 import com.valentinilk.shimmer.shimmer
 import io.lain4504.novelreadingapp.api.book.BookInformation

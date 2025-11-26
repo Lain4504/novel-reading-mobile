@@ -11,7 +11,6 @@ import androidx.navigation.toRoute
 import androidx.work.WorkInfo
 import com.miraimagiclab.novelreadingapp.ui.book.reader.navigateToBookReaderDestination
 import com.miraimagiclab.novelreadingapp.ui.book.reader.navigateToImageViewerDialog
-import com.miraimagiclab.novelreadingapp.ui.dialog.navigateToAddBookToBookshelfDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.navigateToMarkAllChaptersAsReadDialog
 import com.miraimagiclab.novelreadingapp.ui.navigation.Route
 import com.miraimagiclab.novelreadingapp.utils.LocalSnackbarHost
@@ -96,7 +95,8 @@ fun NavGraphBuilder.bookDetailDestination() {
                     }
                 }
             },
-            requestAddBookToBookshelf = navController::navigateToAddBookToBookshelfDialog,
+            onFollowNovel = viewModel::followNovel,
+            onUnfollowNovel = viewModel::unfollowNovel,
             onClickTag = viewModel::onClickTag,
             onClickCover = navController::navigateToImageViewerDialog,
             onClickMarkAllRead = { navController.navigateToMarkAllChaptersAsReadDialog(viewModel.uiState.bookInformation.id) }

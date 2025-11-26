@@ -6,7 +6,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.miraimagiclab.novelreadingapp.ui.book.detail.navigateToBookDetailDestination
-import com.miraimagiclab.novelreadingapp.ui.dialog.navigateToAddBookToBookshelfDialog
 import com.miraimagiclab.novelreadingapp.ui.home.explore.ExploreViewModel
 import com.miraimagiclab.novelreadingapp.ui.navigation.Route
 import com.miraimagiclab.novelreadingapp.utils.isResumed
@@ -23,9 +22,6 @@ fun NavGraphBuilder.exploreSearchDestination() {
             exploreUiState = exploreViewModel.uiState,
             exploreSearchUiState = exploreSearchViewModel.uiState,
             refresh = exploreViewModel::refresh,
-            requestAddBookToBookshelf = {
-                navController.navigateToAddBookToBookshelfDialog(it)
-            },
             onClickBack = { navController.popBackStackIfResumed() },
             init = exploreSearchViewModel::init,
             onChangeSearchType = { exploreSearchViewModel.changeSearchType(it) },

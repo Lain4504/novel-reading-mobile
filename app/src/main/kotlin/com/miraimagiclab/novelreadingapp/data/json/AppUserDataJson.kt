@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
 import com.miraimagiclab.novelreadingapp.data.statistics.Count
-import io.lain4504.novelreadingapp.api.bookshelf.BookshelfSortType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -23,7 +22,6 @@ data class AppUserDataJson(
             .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeTypeAdapter)
             .registerTypeAdapter(LocalDate::class.java, LocalDateTypeAdapter)
             .registerTypeAdapter(LocalTime::class.java, LocalTimeTypeAdapter)
-            .registerTypeAdapter(BookshelfSortType::class.java, BookshelfSortTypeTypeAdapter)
             .registerTypeAdapter(Count::class.java, CountBase64TypeAdapter)
             .create()
 

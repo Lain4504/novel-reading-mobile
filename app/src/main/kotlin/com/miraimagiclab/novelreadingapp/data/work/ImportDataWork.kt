@@ -8,7 +8,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.gson.JsonSyntaxException
 import com.miraimagiclab.novelreadingapp.data.book.BookRepository
-import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.json.AppUserDataContent
 import com.miraimagiclab.novelreadingapp.data.json.AppUserDataJson
 import com.miraimagiclab.novelreadingapp.data.statistics.StatsRepository
@@ -26,7 +25,6 @@ class ImportDataWork @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val webBookDataSourceProvider: WebBookDataSourceProvider,
-    private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository,
     private val userDataRepository: UserDataRepository,
     private val statsRepository: StatsRepository
@@ -72,7 +70,7 @@ class ImportDataWork @AssistedInject constructor(
             e.printStackTrace()
             return Result.failure()
         }
-        bookshelfRepository.importBookshelf(data)
+        // Bookshelf import removed - use UserNovelInteraction follow status instead
         bookRepository.importUserReadingData(data)
         userDataRepository.importUserData(data)
         statsRepository.importReadingStats(data)

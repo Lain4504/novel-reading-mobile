@@ -1,0 +1,15 @@
+mutation UpdateReadingProgress($novelId: ID!, $chapterNumber: Int!) {
+  updateReadingProgress(novelId: $novelId, chapterNumber: $chapterNumber) {
+    success
+    message
+    interaction {
+      id
+      novelId
+      currentChapterNumber
+      currentChapterId
+      lastReadAt
+      totalChapterReads
+    }
+  }
+}
+

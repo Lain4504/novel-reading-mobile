@@ -7,7 +7,6 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.miraimagiclab.novelreadingapp.data.book.BookRepository
-import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.json.AppUserDataJsonBuilder
 import com.miraimagiclab.novelreadingapp.data.json.toJsonData
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserDataDao
@@ -17,8 +16,6 @@ import com.miraimagiclab.novelreadingapp.data.web.WebBookDataSourceProvider
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.lain4504.novelreadingapp.api.book.UserReadingData
-import io.lain4504.novelreadingapp.api.bookshelf.Bookshelf
-import io.lain4504.novelreadingapp.api.bookshelf.BookshelfBookMetadata
 import io.lain4504.novelreadingapp.api.userdata.UserDataPath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,7 +30,6 @@ class ExportDataWork @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val webBookDataSourceProvider: WebBookDataSourceProvider,
-    private val bookshelfRepository: BookshelfRepository,
     private val bookRepository: BookRepository,
     private val statsRepository: StatsRepository,
     private val userDataDao: UserDataDao
@@ -62,15 +58,7 @@ class ExportDataWork @AssistedInject constructor(
         return@withContext AppUserDataJsonBuilder()
             .data {
                 webDataSourceId(webBookDataSourceProvider.value.id)
-                if (exportBookshelf) {
-                    bookshelfRepository.getAllBookshelfIds()
-                        .mapNotNull { (bookshelfRepository.getBookshelf(it)) }
-                        .map { (it as Bookshelf).toJsonData() }
-                        .forEach(::bookshelf)
-                    bookshelfRepository.getAllBookshelfBooksMetadata()
-                        .map(BookshelfBookMetadata::toJsonData)
-                        .forEach(::bookshelfBookMetaData)
-                }
+                // Bookshelf export removed - use UserNovelInteraction follow status instead
                 if (exportReadingData) {
                     bookRepository.getAllUserReadingData()
                         .map(UserReadingData::toJsonData)

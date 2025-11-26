@@ -1,36 +1,37 @@
 package com.miraimagiclab.novelreadingapp.data.json
 
 import com.google.gson.annotations.SerializedName
-import io.lain4504.novelreadingapp.api.bookshelf.Bookshelf
-import io.lain4504.novelreadingapp.api.bookshelf.BookshelfSortType
 
+// Stub data class for backward compatibility with JSON import/export
+// Bookshelf functionality has been replaced with UserNovelInteraction
+@Suppress("UNUSED")
 data class BookshelfData(
     @SerializedName("id")
-    val id: Int,
+    val id: Int = -1,
     @SerializedName("name")
-    val name: String,
+    val name: String = "",
     @SerializedName("sort_type")
-    val sortType: BookshelfSortType,
+    val sortType: String = "",
     @SerializedName("auto_cache")
-    val autoCache: Boolean,
+    val autoCache: Boolean = false,
     @SerializedName("system_update_reminder")
-    val systemUpdateReminder: Boolean,
+    val systemUpdateReminder: Boolean = false,
     @SerializedName("all_book_ids")
-    val allBookIds: List<String>,
+    val allBookIds: List<String> = emptyList(),
     @SerializedName("pinned_book_ids")
-    val pinnedBookIds: List<String>,
-    @SerializedName("updatedBookIds")
-    val updatedBookIds: List<String>,
+    val pinnedBookIds: List<String> = emptyList(),
+    @SerializedName("updated_book_ids")
+    val updatedBookIds: List<String> = emptyList()
 )
 
-fun Bookshelf.toJsonData(): BookshelfData =
-    BookshelfData(
-        id = id,
-        name = name,
-        sortType = sortType,
-        autoCache = autoCache,
-        systemUpdateReminder = systemUpdateReminder,
-        allBookIds = allBookIds,
-        pinnedBookIds = pinnedBookIds,
-        updatedBookIds = updatedBookIds,
-    )
+// Stub data class for backward compatibility
+@Suppress("UNUSED")
+data class BookShelfBookMetadataData(
+    @SerializedName("id")
+    val id: String = "",
+    @SerializedName("last_update")
+    val lastUpdate: String = "",
+    @SerializedName("book_shelf_ids")
+    val bookShelfIds: List<Int> = emptyList()
+)
+

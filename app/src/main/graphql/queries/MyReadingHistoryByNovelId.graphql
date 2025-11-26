@@ -1,0 +1,16 @@
+query MyReadingHistoryByNovelId($novelId: ID!) {
+  myReadingHistoryByNovelId(novelId: $novelId) {
+    id
+    userId
+    novelId
+    currentChapterNumber
+    currentChapterId
+    lastReadAt
+    novel {
+      id
+      title
+      coverImage
+    }
+  }
+}
+

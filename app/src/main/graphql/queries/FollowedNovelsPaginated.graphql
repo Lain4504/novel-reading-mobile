@@ -1,0 +1,40 @@
+query FollowedNovelsPaginated($page: Int, $size: Int) {
+  followedNovelsPaginated(page: $page, size: $size) {
+    content {
+      id
+      title
+      description
+      coverImage
+      authorId
+      authorName
+      categories
+      categoriesWithLabels {
+        id
+        label
+      }
+      tags
+      rating
+      ratingCount
+      viewCount
+      followCount
+      wishlistCount
+      commentCount
+      wordCount
+      chapterCount
+      status
+      type
+      createdAt
+      updatedAt
+      isR18
+      latestChapterId
+      latestChapterTitle
+      latestChapterNumber
+      latestChapterCreatedAt
+    }
+    totalPages
+    totalElements
+    hasNext
+    hasPrevious
+  }
+}
+

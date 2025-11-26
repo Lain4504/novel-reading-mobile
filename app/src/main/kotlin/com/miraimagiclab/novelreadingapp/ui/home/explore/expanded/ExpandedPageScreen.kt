@@ -55,7 +55,6 @@ import com.miraimagiclab.novelreadingapp.ui.components.Component
 import com.miraimagiclab.novelreadingapp.ui.home.explore.ExploreScreen
 import com.miraimagiclab.novelreadingapp.ui.home.explore.ExploreUiState
 import com.miraimagiclab.novelreadingapp.utils.LocalSnackbarHost
-import com.miraimagiclab.novelreadingapp.utils.addToBookshelfAction
 import com.miraimagiclab.novelreadingapp.utils.fadingEdge
 import com.miraimagiclab.novelreadingapp.utils.withHaptic
 import com.miraimagiclab.novelreadingapp.R
@@ -71,7 +70,6 @@ fun ExpandedPageScreen(
     expandedPageDataSourceId: String,
     init: (String) -> Unit,
     loadMore: () -> Unit,
-    requestAddBookToBookshelf: (String) -> Unit,
     onClickBack: () -> Unit,
     onClickBook: (String) -> Unit,
     refresh: () -> Unit,
@@ -168,18 +166,12 @@ fun ExpandedPageScreen(
                         items = expandedPageUiState.bookList,
                         key = { it.id }
                     ) { bookInformation ->
-                        val addToBookshelf = addToBookshelfAction.toSwipeAction {
-                            requestAddBookToBookshelf(bookInformation.id)
-                        }
                         BookCardItem(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             bookInformation = bookInformation,
                             onClick = { onClickBook(bookInformation.id) },
                             onLongPress = withHaptic {},
-                            collected = expandedPageUiState.allBookshelfBookIds.contains(
-                                bookInformation.id
-                            ),
-                            swipeToRightActions = listOf(addToBookshelf)
+                            collected = false
                         )
                     }
                 }

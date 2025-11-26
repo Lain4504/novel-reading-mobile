@@ -6,10 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.miraimagiclab.novelreadingapp.data.auth.TokenManager
 import com.miraimagiclab.novelreadingapp.data.book.BookRepository
 import com.miraimagiclab.novelreadingapp.data.content.ContentComponentRepository
 import com.miraimagiclab.novelreadingapp.data.statistics.ReadingStatsUpdate
 import com.miraimagiclab.novelreadingapp.data.statistics.StatsRepository
+import com.miraimagiclab.novelreadingapp.data.sync.ReadingHistorySyncService
 import com.miraimagiclab.novelreadingapp.data.userdata.UserDataRepository
 import com.miraimagiclab.novelreadingapp.ui.book.reader.content.ContentViewModel
 import com.miraimagiclab.novelreadingapp.ui.book.reader.content.flip.FlipPageContentViewModel
@@ -27,7 +29,9 @@ class ReaderViewModel @Inject constructor(
     private val statsRepository: StatsRepository,
     private val bookRepository: BookRepository,
     userDataRepository: UserDataRepository,
-    val contentComponentRepository: ContentComponentRepository
+    val contentComponentRepository: ContentComponentRepository,
+    private val readingHistorySyncService: ReadingHistorySyncService,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
     val settingState = SettingState(userDataRepository, viewModelScope)
     private var contentViewModel: ContentViewModel by mutableStateOf(ContentViewModel.Companion.empty)
@@ -108,10 +112,16 @@ class ReaderViewModel @Inject constructor(
         Log.v("ReaderViewModel", "$bookId/$chapterId Saving progress $progress. (${_uiState.contentUiState.readingChapterContent.title})")
         viewModelScope.launch(Dispatchers.IO) {
             val currentTime = LocalDateTime.now()
+            var shouldSync = false
+            var completedChapter = false
 
             bookRepository.updateUserReadingData(bookId) { userReadingData ->
                 val isChapterCompleted = progress > 0.945 &&
                         !userReadingData.readCompletedChapterIds.contains(chapterId)
+                
+                // Sync if chapter changed or chapter is completed
+                shouldSync = userReadingData.lastReadChapterId != chapterId || isChapterCompleted
+                completedChapter = isChapterCompleted
 
                 userReadingData.apply {
                     lastReadTime = currentTime
@@ -128,6 +138,19 @@ class ReaderViewModel @Inject constructor(
                     if (isChapterCompleted)
                         readCompletedChapterIds.add(chapterId)
                 }
+            }
+            
+            // Sync to backend if user is authenticated and chapter changed or completed
+            if (shouldSync && tokenManager.isUserAuthenticated()) {
+                readingHistorySyncService.pushReadingProgress(bookId, chapterId).fold(
+                    onSuccess = {
+                        Log.d("ReaderViewModel", "Successfully synced reading progress to backend")
+                    },
+                    onFailure = { e ->
+                        Log.e("ReaderViewModel", "Failed to sync reading progress to backend", e)
+                        // Don't block user experience - sync failure is non-critical
+                    }
+                )
             }
         }
     }

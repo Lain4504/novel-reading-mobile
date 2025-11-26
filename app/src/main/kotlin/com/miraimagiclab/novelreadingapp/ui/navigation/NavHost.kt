@@ -11,7 +11,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.miraimagiclab.novelreadingapp.ui.auth.authNavigation
 import com.miraimagiclab.novelreadingapp.ui.book.bookNavigation
-import com.miraimagiclab.novelreadingapp.ui.dialog.addBookToBookshelfDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.markAllChaptersAsReadDialog
 import com.miraimagiclab.novelreadingapp.ui.dialog.updatesAvailableDialog
 import com.miraimagiclab.novelreadingapp.ui.downloadmanager.downloadManager
@@ -47,7 +46,6 @@ fun LightNovelReaderNavHost(
                 bookNavigation()
                 authNavigation()
                 updatesAvailableDialog()
-                addBookToBookshelfDialog()
                 downloadManager()
                 markAllChaptersAsReadDialog()
                 onBuildNavHost.invoke(this)

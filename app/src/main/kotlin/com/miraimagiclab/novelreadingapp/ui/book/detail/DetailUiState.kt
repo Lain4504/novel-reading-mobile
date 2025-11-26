@@ -17,7 +17,7 @@ interface DetailUiState {
     val userReadingData: UserReadingData
     val isCached: Boolean
     val downloadItem: DownloadItem?
-    val isInBookshelf: Boolean
+    val hasFollowing: Boolean
 }
 
 class MutableDetailUiState: DetailUiState {
@@ -27,7 +27,7 @@ class MutableDetailUiState: DetailUiState {
     override var userReadingData: UserReadingData by mutableStateOf(UserReadingData.empty())
     override var isCached: Boolean by mutableStateOf(false)
     override var downloadItem: DownloadItem? by mutableStateOf(null)
-    override var isInBookshelf: Boolean by mutableStateOf(false)
+    override var hasFollowing: Boolean by mutableStateOf(false)
 }
 
 

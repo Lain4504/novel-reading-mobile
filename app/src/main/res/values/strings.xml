@@ -250,6 +250,8 @@
     <string name="export_all_to_lnr_file">Xuất tất cả thành tệp .lnr</string>
     <string name="import_from_file">Nhập từ tệp</string>
     <string name="add_to_bookshelf">Yêu thích</string>
+    <string name="follow">Theo dõi</string>
+    <string name="following">Đang theo dõi</string>
     <string name="action_cache">Lưu đệm</string>
     <string name="action_show_info">Thông tin</string>
     <string name="expand">Mở rộng</string>

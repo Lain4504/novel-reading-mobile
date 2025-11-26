@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.navigation
-import com.miraimagiclab.novelreadingapp.ui.home.bookshelf.bookshelfNavigation
+import com.miraimagiclab.novelreadingapp.ui.home.following.followingDestination
 import com.miraimagiclab.novelreadingapp.ui.home.explore.exploreNavigation
 import com.miraimagiclab.novelreadingapp.ui.home.reading.readingNavigation
 import com.miraimagiclab.novelreadingapp.ui.home.settings.settingsNavigation
@@ -54,7 +54,7 @@ fun NavGraphBuilder.homeNavigation(sharedTransitionScope: SharedTransitionScope)
     ) {
         readingNavigation(sharedTransitionScope)
         exploreNavigation(sharedTransitionScope)
-        bookshelfNavigation(sharedTransitionScope)
+        followingDestination(sharedTransitionScope)
         settingsNavigation(sharedTransitionScope)
     }
 }
@@ -99,22 +99,22 @@ fun HomeNavigateBar(
             }
         )
         NavigationBarItem(
-            selected = selectedRoute is Route.Main.Bookshelf,
+            selected = selectedRoute is Route.Main.Following,
             onClick = {
-                if (selectedRoute !is Route.Main.Bookshelf) coverNavigate(Route.Main.Bookshelf)
+                if (selectedRoute !is Route.Main.Following) coverNavigate(Route.Main.Following)
             },
             icon = {
                 Icon(
                     painter = rememberAnimatedVectorPainter(
                         AnimatedImageVector.animatedVectorResource(R.drawable.animated_bookshelf),
-                        selectedRoute is Route.Main.Bookshelf
+                        selectedRoute is Route.Main.Following
                     ),
                     contentDescription = null
                 )
             },
             label = {
                 Text(
-                    text = stringResource(R.string.nav_bookshelf),
+                    text = stringResource(R.string.following),
                     maxLines = 1
                 )
             }

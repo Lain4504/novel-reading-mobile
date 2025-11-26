@@ -264,13 +264,7 @@ fun ExportUserDataDialog(
         onDismissRequest = onDismissRequest,
     ) {
         Column(Modifier.width(IntrinsicSize.Max).sizeIn(maxHeight = 350.dp)) {
-            CheckBoxListItem(
-                modifier = listItemModifier,
-                title = stringResource(R.string.dialog_snap_bookshelf),
-                supportingText = stringResource(R.string.dialog_snap_bookshelf_text),
-                checked = mutableExportContext.bookshelf,
-                onCheckedChange = { mutableExportContext.bookshelf = it }
-            )
+            // Bookshelf export removed - use UserNovelInteraction follow status instead
             HorizontalDivider(Modifier.padding(horizontal = 14.dp))
             CheckBoxListItem(
                 modifier = listItemModifier,
@@ -552,43 +546,13 @@ fun SliderValueDialog(
     )
 }
 
+// DeleteBookshelfDialog removed - bookshelf functionality replaced with UserNovelInteraction
+@Suppress("UNUSED")
 @Composable
 fun DeleteBookshelfDialog(
     onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit) {
-    AlertDialog(
-        title = {
-            Text(
-                text = stringResource(R.string.dialog_delete_bookshelf),
-                style = AppTypography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.dialog_delete_bookshelf_text),
-                style = AppTypography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(
-                onClick = onConfirmation
-            ) {
-                Text(
-                    text = stringResource(R.string.ok)
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest
-            ) {
-                Text(
-                    text = stringResource(R.string.cancel)
-                )
-            }
-        }
-    )
+    onConfirmation: () -> Unit
+) {
+    // Stub - bookshelf functionality removed, just dismiss immediately
+    onDismissRequest()
 }

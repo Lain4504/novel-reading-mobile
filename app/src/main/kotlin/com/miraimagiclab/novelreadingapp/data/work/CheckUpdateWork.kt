@@ -13,7 +13,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.web.WebBookDataSourceProvider
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -25,52 +24,20 @@ import kotlinx.coroutines.delay
 class CheckUpdateWork @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val webBookDataSourceProvider: WebBookDataSourceProvider,
-    private val bookshelfRepository: BookshelfRepository
+    private val webBookDataSourceProvider: WebBookDataSourceProvider
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val reminderBookMap = mutableMapOf<String, BookInformation>()
-        bookshelfRepository.getAllBookshelfBooksMetadata().forEach { bookshelfBookMetadata ->
-            delay(3000)
-            if (bookshelfBookMetadata.bookShelfIds.all {
-                bookshelfRepository.getBookshelf(it)?.systemUpdateReminder != true
-            }) return@forEach
-            Log.d("CheckUpdateWork", "Updating book id=${bookshelfBookMetadata.id}")
-            val bookInformation = webBookDataSourceProvider.value.getBookInformation(bookshelfBookMetadata.id)
-            val webBookLastUpdate = bookInformation.lastUpdated
-            if (webBookLastUpdate.isAfter(bookshelfBookMetadata.lastUpdate)) {
-                bookshelfBookMetadata.bookShelfIds.forEach {
-                    bookshelfRepository.addUpdatedBooksIntoBookShelf(it, bookshelfBookMetadata.id)
-                    val bookshelf = bookshelfRepository.getBookshelf(it)
-                    if (bookshelf != null && bookshelf.systemUpdateReminder)
-                        reminderBookMap[bookshelfBookMetadata.id] = bookInformation
-                }
-                bookshelfRepository.updateBookshelfBookMetadataLastUpdateTime(bookInformation.id, webBookLastUpdate)
-            }
-        }
-        reminderBookMap.values.forEach {
-            with(NotificationManagerCompat.from(appContext)) {
-                if (ActivityCompat.checkSelfPermission(
-                        appContext,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    return@forEach
-                }
-                createNotificationChannel()
-                notify(
-                    it.id.hashCode(),
-                    NotificationCompat.Builder(appContext, "BookUpdate")
-                        .setSmallIcon(R.drawable.icon_foreground)
-                        .setContentTitle(appContext.getString(R.string.app_name))
-                        .setContentText("Tiểu thuyết bạn theo dõi ${it.title} vừa cập nhật")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .build()
-                )
-            }
-        }
+        // Bookshelf update checking removed - now handled via UserNovelInteraction follow notifications
+        // This work can be removed or repurposed for other update checks
+        Log.d("CheckUpdateWork", "Update check skipped - use UserNovelInteraction follow notifications instead")
         return Result.success()
+    }
+
+    @Suppress("UNUSED")
+    private fun sendNotification(bookInformation: BookInformation) {
+        // Stub - notification functionality removed
+        // Use UserNovelInteraction follow notifications instead
     }
 
     private fun createNotificationChannel() {

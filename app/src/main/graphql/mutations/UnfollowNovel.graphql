@@ -1,0 +1,7 @@
+mutation UnfollowNovel($novelId: ID!) {
+  unfollowNovel(novelId: $novelId) {
+    success
+    message
+  }
+}
+
