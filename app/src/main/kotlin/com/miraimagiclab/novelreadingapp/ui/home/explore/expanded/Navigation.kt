@@ -11,7 +11,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.miraimagiclab.novelreadingapp.ui.book.detail.navigateToBookDetailDestination
-import com.miraimagiclab.novelreadingapp.ui.dialog.navigateToAddBookToBookshelfDialog
 import com.miraimagiclab.novelreadingapp.ui.home.explore.ExploreViewModel
 import com.miraimagiclab.novelreadingapp.ui.navigation.Route
 import com.miraimagiclab.novelreadingapp.utils.isResumed
@@ -33,9 +32,6 @@ fun NavGraphBuilder.exploreExpandDestination() {
             expandedPageDataSourceId = entry.toRoute<Route.Main.Explore.Expanded>().expandedPageDataSourceId,
             init = exploreExpandedPageHomeViewModel::init,
             loadMore = exploreExpandedPageHomeViewModel::loadMore,
-            requestAddBookToBookshelf = {
-                navController.navigateToAddBookToBookshelfDialog(it)
-            },
             onClickBack = {
                 exploreExpandedPageHomeViewModel.clear()
                 navController.popBackStackIfResumed()

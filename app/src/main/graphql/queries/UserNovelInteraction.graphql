@@ -1,0 +1,22 @@
+query UserNovelInteraction($novelId: ID!) {
+  userNovelInteraction(novelId: $novelId) {
+    id
+    userId
+    novelId
+    hasFollowing
+    inWishlist
+    hasRating
+    rating
+    currentChapterNumber
+    currentChapterId
+    totalChapterReads
+    lastReadAt
+    notify
+    novel {
+      id
+      title
+      coverImage
+    }
+  }
+}
+

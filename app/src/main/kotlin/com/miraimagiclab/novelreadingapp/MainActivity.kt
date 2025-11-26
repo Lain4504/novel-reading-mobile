@@ -17,7 +17,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.logging.LoggerRepository
 import com.miraimagiclab.novelreadingapp.data.update.InAppUpdateRepository
 import com.miraimagiclab.novelreadingapp.data.userdata.UserDataRepository
@@ -26,7 +25,6 @@ import com.miraimagiclab.novelreadingapp.theme.LightNovelReaderTheme
 import com.miraimagiclab.novelreadingapp.ui.LightNovelReaderApp
 import com.miraimagiclab.novelreadingapp.utils.LogUtils
 import dagger.hilt.android.AndroidEntryPoint
-import io.lain4504.novelreadingapp.api.bookshelf.BookshelfSortType
 import io.lain4504.novelreadingapp.api.userdata.UserDataPath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +36,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject lateinit var loggerRepository: LoggerRepository
-    @Inject lateinit var bookshelfRepository: BookshelfRepository
     @Inject lateinit var userDataRepository: UserDataRepository
     @Inject lateinit var workManager: WorkManager
     @Inject lateinit var inAppUpdateRepository: InAppUpdateRepository
@@ -64,16 +61,6 @@ class MainActivity : ComponentActivity() {
         // Check for in-app updates if auto-check is enabled
         if (userDataRepository.booleanUserData(UserDataPath.Settings.App.AutoCheckUpdate.path).getOrDefault(true)) {
             inAppUpdateRepository.startFlexibleUpdate(this)
-        }
-        coroutineScope.launch(Dispatchers.IO) {
-            if (bookshelfRepository.getAllBookshelfIds().isEmpty())
-                bookshelfRepository.createBookShelf(
-                    id = 1145140721,
-                    name = "Đã lưu",
-                    sortType = BookshelfSortType.Default,
-                    autoCache = false,
-                    systemUpdateReminder = false
-                )
         }
         coroutineScope.launch(Dispatchers.IO) {
             userDataRepository.stringUserData(UserDataPath.Settings.Display.AppLocale.path)

@@ -18,23 +18,7 @@ object Route {
             }
         }
         @Serializable
-        object Bookshelf {
-            @Serializable
-            object Home
-            @Serializable
-            data class Edit(
-                val id: Int,
-                val title: String
-            )
-            @Serializable
-            data class DeleteBookshelfDialog(
-                val bookshelfId: Int
-            )
-            @Serializable
-            data class AddBookToBookshelfDialog(
-                val selectedBookIds: List<String>
-            )
-        }
+        object Following
         @Serializable
         object Explore {
             @Serializable
@@ -109,10 +93,6 @@ object Route {
     }
     @Serializable
     object UpdatesAvailableDialog
-    @Serializable
-    data class AddBookToBookshelfDialog(
-        val bookId: String
-    )
     @Serializable
     data class MarkAllChaptersAsReadDialog(
         val bookId: String

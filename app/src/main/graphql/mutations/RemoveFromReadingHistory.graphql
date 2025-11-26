@@ -1,0 +1,7 @@
+mutation RemoveFromReadingHistory($novelId: ID!) {
+  removeFromReadingHistory(novelId: $novelId) {
+    success
+    message
+  }
+}
+

@@ -2,7 +2,6 @@ package com.miraimagiclab.novelreadingapp.ui.home.explore.expanded
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.explore.ExploreRepository
 import com.miraimagiclab.novelreadingapp.data.text.TextProcessingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +15,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ExpandedPageViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
-    private val bookshelfRepository: BookshelfRepository,
     private val textProcessingRepository: TextProcessingRepository
 ) : ViewModel() {
     private var expandedPageDataSource: ExploreExpandedPageDataSource? = null
@@ -59,12 +57,6 @@ class ExpandedPageViewModel @Inject constructor(
                         }
                     }
                 }
-            }
-        }
-
-        viewModelScope.launch {
-            bookshelfRepository.getAllBookshelfBookIdsFlow().collect { ids ->
-                _uiState.allBookshelfBookIds = ids.toList()
             }
         }
     }

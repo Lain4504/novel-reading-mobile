@@ -78,7 +78,6 @@ import com.miraimagiclab.novelreadingapp.ui.components.AnimatedTextLine
 import com.miraimagiclab.novelreadingapp.ui.components.Cover
 import com.miraimagiclab.novelreadingapp.ui.components.Loading
 import com.miraimagiclab.novelreadingapp.ui.components.SwitchChip
-import com.miraimagiclab.novelreadingapp.ui.home.bookshelf.home.BookStatusIcon
 import com.miraimagiclab.novelreadingapp.utils.LocalSnackbarHost
 import com.miraimagiclab.novelreadingapp.utils.fadingEdge
 import com.miraimagiclab.novelreadingapp.utils.isScrollingUp
@@ -102,7 +101,8 @@ fun DetailScreen(
     onClickReadFromStart: () -> Unit,
     onClickContinueReading: () -> Unit,
     cacheBook: (String) -> Unit,
-    requestAddBookToBookshelf: (String) -> Unit,
+    onFollowNovel: (String) -> Unit,
+    onUnfollowNovel: (String) -> Unit,
     onClickTag: (String) -> Unit,
     onClickCover: (Uri) -> Unit,
     onClickMarkAllRead: () -> Unit
@@ -188,7 +188,8 @@ fun DetailScreen(
                     onClickChapter = onClickChapter,
                     lazyListState = lazyListState,
                     cacheBook = cacheBook,
-                    requestAddBookToBookshelf = requestAddBookToBookshelf,
+                    onFollowNovel = onFollowNovel,
+                    onUnfollowNovel = onUnfollowNovel,
                     onClickTag = onClickTag,
                     onClickCover = onClickCover,
                     onClickShowInfo = { showInfoBottomSheet = true }
@@ -328,7 +329,8 @@ private fun DetailContent(
     lazyListState: LazyListState,
     onClickChapter: (String) -> Unit,
     cacheBook: (String) -> Unit,
-    requestAddBookToBookshelf: (String) -> Unit,
+    onFollowNovel: (String) -> Unit,
+    onUnfollowNovel: (String) -> Unit,
     onClickTag: (String) -> Unit,
     onClickCover: (Uri) -> Unit,
     onClickShowInfo: () -> Unit
@@ -358,10 +360,11 @@ private fun DetailContent(
         }
         item {
             QuickOperationsBlock(
-                isInBookshelf = uiState.isInBookshelf,
+                hasFollowing = uiState.hasFollowing,
                 isCached = uiState.isCached,
                 downloadItem = uiState.downloadItem,
-                onClickAddToBookShelf = { requestAddBookToBookshelf(uiState.bookInformation.id) },
+                onFollowNovel = { onFollowNovel(uiState.bookInformation.id) },
+                onUnfollowNovel = { onUnfollowNovel(uiState.bookInformation.id) },
                 onClickCache = { cacheBook(uiState.bookInformation.id) },
                 onClickShowInfo = onClickShowInfo
             )
@@ -570,7 +573,17 @@ private fun BookCardBlock(
             )
             Column {
                 InfoRow(
-                    icon = { BookStatusIcon(bookInformation.isComplete) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(
+                                if (bookInformation.isComplete) R.drawable.check_24px
+                                else R.drawable.hourglass_top_24px
+                            ),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
                     text = updateText
                 )
                 Spacer(Modifier.height(2.dp))
@@ -675,10 +688,11 @@ fun QuickOperationButton(
 
 @Composable
 private fun QuickOperationsBlock(
-    isInBookshelf: Boolean,
+    hasFollowing: Boolean,
     isCached: Boolean,
     downloadItem: DownloadItem?,
-    onClickAddToBookShelf: () -> Unit,
+    onFollowNovel: () -> Unit,
+    onUnfollowNovel: () -> Unit,
     onClickCache: () -> Unit,
     onClickShowInfo: () -> Unit
 ) {
@@ -691,18 +705,18 @@ private fun QuickOperationsBlock(
         horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (isInBookshelf) {
+        if (hasFollowing) {
             QuickOperationButton(
                 icon = painterResource(R.drawable.filled_bookmark_add_24px),
-                title = stringResource(R.string.activity_collections),
-                onClick = onClickAddToBookShelf,
+                title = stringResource(R.string.following),
+                onClick = onUnfollowNovel,
                 modifier = Modifier.weight(1f)
             )
         } else {
             QuickOperationButton(
                 icon = painterResource(R.drawable.bookmark_add_24px),
-                title = stringResource(R.string.add_to_bookshelf),
-                onClick = onClickAddToBookShelf,
+                title = stringResource(R.string.follow),
+                onClick = onFollowNovel,
                 modifier = Modifier.weight(1f)
             )
         }

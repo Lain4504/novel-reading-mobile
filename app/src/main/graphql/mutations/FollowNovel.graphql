@@ -1,0 +1,13 @@
+mutation FollowNovel($novelId: ID!) {
+  followNovel(novelId: $novelId) {
+    success
+    message
+    interaction {
+      id
+      novelId
+      hasFollowing
+      notify
+    }
+  }
+}
+

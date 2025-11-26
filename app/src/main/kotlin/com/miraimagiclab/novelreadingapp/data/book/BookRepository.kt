@@ -6,7 +6,6 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.json.AppUserDataContent
 import com.miraimagiclab.novelreadingapp.data.json.BookUserData
 import com.miraimagiclab.novelreadingapp.data.local.LocalBookDataSource
@@ -37,7 +36,6 @@ import javax.inject.Singleton
 class BookRepository @Inject constructor(
     private val webBookDataSourceProvider: WebBookDataSourceProvider,
     private val localBookDataSource: LocalBookDataSource,
-    private val bookshelfRepository: BookshelfRepository,
     private val textProcessingRepository: TextProcessingRepository,
     private val workManager: WorkManager
 ): BookRepositoryApi {
@@ -67,17 +65,6 @@ class BookRepository @Inject constructor(
                 localBookDataSource.updateBookInformation(information)
                 localBookDataSource.getBookInformation(id)?.let { newInfo ->
                     bookInformation.update { newInfo }
-                    bookshelfRepository.getBookshelfBookMetadata(information.id)
-                        ?.let { bookshelfBookMetadata ->
-                            if (bookshelfBookMetadata.lastUpdate.isBefore(information.lastUpdated))
-                                bookshelfBookMetadata.bookShelfIds.forEach {
-                                    bookshelfRepository.updateBookshelfBookMetadataLastUpdateTime(
-                                        information.id,
-                                        information.lastUpdated
-                                    )
-                                    bookshelfRepository.addUpdatedBooksIntoBookShelf(it, id)
-                                }
-                        }
                 }
             }
         }

@@ -67,7 +67,7 @@ import com.miraimagiclab.novelreadingapp.ui.components.LnrSnackbar
 import com.miraimagiclab.novelreadingapp.ui.home.HomeNavigateBar
 import com.miraimagiclab.novelreadingapp.utils.LocalSnackbarHost
 import com.miraimagiclab.novelreadingapp.utils.formTime
-import com.miraimagiclab.novelreadingapp.utils.removeFromBookshelfAction
+import com.miraimagiclab.novelreadingapp.utils.removeFromReadingAction
 import com.miraimagiclab.novelreadingapp.utils.showSnackbar
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
@@ -269,7 +269,7 @@ private fun ReadingContent(
                             onClickBook(recentReadingBookInformationMap[id]!!.id)
                         },
                         swipeToLeftActions = listOf(
-                            removeFromBookshelfAction.toSwipeAction {
+                            removeFromReadingAction.toSwipeAction {
                                 onRemoveBook(id)
                                 showSnackbar(
                                     coroutineScope = coroutineScope,

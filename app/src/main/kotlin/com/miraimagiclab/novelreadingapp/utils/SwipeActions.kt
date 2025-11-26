@@ -37,8 +37,7 @@ val addToBookshelfAction = BaseSwipeAction(
     backgroundColor = Color(0xff2ECC71)
 )
 
-@Suppress("UNUSED")
-val removeFromBookshelfAction = BaseSwipeAction(
+val removeFromReadingAction = BaseSwipeAction(
     iconRes = R.drawable.delete_forever_24px,
     backgroundColor = Color(0xffE74C3C)
 )

@@ -14,15 +14,12 @@ import com.miraimagiclab.novelreadingapp.data.local.room.converter.WorldCountCon
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookInformationDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookRecordDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookVolumesDao
-import com.miraimagiclab.novelreadingapp.data.local.room.dao.BookshelfDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.ChapterContentDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.ReadingStatisticsDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserDataDao
 import com.miraimagiclab.novelreadingapp.data.local.room.dao.UserReadingDataDao
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.BookInformationEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.BookRecordEntity
-import com.miraimagiclab.novelreadingapp.data.local.room.entity.BookshelfBookMetadataEntity
-import com.miraimagiclab.novelreadingapp.data.local.room.entity.BookshelfEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.ChapterContentEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.ChapterInformationEntity
 import com.miraimagiclab.novelreadingapp.data.local.room.entity.ReadingStatisticsEntity
@@ -42,12 +39,10 @@ import io.lain4504.novelreadingapp.api.content.builder.simpleText
         ChapterContentEntity::class,
         UserReadingDataEntity::class,
         UserDataEntity::class,
-        BookshelfEntity::class,
-        BookshelfBookMetadataEntity::class,
         ReadingStatisticsEntity::class,
         BookRecordEntity::class
     ],
-    version = 15,
+    version = 16,
     exportSchema = false
 )
 abstract class LightNovelReaderDatabase : RoomDatabase() {
@@ -56,7 +51,6 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
     abstract fun chapterContentDao(): ChapterContentDao
     abstract fun userReadingDataDao(): UserReadingDataDao
     abstract fun userDataDao(): UserDataDao
-    abstract fun bookshelfDao(): BookshelfDao
     abstract fun readingStatisticsDao(): ReadingStatisticsDao
     abstract fun bookRecordDao(): BookRecordDao
 
@@ -81,7 +75,8 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
                             MIGRATION_11_12,
                             MIGRATION_12_13,
                             MIGRATION_13_14,
-                            MIGRATION_14_15
+                            MIGRATION_14_15,
+                            MIGRATION_15_16
                         )
                         .allowMainThreadQueries()
                         .build()
@@ -451,6 +446,12 @@ abstract class LightNovelReaderDatabase : RoomDatabase() {
         private val MIGRATION_14_15 = object : Migration(14, 15) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("drop table formatting_rule")
+            }
+        }
+        private val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("drop table if exists book_shelf")
+                db.execSQL("drop table if exists book_shelf_book_metadata")
             }
         }
     }

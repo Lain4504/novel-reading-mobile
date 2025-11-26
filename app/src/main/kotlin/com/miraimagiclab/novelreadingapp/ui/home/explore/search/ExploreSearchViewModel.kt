@@ -1,7 +1,6 @@
 package com.miraimagiclab.novelreadingapp.ui.home.explore.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.miraimagiclab.novelreadingapp.data.bookshelf.BookshelfRepository
 import com.miraimagiclab.novelreadingapp.data.explore.ExploreRepository
 import com.miraimagiclab.novelreadingapp.data.userdata.UserDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +13,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ExploreSearchViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
-    private val bookshelfRepository: BookshelfRepository,
     userDataRepository: UserDataRepository
 ) : ViewModel() {
     private val _uiState = MutableExploreSearchUiState()
@@ -40,11 +38,6 @@ class ExploreSearchViewModel @Inject constructor(
                 it?.let {
                     _uiState.historyList = it.reversed().toMutableList()
                 }
-            }
-        }
-        viewModelScope.launch {
-            bookshelfRepository.getAllBookshelfBookIdsFlow().collect {
-                _uiState.allBookshelfBookIds = it.toMutableList()
             }
         }
     }

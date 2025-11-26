@@ -54,7 +54,6 @@ import com.miraimagiclab.novelreadingapp.ui.components.EmptyPage
 import com.miraimagiclab.novelreadingapp.ui.home.explore.ExploreScreen
 import com.miraimagiclab.novelreadingapp.ui.home.explore.ExploreUiState
 import com.miraimagiclab.novelreadingapp.utils.LocalSnackbarHost
-import com.miraimagiclab.novelreadingapp.utils.addToBookshelfAction
 import com.miraimagiclab.novelreadingapp.utils.withHaptic
 import com.miraimagiclab.novelreadingapp.R
 import io.lain4504.novelreadingapp.api.ui.theme.AppTypography
@@ -65,7 +64,6 @@ fun ExploreSearchScreen(
     exploreUiState: ExploreUiState,
     exploreSearchUiState: ExploreSearchUiState,
     refresh: () -> Unit,
-    requestAddBookToBookshelf: (String) -> Unit,
     onClickBack: () -> Unit,
     init: () -> Unit,
     onChangeSearchType: (String) -> Unit,
@@ -315,17 +313,13 @@ fun ExploreSearchScreen(
                         }
                     }
                     items(exploreSearchUiState.searchResult) {
-                        val addToBookshelf = addToBookshelfAction.toSwipeAction {
-                            requestAddBookToBookshelf(it.id)
-                        }
                         BookCardItem(
                             modifier = Modifier.padding(horizontal = 16.dp)
                                 .padding(vertical = 3.dp),
                             bookInformation = it,
                             onClick = { onClickBook(it.id) },
                             onLongPress = withHaptic {},
-                            collected = exploreSearchUiState.allBookshelfBookIds.contains(it.id),
-                            swipeToRightActions = listOf(addToBookshelf)
+                            collected = false
                         )
                     }
                     item {
